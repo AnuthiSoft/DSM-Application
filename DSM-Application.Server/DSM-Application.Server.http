@@ -1,0 +1,6 @@
+@DSM_Application.Server_HostAddress = http://localhost:5164
+
+GET {{DSM_Application.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

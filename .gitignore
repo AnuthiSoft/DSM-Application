@@ -1,1 +1,17 @@
-.vs/ 
+# Visual Studio
+.vs/
+
+# Build outputs
+bin/
+obj/
+Debug/
+Release/
+
+# Cache/config
+*.cache
+*.cache.json
+*.editorconfig
+
+# Node/Angular
+node_modules/
+dist/

@@ -1,0 +1,163 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AdminService, Distributor } from '../../services/admin.service';
+import { AuthService } from '../../services/auth.service';
+
+import * as bootstrap from 'bootstrap';
+
+@Component({
+  selector: 'app-admin',
+  templateUrl: './admin.component.html',
+  styleUrls: ['./admin.component.css']
+})
+export class AdminComponent implements OnInit {
+  distributors: Distributor[] = [];
+  filteredDistributors: Distributor[] = [];
+  selectedDistributor: Distributor | null = null;
+  distributorForm!: FormGroup;
+  isEdit = false;
+  message = '';
+  searchText = '';
+  role: string | null = null;
+
+  private distributorModal: bootstrap.Modal | null = null;
+
+  constructor(
+    private adminService: AdminService,
+    private fb: FormBuilder,
+    private auth: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadDistributors();
+    this.initForm();
+    this.role = this.auth.getRole();
+
+    // ✅ Initialize modal instance
+    const modalEl = document.getElementById('distributorModal');
+    if (modalEl) {
+      this.distributorModal = new bootstrap.Modal(modalEl);
+    }
+  }
+
+  initForm(): void {
+    this.distributorForm = this.fb.group({
+      distributorId: [''],
+      companyName: ['', Validators.required],
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', Validators.required],
+      gst: ['', Validators.required],
+      address: ['', Validators.required],
+      isActive: [true]
+    });
+  }
+
+  loadDistributors(): void {
+    this.adminService.getDistributors().subscribe({
+      next: res => {
+        this.distributors = res;
+        this.filteredDistributors = res;
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  openAdd(): void {
+    this.isEdit = false;
+    this.selectedDistributor = null;
+    this.distributorForm.reset({ isActive: true });
+    this.distributorModal?.show();
+  }
+
+  openEdit(d: Distributor): void {
+    this.isEdit = true;
+    this.selectedDistributor = d;
+    this.distributorForm.patchValue(d);
+    this.distributorModal?.show();
+  }
+
+saveDistributor(): void {
+  if (this.distributorForm.invalid) {
+    this.distributorForm.markAllAsTouched();
+    return;
+  }
+
+  const dist = this.distributorForm.value;
+  console.log("Submitting distributor:", dist);
+
+  if (this.isEdit && this.selectedDistributor) {
+    this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({
+      next: res => {
+        this.message = res;
+        this.loadDistributors();
+        this.distributorModal?.hide();
+      },
+      error: err => {
+        console.error('Update error:', err.error);
+        alert('Update failed: ' + JSON.stringify(err.error.errors));
+      }
+    });
+  } else {
+    this.adminService.addDistributor(dist).subscribe({
+      next: res => {
+        this.message = res;
+        this.loadDistributors();
+        this.distributorModal?.hide();
+      },
+      error: err => {
+        console.error('Add error:', err.error);
+        alert('Add failed: ' + JSON.stringify(err.error.errors));
+      }
+    });
+  }
+}
+
+  deactivate(id: string): void {
+    this.adminService.deactivateDistributor(id).subscribe({
+      next: (res: any) => {
+        console.log("deactivate" + res)
+        this.message = typeof res === 'string' ? res : 'Distributor deactivated successfully';
+        this.loadDistributors();
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  reactivate(id: string): void {
+    this.adminService.reactivateDistributor(id).subscribe({
+      next: (res: any) => {
+        console.log("activate" + res)
+        this.message = typeof res === 'string' ? res : 'Distributor reactivated successfully';
+        this.loadDistributors();
+      },
+      error: err => console.error(err)
+    });
+  }
+
+  delete(id: string): void {
+    if (confirm('Are you sure to delete?')) {
+      this.adminService.deleteDistributor(id).subscribe(() => {
+        this.message = 'Distributor deleted successfully';
+        this.loadDistributors();
+      });
+    }
+  }
+
+  logout(): void {
+    this.auth.logout();
+    window.location.href = '/login';
+  }
+
+  applyFilter(): void {
+    if (!this.searchText) {
+      this.filteredDistributors = this.distributors;
+      return;
+    }
+    this.filteredDistributors = this.distributors.filter(d =>
+      d.companyName.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      d.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      d.email.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  }
+}

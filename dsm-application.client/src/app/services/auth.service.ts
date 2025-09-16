@@ -18,7 +18,17 @@ export class AuthService {
         if (res.token || res.tokenc) {
           localStorage.setItem('token', res.token || res.tokenc);
           localStorage.setItem('role', res.role);
+           // Decode JWT to get DistributorId
+    // const decoded: any = jwt_decode(res.token);
+    // console.log('Decoded JWT:', decoded);
+    //  const distributorId = decoded.DistributorId; // ✅ get distributorId
+    // localStorage.setItem('distributorId', distributorId);
+    //  console.log('DistributorId stored:', distributorId);
+            if (res.distributorId) {
+    localStorage.setItem('DistributorId', res.distributorId); // ✅ now saved
+  }
         }
+      
       })
     );
   }
@@ -50,3 +60,7 @@ export class AuthService {
   }
   
 }
+function jwt_decode(token: any): any {
+  throw new Error('Function not implemented.');
+}
+

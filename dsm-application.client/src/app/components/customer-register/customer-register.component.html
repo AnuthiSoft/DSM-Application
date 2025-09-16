@@ -1,0 +1,11 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold">Customer Registration</h2>
+  <form (ngSubmit)="register()" class="flex flex-col gap-2">
+    <input type="text" placeholder="Name" [(ngModel)]="request.name" name="name" required />
+    <input type="email" placeholder="Email" [(ngModel)]="request.email" name="email" required />
+    <input type="text" placeholder="Phone" [(ngModel)]="request.phoneNumber" name="phoneNumber" />
+    <input type="password" placeholder="Password" [(ngModel)]="request.password" name="password" required />
+    <button type="submit">Register</button>
+  </form>
+  <p class="text-green-600">{{ message }}</p>
+</div>

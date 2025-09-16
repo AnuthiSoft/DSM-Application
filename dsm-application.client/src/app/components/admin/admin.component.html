@@ -25,11 +25,17 @@
           <th>ID</th>
           <th>Company</th>
           <th>Name</th>
+          
           <th>Email</th>
           <th>Phone</th>
           <th>GST</th>
+          
           <th>Status</th>
+           <th>Is Premium</th>
+           <th>Categories</th>
+            
           <th class="text-center">Actions</th>
+         
         </tr>
       </thead>
       <tbody>
@@ -37,13 +43,19 @@
           <td>{{ d.distributorId }}</td>
           <td>{{ d.companyName }}</td>
           <td>{{ d.name }}</td>
+        
           <td>{{ d.email }}</td>
           <td>{{ d.phoneNumber }}</td>
+               
           <td>{{ d.gst }}</td>
           <td>
             <span class="badge bg-success" *ngIf="d.isActive">Active</span>
             <span class="badge bg-danger" *ngIf="!d.isActive">Inactive</span>
+            
           </td>
+            <td>{{ d.isPremium ? 'Yes' : 'No' }}</td>
+            <td>{{ d.categories?.join(', ') || '-' }}</td>
+              
           <td class="text-center">
             <button class="btn btn-sm btn-info me-1" (click)="openEdit(d)">
               <i class="fas fa-edit"></i>
@@ -59,6 +71,11 @@
             <button class="btn btn-sm btn-danger" (click)="delete(d.distributorId)">
               <i class="fas fa-trash"></i>
             </button>
+            
+       <button class="btn btn-sm btn-secondary me-1" (click)="togglePremium(d)">
+  <i class="fas fa-bell" [ngClass]="{'text-warning': d.isPremium, 'text-secondary': !d.isPremium}"></i>
+</button>
+      
           </td>
         </tr>
       </tbody>
@@ -146,6 +163,26 @@
                     [ngClass]="{'is-invalid': distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched}"></textarea>
           <div class="invalid-feedback">Address is required</div>
         </div>
+        <div class="mb-3">
+  <label class="form-label">Categories</label>
+  <select class="form-select" formControlName="categories" multiple>
+    <option value="Food">Food</option>
+    <option value="Clothing">Clothing</option>
+    <option value="Electronics">Electronics</option>
+    <option value="Furniture">Furniture</option>
+    <option value="Others">Others</option>
+  </select>
+  <div class="form-text">Hold CTRL (or CMD on Mac) to select multiple</div>
+</div>
+<!-- ✅ Show text input dynamically if Others is selected -->
+<div class="mb-3" *ngIf="distributorForm.value.categories?.includes('Others')">
+  <input
+    type="text"
+    formControlName="customCategory"
+    placeholder="Enter custom category"
+    *ngIf="distributorForm.value.categories.includes('Others')"
+  />
+</div>
       </div>
 
       <div class="modal-footer">

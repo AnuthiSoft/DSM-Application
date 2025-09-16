@@ -1,0 +1,54 @@
+import { Component, NgZone } from '@angular/core';
+import { CustomerLoginRequest } from '../../../../MyTypes/customer.model';
+import { CustomerService } from '../../services/customer.service';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-customer-login',
+  templateUrl: './customer-login.component.html',
+  styleUrls: ['./customer-login.component.css']
+})
+export class CustomerLoginComponent {
+ request: CustomerLoginRequest = { email: '', password: '' };
+  message = '';
+
+  constructor(
+    private customerService: CustomerService,
+    private auth: AuthService,
+    private router: Router,
+    private ngZone: NgZone
+  ) {}
+
+  login() {
+    this.customerService.login(this.request).subscribe({
+      next: (res: any) => {
+        // ✅ Clear any old data
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('customerId');
+
+        // ✅ Save new auth data
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('role', res.role);
+        if (res.customer?.customerId) {
+          localStorage.setItem('customerId', res.customer.customerId);
+        }
+
+        this.message = "✅ Login successful!";
+
+        // ✅ Navigate to dashboard only for customers
+        if (res.role === 'Customer') {
+          console.log('Navigating to customer dashboard...');
+          this.ngZone.run(() => {
+            this.router.navigateByUrl('/customer-dashboard');
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Login failed:', err);
+        this.message = err?.error?.message || "❌ Invalid email or password";
+      }
+    });
+  }
+}

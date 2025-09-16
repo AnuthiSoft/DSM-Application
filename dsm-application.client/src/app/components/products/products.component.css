@@ -1,0 +1,138 @@
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+  background: #ffffff; /* White background */
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Headings */
+h2, h3 {
+  color: #000; /* Black text */
+  margin-bottom: 20px;
+}
+
+/* Form labels */
+label {
+  font-weight: 500;
+  color: #000;
+}
+
+/* Inputs and textarea */
+input.form-control,
+textarea.form-control {
+  border-radius: 6px;
+  border: 1px solid #ccc; /* Light gray border */
+  transition: all 0.3s ease;
+  background: #fff;
+  color: #000;
+}
+
+input.form-control:focus,
+textarea.form-control:focus {
+  border-color: #007bff; /* Blue focus */
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+}
+
+/* Buttons */
+button.btn-primary {
+  background-color: #007bff; /* Blue */
+  border-color: #007bff;
+  border-radius: 6px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+button.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+button.btn-secondary {
+  background-color: #f8f9fa; /* Light gray/white */
+  border: 1px solid #ccc;
+  color: #000;
+  border-radius: 6px;
+}
+
+button.btn-secondary:hover {
+  background-color: #e2e6ea;
+}
+
+button.btn-warning {
+  background-color: #ffc107; /* Gold/yellow accent */
+  border-color: #ffc107;
+  color: #000;
+}
+
+button.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+button.btn-danger {
+  background-color: #dc3545; /* Red for delete */
+  border-color: #dc3545;
+  color: #fff;
+}
+
+button.btn-danger:hover {
+  background-color: #b02a37;
+}
+
+/* Image preview */
+img {
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+/* Table styling */
+table.table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+table.table th {
+  background-color: #007bff; /* Blue header */
+  color: #fff; /* White text */
+  text-align: center;
+  padding: 10px;
+}
+
+table.table td {
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #000;
+}
+
+table.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Light gray stripes */
+}
+
+table.table tbody tr:hover {
+  background-color: #e7f1ff; /* Light blue hover */
+  transition: 0.3s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .row > .col-md-4, .row > .col-md-6 {
+    margin-bottom: 15px;
+  }
+
+  table.table {
+    font-size: 0.9rem;
+  }
+
+  img {
+    width: 60px;
+    height: 60px;
+  }
+}

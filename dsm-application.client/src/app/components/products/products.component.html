@@ -1,0 +1,131 @@
+<div class="container mt-3">
+  <h2>Product Management</h2>
+
+  <!-- Product Form -->
+  <form [formGroup]="productForm" (ngSubmit)="submitForm()">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Product Name</label>
+        <input type="text" class="form-control" formControlName="productName" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Product Code</label>
+        <input type="text" class="form-control" formControlName="productCode" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Unit</label>
+        <input type="text" class="form-control" formControlName="unit" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Price</label>
+        <input type="number" class="form-control" formControlName="price" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Cost Price</label>
+        <input type="number" class="form-control" formControlName="costPrice" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Stock</label>
+        <input type="number" class="form-control" formControlName="stock" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label>Discount (%)</label>
+        <input type="number" class="form-control" formControlName="discount" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>GST (%)</label>
+        <input type="number" class="form-control" formControlName="gst" />
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Reorder Level</label>
+        <input type="number" class="form-control" formControlName="reorderLevel" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Brand</label>
+        <input type="text" class="form-control" formControlName="brand" />
+      </div>
+      <div class="col-md-4 mb-3">
+  <label>Category</label>
+  <select class="form-control" formControlName="category">
+  <option value="">-- Select Category --</option>
+  <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+</select>
+</div>
+     <div class="col-md-6 mb-3">
+  <label>Product Image</label>
+  <input 
+    type="file" 
+    class="form-control" 
+    (change)="onFileSelected($event)" 
+    #fileInput
+  />
+  <!-- Preview uploaded image -->
+  <img *ngIf="previewUrl" [src]="previewUrl" width="120" height="120" class="mt-2" />
+  
+</div>
+</div>
+
+    <div class="mb-3">
+      <label>Description</label>
+      <textarea class="form-control" formControlName="description"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      {{ isEdit ? 'Update' : 'Add' }} Product
+    </button>
+    <button type="button" class="btn btn-secondary ms-2" (click)="resetForm()">Reset</button>
+  </form>
+
+  <hr />
+
+  <!-- Product List -->
+  <h3>Products</h3>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Code</th>
+        <th>Unit</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Discount</th>
+        <th>GST</th>
+        <th>Brand</th>
+         <th>Category</th>
+         <th>Image</th>
+        <th>Actions</th>
+       
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of products">
+        <td>{{ p.productName }}</td>
+        <td>{{ p.productCode }}</td>
+        <td>{{ p.unit }}</td>
+        <td>{{ p.price | currency }}</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.discount }}%</td>
+        <td>{{ p.gst }}%</td>
+        <td>{{ p.brand }}</td>
+          <td>{{ p.category }}</td>
+        
+        <td>
+  <img *ngIf="p.imageUrl" [src]="'https://localhost:7189' + p.imageUrl" width="80" />
+</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="editProduct(p)">Edit</button>
+          <button class="btn btn-sm btn-danger" (click)="deleteProduct(p.productId!)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

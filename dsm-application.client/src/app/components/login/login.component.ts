@@ -25,7 +25,14 @@ export class LoginComponent {
           this.router.navigate(['/admin']);
         } else if (role === 'Distributor' ) {
           this.router.navigate(['/dashboard']);
-        } else {
+        } 
+        else if (role === 'Employee' ) {
+          this.router.navigate(['/dashboard']);
+        } 
+         else if (role === 'Customer' ) {
+          this.router.navigate(['/customer-dashboard']);
+        } 
+        else {
           this.error = 'Unknown role'; 
         }
       },

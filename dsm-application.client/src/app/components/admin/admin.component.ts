@@ -19,6 +19,7 @@ export class AdminComponent implements OnInit {
   message = '';
   searchText = '';
   role: string | null = null;
+  customCategory: string = "";
 
   private distributorModal: bootstrap.Modal | null = null;
 
@@ -27,6 +28,7 @@ export class AdminComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService
   ) {}
+  
 
   ngOnInit(): void {
     this.loadDistributors();
@@ -40,6 +42,7 @@ export class AdminComponent implements OnInit {
     }
   }
 
+
   initForm(): void {
     this.distributorForm = this.fb.group({
       distributorId: [''],
@@ -49,7 +52,10 @@ export class AdminComponent implements OnInit {
       phoneNumber: ['', Validators.required],
       gst: ['', Validators.required],
       address: ['', Validators.required],
-      isActive: [true]
+       isPremium: [''],
+      isActive: [true],
+      categories: [[]] , // ✅ new field
+       customCategory: [''] // ✅ new form control
     });
   }
 
@@ -67,8 +73,23 @@ export class AdminComponent implements OnInit {
     this.isEdit = false;
     this.selectedDistributor = null;
     this.distributorForm.reset({ isActive: true });
+     this.distributorForm.reset({ isPremium: true });
     this.distributorModal?.show();
   }
+   togglePremium(d: Distributor) {
+    if (d.isPremium) {
+      this.adminService.removePremium(d.distributorId).subscribe({
+        next: () => d.isPremium = false,
+        error: (err) => console.error(err)
+      });
+    } else {
+      this.adminService.setPremium(d.distributorId).subscribe({
+        next: () => d.isPremium = true,
+        error: (err) => console.error(err)
+      });
+    }
+  }
+  
 
   openEdit(d: Distributor): void {
     this.isEdit = true;
@@ -85,6 +106,11 @@ saveDistributor(): void {
 
   const dist = this.distributorForm.value;
   console.log("Submitting distributor:", dist);
+  if (dist.categories.includes('Others') && dist.customCategory.trim()) {
+    dist.categories = dist.categories
+      .filter((c: string) => c !== 'Others')
+      .concat(dist.customCategory.trim());
+  }
 
   if (this.isEdit && this.selectedDistributor) {
     this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({

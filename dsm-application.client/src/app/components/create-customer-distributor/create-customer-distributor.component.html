@@ -1,0 +1,10 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold">Create Customer (Distributor)</h2>
+  <form (ngSubmit)="createCustomer()" class="flex flex-col gap-2">
+    <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
+    <input type="email" placeholder="Email" [(ngModel)]="customer.email" name="email" required />
+    <input type="text" placeholder="Phone" [(ngModel)]="customer.phoneNumber" name="phoneNumber" />
+    <button type="submit">Create</button>
+  </form>
+  <p class="text-green-600">{{ message }}</p>
+</div>

@@ -10,7 +10,9 @@ export interface Distributor {
   phoneNumber: string;
   gst: string;
   address: string;
+    isPremium: boolean;
   isActive: boolean;
+   categories?: string[]; // ✅ add this
 }
 
 @Injectable({
@@ -43,6 +45,13 @@ export class AdminService {
 
   reactivateDistributor(id: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/distributors/${id}/reactivate`, {},{ responseType: 'text' });
+  }
+   setPremium(id: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/distributors/${id}/set-premium`, {});
+  }
+
+  removePremium(id: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/distributors/${id}/remove-premium`, {});
   }
 
   deleteDistributor(id: string): Observable<any> {

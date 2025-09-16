@@ -10,6 +10,13 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { SignupComponent } from './components/signup/signup.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AdminComponent } from './components/admin/admin.component';
+import { ProductsComponent } from './components/products/products.component';
+import { CustomerRegisterComponent } from './components/customer-register/customer-register.component';
+import { CustomerLoginComponent } from './components/customer-login/customer-login.component';
+import { CreateCustomerDistributorComponent } from './components/create-customer-distributor/create-customer-distributor.component';
+import { CustomerDashboardComponent } from './components/customer-dashboard/customer-dashboard.component';
+
+
 
 @NgModule({
   declarations: [
@@ -17,7 +24,13 @@ import { AdminComponent } from './components/admin/admin.component';
     LoginComponent,
     SignupComponent,
     DashboardComponent,
-    AdminComponent
+    AdminComponent,
+    ProductsComponent,
+    CustomerRegisterComponent,
+    CustomerLoginComponent,
+    CreateCustomerDistributorComponent,
+    CustomerDashboardComponent,
+   
   ],
   imports: [
     BrowserModule, HttpClientModule,

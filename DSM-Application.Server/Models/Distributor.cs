@@ -8,14 +8,19 @@ namespace DistributorManagementSystem.Server.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? DistributorId { get; set; } = string.Empty;
-
+        [BsonElement("CompanyName")]
         public string CompanyName { get; set; } = string.Empty;
         public string GST { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty; // Primary contact name
         public string Email { get; set; } = string.Empty; // Primary contact email
+        public bool IsPremium { get; set; } = false;
         public bool IsActive { get; set; } = false; // For deactivate/reactivate.
+                                                    
+        // ✅ NEW: Categories for this distributor (Food, Clothing, Electronics, etc.)
+        [BsonElement("Categories")]
+        public List<string> Categories { get; set; } = new List<string>();
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

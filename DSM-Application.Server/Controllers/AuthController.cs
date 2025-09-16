@@ -29,7 +29,7 @@ namespace DistributorManagementSystem.Server.Controllers
             // Hardcoded admin credentials
             const string adminEmail = "admin@gmail.com";
             const string adminPassword = "admin123";
-
+  
             // Check if login is for Admin
             if (request.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase))
             {
@@ -41,20 +41,34 @@ namespace DistributorManagementSystem.Server.Controllers
                 {
                     Email = adminEmail,
                     Role = "Admin",
-                    IsRegistered = true
+                    IsRegistered = true,
+                    Username = "Administrator",
+              
+                    DistributorId = ""
                 };
 
                 var tokenc = _jwt.GenerateToken(adminUser);
-                return Ok(new { tokenc, role = adminUser.Role });
+                return Ok(new { tokenc, role = adminUser.Role});
             }
-            var distributor = await _db.Distributors
-        .Find(d => d.Email == request.Email)
-        .FirstOrDefaultAsync();
-
-            if (!distributor.IsActive)
-                return Unauthorized("Your account is deactivated. Contact admin.");
             var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
-            if (user == null) return Unauthorized("User not found");
+            if (user == null)
+                return Unauthorized("User not found");
+            if (user.Role == "Distributor")
+            {
+                var distributor = await _db.Distributors
+                    .Find(d => d.Email == request.Email)
+                    .FirstOrDefaultAsync();
+
+                if (distributor == null)
+                    return Unauthorized("Distributor record not found");
+
+                if (!distributor.IsActive)
+                    return Unauthorized("Your account is deactivated. Contact admin.");
+            }
+            // 4️⃣ If Employee -> just check IsActive flag in user itself
+            if (user.Role == "Employee" && !user.IsActive)
+                return Unauthorized("Your employee account is deactivated. Contact distributor.");
+
 
 
 
@@ -65,8 +79,9 @@ namespace DistributorManagementSystem.Server.Controllers
                 return Unauthorized("Invalid password");
 
             var token = _jwt.GenerateToken(user);
-            return Ok(new { token, role = user.Role });
-        }
+            return Ok(new { token, role = user.Role,
+                distributorId = user.DistributorId,  });
+            }
 
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] Models.LoginRequest request)
@@ -88,6 +103,7 @@ namespace DistributorManagementSystem.Server.Controllers
 
             return Ok("Password created successfully. You can now login.");
         }
+
 
         private string ComputeHash(string input)
         {

@@ -35,6 +35,7 @@ namespace DistributorManagementSystem.Server.Controllers
             {
                 distributor.DistributorId = ObjectId.GenerateNewId().ToString();
             }
+            distributor.Categories ??= new List<string>(); // ✅ Ensure categories is never null
             await _db.Distributors.InsertOneAsync(distributor);
 
             // create distributor login with temporary username
@@ -47,7 +48,8 @@ namespace DistributorManagementSystem.Server.Controllers
                 Name = distributor.Name,
                 Email = distributor.Email,
                 PhoneNumber = distributor.PhoneNumber,
-                IsRegistered = false
+                IsRegistered = false,
+                
             };
             await _db.Users.InsertOneAsync(user);
 
@@ -61,25 +63,29 @@ namespace DistributorManagementSystem.Server.Controllers
             if (distributor == null) return NotFound("Distributor not found");
             return Ok(distributor);
         }
-
         // Update distributor details
         [HttpPut("distributors/{id}")]
         public async Task<IActionResult> UpdateDistributor(string id, [FromBody] Distributor update)
         {
             var existing = await _db.Distributors.Find(d => d.DistributorId == id).FirstOrDefaultAsync();
-            if (existing == null) return NotFound("Distributor not found");
+            if (existing == null)
+                return NotFound("Distributor not found");
+
+            // ✅ Ensure categories is not null to avoid overwriting with null
+            update.Categories ??= new List<string>();
 
             var updateDef = Builders<Distributor>.Update
                 .Set(d => d.CompanyName, update.CompanyName)
                 .Set(d => d.Email, update.Email)
                 .Set(d => d.PhoneNumber, update.PhoneNumber)
                 .Set(d => d.GST, update.GST)
-                .Set(d => d.Address, update.Address);
+                .Set(d => d.Address, update.Address)
+                .Set(d => d.Categories, update.Categories); // ✅ Include categories
 
             await _db.Distributors.UpdateOneAsync(d => d.DistributorId == id, updateDef);
+
             return Ok("Distributor updated successfully");
         }
-
         // Deactivate distributor
         [HttpPut("distributors/{id}/deactivate")]
         public async Task<IActionResult> DeactivateDistributor(string id)
@@ -117,6 +123,34 @@ namespace DistributorManagementSystem.Server.Controllers
             var result = await _db.Distributors.DeleteOneAsync(d => d.DistributorId == id);
             if (result.DeletedCount == 0) return NotFound("Distributor not found");
             return Ok("Distributor deleted successfully");
+        }
+        [HttpPut("distributors/{id}/set-premium")]
+        public async Task<IActionResult> SetPremium(string id)
+        {
+            var existing = await _db.Distributors.Find(d => d.DistributorId == id).FirstOrDefaultAsync();
+            if (existing == null) return NotFound("Distributor not found");
+
+            await _db.Distributors.UpdateOneAsync(
+                d => d.DistributorId == id,
+                Builders<Distributor>.Update.Set(d => d.IsPremium, true)
+            );
+
+            return Ok(new { distributorId = id, isPremium = true });
+        }
+
+        // Remove premium status
+        [HttpPut("distributors/{id}/remove-premium")]
+        public async Task<IActionResult> RemovePremium(string id)
+        {
+            var existing = await _db.Distributors.Find(d => d.DistributorId == id).FirstOrDefaultAsync();
+            if (existing == null) return NotFound("Distributor not found");
+
+            await _db.Distributors.UpdateOneAsync(
+                d => d.DistributorId == id,
+                Builders<Distributor>.Update.Set(d => d.IsPremium, false)
+            );
+
+            return Ok(new { distributorId = id, isPremium = false });
         }
     }
 }

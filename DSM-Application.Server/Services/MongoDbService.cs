@@ -1,4 +1,5 @@
 ﻿using DistributorManagementSystem.Server.Models;
+using DSM_Application.Server.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -16,6 +17,9 @@ namespace DistributorManagementSystem.Server.Services
 
         public IMongoCollection<User> Users => _db.GetCollection<User>("Users");
         public IMongoCollection<Distributor> Distributors => _db.GetCollection<Distributor>("Distributors");
+        public IMongoCollection<Product> Products => _db.GetCollection<Product>("Products");
+        public IMongoCollection<Customer> Customers => _db.GetCollection<Customer>("Customers");
+        public IMongoCollection<Employee> Employees => _db.GetCollection<Employee>("Employees");
     }
 
     public class MongoDbSettings

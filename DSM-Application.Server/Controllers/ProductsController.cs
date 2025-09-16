@@ -1,0 +1,158 @@
+﻿using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
+namespace DSM_Application.Server.Controllers
+{
+    [Authorize(Roles = "Distributor")]
+
+    [Route("api/[controller]")]
+    [ApiController]
+    
+    public class ProductsController : ControllerBase
+    {
+        private readonly ProductService _productService;
+
+
+        public ProductsController(ProductService productService)
+        {
+            _productService = productService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (string.IsNullOrEmpty(distributorId))
+                return Unauthorized("Distributor not found");
+
+            var products = await _productService.GetAllByDistributorAsync(distributorId);
+            return Ok(products);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var product = await _productService.GetByIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.DistributorId))
+                return BadRequest("DistributorId is missing from request");
+            // ✅ Validate category
+            var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
+            if (distributor == null)
+                return NotFound("Distributor not found");
+
+            if (string.IsNullOrWhiteSpace(dto.Category) ||
+                distributor.Categories == null ||
+                !distributor.Categories.Contains(dto.Category))
+            {
+                return BadRequest($"Category '{dto.Category}' is not available for this distributor.");
+            }
+
+            if (dto.Image != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Image.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.Image.CopyToAsync(stream);
+                }
+
+                dto.ImageUrl = $"/uploads/{fileName}";
+            }
+
+            var product = new Product
+            {
+                ProductName = dto.ProductName,
+                ProductCode = dto.ProductCode,
+                Description = dto.Description,
+                Unit = dto.Unit,
+                Price = dto.Price,
+                CostPrice = dto.CostPrice,
+                Discount = dto.Discount,
+                GST = dto.GST,
+                Stock = dto.Stock,
+                ReorderLevel = dto.ReorderLevel,
+                Brand = dto.Brand,
+                ImageUrl = dto.ImageUrl,
+                  DistributorId = dto.DistributorId ,
+                Category = dto.Category // ✅ store selected category
+            };
+
+            var created = await _productService.CreateAsync(product);
+
+            return Ok(created);
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromForm] ProductCreateDto dto)
+        {
+            var existing = await _productService.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            if (dto.Image != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.Image.CopyToAsync(stream);
+                }
+
+                existing.ImageUrl = $"/uploads/{fileName}";
+            }
+
+            // Update fields
+            existing.ProductName = dto.ProductName;
+            existing.ProductCode = dto.ProductCode;
+            existing.Description = dto.Description;
+            existing.Unit = dto.Unit;
+            existing.Price = dto.Price;
+            existing.CostPrice = dto.CostPrice;
+            existing.Discount = dto.Discount;
+            existing.GST = dto.GST;
+            existing.Stock = dto.Stock;
+            existing.ReorderLevel = dto.ReorderLevel;
+            existing.Brand = dto.Brand;
+            existing.Category = dto.Category; // ✅ update category
+
+            await _productService.UpdateAsync(id, existing);
+
+            return NoContent();
+        }
+        [AllowAnonymous]
+        [HttpGet("distributor/{distributorId}/categories")]
+        public async Task<IActionResult> GetCategoriesByDistributor(string distributorId)
+        {
+            var categories = await _productService.GetCategoriesByDistributorAsync(distributorId);
+            return Ok(categories);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var existing = await _productService.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            await _productService.DeleteAsync(id);
+            return NoContent();
+        }
+    }
+}

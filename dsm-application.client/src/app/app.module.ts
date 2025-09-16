@@ -15,6 +15,9 @@ import { CustomerRegisterComponent } from './components/customer-register/custom
 import { CustomerLoginComponent } from './components/customer-login/customer-login.component';
 import { CreateCustomerDistributorComponent } from './components/create-customer-distributor/create-customer-distributor.component';
 import { CustomerDashboardComponent } from './components/customer-dashboard/customer-dashboard.component';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
+import { DistributorDashboardComponent } from './components/distributor-dashboard/distributor-dashboard.component';
+import { EmployeeDashboardComponent } from './components/employee-dashboard/employee-dashboard.component';
 
 
 
@@ -30,6 +33,9 @@ import { CustomerDashboardComponent } from './components/customer-dashboard/cust
     CustomerLoginComponent,
     CreateCustomerDistributorComponent,
     CustomerDashboardComponent,
+    AdminDashboardComponent,
+    DistributorDashboardComponent,
+    EmployeeDashboardComponent,
    
   ],
   imports: [

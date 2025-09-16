@@ -111,6 +111,7 @@ saveDistributor(): void {
       .filter((c: string) => c !== 'Others')
       .concat(dist.customCategory.trim());
   }
+    delete dist.customCategory; // ✅ remove before sending to API
 
   if (this.isEdit && this.selectedDistributor) {
     this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({

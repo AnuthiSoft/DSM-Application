@@ -12,6 +12,9 @@ import { CustomerRegisterComponent } from './components/customer-register/custom
 import { CustomerLoginComponent } from './components/customer-login/customer-login.component';
 import { CreateCustomerDistributorComponent } from './components/create-customer-distributor/create-customer-distributor.component';
 import { CustomerDashboardComponent } from './components/customer-dashboard/customer-dashboard.component';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
+import { DistributorDashboardComponent } from './components/distributor-dashboard/distributor-dashboard.component';
+import { EmployeeDashboardComponent } from './components/employee-dashboard/employee-dashboard.component';
 
 
 
@@ -24,6 +27,9 @@ const routes: Routes = [
      { path: 'customer/register', component: CustomerRegisterComponent },
   { path: 'customer/login', component: CustomerLoginComponent },
   { path: 'distributor/create-customer', component: CreateCustomerDistributorComponent },
+   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
+  { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
+  { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
    {path: 'customer-dashboard', component: CustomerDashboardComponent },
     
  

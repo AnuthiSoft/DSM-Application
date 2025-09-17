@@ -47,5 +47,15 @@ export class CustomerService {
     return localStorage.getItem('role');
   }
 
-  
+  getMyCustomers(): Observable<Customer[]> {
+  const token = localStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}` };
+
+  return this.http.get<Customer[]>(`${this.apiUrl}/my-customers`, { headers });
+}
+ getDashboard(): Observable<any> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  return this.http.get(`${this.apiUrl}/dashboard`, { headers });
+}
 }

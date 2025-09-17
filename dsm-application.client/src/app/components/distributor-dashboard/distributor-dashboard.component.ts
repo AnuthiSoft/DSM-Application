@@ -6,5 +6,6 @@ import { Component } from '@angular/core';
   styleUrl: './distributor-dashboard.component.css'
 })
 export class DistributorDashboardComponent {
+  activeTab: string = 'product'; // default tab
 
 }

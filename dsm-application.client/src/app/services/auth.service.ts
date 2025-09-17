@@ -28,6 +28,7 @@ export class AuthService {
     localStorage.setItem('DistributorId', res.distributorId); // ✅ now saved
   }
         }
+       
       
       })
     );
@@ -46,6 +47,11 @@ export class AuthService {
   getRole(): string | null {
     return localStorage.getItem('role');
   }
+    // ✅ NEW METHOD: Safely get distributorId from localStorage
+  getDistributorId(): string {
+    const id = localStorage.getItem('DistributorId');
+    return id ? id : ''; // returns empty string if not found
+  }
 
   getToken(): string | null {
     return localStorage.getItem('token');
@@ -58,6 +64,17 @@ export class AuthService {
   authStatus$(): Observable<boolean> {
     return this.authStatus.asObservable();
   }
+  forgotPassword(email: string) {
+  return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
+}
+
+verifyOtp(email: string, otp: string) {
+  return this.http.post(`${this.apiUrl}/auth/verify-otp`, { email, otp });
+}
+
+resetPassword(email: string, otp: string, newPassword: string) {
+  return this.http.post(`${this.apiUrl}/auth/reset-password`, { email, otp, newPassword });
+}
   
 }
 function jwt_decode(token: any): any {

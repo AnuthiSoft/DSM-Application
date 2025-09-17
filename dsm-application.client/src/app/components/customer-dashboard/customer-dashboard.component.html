@@ -7,4 +7,19 @@
     Logout
   </button>
 </div>
+<div class="distributor-card" *ngFor="let distributor of distributors">
+  <h3>{{ distributor.CompanyName }}</h3>   <!-- was distributor.name -->
+  <p>Email: {{ distributor.Email }}</p>
+  <p>Phone: {{ distributor.PhoneNumber }}</p>
+  <p *ngIf="distributor.IsPremium">Premium Distributor</p>
 
+  <!-- Show products only if current customer was added by this distributor -->
+ <div *ngIf="currentCustomer?.addedByDistributorId === distributor.DistributorId">
+    <h4>Products:</h4>
+    <ul>
+      <li *ngFor="let product of distributor.products">
+        {{ product.ProductName }} - ${{ product.Price }}
+      </li>
+    </ul>
+  </div>
+</div>

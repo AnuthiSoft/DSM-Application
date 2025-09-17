@@ -1,0 +1,52 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold mb-4">Manage Employees</h2>
+
+  <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="grid gap-3 md:grid-cols-2 mb-4">
+    <input type="text" formControlName="name" placeholder="Name" class="p-2 border rounded" />
+    <input type="email" formControlName="email" placeholder="Email" class="p-2 border rounded" />
+    <input type="text" formControlName="phoneNumber" placeholder="Phone Number" class="p-2 border rounded" />
+    <input type="text" formControlName="role" placeholder="Role" class="p-2 border rounded" />
+    <input type="text" formControlName="designation" placeholder="Designation" class="p-2 border rounded" />
+
+    <label class="flex items-center space-x-2">
+      <input type="checkbox" formControlName="isActive" />
+      <span>Active</span>
+    </label>
+
+    <button type="submit" class="bg-blue-600 text-white p-2 rounded col-span-2">
+      {{ isEdit ? 'Update Employee' : 'Add Employee' }}
+    </button>
+  </form>
+
+  <table class="table-auto w-full border">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="p-2 border">Name</th>
+        <th class="p-2 border">Email</th>
+        <th class="p-2 border">Phone</th>
+        <th class="p-2 border">Role</th>
+        <th class="p-2 border">Designation</th>
+        <th class="p-2 border">Active</th>
+        <th class="p-2 border">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let emp of employees">
+        <td class="p-2 border">{{ emp.name }}</td>
+        <td class="p-2 border">{{ emp.email }}</td>
+        <td class="p-2 border">{{ emp.phoneNumber }}</td>
+        <td class="p-2 border">{{ emp.role }}</td>
+        <td class="p-2 border">{{ emp.designation }}</td>
+        <td class="p-2 border">
+          <input type="checkbox" [checked]="emp.isActive" (change)="toggleActive(emp)" />
+        </td>
+        <td class="p-2 border space-x-2">
+          <button (click)="editEmployee(emp)" class="bg-yellow-400 px-2 rounded">Edit</button>
+          <button (click)="deleteEmployee(emp)" class="bg-red-500 text-white px-2 rounded">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="text-center mt-2">Loading employees...</div>
+</div>

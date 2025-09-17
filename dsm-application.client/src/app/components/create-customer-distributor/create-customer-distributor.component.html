@@ -1,4 +1,4 @@
-<div class="p-4">
+<!-- <div class="p-4">
   <h2 class="text-xl font-bold">Create Customer (Distributor)</h2>
   <form (ngSubmit)="createCustomer()" class="flex flex-col gap-2">
     <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
@@ -7,4 +7,58 @@
     <button type="submit">Create</button>
   </form>
   <p class="text-green-600">{{ message }}</p>
+</div>
+<div class="p-4">
+  <h2 class="text-xl font-bold mb-4">My Customers</h2>
+
+  <p *ngIf="message" class="text-red-600">{{ message }}</p>
+
+  <table class="w-full border-collapse border">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="border px-2 py-1">Name</th>
+        <th class="border px-2 py-1">Email</th>
+        <th class="border px-2 py-1">Phone</th>
+        <th class="border px-2 py-1">Registered</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of customers">
+        <td class="border px-2 py-1">{{ c.name }}</td>
+        <td class="border px-2 py-1">{{ c.email }}</td>
+        <td class="border px-2 py-1">{{ c.phoneNumber }}</td>
+        <td class="border px-2 py-1">{{ c.isRegistered ? 'Yes' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div> -->
+<div class="customer-container">
+  <h2>Create Customer (Distributor)</h2>
+  <form (ngSubmit)="createCustomer()">
+    <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
+    <input type="email" placeholder="Email" [(ngModel)]="customer.email" name="email" required />
+    <input type="text" placeholder="Phone" [(ngModel)]="customer.phoneNumber" name="phoneNumber" />
+    <button type="submit">Create</button>
+  </form>
+  <p class="message text-green-600">{{ message }}</p>
+
+  <!-- Customer List Table -->
+  <table class="customer-table" *ngIf="customers.length > 0">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Registered</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of customers">
+        <td>{{ c.name }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.phoneNumber }}</td>
+        <td>{{ c.isRegistered ? 'Yes' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

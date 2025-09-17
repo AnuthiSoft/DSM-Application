@@ -1,2 +1,30 @@
-<p>distributor-dashboard works!</p>
-<app-products></app-products>
+<div class="dashboard-container">
+  <!-- Navbar -->
+  <nav class="dashboard-nav">
+    <button
+      [class.active]="activeTab === 'products'"
+      (click)="activeTab = 'products'"
+    >
+      Products
+    </button>
+    <button
+      [class.active]="activeTab === 'employees'"
+      (click)="activeTab = 'employees'"
+    >
+      Employees
+    </button>
+    <button
+      [class.active]="activeTab === 'customers'"
+      (click)="activeTab = 'customers'"
+    >
+      Create Customer
+    </button>
+  </nav>
+
+  <!-- Tab Content -->
+  <div class="dashboard-content">
+    <app-products *ngIf="activeTab === 'products'"></app-products>
+    <app-employees *ngIf="activeTab === 'employees'"></app-employees>
+    <app-create-customer-distributor *ngIf="activeTab === 'customers'"></app-create-customer-distributor>
+  </div>
+</div>

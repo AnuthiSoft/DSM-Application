@@ -21,6 +21,12 @@ namespace DistributorManagementSystem.Server.Models
         public string PhoneNumber { get; set; } = string.Empty;
 
         public bool IsRegistered { get; set; } = false; // true if password created by distributor
-     
+        [BsonElement("ResetOtp")]
+        public string? ResetOtp { get; set; }
+
+        [BsonElement("ResetOtpExpiry")]
+        public DateTime? ResetOtpExpiry { get; set; }
+
+
     }
 }

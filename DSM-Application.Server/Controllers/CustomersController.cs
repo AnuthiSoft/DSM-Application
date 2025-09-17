@@ -2,6 +2,7 @@
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,13 @@ namespace DSM_Application.Server.Controllers
     {
         private readonly MongoDbService _db;
         private readonly JwtService _jwt;
+        private readonly ProductService _productService;
 
-        public CustomersController(MongoDbService db, JwtService jwt)
+        public CustomersController(MongoDbService db, JwtService jwt, ProductService productService)
         {
             _db = db;
             _jwt = jwt;
+            _productService = productService;
         }
 
         // 🌍 Global Registration
@@ -63,7 +66,7 @@ namespace DSM_Application.Server.Controllers
             var token = _jwt.GenerateCustomerToken(customer);
             return Ok(new { token, customer , role = customer.Role });
         }
-        [Authorize(Roles = "Distributor")]
+
 
         [Authorize(Roles = "Distributor")]
         [HttpPost("create-by-distributor")]
@@ -85,6 +88,22 @@ namespace DSM_Application.Server.Controllers
             await _db.Customers.InsertOneAsync(customer);
 
             return Ok(new { message = "Customer created by distributor. Customer must set password.", customer });
+        }
+        [Authorize(Roles = "Distributor")]
+        [HttpGet("my-customers")]
+        public async Task<IActionResult> GetCustomersByDistributor()
+        {
+            // Get distributor ID from JWT claims
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (distributorId == null)
+                return Unauthorized("Distributor ID not found in token");
+
+            // Fetch customers added by this distributor
+            var customers = await _db.Customers
+                .Find(c => c.AddedByDistributorId == distributorId)
+                .ToListAsync();
+
+            return Ok(customers);
         }
 
 
@@ -111,6 +130,41 @@ namespace DSM_Application.Server.Controllers
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
+        }
+        [HttpGet("dashboard")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (customerId == null) return Unauthorized();
+
+            var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+            if (customer == null) return NotFound();
+
+            var distributors = await _db.Distributors.Find(_ => true).ToListAsync();
+            var result = new List<DistributorDashboardDto>();
+
+            foreach (var d in distributors)
+            {
+                var dto = new DistributorDashboardDto
+                {
+                    DistributorId = d.DistributorId,
+                    CompanyName = d.CompanyName,
+                    Email = d.Email,
+                    PhoneNumber = d.PhoneNumber,
+                    IsPremium = d.IsPremium
+                };
+
+                // If the customer is added by this distributor, include products
+                if (!string.IsNullOrEmpty(customer.AddedByDistributorId) && customer.AddedByDistributorId == d.DistributorId)
+                {
+                    dto.Products = await _db.Products.Find(p => p.DistributorId == d.DistributorId && p.IsActive).ToListAsync();
+                }
+
+                result.Add(dto);
+            }
+
+            return Ok(result);
         }
     }
 }

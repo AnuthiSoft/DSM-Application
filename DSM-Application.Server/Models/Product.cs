@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class Product
     {
         [BsonId] // MongoDB will auto-generate this
@@ -27,7 +28,8 @@ namespace DSM_Application.Server.Models
             "" +
             "" +
             "")]
-        public string? Category { get; set; } // store name for quick display
+        public string Category { get; set; } // store name for quick display
+
 
 
         [BsonElement("Description")]

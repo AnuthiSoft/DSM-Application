@@ -1,13 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace DSM_Application.Server.Models.DTOs
 {
+    [BsonIgnoreExtraElements]
     public class ProductCreateDto
     {
 
         public string ProductName { get; set; }
         public string ProductCode { get; set; }
         //public string? Category { get; set; } // ✅ add this
+
         public string Category { get; set; } // <-- must match FormData key
         public string Description { get; set; }
         public string Unit { get; set; }

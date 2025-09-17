@@ -26,7 +26,7 @@ namespace DSM_Application.Server.Models
         public string Designation { get; set; } = "Employee";
 
         [BsonElement("IsRegistered")]
-        public bool IsRegistered { get; set; } = false;
+        public bool IsRegistered { get; set; } =true;
 
         [BsonElement("PasswordHash")]
         public string? PasswordHash { get; set; }

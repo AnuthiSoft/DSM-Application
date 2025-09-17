@@ -4,10 +4,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
+
 
 import { AuthInterceptor } from './services/auth.interceptor';
-import { SignupComponent } from './components/signup/signup.component';
+
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AdminComponent } from './components/admin/admin.component';
 import { ProductsComponent } from './components/products/products.component';
@@ -18,14 +18,17 @@ import { CustomerDashboardComponent } from './components/customer-dashboard/cust
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { DistributorDashboardComponent } from './components/distributor-dashboard/distributor-dashboard.component';
 import { EmployeeDashboardComponent } from './components/employee-dashboard/employee-dashboard.component';
+import { MainPageComponent } from './components/main-page/main-page.component';
+import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
+import { DistributorSignupComponent } from './components/distributor-signup/distributor-signup.component';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
-    SignupComponent,
+    
+    
     DashboardComponent,
     AdminComponent,
     ProductsComponent,
@@ -36,6 +39,9 @@ import { EmployeeDashboardComponent } from './components/employee-dashboard/empl
     AdminDashboardComponent,
     DistributorDashboardComponent,
     EmployeeDashboardComponent,
+    MainPageComponent,
+    DistributorLoginComponent,
+    DistributorSignupComponent,
    
   ],
   imports: [

@@ -1,8 +1,9 @@
 import { Component, NgZone } from '@angular/core';
-import { CustomerLoginRequest } from '../../../../MyTypes/customer.model';
+
 import { CustomerService } from '../../services/customer.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { CustomerLoginRequest } from '../../models/customer.model';
 
 @Component({
   selector: 'app-customer-login',

@@ -1,0 +1,219 @@
+<div class="body">
+	 <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-building me-2 "></i>BusinessPortal
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="distributorDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-truck me-1"></i> Distributor
+                        </a>
+                        <div class="dropdown-menu nav-dropdown-menu" aria-labelledby="distributorDropdown">
+                            <a class="dropdown-item nav-dropdown-item" routerLink="/distributor-login">Distributor Login</a>
+                            <!-- <form class="px-4 py-3 login-form">
+                                <div class="mb-3">
+                                    <label for="distributorEmail" class="form-label">Email address</label>
+                                    <input type="email" class="form-control" id="distributorEmail" placeholder="email@example.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="distributorPassword" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="distributorPassword" placeholder="Password">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                            </form> -->
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header">Distributor Services</h6>
+                            <a class="dropdown-item nav-dropdown-item" >
+                                <i class="fas fa-box-open me-2"></i> Inventory Management
+                            </a>
+                            <a class="dropdown-item nav-dropdown-item" >
+                                <i class="fas fa-chart-line me-2"></i> Sales Analytics
+                            </a>
+                            <a class="dropdown-item nav-dropdown-item" >
+                                <i class="fas fa-file-invoice me-2"></i> Order Processing
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-users me-1"></i> Customer
+                        </a>
+                        <div class="dropdown-menu nav-dropdown-menu" aria-labelledby="customerDropdown">
+                            <h6 class="dropdown-header">Customer Login</h6>
+                            <form class="px-4 py-3 login-form">
+                                <div class="mb-3">
+                                    <label for="customerEmail" class="form-label">Email address</label>
+                                    <input type="email" class="form-control" id="customerEmail" placeholder="email@example.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="customerPassword" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="customerPassword" placeholder="Password">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                            </form>
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header">Customer Services</h6>
+                            <a class="dropdown-item nav-dropdown-item" href="#">
+                                <i class="fas fa-shopping-cart me-2"></i> Product Catalog
+                            </a>
+                            <a class="dropdown-item nav-dropdown-item" href="#">
+                                <i class="fas fa-headset me-2"></i> 24/7 Support
+                            </a>
+                            <a class="dropdown-item nav-dropdown-item" href="#">
+                                <i class="fas fa-tag me-2"></i> Special Offers
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+<section class="bg-light">
+    <!-- Hero Section -->
+    <section class=" bg-light hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Your Business Solutions Partner</h1>
+            <p class="lead mb-4">We provide comprehensive solutions for distributors and customers to streamline operations and enhance experiences.</p>
+            <button class="btn btn-primary btn-lg me-2">Get Started</button>
+            <button class="btn btn-outline-light btn-lg">Learn More</button>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="container mb-5">
+        <h2 class="text-center section-title mx-auto">Our Services</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card service-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <h3 class="h4">Dashboard Analytics</h3>
+                        <p>Comprehensive analytics and reporting tools to track your business performance in real-time.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card service-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3 class="h4">Inventory Management</h3>
+                        <p>Efficiently manage your inventory with our advanced tracking and forecasting systems.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="card service-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3 class="h4">Customer Relations</h3>
+                        <p>Build stronger relationships with your customers through our integrated CRM solutions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Distributor Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="section-title">For Distributors</h2>
+                    <p>Our distributor portal provides powerful tools to manage your supply chain, track orders, and analyze sales performance.</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Real-time inventory tracking</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Automated order processing</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Advanced reporting tools</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Supply chain management</li>
+                    </ul>
+                    <!-- <a href="#" class="btn btn-primary mt-3">Distributor Login</a> -->
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Distributor Services" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <h2 class="section-title">For Customers</h2>
+                    <p>Our customer portal offers a seamless shopping experience with personalized recommendations, order tracking, and dedicated support.</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Easy product browsing</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Secure checkout process</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Order history and tracking</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> 24/7 customer support</li>
+                    </ul>
+                    <!-- <a href="#" class="btn btn-primary mt-3">Customer Login</a> -->
+                </div>
+                <div class="col-lg-6 order-lg-1">
+                    <img src="https://images.unsplash.com/photo-1526947425960-945c6e72858f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="Customer Services" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5>BusinessPortal</h5>
+                    <p>Providing innovative solutions for distributors and customers to streamline operations and enhance experiences.</p>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">Home</a></li>
+                        <li><a href="#" class="text-white">About</a></li>
+                        <li><a href="#" class="text-white">Services</a></li>
+                        <li><a href="#" class="text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h5>Account Types</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">Distributor Login</a></li>
+                        <li><a href="#" class="text-white">Customer Login</a></li>
+                        <li><a href="#" class="text-white">Distributor Signup</a></li>
+                        <li><a href="#" class="text-white">Customer Signup</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Business Ave, Suite 500</li>
+                        <li><i class="fas fa-phone me-2"></i> (555) 123-4567</li>
+                        <li><i class="fas fa-envelope me-2"></i> info&#64;businessportal.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-0 mb-4">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+	 
+	</div>

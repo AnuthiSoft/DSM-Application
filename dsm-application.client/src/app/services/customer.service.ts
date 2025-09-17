@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Customer, CustomerLoginRequest, CustomerLoginResponse, CustomerRegisterRequest } from '../../../MyTypes/customer.model';
+
 import { Observable, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Customer, CustomerLoginRequest, CustomerLoginResponse, CustomerRegisterRequest } from '../models/customer.model';
 
 @Injectable({
   providedIn: 'root'

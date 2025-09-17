@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { CustomerRegisterRequest } from '../../../../MyTypes/customer.model';
+
 import { CustomerService } from '../../services/customer.service';
+import { CustomerRegisterRequest } from '../../models/customer.model';
 
 @Component({
   selector: 'app-customer-register',
@@ -23,5 +24,4 @@ export class CustomerRegisterComponent {
       }
     });
   }
-
 }

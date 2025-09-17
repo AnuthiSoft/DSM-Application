@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
+
 
 import { AuthGuard } from './guards/auth.guard';
-import { SignupComponent } from './components/signup/signup.component';
+
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AdminComponent } from './components/admin/admin.component';
 
@@ -15,12 +15,15 @@ import { CustomerDashboardComponent } from './components/customer-dashboard/cust
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
 import { DistributorDashboardComponent } from './components/distributor-dashboard/distributor-dashboard.component';
 import { EmployeeDashboardComponent } from './components/employee-dashboard/employee-dashboard.component';
+import { MainPageComponent } from './components/main-page/main-page.component';
+import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
+import { DistributorSignupComponent } from './components/distributor-signup/distributor-signup.component';
 
 
 
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+ 
+  
   { path: 'dashboard', component: DashboardComponent },
   { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
     { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
@@ -31,10 +34,17 @@ const routes: Routes = [
   { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
   { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
    {path: 'customer-dashboard', component: CustomerDashboardComponent },
+   {path: 'main-page', component: MainPageComponent},
+   {path: 'distributor-login', component: DistributorLoginComponent},
+   {path: 'distributor-signup', component: DistributorSignupComponent},
+
+
+
+
     
  
 
-  { path: '', redirectTo: 'login', pathMatch: 'full' }
+  { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];
 
 @NgModule({

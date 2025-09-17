@@ -173,7 +173,7 @@ saveDistributor(): void {
 
   logout(): void {
     this.auth.logout();
-    window.location.href = '/login';
+    window.location.href = "/distributor-login";
   }
 
   applyFilter(): void {

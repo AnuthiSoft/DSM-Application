@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { Customer } from '../../../../MyTypes/customer.model';
+
 import { CustomerService } from '../../services/customer.service';
+import { Customer } from '../../models/customer.model';
 
 @Component({
   selector: 'app-create-customer-distributor',

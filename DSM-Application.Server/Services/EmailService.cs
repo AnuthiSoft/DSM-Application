@@ -11,10 +11,20 @@ namespace DSM_Application.Server.Services
         {
             _config = config;
         }
-
-        public void SendOtpEmail(string toEmail, string otp)
+           // Existing OTP email method (still synchronous)
+        public async Task SendOtpEmailAsync(string toEmail, string otp)
         {
-            var smtpHost = _config["Email:SmtpHost"];
+            await SendEmailAsync(
+                toEmail,
+                "Your OTP Code",
+                $"Your OTP code is {otp}. It is valid for 5 minutes."
+            );
+        }
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        {
+            try
+            {
+                var smtpHost = _config["Email:SmtpHost"];
             var smtpPort = int.Parse(_config["Email:SmtpPort"]);
             var smtpUser = _config["Email:Username"];
             var smtpPass = _config["Email:Password"];
@@ -28,12 +38,24 @@ namespace DSM_Application.Server.Services
             var mail = new MailMessage
             {
                 From = new MailAddress(smtpUser),
-                Subject = "Your OTP Code",
-                Body = $"Your OTP code is {otp}. It is valid for 5 minutes."
-            };
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = false // set true if you want HTML formatting
+            
+        };
+
             mail.To.Add(toEmail);
 
-            client.Send(mail);
+           
+                await client.SendMailAsync(mail); // ✅ async call
+                Console.WriteLine($"✅ Email sent to {toEmail} successfully.");
+
+            }
+            catch (SmtpException ex)
+            {
+                Console.WriteLine($"[EmailService] Failed to send email: {ex.Message}");
+                throw;
+            }
         }
     }
 }

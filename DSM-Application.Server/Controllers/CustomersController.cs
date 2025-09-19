@@ -64,7 +64,7 @@ namespace DSM_Application.Server.Controllers
 
             // Generate JWT for customer
             var token = _jwt.GenerateCustomerToken(customer);
-            return Ok(new { token, customer , role = customer.Role });
+            return Ok(new { token, customer , role = customer.Role,customerId=customer.CustomerId });
         }
 
 
@@ -131,47 +131,61 @@ namespace DSM_Application.Server.Controllers
             var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
             if (customer == null) return NotFound("Customer not found");
             // Collection of connections
-    var connections = await _db.Connections
-        .Find(c => c.CustomerId == customerId)
-        .ToListAsync();
-            // If AddedByDistributorId is null => global customer => show all distributors
+            // Get all connections for this customer
+            var connections = await _db.Connections
+                .Find(c => c.CustomerId == customerId)
+                .ToListAsync();
+            // Global customer: show all distributors + products if connection accepted
             if (string.IsNullOrEmpty(customer.AddedByDistributorId))
             {
                 var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
-                // Add connection status for each distributor
+                var distributorsWithProducts = new List<object>();
+
                 foreach (var dist in allDistributors)
                 {
                     var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
-                    dist.Status = conn?.Status.ToString(); // Pending / Accepted / Rejected / null
+                    dist.Status = conn?.Status.ToString();
+
+                    List<Product> products = new();
+                    if (conn != null && conn.Status == ConnectionStatus.Accepted)
+                    {
+                        // Fetch products for this distributor
+                        products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
+                    }
+
+                    distributorsWithProducts.Add(new
+                    {
+                        distributor = dist,
+                        products = products
+                    });
                 }
+
                 return Ok(new
                 {
                     isGlobal = true,
-                    distributors = allDistributors
+                    distributors = distributorsWithProducts
                 });
             }
+
             else
             {
                 // Distributor-specific customer => return that distributor and products
+                // Distributor-specific customer: show only that distributor + products
                 var distributor = await _productService.GetDistributorByIdAsync(customer.AddedByDistributorId);
-                if (distributor == null)
-                    return NotFound("Distributor not found");
+                if (distributor == null) return NotFound("Distributor not found");
 
-                // Check if connection exists for this distributor (for global customers who later connect)
-                var connection = connections.FirstOrDefault(c => c.DistributorId == distributor.DistributorId);
-
-                List<Product> products = new();
-                if (connection == null || connection.Status == ConnectionStatus.Accepted)
+                var connectionSpecific = connections.FirstOrDefault(c => c.DistributorId == distributor.DistributorId);
+                List<Product> distributorProducts = new();
+                if (connectionSpecific == null || connectionSpecific.Status == ConnectionStatus.Accepted)
                 {
-                    products = await _productService.GetProductsByDistributorAsync(distributor.DistributorId);
+                    distributorProducts = await _productService.GetProductsByDistributorAsync(distributor.DistributorId);
                 }
-
 
                 return Ok(new
                 {
                     isGlobal = false,
                     distributor,
-                    products
+                    products = distributorProducts
                 });
             }
         }

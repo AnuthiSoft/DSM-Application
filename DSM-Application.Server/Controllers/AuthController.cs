@@ -145,7 +145,7 @@ namespace DistributorManagementSystem.Server.Controllers
 
             try
             {
-                _emailService.SendOtpEmail(request.Email, otp);
+                _emailService.SendOtpEmailAsync(request.Email, otp);
                 return Ok("OTP sent to your email.");
             }
             catch (Exception ex)

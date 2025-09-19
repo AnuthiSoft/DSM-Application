@@ -1,17 +1,11 @@
-/* :root {
-  --primary-color: #2563eb;
-  --secondary-color: #1e293b;
-  --accent-color: #dc2626;
-  --success-color: #16a34a;
-  --warning-color: #d97706;
-  --info-color: #0891b2;
-  --light-bg: #f8fafc;
-} */
+* {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
 
-body {
+.body {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-  background-color: var(--light-bg);
-  color: #334155;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   padding: 20px;
 }
 
@@ -21,13 +15,12 @@ body {
 }
 
 .dashboard-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow);
   padding: 24px;
   margin-bottom: 24px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .page-header {
@@ -36,7 +29,12 @@ body {
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-header h2 {
+  color: var(--text-color);
+  margin: 0;
 }
 
 .btn-primary {
@@ -46,7 +44,7 @@ body {
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .btn-primary:hover {
@@ -54,7 +52,7 @@ body {
 }
 
 .btn-warning {
-  background-color: var(--accent-color);
+  background-color: #f59e0b;
   border: none;
   color: white;
   padding: 8px 16px;
@@ -64,11 +62,11 @@ body {
 }
 
 .btn-warning:hover {
-  background-color: #b45309;
+  background-color: #d97706;
 }
 
 .btn-danger {
-  background-color: var(--warning-color);
+  background-color: #ef4444;
   border: none;
   color: white;
   padding: 8px 16px;
@@ -78,141 +76,20 @@ body {
 }
 
 .btn-danger:hover {
-  background-color: #b91c1c;
+  background-color: #dc2626;
 }
 
-.table thead th {
-  background-color: var(--secondary-color);
-  color: white;
-  border: none;
-  font-weight: 500;
-  padding: 16px;
-  font-size: 0.875rem;
-  position: sticky;
-  top: 0;
-}
-
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: #f9fafb;
-}
-
-.table tbody td {
-  padding: 16px;
-  vertical-align: middle;
-  border-color: #e5e7eb;
-}
-
-.table tbody tr:hover {
-  background-color: #f1f5f9;
-}
-
-.status-badge {
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-}
-
-/* Modal Styles */
-.modal-content {
-  border-radius: 12px;
-  border: none;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  background-color: var(--secondary-color);
-  color: white;
-  border-radius: 12px 12px 0 0;
-  padding: 16px 20px;
-}
-
-.btn-close {
-  filter: invert(1);
-  opacity: 0.8;
-}
-
-.form-control,
-.form-select {
-  border-radius: 8px;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  transition: all 0.2s;
-}
-
-.form-control:focus,
-.form-select:focus {
+.btn-outline-primary {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  outline: none;
+  color: var(--primary-color);
 }
 
-.form-label {
-  font-weight: 500;
-  color: var(--secondary-color);
-  margin-bottom: 8px;
-}
-
-.form-check-input:checked {
+.btn-outline-primary:hover {
   background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.loading-indicator {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
-
-.spinner {
-  width: 2rem;
-  height: 2rem;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid var(--primary-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-right: 10px;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.employee-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: white;
-  font-weight: 600;
-  margin-right: 12px;
 }
 
-.employee-name {
-  display: flex;
-  align-items: center;
-}
-
-.action-buttons {
-  white-space: nowrap;
-}
-
-.table-container {
-  max-height: 600px;
-  overflow-y: auto;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
+/* Search and Filter */
 .search-section {
   display: flex;
   gap: 16px;
@@ -224,18 +101,191 @@ body {
   flex: 1;
   min-width: 250px;
 }
+.search-box input::placeholder {
+  color: var(--input-text);       /* placeholder text color */
+  font-style: italic; /* optional, make it italic */
+  font-size: 14px;    /* adjust font size */
+  opacity: 1;         /* ensure it's fully visible */
+}
 
 .filter-dropdown {
   width: 200px;
 }
 
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.2s;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* Table Styles - Improved for dark mode */
+.table-container {
+  max-height: 600px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.table {
+  margin-bottom: 0;
+  color: var(--text-color);
+  border-color: var(--table-border);
+}
+
+.table thead th {
+  background-color: var(--table-header-bg);
+  color: white;
+  border: none;
+  font-weight: 500;
+  padding: 16px;
+  font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: var(--table-stripe);
+}
+
+.table tbody td {
+  padding: 16px;
+  vertical-align: middle;
+  border-color: var(--table-border);
+}
+
+.table tbody tr:hover {
+  background-color: var(--table-hover);
+}
+
+.status-badge {
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+}
+
+.bg-success {
+  background-color: #16a34a !important;
+}
+
+.bg-secondary {
+  background-color: #6b7280 !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+.employee-name {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+/* Modal Styles */
+.modal-content {
+  background-color: var(--modal-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  color: var(--text-color);
+}
+
+.modal-header {
+  background-color: var(--secondary-color);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.btn-close {
+  filter: invert(1);
+  opacity: 0.8;
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 8px;
+}
+
+.form-check-input {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Loading and Empty States */
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.spinner-border {
+  color: var(--primary-color);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.py-5 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.fa-3x {
+  font-size: 3em;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+/* Table Footer */
 .table-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: var(--primary-color);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {
@@ -255,5 +305,21 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .btn-group {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-group .btn {
+    flex: 1;
   }
 }

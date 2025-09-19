@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 export interface Distributor {
   distributorId: string;
@@ -10,51 +10,66 @@ export interface Distributor {
   phoneNumber: string;
   gst: string;
   address: string;
-    isPremium: boolean;
+  isPremium: boolean;
   isActive: boolean;
-   categories?: string[]; // ✅ add this
+  categories?: string[]; // ✅ add this
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminService {
-  private apiUrl = 'https://localhost:7189/api/admin';
+  
 
-  constructor(private http: HttpClient) {}
+  constructor(private api: ApiService) {}
 
   getDistributors(): Observable<Distributor[]> {
-    return this.http.get<Distributor[]>(`${this.apiUrl}/distributors`);
+    return this.api.get<Distributor[]>(`admin/distributors`);
   }
 
   getDistributor(id: string): Observable<Distributor> {
-    return this.http.get<Distributor>(`${this.apiUrl}/distributors/${id}`);
+    return this.api.get<Distributor>(`admin/distributors/${id}`);
   }
 
   addDistributor(distributor: Distributor): Observable<any> {
-    return this.http.post(`${this.apiUrl}/distributors`, distributor,{ responseType: 'text' });
+    return this.api.post(`admin/distributors`, distributor, {
+      responseType: 'text',
+    });
   }
 
   updateDistributor(id: string, distributor: Distributor): Observable<any> {
-    return this.http.put(`${this.apiUrl}/distributors/${id}`, distributor,{ responseType: 'text' });
+    return this.api.put(`admin/distributors/${id}`, distributor, {
+      responseType: 'text',
+    });
   }
 
   deactivateDistributor(id: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/distributors/${id}/deactivate`, {},{ responseType: 'text' });
+    return this.api.put(
+      `admin/distributors/${id}/deactivate`,
+      {},
+      { responseType: 'text' }
+    );
   }
 
   reactivateDistributor(id: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/distributors/${id}/reactivate`, {},{ responseType: 'text' });
+    return this.api.put(
+      `admin/distributors/${id}/reactivate`,
+      {},
+      { responseType: 'text' }
+    );
   }
-   setPremium(id: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/distributors/${id}/set-premium`, {});
+  setPremium(id: string): Observable<any> {
+    return this.api.put(`admin/distributors/${id}/set-premium`, {});
   }
 
   removePremium(id: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/distributors/${id}/remove-premium`, {});
+    return this.api.put(
+      `admin/distributors/${id}/remove-premium`,
+      {}
+    );
   }
 
   deleteDistributor(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/distributors/${id}`,{});
+    return this.api.delete(`admin/distributors/${id}`, {});
   }
 }

@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 export interface Product {
   productId?: string;
   productName: string;
@@ -33,35 +34,37 @@ export interface Category {
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = 'https://localhost:7189/api/products'; // Change if needed
+  
+   private readonly endpoint = 'products';
+  constructor(private api: ApiService) {}
 
-  constructor(private http: HttpClient) {}
-
-  getAll(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.apiUrl);
+   getAll(): Observable<Product[]> {
+    return this.api.get<Product[]>(this.endpoint);
   }
 
   getById(id: string): Observable<Product> {
-    return this.http.get<Product>(`${this.apiUrl}/${id}`);
+    return this.api.get<Product>(`${this.endpoint}/${id}`);
   }
 
-  create(formData: FormData) {
-  return this.http.post<Product>(this.apiUrl, formData); // DO NOT set Content-Type manually
-}
+  create(formData: FormData): Observable<Product> {
+    // ✅ FormData automatically sets correct headers
+    return this.api.post<Product>(this.endpoint, formData);
+  }
 
-update(id: string, formData: FormData) {
-  return this.http.put<void>(`${this.apiUrl}/${id}`, formData); // DO NOT set Content-Type manually
-}
+  update(id: string, formData: FormData): Observable<void> {
+    return this.api.put<void>(`${this.endpoint}/${id}`, formData);
+  }
+
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
-  
-   getCategoriesByDistributor(distributorId: string): Observable<string[]> {
-  return this.http.get<string[]>(`${this.apiUrl}/distributor/${distributorId}/categories`);
-}
-    // ✅ Get products for a distributor (NEW)
+
+  getCategoriesByDistributor(distributorId: string): Observable<string[]> {
+    return this.api.get<string[]>(`${this.endpoint}/distributor/${distributorId}/categories`);
+  }
+
   getProductsByDistributor(distributorId: string): Observable<Product[]> {
-    return this.http.get<Product[]>(`${this.apiUrl}/distributor/${distributorId}`);
+    return this.api.get<Product[]>(`${this.endpoint}/distributor/${distributorId}`);
   }
 
 }

@@ -1,23 +1,21 @@
 import { Injectable } from '@angular/core';
-
 import { Observable, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Customer, CustomerLoginRequest, CustomerLoginResponse, CustomerRegisterRequest } from '../models/customer.model';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
-    private apiUrl = 'https://localhost:7189/api/customers';
-
-  constructor(private http: HttpClient) {}
+  constructor(private api: ApiService) {}
 
   register(request: CustomerRegisterRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, request);
+    return this.api.post(`customers/register`, request);
   }
 
   login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
-    return this.http.post<CustomerLoginResponse>(`${this.apiUrl}/login`, request).pipe(
+    return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
           tap(res => {
             if (res.token || res.token) {
               localStorage.setItem('token', res.token || res.token);
@@ -37,11 +35,11 @@ export class CustomerService {
       Authorization: `Bearer ${token}`
     });
 
-    return this.http.post(`${this.apiUrl}/create-by-distributor`, customer, { headers });
+    return this.api.post(`customers/create-by-distributor`, customer, { headers });
   }
 
   setPassword(request: CustomerLoginRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/set-password`, request);
+    return this.api.post(`customers/set-password`, request);
   }
     getRole(): string | null {
     return localStorage.getItem('role');
@@ -51,7 +49,7 @@ export class CustomerService {
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
 
-  return this.http.get<Customer[]>(`${this.apiUrl}/my-customers`, { headers });
+  return this.api.get<Customer[]>(`customers/my-customers`, { headers });
 }
 
 }

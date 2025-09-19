@@ -1,41 +1,31 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
-  private apiUrl = 'https://localhost:7189/api/auth';
   private authStatus = new BehaviorSubject<boolean>(this.isLoggedIn());
-
-  constructor(private http: HttpClient) {}
+ constructor(private api: ApiService) {}
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
+    return this.api.post<any>(`auth/login`, { email, password }).pipe(
       tap(res => {
         if (res.token || res.tokenc) {
           localStorage.setItem('token', res.token || res.tokenc);
           localStorage.setItem('role', res.role);
-           // Decode JWT to get DistributorId
-    // const decoded: any = jwt_decode(res.token);
-    // console.log('Decoded JWT:', decoded);
-    //  const distributorId = decoded.DistributorId; // ✅ get distributorId
-    // localStorage.setItem('distributorId', distributorId);
-    //  console.log('DistributorId stored:', distributorId);
             if (res.distributorId) {
-    localStorage.setItem('DistributorId', res.distributorId); // ✅ now saved
+    localStorage.setItem('DistributorId', res.distributorId); 
   }
         }
-       
-      
       })
     );
   }
 
   signup(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signup`, { email, password });
+    return this.api.post(`auth/signup`, { email, password });
   }
 
   logout(): void {
@@ -65,15 +55,15 @@ export class AuthService {
     return this.authStatus.asObservable();
   }
   forgotPassword(email: string) {
-  return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
+  return this.api.post(`auth/forgot-password`, { email });
 }
 
 verifyOtp(email: string, otp: string) {
-  return this.http.post(`${this.apiUrl}/auth/verify-otp`, { email, otp });
+  return this.api.post(`auth/verify-otp`, { email, otp });
 }
 
 resetPassword(email: string, otp: string, newPassword: string) {
-  return this.http.post(`${this.apiUrl}/auth/reset-password`, { email, otp, newPassword });
+  return this.api.post(`auth/reset-password`, { email, otp, newPassword });
 }
 
   // ✅ NEW METHOD
@@ -83,7 +73,5 @@ resetPassword(email: string, otp: string, newPassword: string) {
   }
   
 }
-function jwt_decode(token: any): any {
-  throw new Error('Function not implemented.');
-}
+
 

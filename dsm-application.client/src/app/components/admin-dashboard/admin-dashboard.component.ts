@@ -65,7 +65,6 @@ premiumDistributors = 0;
   loadDistributors(): void {
     this.adminService.getDistributors().subscribe({
       next: res => {
-        debugger
         this.distributors = res;
         this.filteredDistributors = res;
 

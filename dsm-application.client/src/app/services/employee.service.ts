@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 export interface Employee {
   employeeId?: string;
   distributorId: string;
@@ -13,34 +14,43 @@ export interface Employee {
   isActive: boolean;
 }
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EmployeeService {
-   private baseUrl = 'https://localhost:7189/api/employees'; // matches ASP.NET controller route
-
-  constructor(private http: HttpClient) {}
+  constructor(private api: ApiService) {}
 
   getEmployees(distributorId: string): Observable<Employee[]> {
-    return this.http.get<Employee[]>(`${this.baseUrl}/${distributorId}`);
+    // ✅ no baseUrl, no http, just endpoint
+    return this.api.get<Employee[]>(`employees/${distributorId}`);
   }
 
   addEmployee(distributorId: string, emp: Employee): Observable<Employee> {
-    return this.http.post<Employee>(`${this.baseUrl}/${distributorId}`, emp);
+    return this.api.post<Employee>(`employees/${distributorId}`, emp);
   }
 
-  updateEmployee(distributorId: string, employeeId: string, emp: Employee): Observable<Employee> {
-    return this.http.put<Employee>(`${this.baseUrl}/${distributorId}/${employeeId}`, emp);
+  updateEmployee(
+    distributorId: string,
+    employeeId: string,
+    emp: Employee
+  ): Observable<Employee> {
+    return this.api.put<Employee>(
+      `employees/${distributorId}/${employeeId}`,
+      emp
+    );
   }
 
   deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${distributorId}/${employeeId}`);
+    return this.api.delete<any>(`employees/${distributorId}/${employeeId}`);
   }
 
-  toggleActive(distributorId: string, employeeId: string): Observable<Employee> {
-    return this.http.patch<Employee>(`${this.baseUrl}/toggle/${distributorId}/${employeeId}`, {});
+  toggleActive(
+    distributorId: string,
+    employeeId: string
+  ): Observable<Employee> {
+    return this.api.patch<Employee>(
+      `employees/toggle/${distributorId}/${employeeId}`,
+      {}
+    );
   }
-
- 
 }

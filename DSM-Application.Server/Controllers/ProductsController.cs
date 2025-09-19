@@ -154,5 +154,23 @@ namespace DSM_Application.Server.Controllers
             await _productService.DeleteAsync(id);
             return NoContent();
         }
+        // ✅ NEW ENDPOINT - Get Products by DistributorId
+        [HttpGet("distributor/{distributorId}")]
+        public async Task<IActionResult> GetProductsByDistributor(string distributorId)
+        {
+            try
+            {
+                var products = await _productService.GetProductsByDistributorAsync(distributorId);
+
+                if (products == null || !products.Any())
+                    return NotFound(new { message = "No products found for this distributor." });
+
+                return Ok(products);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error fetching products", error = ex.Message });
+            }
+        }
     }
 }

@@ -24,7 +24,8 @@ namespace DistributorManagementSystem.Server.Services
                 new Claim(ClaimTypes.Name, user.Username ?? user.Email),
                 new Claim(ClaimTypes.Role, user.Role ?? "User"),
                 new Claim("UserId", user.Id ?? string.Empty),
-                new Claim("DistributorId", user.DistributorId ?? string.Empty)
+                new Claim("DistributorId", user.DistributorId ?? string.Empty),
+              
             };
 
             return BuildToken(claims);
@@ -38,7 +39,7 @@ namespace DistributorManagementSystem.Server.Services
                 new Claim(ClaimTypes.Name, customer.Email),
                 new Claim(ClaimTypes.Role, "Customer"),
                 new Claim("CustomerId", customer.CustomerId),
-                    new Claim(ClaimTypes.Role, "Distributor")
+                    //new Claim(ClaimTypes.Role, "Distributor")
             };
 
             return BuildToken(claims);

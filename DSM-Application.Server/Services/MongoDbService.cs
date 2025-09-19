@@ -2,6 +2,7 @@
 using DSM_Application.Server.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using System.Diagnostics.Metrics;
 
 namespace DistributorManagementSystem.Server.Services
 {
@@ -20,6 +21,10 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<Product> Products => _db.GetCollection<Product>("Products");
         public IMongoCollection<Customer> Customers => _db.GetCollection<Customer>("Customers");
         public IMongoCollection<Employee> Employees => _db.GetCollection<Employee>("Employees");
+        //public IMongoCollection<Counter> Counters => _db.GetCollection<Counter>("Counters");
+        // ✅ Add this for connections
+        public IMongoCollection<CustomerDistributorConnection> Connections =>
+            _db.GetCollection<CustomerDistributorConnection>("Connections");
     }
 
     public class MongoDbSettings

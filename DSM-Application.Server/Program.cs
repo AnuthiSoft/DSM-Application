@@ -1,5 +1,6 @@
 using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
+using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -35,26 +36,34 @@ builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:58555") // your Angular frontend URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+        policy => policy
+            .WithOrigins("http://localhost:58555") // Angular URL
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = null; // preserves property names
+});
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<ProductService>();
+builder.Services.AddSingleton<EmployeeService>();
+//builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
+builder.Services.AddSingleton<EmailService>();
+
 builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
+app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();

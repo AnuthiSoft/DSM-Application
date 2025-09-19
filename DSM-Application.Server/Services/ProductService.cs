@@ -69,5 +69,11 @@ namespace DSM_Application.Server.Services
 
             return distributor.Categories;
         }
+        public async Task<List<Product>> GetProductsByDistributorAsync(string distributorId)
+        {
+            return await _products
+                .Find(p => p.DistributorId == distributorId)
+                .ToListAsync();
+        }
     }
 }

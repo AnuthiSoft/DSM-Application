@@ -22,5 +22,6 @@ namespace DistributorManagementSystem.Server.Models
         [BsonElement("Categories")]
         public List<string> Categories { get; set; } = new List<string>();
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public string? Status { get; set; } // Pending / Accepted / Rejected / null
     }
 }

@@ -124,6 +124,86 @@ namespace DSM_Application.Server.Controllers
             await _db.Customers.UpdateOneAsync(c => c.CustomerId == customer.CustomerId, update);
             return Ok("Password created successfully. You can now login.");
         }
+        //[Authorize(Roles = "Customer")]
+        [HttpGet("dashboard/{customerId}")]
+        public async Task<IActionResult> GetCustomerDashboard(string customerId)
+        {
+            var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+            if (customer == null) return NotFound("Customer not found");
+            // Collection of connections
+    var connections = await _db.Connections
+        .Find(c => c.CustomerId == customerId)
+        .ToListAsync();
+            // If AddedByDistributorId is null => global customer => show all distributors
+            if (string.IsNullOrEmpty(customer.AddedByDistributorId))
+            {
+                var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
+                // Add connection status for each distributor
+                foreach (var dist in allDistributors)
+                {
+                    var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+                    dist.Status = conn?.Status.ToString(); // Pending / Accepted / Rejected / null
+                }
+                return Ok(new
+                {
+                    isGlobal = true,
+                    distributors = allDistributors
+                });
+            }
+            else
+            {
+                // Distributor-specific customer => return that distributor and products
+                var distributor = await _productService.GetDistributorByIdAsync(customer.AddedByDistributorId);
+                if (distributor == null)
+                    return NotFound("Distributor not found");
+
+                // Check if connection exists for this distributor (for global customers who later connect)
+                var connection = connections.FirstOrDefault(c => c.DistributorId == distributor.DistributorId);
+
+                List<Product> products = new();
+                if (connection == null || connection.Status == ConnectionStatus.Accepted)
+                {
+                    products = await _productService.GetProductsByDistributorAsync(distributor.DistributorId);
+                }
+
+
+                return Ok(new
+                {
+                    isGlobal = false,
+                    distributor,
+                    products
+                });
+            }
+        }
+        //[Authorize(Roles = "Customer")]
+        [HttpPost("connect-distributor")]
+        public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
+        {
+            // Validate customer
+            var customer = await _db.Customers.Find(c => c.CustomerId == request.CustomerId).FirstOrDefaultAsync();
+            if (customer == null) return NotFound("Customer not found");
+
+            // Optionally check if already connected
+            var existing = await _db.Connections.Find(c => c.CustomerId == request.CustomerId && c.DistributorId == request.DistributorId).FirstOrDefaultAsync();
+            if (existing != null) return BadRequest("Already connected");
+
+            // Save connection
+            var newConnection = new CustomerDistributorConnection
+            {
+                CustomerId = request.CustomerId,
+                DistributorId = request.DistributorId,
+                ConnectedOn = DateTime.UtcNow
+            };
+            await _db.Connections.InsertOneAsync(newConnection);
+
+            return Ok("Connection request sent successfully");
+        }
+
+        public class ConnectRequest
+        {
+            public string CustomerId { get; set; }
+            public string DistributorId { get; set; }
+        }
 
         private string ComputeHash(string input)
         {
@@ -131,40 +211,6 @@ namespace DSM_Application.Server.Controllers
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
         }
-        [HttpGet("dashboard")]
-        [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> GetDashboard()
-        {
-            var customerId = User.FindFirst("CustomerId")?.Value;
-            if (customerId == null) return Unauthorized();
-
-            var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
-            if (customer == null) return NotFound();
-
-            var distributors = await _db.Distributors.Find(_ => true).ToListAsync();
-            var result = new List<DistributorDashboardDto>();
-
-            foreach (var d in distributors)
-            {
-                var dto = new DistributorDashboardDto
-                {
-                    DistributorId = d.DistributorId,
-                    CompanyName = d.CompanyName,
-                    Email = d.Email,
-                    PhoneNumber = d.PhoneNumber,
-                    IsPremium = d.IsPremium
-                };
-
-                // If the customer is added by this distributor, include products
-                if (!string.IsNullOrEmpty(customer.AddedByDistributorId) && customer.AddedByDistributorId == d.DistributorId)
-                {
-                    dto.Products = await _db.Products.Find(p => p.DistributorId == d.DistributorId && p.IsActive).ToListAsync();
-                }
-
-                result.Add(dto);
-            }
-
-            return Ok(result);
-        }
+       
     }
 }

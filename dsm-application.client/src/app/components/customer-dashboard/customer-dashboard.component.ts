@@ -6,27 +6,50 @@ import { HttpClient } from '@angular/common/http';
 
 
 interface Distributor {
-  distributorId: string;
-  companyName: string;
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  isPremium?: boolean;
-  status:string;
+  DistributorId: string;
+  CompanyName: string;
+  Name?: string;
+  Email?: string;
+  PhoneNumber?: string;
+  Status: string;
+  IsPremium?: boolean;
+  IsActive?: boolean;
+  Address?: string;
+  Categories?: string[];
+  CreatedDate?: string;
+  
+
 }
 
 interface Product {
-  productId: string;
-  productName: string;
-  productCode?: string;
-  distributorId: string;
+  ProductId: string;
+  ProductName: string;
+  ProductCode?: string;
+  DistributorId: string;
+  CategoryId?: string | null;
+  Price?: string;
+  Stock?: string;
+  Brand?: string;
+  ImageUrl?: string;
+  Category?: string;
+  
+
+  
+               
+}
+interface DistributorWrapper {
+  distributor: Distributor;
+  products?: Product[];
 }
 
 interface DashboardResponse {
   isGlobal: boolean;
-  distributors?: Distributor[];
-  distributor?: Distributor;
-  products?: Product[];
+  distributors: {
+    distributor: Distributor;
+    products: Product[];
+  }[];
+   distributor?: Distributor;  // 👈 Add this
+  products?: Product[];       // 👈 Add this
 }
 @Component({
   selector: 'app-customer-dashboard',
@@ -46,12 +69,22 @@ export class CustomerDashboardComponent {
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
       this.customerId = localStorage.getItem('customerId') || '';
-    if (!this.customerId) {
-      alert('No customer logged in!');
-      this.router.navigate(['/customer/login']);
-      return;
-    }
-    this.loadDashboard();
+    // if (!this.customerId) {
+    //   alert('No customer logged in!');
+    //   this.router.navigate(['/customer/login']);
+    //   return;
+    // }
+       if (!this.customerId) {
+    console.error('No customerId found in localStorage');
+    // Optionally redirect to login:
+    // this.router.navigate(['/customer/login']);
+    return;
+  }
+  
+ 
+  this.loadDashboard();
+
+  
   
   }
    loadDashboard() {
@@ -71,7 +104,7 @@ export class CustomerDashboardComponent {
   connectDistributor(distributor: Distributor) {
   const body = {
     customerId: this.customerId,
-    distributorId: distributor.distributorId
+    distributorId: distributor.DistributorId
   };
 
   this.http.post('https://localhost:7189/api/customers/connect-distributor', body)

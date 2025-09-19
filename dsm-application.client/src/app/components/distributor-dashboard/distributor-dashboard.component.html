@@ -99,6 +99,26 @@
     
 
     <!-- Customers Tab -->
-   
+    <!-- Customer Requests Tab -->
+    <div *ngIf="activeTab === 'orders'" class="container mt-4">
+      <h4>Pending Connection Requests</h4>
+      <div *ngIf="pendingRequests.length === 0">No pending requests.</div>
+<!--  -->
+      <div class="list-group">
+        <div class="list-group-item mb-2" *ngFor="let req of pendingRequests">
+
+          <!-- <strong>Customer ID:</strong> {{ req.customerId }} <br> -->
+          <strong>Name:</strong> {{ req.Name }} <br>
+          <strong>Email:</strong> {{ req.Email }} <br>
+          <strong>Phone:</strong> {{ req.PhoneNumber }} <br>
+          <!-- <strong>Status:</strong> {{ req.status }} <br> -->
+          <strong>RequestedOn :</strong> {{ req.ConnectedOn | date }}
+          <div class="mt-2">
+            <button class="btn btn-success btn-sm me-2" (click)="respond(req, true)">Accept</button>
+            <button class="btn btn-danger btn-sm" (click)="respond(req, false)">Reject</button>
+          </div>
+        </div>
+      </div>
   </div>
-</div>
+    </div>
+  </div>

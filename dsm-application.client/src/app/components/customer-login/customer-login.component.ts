@@ -37,9 +37,9 @@ export class CustomerLoginComponent {
         // ✅ Save new auth data
         localStorage.setItem('token', res.token);
         localStorage.setItem('role', res.role);
-        if (res.customer?.customerId) {
-          localStorage.setItem('customerId', res.customer.customerId);
-        }
+       
+          localStorage.setItem('customerId', res.customerId);
+      
 
         this.message = "✅ Login successful!";
 

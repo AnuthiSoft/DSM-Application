@@ -13,6 +13,7 @@ import { CustomerLoginRequest } from '../../models/customer.model';
 export class CustomerLoginComponent {
  request: CustomerLoginRequest = { email: '', password: '' };
   message = '';
+   showPassword = false; 
 
   constructor(
     private customerService: CustomerService,
@@ -20,6 +21,10 @@ export class CustomerLoginComponent {
     private router: Router,
     private ngZone: NgZone
   ) {}
+
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   login() {
     this.customerService.login(this.request).subscribe({

@@ -15,7 +15,6 @@
   <div class="login-container">
     <div class="container">
       <div class="row justify-content-center align-items-center">
-        
         <!-- Login Card -->
         <div class="col-md-6">
           <div class="login-card">
@@ -46,20 +45,23 @@
                     <input
                       [(ngModel)]="password"
                       name="password"
-                      [type]="showPassword ? 'text' : 'password'" 
+                      [type]="showPassword ? 'text' : 'password'"
                       class="form-control"
                       id="password"
                       placeholder="Enter your password"
                       required
                     />
                     <span class="password-toggle" (click)="togglePassword()">
-                      <i class="far" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                      <i
+                        class="far"
+                        [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+                      ></i>
                     </span>
                   </div>
                 </div>
                 <div class="mb-3 d-flex justify-content-between">
                   <a routerLink="/distributor-signup">Sign Up ?</a>
-                  <a href="#">Forgot Password?</a>
+                  <a routerLink="/forgot-password">Forgot Password?</a>
                 </div>
                 <button type="submit" class="btn btn-login">
                   Login to Dashboard
@@ -89,7 +91,9 @@
               <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
               <div>
                 <h5>Sales Analytics</h5>
-                <p class="text-muted mb-0">Track performance with real-time analytics</p>
+                <p class="text-muted mb-0">
+                  Track performance with real-time analytics
+                </p>
               </div>
             </div>
 
@@ -97,15 +101,21 @@
               <div class="feature-icon"><i class="fas fa-boxes"></i></div>
               <div>
                 <h5>Inventory Management</h5>
-                <p class="text-muted mb-0">Manage stock levels and product availability</p>
+                <p class="text-muted mb-0">
+                  Manage stock levels and product availability
+                </p>
               </div>
             </div>
 
             <div class="feature-item">
-              <div class="feature-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+              <div class="feature-icon">
+                <i class="fas fa-file-invoice-dollar"></i>
+              </div>
               <div>
                 <h5>Order Processing</h5>
-                <p class="text-muted mb-0">Process and track orders efficiently</p>
+                <p class="text-muted mb-0">
+                  Process and track orders efficiently
+                </p>
               </div>
             </div>
 
@@ -113,7 +123,9 @@
               <div class="feature-icon"><i class="fas fa-users"></i></div>
               <div>
                 <h5>Customer Management</h5>
-                <p class="text-muted mb-0">Manage your customer relationships</p>
+                <p class="text-muted mb-0">
+                  Manage your customer relationships
+                </p>
               </div>
             </div>
 
@@ -121,7 +133,9 @@
               <div class="feature-icon"><i class="fas fa-percentage"></i></div>
               <div>
                 <h5>Commission Tracking</h5>
-                <p class="text-muted mb-0">Monitor your earnings and commissions</p>
+                <p class="text-muted mb-0">
+                  Monitor your earnings and commissions
+                </p>
               </div>
             </div>
           </div>

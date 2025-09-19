@@ -1,9 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from './services/auth.service';
-import { Router } from '@angular/router';
-
-
+import { ThemeService } from './shared/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -11,14 +7,10 @@ import { Router } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent  {
-  constructor(public auth: AuthService, private router: Router) {}
-  ngOnInit(): void {
-  
-  }
+  constructor(private themeService: ThemeService) {}
 
-  logout(): void {
-    this.auth.logout();
-    this.router.navigate(['/login']);
+  toggleTheme() {
+    this.themeService.toggleTheme();
   }
   title = 'distributormanagementsystem.client';
 

@@ -4,12 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule,ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-
-
 import { AuthInterceptor } from './services/auth.interceptor';
-
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { AdminComponent } from './components/admin/admin.component';
 import { ProductsComponent } from './components/products/products.component';
 import { CustomerRegisterComponent } from './components/customer-register/customer-register.component';
 import { CustomerLoginComponent } from './components/customer-login/customer-login.component';
@@ -21,16 +16,16 @@ import { EmployeeDashboardComponent } from './components/employee-dashboard/empl
 import { MainPageComponent } from './components/main-page/main-page.component';
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
 import { DistributorSignupComponent } from './components/distributor-signup/distributor-signup.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { EmployeesComponent } from './components/employees/employees.component';
+import { SetPasswordComponent } from './components/set-password/set-password.component';
+
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    
-    
-    DashboardComponent,
-    AdminComponent,
     ProductsComponent,
     CustomerRegisterComponent,
     CustomerLoginComponent,
@@ -42,7 +37,10 @@ import { DistributorSignupComponent } from './components/distributor-signup/dist
     MainPageComponent,
     DistributorLoginComponent,
     DistributorSignupComponent,
-   
+    ForgotPasswordComponent,
+    EmployeesComponent,
+    SetPasswordComponent,
+
   ],
   imports: [
     BrowserModule, HttpClientModule,

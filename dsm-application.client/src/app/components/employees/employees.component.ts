@@ -6,42 +6,50 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-employees',
   templateUrl: './employees.component.html',
-  styleUrl: './employees.component.css'
+  styleUrls: ['./employees.component.css']
 })
 export class EmployeesComponent {
-   employees: Employee[] = [];
+  employees: Employee[] = [];
+  filteredEmployees: Employee[] = [];   // ✅ for search/filter results
   employeeForm!: FormGroup;
-  distributorId = ''; // ✅ replace with actual logged-in distributorId
+  distributorId = '';
   selectedEmployee: Employee | null = null;
   isEdit = false;
   loading = false;
 
+  // filters
+  searchTerm = '';
+  roleFilter = '';
+  statusFilter = '';
+
   constructor(
-    private employeeService: EmployeeService,private auth: AuthService,
+    private employeeService: EmployeeService,
+    private auth: AuthService,
     private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
-      this.distributorId = this.auth.getDistributorId();
+    this.distributorId = this.auth.getDistributorId();
+
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', Validators.required],
       role: ['Employee', Validators.required],
-      designation: ['Employee', Validators.required],
-      
+      designation: ['', Validators.required],
       isActive: [true],
-       
     });
 
     this.loadEmployees();
   }
 
+  // ✅ Load all employees
   loadEmployees() {
     this.loading = true;
     this.employeeService.getEmployees(this.distributorId).subscribe({
       next: (data) => {
         this.employees = data;
+        this.filteredEmployees = [...this.employees];
         this.loading = false;
       },
       error: (err) => {
@@ -51,10 +59,15 @@ export class EmployeesComponent {
     });
   }
 
+  // ✅ Add / Update employee
   onSubmit() {
     if (this.employeeForm.invalid) return;
 
-    const emp: Employee = { ...this.employeeForm.value, distributorId: this.distributorId, isRegistered: true };
+    const emp: Employee = {
+      ...this.employeeForm.value,
+      distributorId: this.distributorId,
+      isRegistered: true
+    };
 
     if (this.isEdit && this.selectedEmployee?.employeeId) {
       this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
@@ -73,20 +86,22 @@ export class EmployeesComponent {
     }
   }
 
+  // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
     this.isEdit = true;
     this.selectedEmployee = emp;
     this.employeeForm.patchValue(emp);
   }
 
+  // ✅ Delete employee
   deleteEmployee(emp: Employee) {
     if (!confirm(`Delete ${emp.name}?`)) return;
-
     this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
       next: () => this.loadEmployees()
     });
   }
 
+  // ✅ Toggle active/inactive
   toggleActive(emp: Employee) {
     this.employeeService.toggleActive(this.distributorId, emp.employeeId!).subscribe({
       next: (updated) => {
@@ -95,6 +110,25 @@ export class EmployeesComponent {
     });
   }
 
+  // ✅ Search + Filter employees
+  applyFilters() {
+    this.filteredEmployees = this.employees.filter(emp => {
+      const matchesSearch =
+        emp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        emp.email.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const matchesRole = !this.roleFilter || emp.designation === this.roleFilter;
+
+      const matchesStatus =
+        !this.statusFilter ||
+        (this.statusFilter === 'active' && emp.isActive) ||
+        (this.statusFilter === 'inactive' && !emp.isActive);
+
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }
+
+  // ✅ Reset form after submit/edit
   resetForm() {
     this.isEdit = false;
     this.selectedEmployee = null;
@@ -103,9 +137,8 @@ export class EmployeesComponent {
       email: '',
       phoneNumber: '',
       role: 'Employee',
-      designation: 'Employee',
+      designation: '',
       isActive: true
     });
   }
-
 }

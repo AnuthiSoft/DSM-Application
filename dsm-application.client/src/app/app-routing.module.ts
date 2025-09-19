@@ -1,12 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-
 import { AuthGuard } from './guards/auth.guard';
-
-import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { AdminComponent } from './components/admin/admin.component';
-
 import { ProductsComponent } from './components/products/products.component';
 import { CustomerRegisterComponent } from './components/customer-register/customer-register.component';
 import { CustomerLoginComponent } from './components/customer-login/customer-login.component';
@@ -18,14 +13,13 @@ import { EmployeeDashboardComponent } from './components/employee-dashboard/empl
 import { MainPageComponent } from './components/main-page/main-page.component';
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
 import { DistributorSignupComponent } from './components/distributor-signup/distributor-signup.component';
+import { EmployeesComponent } from './components/employees/employees.component';
+import { SetPasswordComponent } from './components/set-password/set-password.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 
 
 
 const routes: Routes = [
- 
-  
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
     { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
      { path: 'customer/register', component: CustomerRegisterComponent },
   { path: 'customer/login', component: CustomerLoginComponent },
@@ -37,12 +31,9 @@ const routes: Routes = [
    {path: 'main-page', component: MainPageComponent},
    {path: 'distributor-login', component: DistributorLoginComponent},
    {path: 'distributor-signup', component: DistributorSignupComponent},
-
-
-
-
-    
- 
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+    { path: 'employees', component: EmployeesComponent },
+    { path: 'set-password', component: SetPasswordComponent },
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

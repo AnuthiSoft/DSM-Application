@@ -1,131 +1,245 @@
-<div class="container mt-3">
-  <h2>Product Management</h2>
-
-  <!-- Product Form -->
-  <form [formGroup]="productForm" (ngSubmit)="submitForm()">
-    <div class="row">
-      <div class="col-md-4 mb-3">
-        <label>Product Name</label>
-        <input type="text" class="form-control" formControlName="productName" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>Product Code</label>
-        <input type="text" class="form-control" formControlName="productCode" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>Unit</label>
-        <input type="text" class="form-control" formControlName="unit" />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-4 mb-3">
-        <label>Price</label>
-        <input type="number" class="form-control" formControlName="price" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>Cost Price</label>
-        <input type="number" class="form-control" formControlName="costPrice" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>Stock</label>
-        <input type="number" class="form-control" formControlName="stock" />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-4 mb-3">
-        <label>Discount (%)</label>
-        <input type="number" class="form-control" formControlName="discount" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>GST (%)</label>
-        <input type="number" class="form-control" formControlName="gst" />
-      </div>
-      <div class="col-md-4 mb-3">
-        <label>Reorder Level</label>
-        <input type="number" class="form-control" formControlName="reorderLevel" />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label>Brand</label>
-        <input type="text" class="form-control" formControlName="brand" />
-      </div>
-      <div class="col-md-4 mb-3">
-  <label>Category</label>
-  <select class="form-control" formControlName="category">
-  <option value="">-- Select Category --</option>
-  <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-</select>
-</div>
-     <div class="col-md-6 mb-3">
-  <label>Product Image</label>
-  <input 
-    type="file" 
-    class="form-control" 
-    (change)="onFileSelected($event)" 
-    #fileInput
-  />
-  <!-- Preview uploaded image -->
-  <img *ngIf="previewUrl" [src]="previewUrl" width="120" height="120" class="mt-2" />
-  
-</div>
-</div>
-
-    <div class="mb-3">
-      <label>Description</label>
-      <textarea class="form-control" formControlName="description"></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-      {{ isEdit ? 'Update' : 'Add' }} Product
+<div class="body">
+<div class="container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2><i class="fas fa-box me-2"></i>Product Management</h2>
+    <button  *ngIf="filteredProducts.length > 0"
+      class="btn btn-primary"
+      (click)="openModal(false)"
+    >
+      <i class="fas fa-plus me-2"></i>Add New Product
     </button>
-    <button type="button" class="btn btn-secondary ms-2" (click)="resetForm()">Reset</button>
-  </form>
+  </div>
 
-  <hr />
+  <!-- Search and Filter Section -->
+  <div class="search-section">
+    <div class="search-box">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search products..."
+        [(ngModel)]="searchTerm"
+        (input)="filterProducts()"
+      />
+    </div>
+    <div class="filter-dropdown">
+      <select
+        class="form-select"
+        [(ngModel)]="categoryFilter"
+        (change)="filterProducts()"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+    <div class="filter-dropdown">
+      <select
+        class="form-select"
+        [(ngModel)]="stockFilter"
+        (change)="filterProducts()"
+      >
+        <option value="">All Stock Status</option>
+        <option value="inStock">In Stock</option>
+        <option value="lowStock">Low Stock</option>
+        <option value="outOfStock">Out of Stock</option>
+      </select>
+    </div>
+  </div>
 
-  <!-- Product List -->
-  <h3>Products</h3>
-  <table class="table table-bordered table-striped">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Code</th>
-        <th>Unit</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Discount</th>
-        <th>GST</th>
-        <th>Brand</th>
-         <th>Category</th>
-         <th>Image</th>
-        <th>Actions</th>
-       
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let p of products">
-        <td>{{ p.productName }}</td>
-        <td>{{ p.productCode }}</td>
-        <td>{{ p.unit }}</td>
-        <td>{{ p.price | currency }}</td>
-        <td>{{ p.stock }}</td>
-        <td>{{ p.discount }}%</td>
-        <td>{{ p.gst }}%</td>
-        <td>{{ p.brand }}</td>
-          <td>{{ p.category }}</td>
-        
-        <td>
-  <img *ngIf="p.imageUrl" [src]="'https://localhost:7189' + p.imageUrl" width="80" />
-</td>
-        <td>
-          <button class="btn btn-sm btn-warning me-2" (click)="editProduct(p)">Edit</button>
-          <button class="btn btn-sm btn-danger" (click)="deleteProduct(p.productId!)">Delete</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- Product Grid -->
+  <div class="product-grid">
+    <div
+      *ngIf="filteredProducts.length === 0"
+      id="emptyState"
+      class="text-center py-5"
+    >
+      <i class="fas fa-box-open fa-3x mb-3" style="color: #d1d5db"></i>
+      <h4>No products found</h4>
+      <p>Try adjusting your search or filter criteria</p>
+      <button
+        class="btn btn-primary mt-2"
+        data-bs-toggle="modal"
+        data-bs-target="#productModal"
+      >
+        <i class="fas fa-plus me-2"></i>Add New Product
+      </button>
+    </div>
+
+    <div *ngFor="let product of filteredProducts" class="product-card">
+      <div class="product-image">
+        <img
+          [src]="'https://localhost:7189' + product.imageUrl"
+          [alt]="product.productName"
+        />
+      </div>
+      <div class="product-info">
+        <div class="product-header">
+        <h3 class="product-title">{{ product.productName }}</h3>
+        <div class="product-category">{{ product.category }}</div>
+        </div>
+        <div class="product-price">{{ product.price | currency }}</div>
+
+        <div class="product-details">
+          <div class="product-meta">
+            <span>Code: {{ product.productCode }}</span>
+            <span
+              class="stock-status"
+              [ngClass]="getStockStatus(product.stock).class"
+            >
+              {{ getStockStatus(product.stock).text }}
+            </span>
+          </div>
+          <div class="product-meta">
+            <span>Stock: {{ product.stock }} {{ product.unit }}</span>
+            <span>GST: {{ product.gst }}%</span>
+          </div>
+        </div>
+
+        <div class="product-actions">
+          <button class="btn btn-primary btn-sm" (click)="openModal(true, product)">
+            <i class="fas fa-edit me-1"></i>Edit
+          </button>
+          <button
+            class="btn btn-danger btn-sm"
+            (click)="deleteProduct(product.productId!)"
+          >
+            <i class="fas fa-trash me-1"></i>Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">
+          {{ isEdit ? "Edit Product" : "Add New Product" }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="productForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Product Name</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="productName"
+              />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Product Code</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="productCode"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Price ($)</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="price"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Cost Price ($)</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="costPrice"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Stock</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="stock"
+              />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Discount (%)</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="discount"
+              />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">GST (%)</label>
+              <input type="number" class="form-control" formControlName="gst" />
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Category</label>
+              <select class="form-select" formControlName="category">
+                <option value="">Select Category</option>
+                <option *ngFor="let c of categories" [value]="c">
+                  {{ c }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Brand</label>
+              <input type="text" class="form-control" formControlName="brand" />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Unit</label>
+              <input type="text" class="form-control" formControlName="unit" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Product Image</label>
+            <input
+              type="file"
+              class="form-control"
+              (change)="onFileSelected($event)"
+              #fileInput
+            />
+            <div *ngIf="previewUrl" class="mt-2">
+              <img [src]="previewUrl" class="image-preview" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea
+              class="form-control"
+              formControlName="description"
+              rows="3"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary " (click)="submitForm()">
+          {{ isEdit ? "Update" : "Save" }} Product
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>

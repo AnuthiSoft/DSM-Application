@@ -45,13 +45,14 @@
   <!-- Customer List Table -->
   <table class="customer-table" *ngIf="customers.length > 0">
     <thead>
-      <tr>
+      <tr> 
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
         <th>Registered</th>
       </tr>
     </thead>
+
     <tbody>
       <tr *ngFor="let c of customers">
         <td>{{ c.name }}</td>

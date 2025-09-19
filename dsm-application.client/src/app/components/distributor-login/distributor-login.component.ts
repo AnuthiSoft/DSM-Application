@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-distributor-login',
   templateUrl: './distributor-login.component.html',
-  styleUrl: './distributor-login.component.css'
+  styleUrl: './distributor-login.component.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class DistributorLoginComponent {
    email = '';

@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Category, Product, ProductService } from '../../services/product.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import * as bootstrap from 'bootstrap';
 
 
 @Component({
@@ -9,165 +10,186 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrl: './products.component.css'
 })
 export class ProductsComponent {
-    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
-   products: Product[] = [];
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
+  products: Product[] = [];
+  filteredProducts: Product[] = [];
+
   productForm: FormGroup;
   isEdit = false;
   selectedProductId: string | null = null;
-selectedFile?: File;
-previewUrl: string | ArrayBuffer | null = null;
-//  categories: Category[] = [];
+
+  selectedFile?: File;
+  previewUrl: string | ArrayBuffer | null = null;
+
   categories: any[] = [];
-  currentDistributorId: string = ''; // <-- replace with actual distributor ID
+  searchTerm = '';
+  categoryFilter = '';
+  stockFilter = '';
 
+  modalRef: any;
 
-
-  constructor(private productService: ProductService,private fb: FormBuilder) {
+  constructor(private productService: ProductService, private fb: FormBuilder) {
     this.productForm = this.fb.group({
-  productName: ['', Validators.required],
-  productCode: ['', Validators.required],
-   category: ['', Validators.required], // ← must match backend DTO
-  description: [''],
-  unit: ['', Validators.required],
-  price: [0, [Validators.required, Validators.min(0)]],
-  costPrice: [0, [Validators.required, Validators.min(0)]],
-  discount: [0, [Validators.min(0)]],
-  gst: [0, [Validators.min(0)]],
-  stock: [0, [Validators.min(0)]],
-  reorderLevel: [0, [Validators.min(0)]],
-  brand: [''],
-  imageUrl: [''],
-});
+      productName: ['', Validators.required],
+      productCode: ['', Validators.required],
+      category: ['', Validators.required],
+      description: [''],
+      unit: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      costPrice: [0, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.min(0)]],
+      gst: [0, [Validators.min(0)]],
+      stock: [0, [Validators.min(0)]],
+      reorderLevel: [0, [Validators.min(0)]],
+      brand: [''],
+      imageUrl: [''],
+    });
   }
 
   ngOnInit(): void {
     this.loadProducts();
-   const distributorId = localStorage.getItem('DistributorId');
-  if (distributorId) {
-    this.productService.getCategoriesByDistributor(distributorId).subscribe({
-      next: data => this.categories = data, // data is ["Clothing", "Electronics", "Furniture"]
-      error: err => console.error(err)
-    });
+    const distributorId = localStorage.getItem('DistributorId');
+    if (distributorId) {
+      this.productService.getCategoriesByDistributor(distributorId).subscribe({
+        next: data => this.categories = data,
+        error: err => console.error(err)
+      });
+    }
   }
-     
-
-
-  }
-  
 
   loadProducts() {
     this.productService.getAll().subscribe(data => {
       this.products = data;
+       this.filteredProducts = [...data];
     });
   }
 
-// submitForm() {
-//   const product = this.productForm.value;
-//   const formData = new FormData();
+  filterProducts() {
+    this.filteredProducts = this.products.filter(p => {
+      const matchesSearch = p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            p.productCode.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
+debugger
+      let matchesStock = true;
+      if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
+      else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
+      else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
 
-//   Object.keys(product).forEach(key => {
-//     const value = product[key as keyof Product];
-//     if (value !== null && value !== undefined) {
-//       formData.append(key, value.toString());
-//     }
-//   });
+      return matchesSearch && matchesCategory && matchesStock;
+    });
+  }
 
-//   if (this.selectedFile) {
-//     formData.append('Image', this.selectedFile, this.selectedFile.name);
-//   }
+  getStockStatus(stock: number) {
+    if (stock > 10) return { class: 'in-stock', text: 'In Stock' };
+    if (stock > 0) return { class: 'low-stock', text: 'Low Stock' };
+    return { class: 'out-of-stock', text: 'Out of Stock' };
+  }
 
-//   if (this.isEdit && this.selectedProductId) {
-//     this.productService.update(this.selectedProductId, formData).subscribe(() => {
-//       this.loadProducts();
-//       this.resetForm();
-//     });
-//   } else {
-//     this.productService.create(formData).subscribe(() => {
-//       this.loadProducts();
-//       this.resetForm();
-//     });
-//   }
-// }
-submitForm() {
-  const product = this.productForm.value;
-  const formData = new FormData();
+  submitForm() {
+    const product = this.productForm.value;
+    const formData = new FormData();
 
-  // Append all other fields
-  Object.keys(product).forEach(key => {
-    const value = product[key as keyof Product];
-    if (value !== null && value !== undefined) {
-      formData.append(key, value.toString());
+    Object.keys(product).forEach(key => {
+      const value = product[key as keyof Product];
+      if (value !== null && value !== undefined) {
+        formData.append(key, value.toString());
+      }
+    });
+
+    const distributorId = localStorage.getItem('DistributorId');
+    if (distributorId) {
+      formData.append('DistributorId', distributorId);
     }
-  });
 
-  // ✅ Append category explicitly
-  formData.append('Category', this.productForm.value.category);
+    if (this.selectedFile) {
+      formData.append('Image', this.selectedFile, this.selectedFile.name);
+    }
 
-  // Append DistributorId
-  const distributorId = localStorage.getItem('DistributorId');
-  if (distributorId) {
-    formData.append('DistributorId', distributorId);
+    if (this.isEdit && this.selectedProductId) {
+      this.productService.update(this.selectedProductId, formData).subscribe(() => {
+        this.loadProducts();
+        this.resetForm();
+        this.modalRef.hide();
+      });
+    } else {
+      this.productService.create(formData).subscribe(() => {
+        this.loadProducts();
+        
+        this.resetForm();
+         this.modalRef.hide();
+      });
+    }
   }
 
-  // Append file if selected
-  if (this.selectedFile) {
-    formData.append('Image', this.selectedFile, this.selectedFile.name);
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl = reader.result;
+    reader.readAsDataURL(file);
   }
-
-  // Send request
-  if (this.isEdit && this.selectedProductId) {
-    this.productService.update(this.selectedProductId, formData).subscribe(() => {
-      this.loadProducts();
-      this.resetForm();
-    });
-  } else {
-    this.productService.create(formData).subscribe(() => {
-      this.loadProducts();
-      this.resetForm();
-    });
-  }
-}
-
-
-
-onFileSelected(event: any) {
-  const file = event.target.files[0];
-  if (!file) return; // no file selected
-
-  this.selectedFile = file;
-
-  // Preview uploaded image
-  const reader = new FileReader();
-  reader.onload = () => this.previewUrl = reader.result;
-  reader.readAsDataURL(file); // safe, file is not undefined
-}
 
   editProduct(product: Product) {
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
     this.productForm.patchValue(product);
+    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
   }
 
-  deleteProduct(id: string) {
-    if (confirm('Are you sure you want to delete this product?')) {
-      this.productService.delete(id).subscribe(() => {
-        this.loadProducts();
-      });
-    }
+ deleteProduct(id: string) {
+  console.log("Deleting product with id:", id);  
+  if (confirm('Are you sure you want to delete this product?')) {
+    this.productService.delete(id).subscribe({
+      next: () => {
+        console.log("Deleted successfully");
+       this.products = this.products.filter(p => p.productId !== id);
+        this.filteredProducts = this.filteredProducts.filter(p => p.productId !== id);
+      },
+      error: err => {
+        console.error("Delete failed:", err);
+      }
+    });
   }
+}
 
 
   resetForm() {
     this.productForm.reset();
-    this.selectedFile = undefined; 
+    this.selectedFile = undefined;
     this.previewUrl = null;
     this.selectedProductId = null;
     this.isEdit = false;
-
-    // ✅ clear file input too
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
   }
 
+  openModal(isEdit = false, product?: any) {
+  this.isEdit = isEdit;
+  this.previewUrl = null;
+
+  if (isEdit && product) {
+    this.selectedProductId = product.productId;
+    this.productForm.patchValue(product);
+    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
+  } else {
+    this.productForm.reset();
+    this.selectedProductId = null;
+  }
+
+  const modalEl = document.getElementById('productModal');
+  if (modalEl) {
+    this.modalRef = new bootstrap.Modal(modalEl);
+    this.modalRef.show();
+  }
+}
+
+closeModal() {
+  if (this.modalRef) {
+    this.modalRef.hide();
+  }
+}
 }

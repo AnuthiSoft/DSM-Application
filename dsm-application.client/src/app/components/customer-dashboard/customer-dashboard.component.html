@@ -1,25 +1,58 @@
-<div class="p-4">
-  <h1 class="text-2xl font-bold">Welcome to Customer Dashboard 🎉</h1>
-  <p class="mt-2">You are successfully logged in as a Customer.</p>
+<div class="container mt-4">
+  <h2>Customer Dashboard</h2>
 
-  <button class="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-          (click)="logout()">
-    Logout
-  </button>
-</div>
-<div class="distributor-card" *ngFor="let distributor of distributors">
-  <h3>{{ distributor.CompanyName }}</h3>   <!-- was distributor.name -->
-  <p>Email: {{ distributor.Email }}</p>
-  <p>Phone: {{ distributor.PhoneNumber }}</p>
-  <p *ngIf="distributor.IsPremium">Premium Distributor</p>
+  <button class="btn btn-secondary mb-3" (click)="logout()">Logout</button>
 
-  <!-- Show products only if current customer was added by this distributor -->
- <div *ngIf="currentCustomer?.addedByDistributorId === distributor.DistributorId">
-    <h4>Products:</h4>
-    <ul>
-      <li *ngFor="let product of distributor.products">
-        {{ product.ProductName }} - ${{ product.Price }}
-      </li>
-    </ul>
+  <div *ngIf="loading">Loading...</div>
+
+  <!-- Global customer view -->
+  <div *ngIf="!loading && dashboardData?.isGlobal">
+    <h3>All Distributors</h3>
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let dist of dashboardData?.distributors || []">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ dist?.companyName }}</h5>
+            <p class="card-text">
+              Name: {{ dist?.name }} <br>
+              Email: {{ dist?.email }} <br>
+              Phone: {{ dist?.phoneNumber }}
+            </p>
+           <button class="btn btn-primary" 
+        [disabled]="dist.status === 'Pending' || dist.status === 'Accepted'"
+        (click)="connectDistributor(dist)">
+  {{ dist.status === 'Pending' ? 'Pending' : dist.status === 'Accepted' ? 'Connected' : 'Connect' }}
+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distributor-specific customer view -->
+  <div *ngIf="!loading && !dashboardData?.isGlobal && dashboardData?.distributor">
+    <h3>Your Distributor</h3>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ dashboardData.distributor?.companyName }}</h5>
+        <p class="card-text">
+          Name: {{ dashboardData.distributor?.name }} <br>
+          Email: {{ dashboardData.distributor?.email }} <br>
+          Phone: {{ dashboardData.distributor?.phoneNumber }}
+        </p>
+      </div>
+    </div>
+
+    <h4>Products</h4>
+    <div class="row">
+      <div class="col-md-3 mb-3" *ngFor="let prod of dashboardData?.products || []">
+        <div class="card">
+          <div class="card-body">
+            <h6 class="card-title">{{ prod?.productName }}</h6>
+            <p class="card-text">Code: {{ prod?.productCode }}aaa</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

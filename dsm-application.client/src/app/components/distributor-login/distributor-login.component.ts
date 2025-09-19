@@ -23,6 +23,7 @@ export class DistributorLoginComponent {
       this.auth.login(this.email, this.password).subscribe({
         next: (res: any) => {
           const role = this.auth.getRole();
+             localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId
           if (role === 'Admin') {
             this.router.navigate(['/admin-dashboard']);
           } else if (role === 'Distributor') {

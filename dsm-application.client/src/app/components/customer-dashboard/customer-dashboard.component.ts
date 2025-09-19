@@ -1,41 +1,96 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
-import { Customer } from '../../../../MyTypes/customer.model';
+import { Customer } from '../../models/customer.model';
+import { HttpClient } from '@angular/common/http';
 
+
+interface Distributor {
+  distributorId: string;
+  companyName: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  isPremium?: boolean;
+  status:string;
+}
+
+interface Product {
+  productId: string;
+  productName: string;
+  productCode?: string;
+  distributorId: string;
+}
+
+interface DashboardResponse {
+  isGlobal: boolean;
+  distributors?: Distributor[];
+  distributor?: Distributor;
+  products?: Product[];
+}
 @Component({
   selector: 'app-customer-dashboard',
   templateUrl: './customer-dashboard.component.html',
   styleUrl: './customer-dashboard.component.css'
 })
 export class CustomerDashboardComponent {
-   customerEmail: string | null = '';
-   
-  distributors: any[] = [];
-  currentCustomer: Customer | null = null; // <-- add this
+    customerEmail: string | null = '';
+  customerId: string = '';
+  dashboardData!: DashboardResponse;
+  loading = true;
+  status:string='';
 
 
-  constructor(private router: Router,private customerService: CustomerService) {}
+  constructor(private customerService: CustomerService,private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
-     this.loadDashboard();
+      this.customerId = localStorage.getItem('customerId') || '';
+    if (!this.customerId) {
+      alert('No customer logged in!');
+      this.router.navigate(['/customer/login']);
+      return;
+    }
+    this.loadDashboard();
+  
   }
+   loadDashboard() {
+    this.loading = true;
+    this.http.get<DashboardResponse>(`https://localhost:7189/api/customers/dashboard/${this.customerId}`)
+      .subscribe({
+        next: (data) => {
+          this.dashboardData = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error loading dashboard', err);
+          this.loading = false;
+        }
+      });
+  }
+  connectDistributor(distributor: Distributor) {
+  const body = {
+    customerId: this.customerId,
+    distributorId: distributor.distributorId
+  };
+
+  this.http.post('https://localhost:7189/api/customers/connect-distributor', body)
+    .subscribe({
+      next: (res: any) => {
+        alert(res);  // e.g., "Connection request sent successfully"
+        // Refresh dashboard so the button shows Pending
+        this.loadDashboard();
+      },
+      error: (err) => {
+        console.error('Error connecting distributor', err);
+        alert(err.error || 'Failed to send connection request');
+      }
+    });
+}
 
   logout() {
     localStorage.clear();
     this.router.navigate(['/customer/login']);
   }
   
-     loadDashboard() {
-  this.customerService.getDashboard().subscribe({
-  next: (res: any) => {
-    this.distributors = res.map((d: any) => ({
-      ...d,
-      products: d.products || []  // ensures products array exists
-    }));
-  },
-  error: (err) => console.error(err)
-});
-  }
 }

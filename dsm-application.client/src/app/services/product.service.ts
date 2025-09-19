@@ -59,6 +59,9 @@ update(id: string, formData: FormData) {
    getCategoriesByDistributor(distributorId: string): Observable<string[]> {
   return this.http.get<string[]>(`${this.apiUrl}/distributor/${distributorId}/categories`);
 }
-  
+    // ✅ Get products for a distributor (NEW)
+  getProductsByDistributor(distributorId: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/distributor/${distributorId}`);
+  }
 
 }

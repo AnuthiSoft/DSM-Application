@@ -75,6 +75,12 @@ verifyOtp(email: string, otp: string) {
 resetPassword(email: string, otp: string, newPassword: string) {
   return this.http.post(`${this.apiUrl}/auth/reset-password`, { email, otp, newPassword });
 }
+
+  // ✅ NEW METHOD
+  getCurrentCustomer(): any {
+    const customer = localStorage.getItem('customer');
+    return customer ? JSON.parse(customer) : null;
+  }
   
 }
 function jwt_decode(token: any): any {

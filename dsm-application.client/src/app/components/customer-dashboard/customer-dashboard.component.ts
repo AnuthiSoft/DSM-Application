@@ -6,32 +6,32 @@ import { HttpClient } from '@angular/common/http';
 
 
 interface Distributor {
-  DistributorId: string;
-  CompanyName: string;
-  Name?: string;
-  Email?: string;
-  PhoneNumber?: string;
-  Status: string;
+  distributorId: string;
+  companyName: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  status: string;
   IsPremium?: boolean;
   IsActive?: boolean;
-  Address?: string;
-  Categories?: string[];
-  CreatedDate?: string;
+  address?: string;
+  categories?: string[];
+  createdDate?: string;
   
 
 }
 
 interface Product {
-  ProductId: string;
-  ProductName: string;
-  ProductCode?: string;
-  DistributorId: string;
-  CategoryId?: string | null;
-  Price?: string;
-  Stock?: string;
-  Brand?: string;
-  ImageUrl?: string;
-  Category?: string;
+  productId: string;
+  productName: string;
+  productCode?: string;
+  distributorId: string;
+  categoryId?: string | null;
+  price?: string;
+  stock?: string;
+  brand?: string;
+  imageUrl?: string;
+  category?: string;
   
 
   
@@ -104,7 +104,7 @@ export class CustomerDashboardComponent {
   connectDistributor(distributor: Distributor) {
   const body = {
     customerId: this.customerId,
-    distributorId: distributor.DistributorId
+    distributorId: distributor.distributorId
   };
 
   this.http.post('https://localhost:7189/api/customers/connect-distributor', body)

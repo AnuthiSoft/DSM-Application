@@ -4,15 +4,23 @@
   <button class="btn btn-secondary mb-3" (click)="logout()">Logout</button>
 
   <div *ngIf="loading">Loading...</div>
+
+
+
+
+
+
+
+
   <div *ngIf="!loading && !dashboardData?.isGlobal && dashboardData?.distributor">
   <h3>Your Distributor</h3>
   <div class="card mb-3">
     <div class="card-body">
-      <h5 class="card-title">{{ dashboardData.distributor?.CompanyName }}</h5>
+      <h5 class="card-title">{{ dashboardData.distributor?.companyName }}</h5>
       <p class="card-text">
-        Name: {{ dashboardData.distributor?.Name }} <br>
-        Email: {{ dashboardData.distributor?.Email }} <br>
-        Phone: {{ dashboardData.distributor?.PhoneNumber }}
+        Name: {{ dashboardData.distributor?.name }} <br>
+        Email: {{ dashboardData.distributor?.email }} <br>
+        Phone: {{ dashboardData.distributor?.phoneNumber }}
       </p>
     </div>
   </div>
@@ -22,13 +30,13 @@
     <div class="col-md-3 mb-3" *ngFor="let prod of dashboardData.products">
       <div class="card">
         <div class="card-body">
-          <h6 class="card-title">{{ prod.ProductName }}</h6>
-          <p class="card-text">Code: {{ prod.ProductCode }}</p>
-          <p class="card-text">Price: {{ prod.Price }}</p>
-          <p class="card-text">Stock: {{ prod.Stock }}</p>
-          <p class="card-text">Brand: {{ prod.Brand }}</p>
-          <p class="card-text">Category: {{ prod.Category }}</p>
-          <img *ngIf="prod.ImageUrl" [src]="prod.ImageUrl" class="img-fluid" />
+          <h6 class="card-title">{{ prod.productName }}</h6>
+          <p class="card-text">Code: {{ prod.productCode }}</p>
+          <p class="card-text">Price: {{ prod.price }}</p>
+          <p class="card-text">Stock: {{ prod.stock }}</p>
+          <p class="card-text">Brand: {{ prod.brand }}</p>
+          <p class="card-text">Category: {{ prod.category }}</p>
+          <img *ngIf="prod.imageUrl" [src]="prod.imageUrl" class="img-fluid" />
         </div>
       </div>
     </div>
@@ -45,17 +53,17 @@
       <div class="col-md-4 mb-3" *ngFor="let wrapper of dashboardData.distributors">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">{{ wrapper.distributor.CompanyName }}</h5>
+            <h5 class="card-title">{{ wrapper.distributor.companyName }}</h5>
             <p class="card-text">
-              Name: {{ wrapper.distributor.Name }} <br>
-              Email: {{ wrapper.distributor.Email }} <br>
-              Phone: {{ wrapper.distributor.PhoneNumber }}
+              Name: {{ wrapper.distributor.name }} <br>
+              Email: {{ wrapper.distributor.email }} <br>
+              Phone: {{ wrapper.distributor.phoneNumber }}
             </p>
             <button class="btn btn-primary"
-                    [disabled]="wrapper.distributor.Status === 'Pending' || wrapper.distributor.Status === 'Accepted'"
+                    [disabled]="wrapper.distributor.status === 'Pending' || wrapper.distributor.status === 'Accepted'"
                     (click)="connectDistributor(wrapper.distributor)">
-              {{ wrapper.distributor.Status === 'Pending' ? 'Pending' : 
-                 wrapper.distributor.Status === 'Accepted' ? 'Connected' : 
+              {{ wrapper.distributor.status === 'Pending' ? 'Pending' : 
+                 wrapper.distributor.status === 'Accepted' ? 'Connected' : 
                  'Connect' }}
             </button>
 
@@ -64,7 +72,7 @@
               <h6>Products:</h6>
               <ul>
                 <li *ngFor="let prod of wrapper.products">
-                  {{ prod.ProductName }} - {{ prod.Price }}
+                  {{ prod.productName }} - {{ prod.price }}
                 </li>
               </ul>
             </div>
@@ -77,17 +85,17 @@
   <!-- 🏢 Specific Customer-Distributor View -->
  <div *ngIf="!loading && !dashboardData?.isGlobal">
   <div *ngFor="let item of dashboardData?.distributors">
-    <h5 class="card-title">{{ item.distributor.CompanyName }}</h5>
-    <p>Name: {{ item.distributor.Name }}</p>
-    <p>Email: {{ item.distributor.Email }}</p>
-    <p>Phone: {{ item.distributor.PhoneNumber }}</p>
+    <h5 class="card-title">{{ item.distributor.companyName }}</h5>
+    <p>Name: {{ item.distributor.name }}</p>
+    <p>Email: {{ item.distributor.email }}</p>
+    <p>Phone: {{ item.distributor.phoneNumber }}</p>
 
     <div *ngIf="item.products?.length; else noProducts" class="row mt-3">
       <div class="col-md-3 mb-3" *ngFor="let prod of item.products">
         <div class="card">
           <div class="card-body">
-            <h6 class="card-title">{{ prod.ProductName }}</h6>
-            <p>Code: {{ prod.ProductCode }}</p>
+            <h6 class="card-title">{{ prod.productName }}</h6>
+            <p>Code: {{ prod.productCode }}</p>
           </div>
         </div>
       </div>

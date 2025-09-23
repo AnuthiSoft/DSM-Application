@@ -96,11 +96,11 @@
     <app-employees *ngIf="activeTab === 'employees'"></app-employees>
     <app-create-customer-distributor *ngIf="activeTab === 'customers'"></app-create-customer-distributor>
     <!-- Employees Tab -->
-    
+      <!-- <app-distributor-orders  *ngIf="activeTab === 'orders'"></app-distributor-orders> -->
 
     <!-- Customers Tab -->
     <!-- Customer Requests Tab -->
-    <div *ngIf="activeTab === 'orders'" class="container mt-4">
+    <div *ngIf="activeTab === 'settings'" class="container mt-4">
       <h4>Pending Connection Requests</h4>
       <div *ngIf="pendingRequests.length === 0">No pending requests.</div>
 <!--  -->
@@ -119,6 +119,41 @@
           </div>
         </div>
       </div>
+      <div class="card">
+  <h3>Accepted Customers</h3>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="!loading && acceptedCustomers?.length; else noAccepted">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Connected On</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of acceptedCustomers">
+        <td>{{ c.name }}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.phoneNumber }}</td>
+        <td>{{ c.connectedOn | date:'medium' }}</td>
+        <td>
+          <button class="btn btn-danger" (click)="disconnect(c.connectionId)">Disconnect</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #noAccepted>
+    <p>No accepted customers yet.</p>
+  </ng-template>
+</div>
+
   </div>
+  
+
     </div>
   </div>

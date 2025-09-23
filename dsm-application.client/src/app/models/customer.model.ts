@@ -6,6 +6,7 @@ export interface Customer {
   passwordHash?: string | null;
   isRegistered?: boolean;
   addedByDistributorId?: string | null;
+   connectedDistributors?: string[];
    role: 'Customer'
 }
 

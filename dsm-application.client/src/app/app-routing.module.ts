@@ -16,6 +16,8 @@ import { DistributorSignupComponent } from './components/distributor-signup/dist
 import { EmployeesComponent } from './components/employees/employees.component';
 import { SetPasswordComponent } from './components/set-password/set-password.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ProfileComponent } from './components/profile/profile.component';
+
 
 
 
@@ -34,6 +36,8 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
     { path: 'employees', component: EmployeesComponent },
     { path: 'set-password', component: SetPasswordComponent },
+      { path: 'profile', component: ProfileComponent },
+   
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

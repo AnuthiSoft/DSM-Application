@@ -19,6 +19,7 @@ import { DistributorSignupComponent } from './components/distributor-signup/dist
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { EmployeesComponent } from './components/employees/employees.component';
 import { SetPasswordComponent } from './components/set-password/set-password.component';
+import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.component';
 
 
 
@@ -40,6 +41,7 @@ import { SetPasswordComponent } from './components/set-password/set-password.com
     ForgotPasswordComponent,
     EmployeesComponent,
     SetPasswordComponent,
+    ThemeToggleComponent,
 
   ],
   imports: [

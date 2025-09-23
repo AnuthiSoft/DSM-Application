@@ -40,6 +40,11 @@
   --table-hover: #f1f5f9;
   --table-border: #e5e7eb;
 
+   --step-bg: #ffffff;
+  --step-active: #3498db;
+  --step-completed: #2c3e50;
+  --step-inactive: #ddd;
+
   --footer-bg: #2c3e50;
   --footer-text: #ffffff;
 
@@ -79,5 +84,9 @@
   --table-stripe: #252525;
   --table-hover: #2d2d2d;
   --table-border: #444444;
+   --step-bg: #1e1e1e;
+  --step-active: #5faee3;
+  --step-completed: #3c4e60;
+  --step-inactive: #444;
 
 }

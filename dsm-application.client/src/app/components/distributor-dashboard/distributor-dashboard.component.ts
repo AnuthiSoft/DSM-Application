@@ -30,11 +30,11 @@ export class DistributorDashboardComponent {
   }
 
 respond(request: any, accept: boolean) {
-  if (!request.ConnectionId) {
+  if (!request.connectionId) {
     console.error('No connectionId found!', request);
     return;
   }
-  this.distributorService.respondConnection(request.ConnectionId, accept)
+  this.distributorService.respondConnection(request.connectionId, accept)
     .subscribe(() => this.loadRequests());
 }
   // Switch tab

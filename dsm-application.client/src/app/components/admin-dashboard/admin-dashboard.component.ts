@@ -20,9 +20,9 @@ export class AdminDashboardComponent implements OnInit {
   role: string | null = null;
   customCategory: string = "";
   totalDistributors = 0;
-activeDistributors = 0;
-inactiveDistributors = 0;
-premiumDistributors = 0;
+  activeDistributors = 0;
+  inactiveDistributors = 0;
+  premiumDistributors = 0;
 
   private distributorModal: bootstrap.Modal | null = null;
 

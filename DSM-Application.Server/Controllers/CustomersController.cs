@@ -20,12 +20,14 @@ namespace DSM_Application.Server.Controllers
         private readonly MongoDbService _db;
         private readonly JwtService _jwt;
         private readonly ProductService _productService;
+        private readonly IMongoCollection<Customer> _customersCollection;
 
         public CustomersController(MongoDbService db, JwtService jwt, ProductService productService)
         {
             _db = db;
             _jwt = jwt;
             _productService = productService;
+            _customersCollection = db.Customers;
         }
 
         // 🌍 Global Registration
@@ -189,7 +191,6 @@ namespace DSM_Application.Server.Controllers
                 });
             }
         }
-        //[Authorize(Roles = "Customer")]
         [HttpPost("connect-distributor")]
         public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
         {
@@ -197,21 +198,86 @@ namespace DSM_Application.Server.Controllers
             var customer = await _db.Customers.Find(c => c.CustomerId == request.CustomerId).FirstOrDefaultAsync();
             if (customer == null) return NotFound("Customer not found");
 
-            // Optionally check if already connected
             var existing = await _db.Connections.Find(c => c.CustomerId == request.CustomerId && c.DistributorId == request.DistributorId).FirstOrDefaultAsync();
-            if (existing != null) return BadRequest("Already connected");
+            if (existing != null)
+            {
+                if (existing.Status == ConnectionStatus.Disconnected || existing.Status == ConnectionStatus.Rejected)
+                {
+                    // Reactivate connection (set back to Pending)
+                    var update = Builders<CustomerDistributorConnection>.Update
+                        .Set(c => c.Status, ConnectionStatus.Pending)
+                        .Set(c => c.ConnectedOn, DateTime.UtcNow)
+                        .Unset(c => c.DisconnectedOn);
 
-            // Save connection
+                    await _db.Connections.UpdateOneAsync(
+                        c => c.CustomerId == request.CustomerId && c.DistributorId == request.DistributorId,
+                        update
+                    );
+
+                    return Ok("Reconnection request sent successfully");
+                }
+
+                return BadRequest("Connection already exists");
+            }
+
+            // Otherwise create new connection
             var newConnection = new CustomerDistributorConnection
             {
                 CustomerId = request.CustomerId,
                 DistributorId = request.DistributorId,
-                ConnectedOn = DateTime.UtcNow
+                ConnectedOn = DateTime.UtcNow,
+                Status = ConnectionStatus.Pending
             };
-            await _db.Connections.InsertOneAsync(newConnection);
 
+            await _db.Connections.InsertOneAsync(newConnection);
             return Ok("Connection request sent successfully");
         }
+        // GET: api/customer/profile
+        [HttpGet("profile")]
+        public async Task<ActionResult<Customer>> GetProfile()
+        {
+            var customerId = User.FindFirstValue("CustomerId"); // matches JWT claim
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized();
+
+            var customer = await _customersCollection.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+            if (customer == null)
+                return NotFound();
+
+            return Ok(customer);
+        }
+
+        // PUT: api/customer/profile
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] Customer updatedCustomer)
+        {
+            Console.WriteLine("Incoming JWT Claims:");
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"{claim.Type} = {claim.Value}");
+            }
+            var customerId = User.FindFirstValue("CustomerId"); // match JWT
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized();
+
+            var update = Builders<Customer>.Update
+                .Set(c => c.Name, updatedCustomer.Name)
+                .Set(c => c.Email, updatedCustomer.Email)
+                .Set(c => c.PhoneNumber, updatedCustomer.PhoneNumber)
+                .Set(c => c.Address, updatedCustomer.Address);
+
+            var result = await _customersCollection.UpdateOneAsync(
+                c => c.CustomerId == customerId,
+                update
+            );
+
+            if (result.ModifiedCount == 0)
+                return BadRequest("Profile update failed.");
+
+            return NoContent();
+        }
+
+
 
         public class ConnectRequest
         {

@@ -16,6 +16,8 @@ namespace DSM_Application.Server.Models
         public string Email { get; set; }
         [BsonElement("Role")]
         public string Role { get; set; } = "Customer";
+        [BsonElement("Address")]
+        public string Address{ get; set; } 
 
         [BsonElement("PhoneNumber")]
         public string? PhoneNumber { get; set; }
@@ -28,5 +30,7 @@ namespace DSM_Application.Server.Models
 
         [BsonElement("AddedByDistributorId")]
         public string? AddedByDistributorId { get; set; } // null if global signup
+        [BsonElement("ConnectedDistributors")]
+        public List<string>? ConnectedDistributors { get; set; } // for global customers
     }
 }

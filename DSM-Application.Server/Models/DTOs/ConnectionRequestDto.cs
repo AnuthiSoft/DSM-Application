@@ -8,6 +8,7 @@
         public string Email { get; set; }     // Customer Email
         public string PhoneNumber { get; set; } // Customer Phone
         public DateTime ConnectedOn { get; set; } = DateTime.UtcNow;
+        public DateTime DisconnectedOn { get; set; } = DateTime.UtcNow;
         public string Status { get; set; }    // Connection Status
     }
 }

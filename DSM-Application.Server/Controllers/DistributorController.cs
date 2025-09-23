@@ -52,6 +52,37 @@ namespace DSM_Application.Server.Controllers
             // Return the actual pending requests as JSON
             return Ok(result);
         }
+
+        // New: Get accepted (connected) customers for the distributor
+        [HttpGet("accepted-customers")]
+        public async Task<IActionResult> GetAcceptedCustomers([FromQuery] string distributorId)
+        {
+            distributorId = distributorId ?? User.FindFirst("DistributorId")?.Value;
+            if (string.IsNullOrEmpty(distributorId))
+                return BadRequest(new { message = "distributorId is required" });
+
+            var connections = await _connections
+                .Find(c => c.DistributorId == distributorId && c.Status == ConnectionStatus.Accepted)
+                .ToListAsync();
+
+            var result = connections.Select(c =>
+            {
+                var customer = _customers.Find(x => x.CustomerId == c.CustomerId).FirstOrDefault();
+                return new ConnectionRequestDto
+                {
+                    ConnectionId = c.Id,
+                    CustomerId = c.CustomerId,
+                    Name = customer?.Name,
+                    Email = customer?.Email,
+                    PhoneNumber = customer?.PhoneNumber,
+                    Status = c.Status.ToString(),
+                    ConnectedOn = c.ConnectedOn
+                };
+            }).ToList();
+
+            return Ok(result);
+        }
+
         [HttpPost("respond-connection")]
         public async Task<IActionResult> RespondConnection([FromBody] RespondRequest request)
         {
@@ -79,6 +110,32 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = request.Accept ? "Request accepted and notification sent" : "Request rejected and notification sent" });
         }
 
+        // New: Disconnect customer (soft) using connectionId
+        [HttpPost("disconnect-customer")]
+        public async Task<IActionResult> DisconnectCustomer([FromBody] DisconnectRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.ConnectionId))
+                return BadRequest(new { message = "ConnectionId is required" });
+
+            var connection = await _connections.Find(c => c.Id == request.ConnectionId).FirstOrDefaultAsync();
+            if (connection == null) return NotFound("Connection not found");
+
+            // Mark disconnected
+            connection.Status = ConnectionStatus.Disconnected;
+            connection.DisconnectedOn = DateTime.UtcNow;
+            await _connections.ReplaceOneAsync(c => c.Id == request.ConnectionId, connection);
+
+            // Notify customer by email (optional)
+            var customer = await _customers.Find(x => x.CustomerId == connection.CustomerId).FirstOrDefaultAsync();
+            if (customer != null && !string.IsNullOrEmpty(customer.Email))
+            {
+                var subject = "Your Distributor Connection has been Disconnected";
+                var body = $"Hi {customer.Name},\n\nThe distributor ({connection.DistributorId}) has disconnected you. You may send a new connection request if needed.";
+                await _emailService.SendEmailAsync(customer.Email, subject, body);
+            }
+
+            return Ok(new { message = "Customer disconnected successfully" });
+        }
 
         public class RespondRequest
         {
@@ -87,6 +144,11 @@ namespace DSM_Application.Server.Controllers
 
             //[JsonPropertyName("accept")]
             public bool Accept { get; set; }
+        }
+
+        public class DisconnectRequest
+        {
+            public string ConnectionId { get; set; }
         }
     }
 }

@@ -108,6 +108,48 @@ namespace DSM_Application.Server.Controllers
             return Ok(customers);
         }
 
+        [HttpPut("update-customer/{customerId}")]
+        public async Task<IActionResult> UpdateCustomer(string customerId, [FromBody] Customer updatedCustomer)
+        {
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (distributorId == null)
+                return Unauthorized("Distributor ID not found in token");
+
+            var existingCustomer = await _db.Customers
+                .Find(c => c.CustomerId == customerId && c.AddedByDistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            if (existingCustomer == null)
+                return NotFound("Customer not found or does not belong to this distributor");
+
+            existingCustomer.Name = updatedCustomer.Name;
+            existingCustomer.Email = updatedCustomer.Email;
+            existingCustomer.PhoneNumber = updatedCustomer.PhoneNumber;
+            existingCustomer.Address = updatedCustomer.Address;
+
+            await _db.Customers.ReplaceOneAsync(c => c.CustomerId == customerId, existingCustomer);
+
+            return Ok(new { message = "Customer updated successfully", customer = existingCustomer });
+        }
+
+        [HttpDelete("delete-customer/{customerId}")]
+        public async Task<IActionResult> DeleteCustomer(string customerId)
+        {
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (distributorId == null)
+                return Unauthorized("Distributor ID not found in token");
+
+            var existingCustomer = await _db.Customers
+                .Find(c => c.CustomerId == customerId && c.AddedByDistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            if (existingCustomer == null)
+                return NotFound("Customer not found or does not belong to this distributor");
+
+            await _db.Customers.DeleteOneAsync(c => c.CustomerId == customerId);
+
+            return Ok(new { message = "Customer deleted successfully" });
+        }
 
         // 🔑 First-time password creation for distributor-added customer
         [HttpPost("set-password")]
@@ -275,6 +317,23 @@ namespace DSM_Application.Server.Controllers
                 return BadRequest("Profile update failed.");
 
             return NoContent();
+        }
+        [HttpGet("connected/{customerId}")]
+        public async Task<IActionResult> GetConnectedDistributors(string customerId)
+        {
+            var connections = await _db.Connections
+                .Find(c => c.CustomerId == customerId && c.Status == ConnectionStatus.Accepted)
+                .ToListAsync();
+
+            var distributors = new List<Distributor>();
+            foreach (var conn in connections)
+            {
+                var dist = await _db.Distributors.Find(d => d.DistributorId == conn.DistributorId).FirstOrDefaultAsync();
+                if (dist != null)
+                    distributors.Add(dist);
+            }
+
+            return Ok(distributors);
         }
 
 

@@ -1,6 +1,7 @@
 ﻿using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DSM_Application.Server.Services
@@ -24,9 +25,8 @@ namespace DSM_Application.Server.Services
                 .Find(p => p.DistributorId == distributorId)
                 .ToListAsync();
         }
-
-
-        // Get by ID
+             
+     
         public async Task<Product> GetByIdAsync(string id)
         {
             return await _products.Find(p => p.ProductId == id).FirstOrDefaultAsync();
@@ -71,9 +71,11 @@ namespace DSM_Application.Server.Services
         }
         public async Task<List<Product>> GetProductsByDistributorAsync(string distributorId)
         {
-            return await _products
-                .Find(p => p.DistributorId == distributorId)
-                .ToListAsync();
+            // Filter by string
+            var filter = Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId);
+            var products = await _products.Find(filter).ToListAsync();
+
+            return products ?? new List<Product>();
         }
     }
 }

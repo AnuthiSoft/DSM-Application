@@ -64,7 +64,7 @@ export class ProductService {
   }
 
   getProductsByDistributor(distributorId: string): Observable<Product[]> {
-    return this.api.get<Product[]>(`${this.endpoint}/distributor/${distributorId}`);
+    return this.api.get<Product[]>(`products/distributor/${distributorId}`);
   }
 
 }

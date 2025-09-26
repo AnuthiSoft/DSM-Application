@@ -56,6 +56,8 @@ export class ProductsComponent {
         error: err => console.error(err)
       });
     }
+      
+
   }
 
   loadProducts() {

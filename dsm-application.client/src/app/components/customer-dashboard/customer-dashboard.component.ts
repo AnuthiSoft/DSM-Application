@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
 import { HttpClient } from '@angular/common/http';
+import { ProductService } from '../../services/product.service';
 
 
 interface Distributor {
@@ -40,6 +41,8 @@ interface Product {
 interface DistributorWrapper {
   distributor: Distributor;
   products?: Product[];
+  
+  
 }
 
 interface DashboardResponse {
@@ -48,8 +51,13 @@ interface DashboardResponse {
     distributor: Distributor;
     products: Product[];
   }[];
-   distributor?: Distributor;  // 👈 Add this
-  products?: Product[];       // 👈 Add this
+   distributor?: Distributor;  
+  products?: Product[];  
+   totalOrders?: number;    
+  totalProducts?: number;   
+  totalDistributors?: number;
+ 
+  
 }
 @Component({
   selector: 'app-customer-dashboard',
@@ -62,22 +70,24 @@ export class CustomerDashboardComponent {
   dashboardData!: DashboardResponse;
   loading = true;
   status:string='';
+  distributorId: string='';
+  products: Product[] = [];
+
+       activeTab: string = 'dashboard';
+         currentDate: Date = new Date();
 
 
-  constructor(private customerService: CustomerService,private router: Router, private http: HttpClient) {}
+  constructor(private customerService: CustomerService,private router: Router, private http: HttpClient,private productservice:ProductService) {}
 
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
       this.customerId = localStorage.getItem('customerId') || '';
-    // if (!this.customerId) {
-    //   alert('No customer logged in!');
-    //   this.router.navigate(['/customer/login']);
-    //   return;
-    // }
+         this.distributorId = localStorage.getItem('distributorId') || '';
+          
+    
        if (!this.customerId) {
     console.error('No customerId found in localStorage');
-    // Optionally redirect to login:
-    // this.router.navigate(['/customer/login']);
+    
     return;
   }
   
@@ -110,8 +120,8 @@ export class CustomerDashboardComponent {
   this.http.post('https://localhost:7189/api/customers/connect-distributor', body)
     .subscribe({
       next: (res: any) => {
-        alert(res);  // e.g., "Connection request sent successfully"
-        // Refresh dashboard so the button shows Pending
+        alert(res);  
+       
         this.loadDashboard();
       },
       error: (err) => {
@@ -119,6 +129,9 @@ export class CustomerDashboardComponent {
         alert(err.error || 'Failed to send connection request');
       }
     });
+}
+viewProducts(distributorId: string) {
+  this.router.navigate(['/products', distributorId]);
 }
 
   logout() {

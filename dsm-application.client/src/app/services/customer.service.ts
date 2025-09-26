@@ -51,5 +51,12 @@ export class CustomerService {
 
   return this.api.get<Customer[]>(`customers/my-customers`, { headers });
 }
+updateCustomer(customerId: string, customer: Customer): Observable<any> {
+    return this.api.put(`customers/update-customer/${customerId}`, customer);
+  }
+
+  deleteCustomer(customerId: string): Observable<any> {
+    return this.api.delete(`customers/delete-customer/${customerId}`);
+  }
 
 }

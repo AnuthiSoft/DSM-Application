@@ -3,6 +3,7 @@ export interface Customer {
   name: string;
   email: string;
   phoneNumber?: string;
+  address:string;
   passwordHash?: string | null;
   isRegistered?: boolean;
   addedByDistributorId?: string | null;
@@ -27,3 +28,5 @@ export interface CustomerLoginResponse {
   customer: Customer;
   role:string;
 }
+
+

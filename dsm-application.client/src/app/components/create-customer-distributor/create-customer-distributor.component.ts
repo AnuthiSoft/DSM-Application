@@ -11,7 +11,8 @@ import { Customer } from '../../models/customer.model';
 export class CreateCustomerDistributorComponent implements OnInit {
   customer: Customer = {
     name: '', email: '', phoneNumber: '',
-    role: 'Customer'
+    role: 'Customer',
+    address: ''
   };
   message = '';
   customers: Customer[] = [];
@@ -40,6 +41,29 @@ export class CreateCustomerDistributorComponent implements OnInit {
     }
   });
 }
+  // Update customer
+  updateCustomer(cust: Customer) {
+    this.customerService.updateCustomer(cust.customerId!, cust).subscribe({
+      next: (res: any) => {
+        this.message = res.message;
+        this.loadCustomers(); // Refresh after update
+      },
+      error: (err) => this.message = err.error || 'Failed to update customer'
+    });
+  }
+
+  // Delete customer
+  deleteCustomer(customerId: string) {
+    if (!confirm('Are you sure you want to delete this customer?')) return;
+
+    this.customerService.deleteCustomer(customerId!).subscribe({
+      next: (res: any) => {
+        this.message = res.message;
+        this.loadCustomers(); // Refresh after delete
+      },
+      error: (err) => this.message = err.error || 'Failed to delete customer'
+    });
+  }
   
 
 }

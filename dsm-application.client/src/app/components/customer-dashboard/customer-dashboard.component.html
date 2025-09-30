@@ -3,6 +3,8 @@
 
   <button class="btn btn-secondary mb-3" (click)="logout()">Logout</button>
       <button class="btn btn-primary" routerLink="/profile">My Profile</button>
+        <button class="btn btn-primary" routerLink="/customerOrder">My Orders</button>
+
 
   <div *ngIf="loading">Loading...</div>
   <div *ngIf="!loading && !dashboardData?.isGlobal && dashboardData?.distributor">
@@ -83,9 +85,11 @@
       <p>No products found.</p>
     </ng-template>
   </div>
-  
+    <!-- Orders Tab -->
+ 
 </div>
 <!-- <div class="orders-section">
   <h3>My Orders</h3>
   <app-customer-orders></app-customer-orders>
 </div> -->
+ 

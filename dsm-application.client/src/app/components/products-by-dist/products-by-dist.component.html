@@ -18,8 +18,30 @@
           <p>Stock: {{ prod.stock }}</p>
           <p>Brand: {{ prod.brand }}</p>
           <p>Category: {{ prod.category }}</p>
+           <button class="btn btn-primary btn-sm" (click)="addToCart(prod)">Add to Cart</button>
         </div>
       </div>
     </div>
   </div>
+   <div class="mt-4" *ngIf="cart.length > 0">
+    <h4>Your Cart</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of cart">
+          <td>{{ item.product.productName }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ item.product.price }}</td>
+          <td>₹{{ item.product.price * item.quantity }}</td>
+          <td><button class="btn btn-sm btn-danger" (click)="removeFromCart(item.product.productId)">Remove</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="fw-bold">Total: ₹{{ getTotal() }}</p>
+    <button class="btn btn-success" (click)="placeOrder()">Place Order</button>
+  </div>
+
 </div>

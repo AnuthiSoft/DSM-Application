@@ -1,33 +1,29 @@
-export interface OrderItem {
+export interface OrderProduct {
   productId: string;
+  productName: string;
+  price: number;
   quantity: number;
 }
 
 export interface Order {
-  orderId?: string;
+ id?: string;
+ orderId :string;
   customerId: string;
   distributorId: string;
-  orderItems: OrderItem[];
-  createdAt?: string;
+  products: OrderProduct[];
+  totalAmount?: number;
+  orderDate?: string;
+  status?: string;
+    orderItems: OrderProduct[]; // ✅ Add this
 }
-export interface Product {
+export interface DistributorOrder {
   id: string;
-  name: string;
-  price: number;
-  description: string;
-}
-
-export interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  total: number;
-}
-
-
-export interface Order {
   customerId: string;
-  distributorId: string;
-  items: OrderItem[];
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  products: OrderProduct[];
+  totalAmount: number;
+  orderDate: string;
+  status: string;
 }

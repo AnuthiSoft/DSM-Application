@@ -1,0 +1,32 @@
+
+  <div *ngIf="loading">Loading orders...</div>
+  <div *ngIf="!loading && orders?.length === 0">No orders found.</div>
+
+<div *ngIf="!loading && orders.length > 0" class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Total Amount</th>
+          <th>Items</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>{{ order.id }}</td>
+          <td>{{ order.orderDate | date:'medium' }}</td>
+          <td>{{ order.status }}</td>
+          <td>{{ order.totalAmount | currency }}</td>
+          <td>
+            <ul>
+              <li *ngFor="let item of order.products">
+                {{ item.productName }} (x{{ item.quantity }})
+              </li>
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>

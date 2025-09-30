@@ -1,0 +1,23 @@
+<div class="container mt-4">
+  <h3>My Orders</h3>
+  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="!loading && orders.length === 0">No orders found.</div>
+  <div *ngFor="let o of orders" class="card mb-3">
+    <div class="card-body">
+      <h5>Order #{{ o.id }} — {{ o.status }}</h5>
+      <p>Date: {{ o.orderDate | date:'medium' }}</p>
+      <p>Total: ₹{{ o.totalAmount }}</p>
+      <table class="table">
+        <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of o.products">
+            <td>{{ p.productName }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>₹{{ p.price }}</td>
+            <td>₹{{ p.price * p.quantity }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

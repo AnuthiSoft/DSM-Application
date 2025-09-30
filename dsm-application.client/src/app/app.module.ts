@@ -1,7 +1,7 @@
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule,ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './services/auth.interceptor';
@@ -21,6 +21,11 @@ import { EmployeesComponent } from './components/employees/employees.component';
 import { SetPasswordComponent } from './components/set-password/set-password.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.component';
+import { ProductsByDistComponent } from './components/products-by-dist/products-by-dist.component';
+import { OrderHistoryComponent } from './components/order-history/order-history.component';
+import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
+import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
+
 
 
 
@@ -43,19 +48,23 @@ import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.compone
     EmployeesComponent,
     SetPasswordComponent,
     ProfileComponent,
-  
     ThemeToggleComponent,
+    ProductsByDistComponent,
+      OrderHistoryComponent,
+      DistributorOrdersComponent,
+      CustomerOrdersComponent
+
 
   ],
   imports: [
     BrowserModule, HttpClientModule,
-    AppRoutingModule,FormsModule, ReactiveFormsModule 
+    AppRoutingModule, FormsModule, ReactiveFormsModule
   ],
   providers: [{
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }],
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor,
+    multi: true
+  }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -17,6 +17,10 @@ import { EmployeesComponent } from './components/employees/employees.component';
 import { SetPasswordComponent } from './components/set-password/set-password.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { ProductsByDistComponent } from './components/products-by-dist/products-by-dist.component';
+import { OrderHistoryComponent } from './components/order-history/order-history.component';
+import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
+
 
 
 
@@ -37,7 +41,11 @@ const routes: Routes = [
     { path: 'employees', component: EmployeesComponent },
     { path: 'set-password', component: SetPasswordComponent },
       { path: 'profile', component: ProfileComponent },
+       { path: 'products/:distributorId', component:ProductsByDistComponent },
+        { path: 'orders', component: OrderHistoryComponent },
+        { path: 'customerOrder', component:CustomerOrdersComponent},
    
+      
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

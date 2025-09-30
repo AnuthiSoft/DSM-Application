@@ -22,6 +22,7 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<Customer> Customers => _db.GetCollection<Customer>("Customers");
         public IMongoCollection<Employee> Employees => _db.GetCollection<Employee>("Employees");
         //public IMongoCollection<Counter> Counters => _db.GetCollection<Counter>("Counters");
+        public IMongoCollection<Order> Orders => _db.GetCollection<Order>("Orders");
         // ✅ Add this for connections
         public IMongoCollection<CustomerDistributorConnection> Connections =>
             _db.GetCollection<CustomerDistributorConnection>("Connections");

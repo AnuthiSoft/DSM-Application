@@ -1,14 +1,17 @@
 export interface Customer {
+  isActive: any;
   customerId?: string;
   name: string;
   email: string;
-  phoneNumber?: string;
+  phoneNumber: string;
   address:string;
   passwordHash?: string | null;
   isRegistered?: boolean;
   addedByDistributorId?: string | null;
    connectedDistributors?: string[];
-   role: 'Customer'
+   role: 'Customer';
+    company?: string;              // ✅ Add this
+  registrationDate?: Date;       // ✅ Add this
 }
 
 export interface CustomerRegisterRequest {
@@ -19,7 +22,8 @@ export interface CustomerRegisterRequest {
 }
 
 export interface CustomerLoginRequest {
-  email: string;
+    email?: string;       // optional
+  phoneNumber?: string; // optional
   password: string;
 }
 

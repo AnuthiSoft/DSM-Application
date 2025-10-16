@@ -29,18 +29,17 @@
             <!-- Body -->
             <div class="login-body">
               <form (ngSubmit)="login()">
-                <div class="mb-3">
-                  <label for="email" class="form-label">Email Address</label>
-                  <input
-                    [(ngModel)]="request.email"
-                    name="email"
-                    type="email"
-                    class="form-control"
-                    id="email"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
+               <div class="mb-3">
+  <label for="identifier" class="form-label">Email or Phone</label>
+  <input
+    [(ngModel)]="request.email " 
+    name="identifier"
+    type="text"
+    class="form-control"
+    placeholder="Enter email or phone number"
+    required
+  />
+</div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
                   <div class="password-container">

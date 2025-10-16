@@ -34,10 +34,18 @@ namespace DSM_Application.Server.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CustomerRegisterRequest request)
         {
-            var existing = await _db.Customers.Find(c => c.Email == request.Email).FirstOrDefaultAsync();
-            if (existing != null)
-                return BadRequest("Customer already exists");
+            // ✅ Check if either email or phone number already exists
+            var existing = await _db.Customers
+                .Find(c => c.Email == request.Email || c.PhoneNumber == request.PhoneNumber)
+                .FirstOrDefaultAsync();
 
+            if (existing != null)
+            {
+                if (existing.Email == request.Email)
+                    return BadRequest("customer with this email already exists.");
+                if (existing.PhoneNumber == request.PhoneNumber)
+                    return BadRequest("customer with this phone number already exists.");
+            }
             var customer = new Customer
             {
                 Name = request.Name,
@@ -51,12 +59,23 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = "Customer registered successfully", customer });
         }
 
-        // 🔑 Global Login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] CustomerLoginRequest request)
         {
-            var customer = await _db.Customers.Find(c => c.Email == request.Email).FirstOrDefaultAsync();
-            if (customer == null) return Unauthorized("Customer not found");
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+                return BadRequest("Email or Phone Number is required");
+
+            if (string.IsNullOrEmpty(request.Password))
+                return BadRequest("Password is required");
+
+            // Find customer by email OR phone
+            var customer = await _db.Customers
+      .Find(c => (request.Email != null && c.Email == request.Email) ||
+                 (request.PhoneNumber != null && c.PhoneNumber == request.PhoneNumber))
+      .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return Unauthorized("Customer not found");
 
             if (!customer.IsRegistered)
                 return Unauthorized("You must create password first (distributor added you)");
@@ -66,7 +85,13 @@ namespace DSM_Application.Server.Controllers
 
             // Generate JWT for customer
             var token = _jwt.GenerateCustomerToken(customer);
-            return Ok(new { token, customer , role = customer.Role,customerId=customer.CustomerId });
+            return Ok(new
+            {
+                token,
+                customer,
+                role = customer.Role,
+                customerId = customer.CustomerId
+            });
         }
 
 
@@ -74,10 +99,16 @@ namespace DSM_Application.Server.Controllers
         [HttpPost("create-by-distributor")]
         public async Task<IActionResult> CreateByDistributor([FromBody] Customer customer)
         {
-            var existing = await _db.Customers.Find(c => c.Email == customer.Email).FirstOrDefaultAsync();
+            var existing = await _db.Customers
+         .Find(c => c.Email == customer.Email || c.PhoneNumber == customer.PhoneNumber)
+         .FirstOrDefaultAsync();
             if (existing != null)
-                return BadRequest("Customer already exists");
-
+            {
+                if (existing.Email == customer.Email)
+                    return BadRequest("A customer with this email already exists.");
+                if (existing.PhoneNumber == customer.PhoneNumber)
+                    return BadRequest("A customer with this phone number already exists.");
+            }
             // ✅ Read "DistributorId" claim instead of ClaimTypes.NameIdentifier
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (distributorId == null)
@@ -150,13 +181,21 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Customer deleted successfully" });
         }
-
-        // 🔑 First-time password creation for distributor-added customer
         [HttpPost("set-password")]
         public async Task<IActionResult> SetPassword([FromBody] CustomerLoginRequest request)
         {
-            var customer = await _db.Customers.Find(c => c.Email == request.Email).FirstOrDefaultAsync();
-            if (customer == null) return NotFound("Customer not found");
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+                return BadRequest("Either Email or Phone Number must be provided.");
+
+            var customer = await _db.Customers
+                .Find(c =>
+                    (!string.IsNullOrEmpty(request.Email) && c.Email.ToLower() == request.Email.ToLower()) ||
+                    (!string.IsNullOrEmpty(request.PhoneNumber) && c.PhoneNumber == request.PhoneNumber)
+                )
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
 
             if (customer.IsRegistered)
                 return BadRequest("Password already created. Please login.");
@@ -172,80 +211,61 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("dashboard/{customerId}")]
         public async Task<IActionResult> GetCustomerDashboard(string customerId)
         {
+
             var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
             if (customer == null) return NotFound("Customer not found");
-            // Collection of connections
-            // Get all connections for this customer
+
             var connections = await _db.Connections
                 .Find(c => c.CustomerId == customerId)
                 .ToListAsync();
-            // Global customer: show all distributors + products if connection accepted
-            if (string.IsNullOrEmpty(customer.AddedByDistributorId))
+
+            var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
+            var distributorsWithProducts = new List<object>();
+
+            foreach (var dist in allDistributors)
             {
-                var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
-                var distributorsWithProducts = new List<object>();
+                var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+                dist.Status = conn?.Status.ToString();
 
-                foreach (var dist in allDistributors)
+                List<Product> products = new();
+
+                // Show products only if:
+                // 1. Customer is added by this distributor, or
+                // 2. Connection exists and accepted
+                if ((customer.AddedByDistributorId == dist.DistributorId) ||
+                    (conn != null && conn.Status == ConnectionStatus.Accepted))
                 {
-                    var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
-                    dist.Status = conn?.Status.ToString();
-
-                    List<Product> products = new();
-                    if (conn != null && conn.Status == ConnectionStatus.Accepted)
-                    {
-                        // Fetch products for this distributor
-                        products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
-                    }
-
-                    distributorsWithProducts.Add(new
-                    {
-                        distributor = dist,
-                        products = products
-                    });
+                    products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
                 }
 
-                return Ok(new
+                distributorsWithProducts.Add(new
                 {
-                    isGlobal = true,
-                    distributors = distributorsWithProducts
+                    distributor = dist,
+                    products = products
                 });
             }
 
-            else
+            return Ok(new
             {
-                // Distributor-specific customer => return that distributor and products
-                // Distributor-specific customer: show only that distributor + products
-                var distributor = await _productService.GetDistributorByIdAsync(customer.AddedByDistributorId);
-                if (distributor == null) return NotFound("Distributor not found");
-
-                var connectionSpecific = connections.FirstOrDefault(c => c.DistributorId == distributor.DistributorId);
-                List<Product> distributorProducts = new();
-                if (connectionSpecific == null || connectionSpecific.Status == ConnectionStatus.Accepted)
-                {
-                    distributorProducts = await _productService.GetProductsByDistributorAsync(distributor.DistributorId);
-                }
-
-                return Ok(new
-                {
-                    isGlobal = false,
-                    distributor,
-                    products = distributorProducts
-                });
-            }
+                isGlobal = true, // All customers see global distributor list
+                distributors = distributorsWithProducts
+            });
         }
         [HttpPost("connect-distributor")]
         public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
         {
-            // Validate customer
             var customer = await _db.Customers.Find(c => c.CustomerId == request.CustomerId).FirstOrDefaultAsync();
             if (customer == null) return NotFound("Customer not found");
 
-            var existing = await _db.Connections.Find(c => c.CustomerId == request.CustomerId && c.DistributorId == request.DistributorId).FirstOrDefaultAsync();
+            var existing = await _db.Connections
+                .Find(c => c.CustomerId == request.CustomerId && c.DistributorId == request.DistributorId)
+                .FirstOrDefaultAsync();
+
             if (existing != null)
             {
                 if (existing.Status == ConnectionStatus.Disconnected || existing.Status == ConnectionStatus.Rejected)
                 {
-                    // Reactivate connection (set back to Pending)
+                    // Reactivate connection
                     var update = Builders<CustomerDistributorConnection>.Update
                         .Set(c => c.Status, ConnectionStatus.Pending)
                         .Set(c => c.ConnectedOn, DateTime.UtcNow)
@@ -256,13 +276,14 @@ namespace DSM_Application.Server.Controllers
                         update
                     );
 
-                    return Ok("Reconnection request sent successfully");
+                    return Ok(new { message = "Reconnection request sent successfully", status = "Pending" });
                 }
 
-                return BadRequest("Connection already exists");
+                // Already Pending or Accepted => return current status
+                return Ok(new { message = $"Connection already {existing.Status}", status = existing.Status.ToString() });
             }
 
-            // Otherwise create new connection
+            // Create new connection
             var newConnection = new CustomerDistributorConnection
             {
                 CustomerId = request.CustomerId,
@@ -272,7 +293,7 @@ namespace DSM_Application.Server.Controllers
             };
 
             await _db.Connections.InsertOneAsync(newConnection);
-            return Ok("Connection request sent successfully");
+            return Ok(new { message = "Connection request sent successfully", status = "Pending" });
         }
         // GET: api/customer/profile
         [HttpGet("profile")]

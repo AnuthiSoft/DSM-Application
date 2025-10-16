@@ -2,27 +2,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
-export interface Product {
-  productId?: string;
-  productName: string;
-  productCode: string;
- category?: string;
-  description: string;
-  unit: string;
-  price: number;
-  costPrice: number;
-  discount: number;
-  gst: number;
-  stock: number;
-  reorderLevel: number;
-  isActive?: boolean;
-  createdDate?: Date;
-  updatedDate?: Date;
-  createdBy?: string;
-  updatedBy?: string;
-  brand?: string;
-  imageUrl?: string;
-}
+import { Product } from '../models/products.model';
+
 export interface Category {
   category: string;
   name: string;

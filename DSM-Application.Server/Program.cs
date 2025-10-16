@@ -6,12 +6,15 @@ using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 
 var builder = WebApplication.CreateBuilder(args);
 // MongoDB
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDb"));
+
+
 builder.Services.AddSingleton<MongoDbService>();
 // JWT
 builder.Services.AddSingleton<JwtService>();
@@ -45,7 +48,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.PropertyNamingPolicy = null; // preserves property names
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; // preserves property names
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<ProductService>();

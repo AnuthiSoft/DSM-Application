@@ -24,15 +24,15 @@
           <div class="signup-body">
             <form (ngSubmit)="onSignup()">
               <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input
-                  [(ngModel)]="email"
-                  name="email"
-                  type="email"
-                  class="form-control"
-                  placeholder="Enter your email"
-                  required
-                />
+               <label for="identifier" class="form-label">Email or Phone Number</label>
+<input
+  [(ngModel)]="identifier"
+  name="identifier"
+  type="text"
+  class="form-control"
+  placeholder="Enter your email or phone number"
+  required
+/>
               </div>
 
               <div class="mb-3">

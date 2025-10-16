@@ -21,10 +21,15 @@ namespace DistributorManagementSystem.Server.Services
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, user.Username ?? user.Email),
-                new Claim(ClaimTypes.Role, user.Role ?? "User"),
+                new Claim(ClaimTypes.Name, user.PhoneNumber ?? user.Email),
+                //new Claim(ClaimTypes.Role, user.Role ?? "User"),
                 new Claim("UserId", user.Id ?? string.Empty),
-                new Claim("DistributorId", user.DistributorId ?? string.Empty),
+                //new Claim("DistributorId", user.DistributorId ?? string.Empty),
+                   //new Claim("EmployeeId", user.EmployeeId),  // ✅ Add this
+                    new Claim("Role", user.Role ?? ""),                        // Role may be null
+    new Claim("DistributorId", user.DistributorId ?? ""),
+    new Claim(ClaimTypes.Role, "Distributor"),// DistributorId may be null
+    new Claim("EmployeeId", user.EmployeeId ?? "")             // EmployeeId may be null
               
             };
 

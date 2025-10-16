@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
   styleUrl: './distributor-signup.component.css'
 })
 export class DistributorSignupComponent {
-  email = '';
+ identifier = '';
     password = '';
     confirmPassword = '';
     message = '';
@@ -63,7 +63,7 @@ export class DistributorSignupComponent {
         return;
       }
   
-      this.auth.signup(this.email, this.password).subscribe({
+      this.auth.signup(this.identifier, this.password).subscribe({
         next: res => {
           this.message = res;
           setTimeout(() => this.router.navigate(['/distributor-login']), 1500);

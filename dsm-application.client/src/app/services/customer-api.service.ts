@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Product } from '../models/products.model';
 export interface DistributorDto {
   distributorId: string;
   companyName: string;
@@ -8,19 +9,6 @@ export interface DistributorDto {
   email?: string;
   phoneNumber?: string;
   connectionStatus?: string | null;
-}
-
-export interface Product {
-  productId?: string;
-  productName: string;
-  productCode?: string;
-  distributorId?: string;
-  price?: number;
-  stock?: number;
-  brand?: string;
-  imageUrl?: string;
-  category?: string;
-  // other fields as returned from backend
 }
 
 

@@ -5,6 +5,7 @@ using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Security.Cryptography;
 using System.Text;
@@ -47,37 +48,41 @@ namespace DistributorManagementSystem.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            // Hardcoded admin credentials
             const string adminEmail = "admin@gmail.com";
             const string adminPassword = "admin123";
-  
-            // Check if login is for Admin
+
+            // ✅ Admin Login
             if (request.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase))
             {
                 if (request.Password != adminPassword)
                     return Unauthorized("Invalid password");
 
-                // Create a dummy admin user object
                 var adminUser = new User
                 {
                     Email = adminEmail,
                     Role = "Admin",
                     IsRegistered = true,
                     Username = "Administrator",
-              
                     DistributorId = ""
                 };
 
                 var tokenc = _jwt.GenerateToken(adminUser);
-                return Ok(new { tokenc, role = adminUser.Role});
+                return Ok(new { tokenc, role = adminUser.Role });
             }
-            var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
+
+            // ✅ Allow login using either email or phone number
+            var user = await _db.Users
+                .Find(u => u.Email == request.Email || u.PhoneNumber == request.Email)
+                .FirstOrDefaultAsync();
+
             if (user == null)
                 return Unauthorized("User not found");
+
+            // Distributor-specific check
             if (user.Role == "Distributor")
             {
                 var distributor = await _db.Distributors
-                    .Find(d => d.Email == request.Email)
+                    .Find(d => d.Email == user.Email || d.PhoneNumber == user.PhoneNumber)
                     .FirstOrDefaultAsync();
 
                 if (distributor == null)
@@ -86,12 +91,10 @@ namespace DistributorManagementSystem.Server.Controllers
                 if (!distributor.IsActive)
                     return Unauthorized("Your account is deactivated. Contact admin.");
             }
-            // 4️⃣ If Employee -> just check IsActive flag in user itself
+
+            // Employee-specific check
             if (user.Role == "Employee" && !user.IsActive)
                 return Unauthorized("Your employee account is deactivated. Contact distributor.");
-
-
-
 
             if (!user.IsRegistered)
                 return Unauthorized("Please sign up first to create password");
@@ -99,20 +102,44 @@ namespace DistributorManagementSystem.Server.Controllers
             if (user.PasswordHash != ComputeHash(request.Password))
                 return Unauthorized("Invalid password");
 
-            var token = _jwt.GenerateToken(user);
-            return Ok(new { token, role = user.Role,
-                distributorId = user.DistributorId,  });
+            // Auto-assign EmployeeId if missing
+            if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
+            {
+                user.EmployeeId = ObjectId.GenerateNewId().ToString();
+                var update = Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId);
+                await _db.Users.UpdateOneAsync(u => u.Id == user.Id, update);
             }
 
+            var token = _jwt.GenerateToken(user);
+            return Ok(new
+            {
+                token,
+                role = user.Role,
+                distributorId = user.DistributorId,
+                employeeId = user.EmployeeId
+            });
+        }
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] Models.LoginRequest request)
         {
-            var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
-            if (user == null) return NotFound("User not found");
+            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+                return BadRequest("Email or Phone Number and Password are required");
+
+            if (string.IsNullOrEmpty(request.Password))
+                return BadRequest("Password is required");
+
+            // Find user by email OR phone number
+            var user = await _db.Users
+                .Find(u => u.Email == request.Email || u.PhoneNumber == request.PhoneNumber)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+                return NotFound("No user found with this email/phone. Please contact your distributor.");
 
             if (user.IsRegistered)
                 return BadRequest("Password already created, please login");
 
+            // Set password
             user.PasswordHash = ComputeHash(request.Password);
             user.IsRegistered = true;
 
@@ -124,7 +151,6 @@ namespace DistributorManagementSystem.Server.Controllers
 
             return Ok("Password created successfully. You can now login.");
         }
-
 
 
         [HttpPost("forgot-password")]
@@ -185,6 +211,7 @@ namespace DistributorManagementSystem.Server.Controllers
 
             return Ok("Password reset successfully. You can now login.");
         }
+      
         private string ComputeHash(string input)
         {
             using var sha = SHA256.Create();

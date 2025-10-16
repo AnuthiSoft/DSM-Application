@@ -1,6 +1,6 @@
-<div class="body">
+<!-- <div class="body">
 <div class="container">
-  <!-- Page Header -->
+
   <div class="page-header d-flex justify-content-between align-items-center">
     <h2><i class="fas fa-users me-2"></i>Employee Management</h2>
     <button
@@ -14,7 +14,6 @@
     </button>
   </div>
 
-  <!-- Search and Filter Section -->
   <div class="search-section d-flex gap-2 my-3">
     <div class="search-box flex-grow-1">
       <input
@@ -51,7 +50,6 @@
     </div>
   </div>
 
-  <!-- Employee Table -->
   <div class="dashboard-card">
     <div class="table-container">
       <table class="table table-striped">
@@ -107,13 +105,13 @@
       </table>
     </div>
 
-    <!-- Loading Indicator -->
+  
     <div *ngIf="loading" class="loading-indicator text-center py-3">
       <div class="spinner-border text-primary"></div>
       <span class="ms-2">Loading employees...</span>
     </div>
 
-    <!-- Empty State -->
+  
     <div *ngIf="!loading && filteredEmployees.length === 0" class="text-center py-5">
       <i class="fas fa-users fa-3x mb-3" style="color: #d1d5db;"></i>
       <h4>No employees found</h4>
@@ -128,7 +126,6 @@
       </button>
     </div>
 
-    <!-- Table Footer -->
     <div class="table-footer d-flex justify-content-between align-items-center mt-3">
       <div class="text-muted">
         Showing {{ filteredEmployees.length }} employees
@@ -145,7 +142,6 @@
   </div>
 </div>
 
-<!-- Employee Modal -->
 <div
   class="modal fade"
   id="employeeModal"
@@ -191,7 +187,7 @@
                 <option value="Manager">Manager</option>
                 <option value="Sales Representative">Sales Representative</option>
                 <option value="Support Staff">Support Staff</option>
-                <!-- <option value="Employee">Employee</option> -->
+                
               </select>
             </div>
           </div>
@@ -226,4 +222,288 @@
     </div>
   </div>
 </div>
+</div> -->
+<div class="body">
+  <div class="employee-section">
+    <!-- Page Header -->
+    <div class="welcome-header">
+      <h2><i class="fas fa-users"></i> Employee Management</h2>
+      <button
+        *ngIf="!loading && filteredEmployees.length > 0" 
+        class="btn btn-primary"
+        (click)="openEmployeeModal()"
+      >
+        <i class="fas fa-plus"></i> Add Employee
+      </button>
+    </div>
+
+    <!-- Search and Filter Card -->
+    <div class="dashboard-card">
+      <div class="filter-header">
+        <h3><i class="fas fa-filter"></i> Filter Employees</h3>
+      </div>
+      <div class="search-filter-grid">
+        <div class="search-box">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="form-control search-input"
+              placeholder="    Search employees by name, email, or phone..."
+              [(ngModel)]="searchTerm"
+              (input)="applyFilters()"
+            />
+          </div>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Designation</label>
+          <select
+            class="form-select"
+            [(ngModel)]="roleFilter"
+            (change)="applyFilters()"
+          >
+            <option value="">All Designations</option>
+            <option value="Administrator">Administrator</option>
+            <option value="Manager">Manager</option>
+            <option value="Sales Representative">Sales Representative</option>
+            <option value="Support Staff">Support Staff</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select
+            class="form-select"
+            [(ngModel)]="statusFilter"
+            (change)="applyFilters()"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Employee Table Card -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-users-cog"></i> Employee Directory</h3>
+        <span class="employee-count">{{ filteredEmployees.length }} employee(s)</span>
+      </div>
+
+      <div class="table-container">
+        <table class="employee-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Designation</th>
+              <th>Status</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of filteredEmployees" class="employee-row">
+              <td class="employee-info">
+                <div class="employee-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="employee-details">
+                  <strong>{{ emp.name }}</strong>
+                </div>
+              </td>
+              <td class="employee-email">{{ emp.email }}</td>
+              <td class="employee-phone">{{ emp.phoneNumber || '-' }}</td>
+              <td class="employee-role">{{ emp.role }}</td>
+              <td class="employee-designation">
+                <span class="designation-badge">{{ emp.designation }}</span>
+              </td>
+              <td class="employee-status">
+                <span class="status-badge" [class]="emp.isActive ? 'active' : 'inactive'">
+                  {{ emp.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td class="employee-actions">
+                <div class="action-buttons">
+                  <button
+                    class="btn btn-outline-primary btn-sm action-btn"
+                    (click)="editEmployee(emp)"
+                  >
+                    <i class="fas fa-edit"></i>
+                    Edit
+                  </button>
+                  <button
+                    class="btn btn-outline-danger btn-sm action-btn"
+                    (click)="deleteEmployee(emp)"
+                  >
+                    <i class="fas fa-trash"></i>
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="loading" class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Loading employees...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && filteredEmployees.length === 0" class="empty-state">
+        <i class="fas fa-users"></i>
+        <h4>No Employees Found</h4>
+        <p>Try adjusting your search or filter criteria</p>
+        <button
+          class="btn btn-primary"
+          (click)="openEmployeeModal()"
+        >
+          <i class="fas fa-plus"></i> Add First Employee
+        </button>
+      </div>
+
+      <!-- Table Footer -->
+      <div class="table-footer">
+        <div class="footer-info">
+          Showing {{ filteredEmployees.length }} of {{ employees.length }} employees
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+          <button class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Modal -->
+  <div *ngIf="showModal" class="modal-overlay">
+    <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
+    
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
+          {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
+        </h3>
+        <button class="modal-close" (click)="closeEmployeeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-user"></i>
+                Full Name
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="name"
+                placeholder="Enter employee name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-envelope"></i>
+                Email Address
+              </label>
+              <input 
+                type="email" 
+                class="form-control" 
+                formControlName="email"
+                placeholder="Enter email address"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-phone"></i>
+                Phone Number
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="phoneNumber"
+                placeholder="Enter phone number"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-briefcase"></i>
+                Designation
+              </label>
+              <select class="form-select" formControlName="designation">
+                <option value="">Select Designation</option>
+                <option value="Administrator">Administrator</option>
+                <option value="Manager">Manager</option>
+                <option value="Sales Representative">Sales Representative</option>
+                <option value="Support Staff">Support Staff</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-user-tag"></i>
+                Role
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                formControlName="role"
+                placeholder="Enter role"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-toggle-on"></i>
+                Status
+              </label>
+              <div class="status-toggle">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    class="toggle-input"
+                    formControlName="isActive"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">
+                  {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
+          <i class="fas fa-times"></i>
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" (click)="onSubmit()">
+          <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
+          {{ isEdit ? 'Update Employee' : 'Save Employee' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

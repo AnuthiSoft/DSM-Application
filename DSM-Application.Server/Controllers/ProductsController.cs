@@ -1,4 +1,5 @@
-﻿using DSM_Application.Server.Models;
+﻿using DistributorManagementSystem.Server.Models;
+using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -90,6 +91,8 @@ namespace DSM_Application.Server.Controllers
                 Brand = dto.Brand,
                 ImageUrl = dto.ImageUrl,
                   DistributorId = dto.DistributorId ,
+                DistributorName = distributor.Name,
+                //Name =distributor.Name,
                 Category = dto.Category // ✅ store selected category
             };
 
@@ -110,7 +113,8 @@ namespace DSM_Application.Server.Controllers
                     Directory.CreateDirectory(uploadsFolder);
 
                 var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
+                var filePath = Path.Combine
+                    (uploadsFolder, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {

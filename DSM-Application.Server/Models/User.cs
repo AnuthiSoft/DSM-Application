@@ -20,7 +20,7 @@ namespace DistributorManagementSystem.Server.Models
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
 
-        public bool IsRegistered { get; set; } = false; // true if password created by distributor
+        public bool IsRegistered { get; set; } = true; // true if password created by distributor
         [BsonElement("ResetOtp")]
         public string? ResetOtp { get; set; }
 

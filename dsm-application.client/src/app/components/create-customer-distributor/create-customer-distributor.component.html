@@ -1,38 +1,4 @@
-<!-- 
-<div class="customer-container">
-  <h2>Create Customer (Distributor)</h2>
-  <form (ngSubmit)="createCustomer()">
-    <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
-    <input type="email" placeholder="Email" [(ngModel)]="customer.email" name="email" required />
-    <input type="text" placeholder="Phone" [(ngModel)]="customer.phoneNumber" name="phoneNumber" />
-    <button type="submit">Create</button>
-  </form>
-  <p class="message text-green-600">{{ message }}</p>
-
-  <table class="customer-table" *ngIf="customers.length > 0">
-    <thead>
-      <tr> 
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Registered</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let c of customers">
-        <td>{{ c.name }}</td>
-        <td>{{ c.email }}</td>
-        <td>{{ c.phoneNumber }}</td>
-        <td>{{ c.isRegistered ? 'Yes' : 'No' }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div> -->
-
-
-
-<div class="customer-container">
+<!-- <div class="customer-container">
   <h2>Create Customer (Distributor)</h2>
   <form (ngSubmit)="createCustomer()">
     <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
@@ -43,7 +9,7 @@
   </form>
   <p class="message text-green-600">{{ message }}</p>
 
-  <!-- Customer List Table -->
+
   <table class="customer-table" *ngIf="customers.length > 0">
     <thead>
       <tr> 
@@ -79,4 +45,163 @@
       </tr>
     </tbody>
   </table>
+</div> -->
+<div class="customer-section">
+  <div class="welcome-header">
+    <h2>Create Customer (Distributor)</h2>
+  </div>
+
+  <div class="customer-content">
+    <!-- Create Customer Card -->
+    <div class="customer-card">
+      <div class="card-header">
+        <h3><i class="fas fa-user-plus"></i> Add New Customer</h3>
+      </div>
+      
+      <form (ngSubmit)="createCustomer()" class="customer-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user"></i>
+              Full Name
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   placeholder="Enter customer name" 
+                   [(ngModel)]="customer.name" 
+                   name="name" 
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-envelope"></i>
+              Email Address
+            </label>
+            <input type="email" 
+                   class="form-control" 
+                   placeholder="Enter email address" 
+                   [(ngModel)]="customer.email" 
+                   name="email" 
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-phone"></i>
+              Phone Number
+            </label>
+            <input type="text" 
+                   class="form-control" 
+                   placeholder="Enter phone number" 
+                   [(ngModel)]="customer.phoneNumber" 
+                   name="phoneNumber">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-map-marker-alt"></i>
+              Address
+            </label>
+            <textarea class="form-control" 
+                      placeholder="Enter complete address" 
+                      [(ngModel)]="customer.address" 
+                      name="address" 
+                      rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary create-btn">
+            <i class="fas fa-plus-circle"></i>
+            Create Customer
+          </button>
+        </div>
+      </form>
+
+      <div *ngIf="message" class="message-success">
+        <i class="fas fa-check-circle"></i>
+        {{ message }}
+      </div>
+    </div>
+
+    <!-- Customer List Card -->
+    <div class="customer-list-card" *ngIf="customers.length > 0">
+      <div class="card-header">
+        <h3><i class="fas fa-users"></i> Customer List</h3>
+        <span class="customer-count">{{ customers.length }} customer(s)</span>
+      </div>
+
+      <div class="table-container">
+        <table class="customer-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Registered</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of customers" class="customer-row">
+              <td class="customer-name">
+                <input type="text" 
+                       class="form-control inline-input" 
+                       [(ngModel)]="c.name" 
+                       name="name-{{c.customerId}}"
+                       placeholder="Name">
+              </td>
+              <td class="customer-email">
+                <input type="email" 
+                       class="form-control inline-input" 
+                       [(ngModel)]="c.email" 
+                       name="email-{{c.customerId}}"
+                       placeholder="Email">
+              </td>
+              <td class="customer-phone">
+                <input type="text" 
+                       class="form-control inline-input" 
+                       [(ngModel)]="c.phoneNumber" 
+                       name="phone-{{c.customerId}}"
+                       placeholder="Phone">
+              </td>
+              <td class="customer-address">
+                <input type="text" 
+                       class="form-control inline-input" 
+                       [(ngModel)]="c.address" 
+                       name="address-{{c.customerId}}"
+                       placeholder="Address">
+              </td>
+              <td class="customer-status">
+                <span class="status-badge" [class]="c.isRegistered ? 'registered' : 'not-registered'">
+                  {{ c.isRegistered ? 'Yes' : 'No' }}
+                </span>
+              </td>
+              <td class="customer-actions">
+                <button class="btn btn-outline-primary btn-sm update-btn" 
+                        (click)="updateCustomer(c)">
+                  <i class="fas fa-edit"></i>
+                  Update
+                </button>
+                <button class="btn btn-outline-danger btn-sm delete-btn" 
+                        (click)="deleteCustomer(c.customerId!)">
+                  <i class="fas fa-trash"></i>
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="customers.length === 0" class="empty-state">
+      <i class="fas fa-users"></i>
+      <h3>No Customers Yet</h3>
+      <p>Create your first customer to get started.</p>
+    </div>
+  </div>
 </div>

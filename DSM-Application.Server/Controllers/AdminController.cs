@@ -31,6 +31,33 @@ namespace DistributorManagementSystem.Server.Controllers
         public async Task<IActionResult> AddDistributor([FromBody] Distributor distributor)
         {
 
+            // ✅ Check for duplicate email or phone number
+            var existingDistributor = await _db.Distributors
+                .Find(d => d.Email == distributor.Email || d.PhoneNumber == distributor.PhoneNumber)
+                .FirstOrDefaultAsync();
+
+            if (existingDistributor != null)
+            {
+                if (existingDistributor.Email == distributor.Email)
+                    return BadRequest("A distributor with this email already exists.");
+                if (existingDistributor.PhoneNumber == distributor.PhoneNumber)
+                    return BadRequest("A distributor with this phone number already exists.");
+            }
+
+            // ✅ Optionally, check in Users collection too (to avoid cross-role duplicates)
+            var existingUser = await _db.Users
+                .Find(u => u.Email == distributor.Email || u.PhoneNumber == distributor.PhoneNumber)
+                .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                if (existingUser.Email == distributor.Email)
+                    return BadRequest("This email is already used by another user.");
+                if (existingUser.PhoneNumber == distributor.PhoneNumber)
+                    return BadRequest("This phone number is already used by another user.");
+            }
+
+            // ✅ Generate DistributorId if missing
             if (string.IsNullOrEmpty(distributor.DistributorId))
             {
                 distributor.DistributorId = ObjectId.GenerateNewId().ToString();
@@ -67,11 +94,37 @@ namespace DistributorManagementSystem.Server.Controllers
         [HttpPut("distributors/{id}")]
         public async Task<IActionResult> UpdateDistributor(string id, [FromBody] Distributor update)
         {
+
             var existing = await _db.Distributors.Find(d => d.DistributorId == id).FirstOrDefaultAsync();
             if (existing == null)
                 return NotFound("Distributor not found");
 
-            // ✅ Ensure categories is not null to avoid overwriting with null
+            // ✅ Check if email or phone is already used by another distributor
+            var duplicate = await _db.Distributors
+                .Find(d => (d.Email == update.Email || d.PhoneNumber == update.PhoneNumber) && d.DistributorId != id)
+                .FirstOrDefaultAsync();
+
+            if (duplicate != null)
+            {
+                if (duplicate.Email == update.Email)
+                    return BadRequest("A distributor with this email already exists.");
+                if (duplicate.PhoneNumber == update.PhoneNumber)
+                    return BadRequest("A distributor with this phone number already exists.");
+            }
+
+            // ✅ Optionally check in Users collection to avoid cross-role duplicates
+            var existingUser = await _db.Users
+                .Find(u => (u.Email == update.Email || u.PhoneNumber == update.PhoneNumber)
+                         && u.DistributorId != id)
+                .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                if (existingUser.Email == update.Email)
+                    return BadRequest("This email is already used by another user.");
+                if (existingUser.PhoneNumber == update.PhoneNumber)
+                    return BadRequest("This phone number is already used by another user.");
+            }
             update.Categories ??= new List<string>();
 
             var updateDef = Builders<Distributor>.Update

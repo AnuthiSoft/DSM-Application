@@ -1,0 +1,85 @@
+<!-- <div *ngIf="loading">Loading distributors...</div>
+
+<div *ngIf="!loading && distributors.length">
+  <div class="distributors-grid">
+    <div class="distributor-card" *ngFor="let d of distributors">
+      <h4>{{ d.companyName }}</h4>
+      <p><i class="fas fa-user"></i> {{ d.name }}</p>
+      <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+      <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
+      <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
+
+      
+     <button
+  class="btn btn-primary"
+  *ngIf="dashboardType === 'global'" 
+  [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
+  (click)="connectDistributor(d.distributorId)"
+>
+  {{ d.status === 'Pending'
+    ? 'Pending'
+    : d.status === 'Accepted'
+    ? 'Connected'
+    : 'Connect' }}
+</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!loading && !distributors.length">
+  <p>No distributors found.</p>
+</div> -->
+<div class="distributors-section">
+  <div *ngIf="loading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Loading distributors...</span>
+  </div>
+
+  <div *ngIf="!loading && distributors.length" class="distributors-content">
+    <div class="distributors-grid">
+      <div class="distributor-card" *ngFor="let d of distributors">
+        <div class="distributor-header">
+          <h4>{{ d.companyName }}</h4>
+          <span class="status-badge" [class]="d.status?.toLowerCase()">
+            {{ d.status || 'Available' }}
+          </span>
+        </div>
+        
+        <div class="distributor-info">
+          <p><i class="fas fa-user"></i> {{ d.name }}</p>
+          <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+          <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
+          <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
+          <p><i class="fas fa-tags"></i> {{ d.categories }}</p>
+        </div>
+
+        <div class="distributor-actions">
+          <!-- View Products Button -->
+          <!-- <button class="btn btn-outline-primary" 
+                  *ngIf="d.status === 'Accepted'"
+                  (click)="viewProducts(d.distributorId)">
+            View Products
+          </button> -->
+
+          <!-- Connect Button -->
+          <button class="btn btn-primary"
+                  *ngIf="dashboardType === 'global'" 
+                  [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
+                  (click)="connectDistributor(d.distributorId)">
+            {{ d.status === 'Pending'
+              ? 'Pending'
+              : d.status === 'Accepted'
+              ? 'Connected'
+              : 'Connect' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !distributors.length" class="no-distributors">
+    <i class="fas fa-truck"></i>
+    <h3>No Distributors Found</h3>
+    <p>There are no distributors available at the moment.</p>
+  </div>
+</div>

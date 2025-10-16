@@ -1,4 +1,4 @@
- <div class="container mt-4">
+ <!-- <div class="container mt-4">
   <h2>Customer Dashboard</h2>
 
   <button class="btn btn-secondary mb-3" (click)="logout()">Logout</button>
@@ -85,11 +85,127 @@
       <p>No products found.</p>
     </ng-template>
   </div>
-    <!-- Orders Tab -->
+
  
-</div>
-<!-- <div class="orders-section">
-  <h3>My Orders</h3>
-  <app-customer-orders></app-customer-orders>
 </div> -->
- 
+<div class="body">
+  <!-- Sidebar Navigation -->
+  <div class="dashboard-sidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-building"></i> <span>BusinessPortal</span></h3>
+    </div>
+    <div class="nav-items">
+      <div class="nav-item" 
+           [class.active]="isActive('dashboard')" 
+           (click)="setActiveTab('dashboard')">
+        <i class="fas fa-th-large"></i> <span>Dashboard</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('distributors')" 
+           (click)="setActiveTab('distributors')">
+        <i class="fas fa-truck"></i> <span>Distributors</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('products')" 
+           (click)="setActiveTab('products')">
+        <i class="fas fa-box"></i> <span>Products</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('orders')" 
+           (click)="setActiveTab('orders')">
+        <i class="fas fa-shopping-cart"></i> <span>My Orders</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('profile')" 
+           (click)="setActiveTab('profile')">
+        <i class="fas fa-user"></i> <span>My Profile</span>
+      </div>
+
+      <div class="nav-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <!-- Dashboard Tab -->
+    <div class="tab-content active" *ngIf="isActive('dashboard')">
+      <div class="welcome-header">
+        <h2>Customer Dashboard Overview</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+          <div class="stat-value">{{ orderStats.total || 0 }}</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-box"></i></div>
+          <div class="stat-value">{{ productStats.total || 0 }}</div>
+          <div class="stat-label">Available Products</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-truck"></i></div>
+          <div class="stat-value">{{ distributorStats.total || 0 }}</div>
+          <div class="stat-label">Distributors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-value">${{ revenueStats.total || 0 }}</div>
+          <div class="stat-label">Total Spent</div>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <h3>Recent Orders</h3>
+        <div *ngIf="recentOrders?.length; else noRecentOrders">
+          <div class="order-item" *ngFor="let order of recentOrders">
+            <div class="order-info">
+              <strong>Order #{{ order.orderId }}</strong>
+              <span class="order-date">{{ order.orderDate | date:'medium' }}</span>
+            </div>
+            <div class="order-status" [class]="order.status.toLowerCase()">
+              {{ order.status }}
+            </div>
+          </div>
+        </div>
+        <ng-template #noRecentOrders>
+          <p>No recent orders found.</p>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Distributors Tab -->
+    <div class="tab-content"  *ngIf="activeTab === 'distributors'"> -->
+      div class="welcome-header">
+        <h2>My Distributors</h2>
+      </div> 
+
+   
+      <app-cust-dashboard *ngIf="activeTab === 'distributors'"></app-cust-dashboard>
+
+      
+<app-products-by-dist
+  *ngIf="activeTab === 'products'"
+  [products]="products"
+  [distributorId]="dashboardData?.distributor?.distributorId || ''"
+  [customerId]="customerId">
+</app-products-by-dist>
+    <!-- Orders Tab -->
+    
+      <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>
+   
+
+    <!-- Profile Tab -->
+    
+      
+   <app-profile *ngIf="activeTab === 'profile'"></app-profile>
+    
+
+</div>

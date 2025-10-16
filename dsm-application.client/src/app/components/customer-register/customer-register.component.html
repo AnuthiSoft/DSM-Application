@@ -1,12 +1,123 @@
-<div class="p-4">
-  <h2 class="text-xl font-bold">Customer Registration</h2>
-  <form (ngSubmit)="register()" class="flex flex-col gap-2">
-    <input type="text" placeholder="Name" [(ngModel)]="request.name" name="name" required />
-    <input type="email" placeholder="Email" [(ngModel)]="request.email" name="email" required />
-    <input type="text" placeholder="Phone" [(ngModel)]="request.phoneNumber" name="phoneNumber" />
-    <input type="password" placeholder="Password" [(ngModel)]="request.password" name="password" required />
-    <button type="submit">Register</button>
-  </form>
-  <p class="text-green-600">{{ message }}</p>
-</div>
+<div class="registration-section">
+  <div class="registration-card">
+    <div class="card-header">
+      <h2><i class="fas fa-user-plus"></i> Customer Registration</h2>
+      <p class="card-subtitle">Create a new customer account</p>
+    </div>
 
+    <form (ngSubmit)="register()" class="registration-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-user"></i>
+            Full Name
+          </label>
+          <input 
+            type="text" 
+            class="form-control"
+            placeholder="Enter your full name" 
+            [(ngModel)]="request.name" 
+            name="name" 
+            required
+          />
+          <div class="form-hint">Your complete name as it should appear on orders</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <input 
+            type="email" 
+            class="form-control"
+            placeholder="Enter your email address" 
+            [(ngModel)]="request.email" 
+            name="email" 
+            required
+          />
+          <div class="form-hint">We'll send confirmation to this email</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-phone"></i>
+            Phone Number
+          </label>
+          <input 
+            type="text" 
+            class="form-control"
+            placeholder="Enter your phone number" 
+            [(ngModel)]="request.phoneNumber" 
+            name="phoneNumber" 
+          />
+          <div class="form-hint">Optional - for order updates and support</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <input 
+            type="password" 
+            class="form-control"
+            placeholder="Create a secure password" 
+            [(ngModel)]="request.password" 
+            name="password" 
+            required
+            (input)="checkPasswordStrength()"
+          />
+          <div class="password-strength">
+            <div class="strength-bar" [class]="passwordStrength">
+              <div class="strength-fill"></div>
+            </div>
+            <span class="strength-text">{{ passwordStrengthText }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary register-btn" [disabled]="!isFormValid() || isProcessing">
+          <i class="fas" [class.fa-user-plus]="!isProcessing" [class.fa-spinner]="isProcessing" [class.fa-spin]="isProcessing"></i>
+          {{ isProcessing ? 'Creating Account...' : 'Create Account' }}
+        </button>
+        
+        <div class="form-links">
+          <a href="/customer/login" class="link-text">
+            <i class="fas fa-sign-in-alt"></i>
+            Already have an account? Sign in
+          </a>
+        </div>
+      </div>
+    </form>
+
+    <!-- Success Message -->
+    <div *ngIf="message" class="message-success">
+      <i class="fas fa-check-circle"></i>
+      <div class="message-content">
+        <h4>Registration Successful!</h4>
+        <p>{{ message }}</p>
+        <div class="success-actions">
+          <button class="btn btn-outline-success btn-sm" (click)="resetForm()">
+            <i class="fas fa-plus"></i>
+            Register Another
+          </button>
+          <a href="/login" class="btn btn-success btn-sm">
+            <i class="fas fa-sign-in-alt"></i>
+            Sign In Now
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="message-error">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="message-content">
+        <h4>Registration Failed</h4>
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  </div>
+</div>

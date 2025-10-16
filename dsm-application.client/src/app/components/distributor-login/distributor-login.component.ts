@@ -25,6 +25,8 @@ export class DistributorLoginComponent {
         next: (res: any) => {
           const role = this.auth.getRole();
              localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId
+             localStorage.setItem('EmployeeId', res.employeeId);
+                localStorage.setItem('employeeId', res.employeeId); // ✅ store employeeId
           if (role === 'Admin') {
             this.router.navigate(['/admin-dashboard']);
           } else if (role === 'Distributor') {
@@ -39,3 +41,5 @@ export class DistributorLoginComponent {
       });
     }
 }
+
+

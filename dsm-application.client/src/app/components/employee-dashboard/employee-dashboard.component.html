@@ -1,1 +1,206 @@
-<p>employee-dashboard works!</p>
+<!-- <p>employee-dashboard works!</p>
+<app-employee-orders></app-employee-orders> -->
+<!-- employee-dashboard.component.html -->
+<!-- <nav>
+  <ul>
+    <li><a routerLink="/employee-orders"><i class="fas fa-list"></i> My Orders</a></li>
+  </ul>
+</nav>
+
+<router-outlet></router-outlet> -->
+<div class="body">
+  <!-- Sidebar Navigation -->
+  <div class="dashboard-sidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-user-tie"></i> <span>EmployeePortal</span></h3>
+    </div>
+    <div class="nav-items">
+      <div class="nav-item" 
+           [class.active]="isActive('dashboard')" 
+           (click)="setActiveTab('dashboard')">
+        <i class="fas fa-th-large"></i> <span>Dashboard</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('orders')" 
+           (click)="setActiveTab('orders')">
+        <i class="fas fa-shopping-cart"></i> <span>My Orders</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('tasks')" 
+           (click)="setActiveTab('tasks')">
+        <i class="fas fa-tasks"></i> <span>Tasks</span>
+      </div>
+
+      <div class="nav-item" 
+           [class.active]="isActive('profile')" 
+           (click)="setActiveTab('profile')">
+        <i class="fas fa-user"></i> <span>My Profile</span>
+      </div>
+
+      <div class="nav-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <!-- Dashboard Tab -->
+    <div class="tab-content active" *ngIf="isActive('dashboard')">
+      <div class="welcome-header">
+        <h2>Employee Dashboard</h2>
+        <div class="user-welcome">Welcome, {{employeeName}}!</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+          <div class="stat-value">{{orderStats?.assigned || 0}}</div>
+          <div class="stat-label">Assigned Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value">{{orderStats?.completed || 0}}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-value">{{orderStats?.pending || 0}}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div class="stat-value">{{performanceRating || '4.5'}}</div>
+          <div class="stat-label">Performance</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Recent Orders -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Recent Orders</h3>
+            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('orders')">
+              View All
+            </button>
+          </div>
+          <div *ngIf="recentOrders?.length; else noRecentOrders">
+            <div class="order-item" *ngFor="let order of recentOrders">
+              <div class="order-info">
+                <strong>Order #{{ order.id }}</strong>
+                <span class="order-date">{{ order.orderDate | date:'short' }}</span>
+              </div>
+              <div class="order-status" [class]="order.status?.toLowerCase()">
+                {{ order.status }}
+              </div>
+            </div>
+          </div>
+          <ng-template #noRecentOrders>
+            <p class="no-data">No recent orders assigned.</p>
+          </ng-template>
+        </div>
+           <!-- <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders> -->
+
+        <!-- Tasks -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Today's Tasks</h3>
+            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('tasks')">
+              View All
+            </button>
+          </div>
+          <div *ngIf="todayTasks?.length; else noTasks">
+            <div class="task-item" *ngFor="let task of todayTasks">
+              <div class="task-info">
+                <span class="task-title">{{ task.title }}</span>
+                <span class="task-time">{{ task.dueTime }}</span>
+              </div>
+              <div class="task-priority" [class]="task.priority?.toLowerCase()">
+                {{ task.priority }}
+              </div>
+            </div>
+          </div>
+          <ng-template #noTasks>
+            <p class="no-data">No tasks for today.</p>
+          </ng-template>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="action-btn" (click)="setActiveTab('orders')">
+              <i class="fas fa-list"></i>
+              <span>View Orders</span>
+            </button>
+            <button class="action-btn" (click)="updateStatus()">
+              <i class="fas fa-edit"></i>
+              <span>Update Status</span>
+            </button>
+            <button class="action-btn" (click)="setActiveTab('profile')">
+              <i class="fas fa-user-cog"></i>
+              <span>Profile Settings</span>
+            </button>
+            <button class="action-btn" (click)="viewSchedule()">
+              <i class="fas fa-calendar"></i>
+              <span>View Schedule</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="dashboard-card">
+          <h3>Performance Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <span class="metric-label">On-time Delivery</span>
+              <div class="metric-value">92%</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Customer Rating</span>
+              <div class="metric-value">4.7/5</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Tasks Completed</span>
+              <div class="metric-value">45/50</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Efficiency</span>
+              <div class="metric-value">88%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Tab -->
+    
+    <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders>
+    
+
+    <!-- Tasks Tab -->
+    <div class="tab-content" *ngIf="isActive('tasks')">
+      <div class="welcome-header">
+        <h2>My Tasks</h2>
+        <button class="btn btn-primary" (click)="refreshTasks()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+      <div class="tasks-content">
+        <p>Task management content will be implemented here...</p>
+      </div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div class="tab-content" *ngIf="isActive('profile')">
+      <div class="welcome-header">
+        <h2>My Profile</h2>
+      </div>
+      <div class="profile-content">
+        <p>Employee profile management will be implemented here...</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Employee, EmployeeService } from '../../services/employee.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-employees',
@@ -13,6 +14,7 @@ export class EmployeesComponent {
   filteredEmployees: Employee[] = [];   // ✅ for search/filter results
   employeeForm!: FormGroup;
   distributorId = '';
+  employeeId='';
   selectedEmployee: Employee | null = null;
   isEdit = false;
   loading = false;
@@ -21,15 +23,17 @@ export class EmployeesComponent {
   searchTerm = '';
   roleFilter = '';
   statusFilter = '';
-
+  showModal = false;
+// isEdit = false;
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
-    private fb: FormBuilder
+    private fb: FormBuilder, private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
     this.distributorId = this.auth.getDistributorId();
+    this.employeeId = this.auth.getEmployeeId();
 
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
@@ -48,6 +52,7 @@ export class EmployeesComponent {
     this.loading = true;
     this.employeeService.getEmployees(this.distributorId).subscribe({
       next: (data) => {
+        
         this.employees = data;
         this.filteredEmployees = [...this.employees];
         this.loading = false;
@@ -60,37 +65,50 @@ export class EmployeesComponent {
   }
 
   // ✅ Add / Update employee
-  onSubmit() {
-    if (this.employeeForm.invalid) return;
+onSubmit() {
+  if (this.employeeForm.invalid) return;
 
-    const emp: Employee = {
-      ...this.employeeForm.value,
-      distributorId: this.distributorId,
-      isRegistered: true
-    };
+  const emp: Employee = {
+    ...this.employeeForm.value,
+    distributorId: this.distributorId,
+    isRegistered: false
+  };
 
-    if (this.isEdit && this.selectedEmployee?.employeeId) {
-      this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
-        next: () => {
-          this.loadEmployees();
-          this.resetForm();
-        }
-      });
-    } else {
-      this.employeeService.addEmployee(this.distributorId, emp).subscribe({
-        next: () => {
-          this.loadEmployees();
-          this.resetForm();
-        }
-      });
-    }
+  if (this.isEdit && this.selectedEmployee?.employeeId) {
+    this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
+      next: (res: any) => {
+        this.toastr.success(res.message || 'Employee updated successfully!');
+        this.loadEmployees();
+        this.resetForm();
+        this.showModal = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to update employee.');
+      }
+    });
+  } else {
+    this.employeeService.addEmployee(this.distributorId, emp).subscribe({
+      next: (res: any) => {
+        this.toastr.success(res.message || 'Employee added successfully!');
+        this.loadEmployees();
+        this.resetForm();
+        this.showModal = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error('Failed to add employee.');
+      }
+    });
   }
+}
 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
-    this.isEdit = true;
-    this.selectedEmployee = emp;
-    this.employeeForm.patchValue(emp);
+     this.isEdit = true;
+  this.employeeForm.patchValue(emp);
+  this.showModal = true; // ✅ this opens the modal automatically
+   this.selectedEmployee = emp; // ✅ Add this line
   }
 
   // ✅ Delete employee
@@ -141,4 +159,13 @@ export class EmployeesComponent {
       isActive: true
     });
   }
+  openEmployeeModal(): void {
+    this.isEdit = false;
+  this.employeeForm.reset();
+  this.showModal = true;
+}
+
+closeEmployeeModal(): void {
+  this.showModal = false;
+}
 }

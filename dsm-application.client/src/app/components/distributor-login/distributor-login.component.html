@@ -28,16 +28,16 @@
             <div class="login-body">
               <form (ngSubmit)="onLogin()">
                 <div class="mb-3">
-                  <label for="email" class="form-label">Email Address</label>
-                  <input
-                    [(ngModel)]="email"
-                    name="email"
-                    type="email"
-                    class="form-control"
-                    id="email"
-                    placeholder="Enter your email"
-                    required
-                  />
+                 <label for="email" class="form-label">Email or Phone Number</label>
+<input
+  [(ngModel)]="email"
+  name="email"
+  type="text"
+  class="form-control"
+  id="email"
+  placeholder="Enter your email or phone number"
+  required
+/>
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>

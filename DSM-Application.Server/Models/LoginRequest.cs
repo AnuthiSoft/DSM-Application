@@ -1,8 +1,12 @@
-﻿namespace DistributorManagementSystem.Server.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DistributorManagementSystem.Server.Models
 {
     public class LoginRequest
     {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        public string? Email { get; set; }          // optional
+        public string? PhoneNumber { get; set; }    // optional
+        [Required]
+        public string Password { get; set; }
     }
 }

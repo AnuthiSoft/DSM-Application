@@ -4,6 +4,7 @@ import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
+import { Product } from '../../models/products.model';
 
 
 interface Distributor {
@@ -18,31 +19,32 @@ interface Distributor {
   address?: string;
   categories?: string[];
   createdDate?: string;
-  
+
 
 }
 
-interface Product {
-  productId: string;
-  productName: string;
-  productCode?: string;
-  distributorId: string;
-  categoryId?: string | null;
-  price?: string;
-  stock?: string;
-  brand?: string;
-  imageUrl?: string;
-  category?: string;
-  
+// interface Product {
+//   productId: string;
+//   productName: string;
+//   productCode?: string;
+//   distributorId: string;
+//   categoryId?: string | null;
+//   price?: string;
+//   stock?: string;
+//   brand?: string;
+//   imageUrl?: string;
+//   category?: string;
+//    distributorName?: string; // Add this
 
-  
-               
-}
+
+
+
+// }
 interface DistributorWrapper {
   distributor: Distributor;
   products?: Product[];
-  
-  
+
+
 }
 
 interface DashboardResponse {
@@ -51,13 +53,13 @@ interface DashboardResponse {
     distributor: Distributor;
     products: Product[];
   }[];
-   distributor?: Distributor;  
-  products?: Product[];  
-   totalOrders?: number;    
-  totalProducts?: number;   
+  distributor?: Distributor;
+  products?: Product[];
+  totalOrders?: number;
+  totalProducts?: number;
   totalDistributors?: number;
- 
-  
+
+
 }
 @Component({
   selector: 'app-customer-dashboard',
@@ -65,78 +67,108 @@ interface DashboardResponse {
   styleUrl: './customer-dashboard.component.css'
 })
 export class CustomerDashboardComponent {
-    customerEmail: string | null = '';
+  customerEmail: string | null = '';
   customerId: string = '';
   dashboardData!: DashboardResponse;
   loading = true;
-  status:string='';
-  distributorId: string='';
+  status: string = '';
+  distributorId: string = '';
   products: Product[] = [];
 
-       activeTab: string = 'dashboard';
-         currentDate: Date = new Date();
+  activeTab: string = 'dashboard';
+  currentDate: Date = new Date();
+orderStats: { total: number } = { total: 0 };
+productStats: { total: number } = { total: 0 };
+distributorStats: { total: number } = { total: 0 };
+revenueStats: { total: number } = { total: 0 };
+recentOrders: any[] = [];
+// products: any[] = [];
+productsLoading: boolean = true;
 
-
-  constructor(private customerService: CustomerService,private router: Router, private http: HttpClient,private productservice:ProductService) {}
+  constructor(private customerService: CustomerService, private router: Router, private http: HttpClient, private productservice: ProductService) { }
 
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
-      this.customerId = localStorage.getItem('customerId') || '';
-         this.distributorId = localStorage.getItem('distributorId') || '';
-          
-    
-       if (!this.customerId) {
-    console.error('No customerId found in localStorage');
-    
-    return;
-  }
-  
- 
-  this.loadDashboard();
+    this.customerId = localStorage.getItem('customerId') || '';
+    this.distributorId = localStorage.getItem('distributorId') || '';
 
-  
-  
+
+    if (!this.customerId) {
+      console.error('No customerId found in localStorage');
+
+      return;
+    }
+
+
+    this.loadDashboard();
+
+
+
   }
-   loadDashboard() {
-    this.loading = true;
-    this.http.get<DashboardResponse>(`https://localhost:7189/api/customers/dashboard/${this.customerId}`)
+ loadDashboard() {
+  this.loading = true;
+  this.http
+    .get<DashboardResponse>(`https://localhost:7189/api/customers/dashboard/${this.customerId}`)
+    .subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.loading = false;
+
+        // ✅ If non-global customer, load products directly
+        if (!data.isGlobal && data.products) {
+          this.products = data.products;
+        }
+
+        // ✅ If global customer, gather products from each distributor
+        else if (data.isGlobal && data.distributors?.length) {
+          this.products = data.distributors.flatMap(d => d.products || []);
+        }
+
+        console.log('Loaded products:', this.products);
+      },
+      error: (err) => {
+        console.error('Error loading dashboard', err);
+        this.loading = false;
+      },
+    });
+}
+  connectDistributor(distributor: Distributor) {
+    const body = {
+      customerId: this.customerId,
+      distributorId: distributor.distributorId
+    };
+
+    this.http.post('https://localhost:7189/api/customers/connect-distributor', body)
       .subscribe({
-        next: (data) => {
-          this.dashboardData = data;
-          this.loading = false;
+        next: (res: any) => {
+          alert(res);
+
+          this.loadDashboard();
         },
         error: (err) => {
-          console.error('Error loading dashboard', err);
-          this.loading = false;
+          console.error('Error connecting distributor', err);
+          alert(err.error || 'Failed to send connection request');
         }
       });
   }
-  connectDistributor(distributor: Distributor) {
-  const body = {
-    customerId: this.customerId,
-    distributorId: distributor.distributorId
-  };
-
-  this.http.post('https://localhost:7189/api/customers/connect-distributor', body)
-    .subscribe({
-      next: (res: any) => {
-        alert(res);  
-       
-        this.loadDashboard();
-      },
-      error: (err) => {
-        console.error('Error connecting distributor', err);
-        alert(err.error || 'Failed to send connection request');
-      }
-    });
-}
-viewProducts(distributorId: string) {
-  this.router.navigate(['/products', distributorId]);
-}
+  viewProducts(distributorId: string) {
+    this.router.navigate(['/products', distributorId]);
+  }
 
   logout() {
     localStorage.clear();
     this.router.navigate(['/customer/login']);
   }
-  
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+
+  isActive(tab: string): boolean {
+    return this.activeTab === tab;
+  }
+  addToCart(product: any) {
+  console.log('Add to cart:', product);
+  // Call your cart service here
+}
+
 }

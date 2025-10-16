@@ -1,0 +1,157 @@
+<!-- 
+      <h4>Pending Connection Requests</h4>
+      <div *ngIf="pendingRequests.length === 0">No pending requests.</div>
+
+      <div class="list-group">
+        <div class="list-group-item mb-2" *ngFor="let req of pendingRequests">
+
+
+          <strong>Name:</strong> {{ req.name }} <br>
+          <strong>Email:</strong> {{ req.email }} <br>
+          <strong>Phone:</strong> {{ req.phoneNumber }} <br>
+
+          <strong>RequestedOn :</strong> {{ req.connectedOn | date }}
+          <div class="mt-2">
+            <button class="btn btn-success btn-sm me-2" (click)="respond(req, true)">Accept</button>
+            <button class="btn btn-danger btn-sm" (click)="respond(req, false)">Reject</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Accepted Customers</h3>
+
+        <div *ngIf="loading">Loading...</div>
+
+        <table *ngIf="!loading && acceptedCustomers?.length; else noAccepted">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Connected On</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of acceptedCustomers">
+              <td>{{ c.name }}</td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.phoneNumber }}</td>
+              <td>{{ c.connectedOn | date:'medium' }}</td>
+              <td>
+                <button class="btn btn-danger" (click)="disconnect(c.connectionId)">Disconnect</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #noAccepted>
+          <p>No accepted customers yet.</p>
+        </ng-template>
+      </div> -->
+<div class="customer-connections-section">
+  <!-- Pending Requests Card -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <h3><i class="fas fa-clock"></i> Pending Connection Requests</h3>
+      <span class="requests-count">{{ pendingRequests.length }} request(s)</span>
+    </div>
+
+    <div *ngIf="pendingRequests.length === 0" class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <h4>No Pending Requests</h4>
+      <p>All connection requests have been processed.</p>
+    </div>
+
+    <div *ngIf="pendingRequests.length > 0" class="requests-grid">
+      <div *ngFor="let req of pendingRequests" class="request-card">
+        <div class="request-header">
+          <div class="customer-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="customer-info">
+            <h4>{{ req.name }}</h4>
+            <span class="request-date">
+              <i class="fas fa-calendar"></i>
+              Requested on {{ req.connectedOn | date:'mediumDate' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="request-details">
+          <div class="detail-item">
+            <i class="fas fa-envelope"></i>
+            <span class="detail-value">{{ req.email }}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-phone"></i>
+            <span class="detail-value">{{ req.phoneNumber || 'Not provided' }}</span>
+          </div>
+        </div>
+
+        <div class="request-actions">
+          <button class="btn btn-success btn-sm" (click)="respond(req, true)">
+            <i class="fas fa-check-circle"></i>
+            Accept
+          </button>
+          <button class="btn btn-danger btn-sm" (click)="respond(req, false)">
+            <i class="fas fa-times-circle"></i>
+            Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accepted Customers Card -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <h3><i class="fas fa-users"></i> Connected Customers</h3>
+      <span class="customers-count">{{ acceptedCustomers.length }} customer(s)</span>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Loading connected customers...</span>
+    </div>
+
+    <div *ngIf="!loading && acceptedCustomers.length > 0" class="table-container">
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Connected On</th>
+            <th class="actions-column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of acceptedCustomers" class="customer-row">
+            <td class="customer-name">
+              <strong>{{ c.name }}</strong>
+            </td>
+            <td class="customer-email">{{ c.email }}</td>
+            <td class="customer-phone">{{ c.phoneNumber || '-' }}</td>
+            <td class="connection-date">
+              <i class="fas fa-calendar-check"></i>
+              {{ c.connectedOn | date:'medium' }}
+            </td>
+            <td class="customer-actions">
+              <button class="btn btn-danger btn-sm" (click)="disconnect(c.connectionId)">
+                <i class="fas fa-unlink"></i>
+                Disconnect
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="!loading && acceptedCustomers.length === 0" class="empty-state">
+      <i class="fas fa-users-slash"></i>
+      <h4>No Connected Customers</h4>
+      <p>Accepted connection requests will appear here.</p>
+    </div>
+  </div>
+</div>

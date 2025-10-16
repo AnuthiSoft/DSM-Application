@@ -18,20 +18,34 @@ export class AuthService {
           localStorage.setItem('role', res.role);
             if (res.distributorId) {
     localStorage.setItem('DistributorId', res.distributorId); 
+
   }
+     if (res.employeeId) {
+    localStorage.setItem('EmployeeId', res.employeeId); 
+    
+  }
+     this.authStatus.next(true); // ✅ mark user as logged in
         }
       })
     );
   }
 
-  signup(email: string, password: string): Observable<any> {
-    return this.api.post(`auth/signup`, { email, password });
-  }
+  signup(identifier: string, password: string): Observable<any> {
+  // If identifier contains '@', treat it as email, else as phone number
+  const payload = {
+    Email: identifier.includes('@') ? identifier : null,
+    PhoneNumber: !identifier.includes('@') ? identifier : null,
+    Password: password
+  };
+
+  return this.api.post(`auth/signup`, payload);
+}
 
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     this.authStatus.next(false);
+     localStorage.removeItem('EmployeeId');
   }
 
   getRole(): string | null {
@@ -42,7 +56,12 @@ export class AuthService {
     const id = localStorage.getItem('DistributorId');
     return id ? id : ''; // returns empty string if not found
   }
-
+   // Get employeeId from localStorage
+  getEmployeeId(): string {
+    const id = localStorage.getItem('EmployeeId');
+    return id ? id : ''; // return empty string if not found
+  }
+  
   getToken(): string | null {
     return localStorage.getItem('token');
   }

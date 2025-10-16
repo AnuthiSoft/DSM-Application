@@ -1,4 +1,6 @@
-﻿namespace DSM_Application.Server.Models.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace DSM_Application.Server.Models.DTOs
 {
     public class OrderCreateDto
     {
@@ -13,5 +15,50 @@
         public string ProductName { get; set; }
         public double Price { get; set; }
         public int Quantity { get; set; }
+    }
+    public class AssignOrderDto
+    {
+        [JsonPropertyName("employeeId")]
+        public string EmployeeId { get; set; }
+        [JsonPropertyName("employeeName")]
+        public string EmployeeName { get; set; } // optional but convenient
+        public string Note { get; set; } // optional
+    }
+
+    public class EmployeeUpdateStatusDto
+    {
+        public string Status { get; set; } // e.g., "Delivered", "FailedDelivery"
+        public bool PaymentCollected { get; set; } = false;
+        public double? CollectedAmount { get; set; }
+        public string PaymentMethod { get; set; } // "COD", "Online"
+        public string Remarks { get; set; }
+    }
+    public class UpdateStatusDto
+    {
+        public string Status { get; set; }
+        public string? PaymentMethod { get; set; } // "Cash" or "Online"
+        public double? CollectedAmount { get; set; }
+    }
+
+    public class DistributorOrderDto
+    {
+        public string Id { get; set; }
+        public string CustomerId { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhone { get; set; }
+        public List<OrderProduct> Products { get; set; }
+        public double TotalAmount { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string Status { get; set; }
+        // ✅ Add these fields
+        public string? EmployeeId { get; set; }
+        public string? Name { get; set; }
+        public bool PaymentCollectedByEmployee { get; set; } = false;
+        public double? CollectedAmount { get; set; } // amount collected physically by employee (if COD)
+        public string PaymentMethod { get; set; } // "COD", "Online", etc.
+        public DateTime? CollectedOn { get; set; }
+
+        public DateTime? DeliveredOn { get; set; }
     }
 }

@@ -25,5 +25,8 @@ namespace DSM_Application.Server.Models.DTOs
         public string? ImageUrl { get; set; }
         
         public string DistributorId { get; set; }
+        //[BsonElement("Name")]
+        //public string Name { get; set; }
+
     }
 }

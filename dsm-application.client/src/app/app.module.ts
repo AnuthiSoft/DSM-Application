@@ -25,7 +25,11 @@ import { ProductsByDistComponent } from './components/products-by-dist/products-
 import { OrderHistoryComponent } from './components/order-history/order-history.component';
 import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
 import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
-
+import { EmployeeOrdersComponent } from './components/employee-orders/employee-orders.component';
+import { CustDashboardComponent } from './components/cust-dashboard/cust-dashboard.component';
+import { DistributorConnectionRequestsComponent } from './components/distributor-connection-requests/distributor-connection-requests.component';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 
@@ -52,13 +56,21 @@ import { CustomerOrdersComponent } from './components/customer-orders/customer-o
     ProductsByDistComponent,
       OrderHistoryComponent,
       DistributorOrdersComponent,
-      CustomerOrdersComponent
+      CustomerOrdersComponent,
+      EmployeeOrdersComponent,
+      CustDashboardComponent,
+      DistributorConnectionRequestsComponent
+   
 
 
   ],
   imports: [
     BrowserModule, HttpClientModule,
-    AppRoutingModule, FormsModule, ReactiveFormsModule
+    AppRoutingModule, FormsModule, ReactiveFormsModule,  BrowserAnimationsModule, ToastrModule.forRoot({
+      timeOut: 3000,
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true,
+    }),
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

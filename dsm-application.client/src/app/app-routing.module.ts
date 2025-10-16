@@ -20,6 +20,9 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { ProductsByDistComponent } from './components/products-by-dist/products-by-dist.component';
 import { OrderHistoryComponent } from './components/order-history/order-history.component';
 import { CustomerOrdersComponent } from './components/customer-orders/customer-orders.component';
+import { EmployeeOrdersComponent } from './components/employee-orders/employee-orders.component';
+import { CustDashboardComponent } from './components/cust-dashboard/cust-dashboard.component';
+import { DistributorConnectionRequestsComponent } from './components/distributor-connection-requests/distributor-connection-requests.component';
 
 
 
@@ -44,6 +47,9 @@ const routes: Routes = [
        { path: 'products/:distributorId', component:ProductsByDistComponent },
         { path: 'orders', component: OrderHistoryComponent },
         { path: 'customerOrder', component:CustomerOrdersComponent},
+        { path: 'employee-orders', component: EmployeeOrdersComponent },
+          { path: 'cust-dash', component: CustDashboardComponent },
+          { path: 'connectionrequests', component:DistributorConnectionRequestsComponent },
    
       
 

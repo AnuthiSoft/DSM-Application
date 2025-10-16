@@ -11,7 +11,8 @@ import { CustomerLoginRequest } from '../../models/customer.model';
   styleUrls: ['./customer-login.component.css']
 })
 export class CustomerLoginComponent {
- request: CustomerLoginRequest = { email: '', password: '' };
+ request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
+
   message = '';
    showPassword = false; 
 
@@ -27,6 +28,23 @@ export class CustomerLoginComponent {
   }
 
   login() {
+     // Determine if input is a phone number (all digits)
+  const identifier = this.request.email?.trim();
+  if (!identifier) {
+    this.message = "Please enter email or phone number";
+    return;
+  }
+
+  if (/^\d+$/.test(identifier)) {
+    // all digits → phone
+    this.request.phoneNumber = identifier;
+    this.request.email = '';
+  } else {
+    // otherwise → email
+    this.request.email = identifier;
+    this.request.phoneNumber = '';
+  }
+
     this.customerService.login(this.request).subscribe({
       next: (res: any) => {
         // ✅ Clear any old data

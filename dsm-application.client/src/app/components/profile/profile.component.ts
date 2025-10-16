@@ -11,6 +11,7 @@ export class ProfileComponent implements OnInit{
   isSaving: boolean = false;
   isLoading: boolean = false;
   errorMessage: string = '';
+    originalCustomer: any = {}; // keep a copy for change detection
 
   constructor(private http: HttpClient) {}
 
@@ -26,6 +27,7 @@ export class ProfileComponent implements OnInit{
     this.http.get('https://localhost:7189/api/customers/profile',{ headers }).subscribe({
       next: (res) => {
         this.customer = res;
+         this.originalCustomer = { ...res }; // store original data
         this.isLoading = false;
       },
       error: (err) => {
@@ -41,6 +43,7 @@ export class ProfileComponent implements OnInit{
     this.http.put('https://localhost:7189/api/customers/profile', this.customer).subscribe({
       next: () => {
         alert('Profile updated successfully!');
+           this.originalCustomer = { ...this.customer }; // update original copy
         this.isSaving = false;
       },
       error: (err) => {
@@ -49,5 +52,14 @@ export class ProfileComponent implements OnInit{
         this.isSaving = false;
       }
     });
+  }
+   cancelEdit() {
+    // revert changes
+    this.customer = { ...this.originalCustomer };
+  }
+
+  hasChanges(): boolean {
+    // compare current with original
+    return JSON.stringify(this.customer) !== JSON.stringify(this.originalCustomer);
   }
 }

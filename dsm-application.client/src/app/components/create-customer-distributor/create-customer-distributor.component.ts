@@ -12,7 +12,8 @@ export class CreateCustomerDistributorComponent implements OnInit {
   customer: Customer = {
     name: '', email: '', phoneNumber: '',
     role: 'Customer',
-    address: ''
+    address: '',
+    isActive: undefined
   };
   message = '';
   customers: Customer[] = [];

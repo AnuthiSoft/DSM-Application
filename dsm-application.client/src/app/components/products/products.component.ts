@@ -1,7 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { Category, Product, ProductService } from '../../services/product.service';
+import { Category, ProductService } from '../../services/product.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
+import { Product } from '../../models/products.model';
 
 
 @Component({

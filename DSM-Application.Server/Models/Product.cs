@@ -17,6 +17,11 @@ namespace DSM_Application.Server.Models
         [BsonElement("DistributorId")]
         [Required]
         public string DistributorId { get; set; } // Logged-in distributor ID
+                                                  //[BsonElement("Name")]
+                                                  //public string Name { get; set; }
+                                                  // ✅ Add this property
+        public string DistributorName { get; set; } = string.Empty;
+
 
 
         [BsonElement("ProductCode")]

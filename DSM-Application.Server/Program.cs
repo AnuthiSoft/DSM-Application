@@ -35,15 +35,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy => policy
-            .WithOrigins("http://localhost:58555") // Angular URL
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials());
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()    // or restrict to your Angular domain later
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -64,7 +63,7 @@ var app = builder.Build();
 var dbService = app.Services.GetRequiredService<MongoDbService>();
 app.UseStaticFiles();
 
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();

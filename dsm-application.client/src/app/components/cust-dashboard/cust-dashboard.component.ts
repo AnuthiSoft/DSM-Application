@@ -11,7 +11,7 @@ interface Distributor {
   name?: string;
   email?: string;
   phoneNumber?: string;
-  status: string;
+  status?: string;
   isPremium?: boolean;
   isActive?: boolean;
   address?: string;

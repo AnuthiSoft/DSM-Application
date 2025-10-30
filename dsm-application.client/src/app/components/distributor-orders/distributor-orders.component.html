@@ -108,8 +108,9 @@
             <th>Total Amount</th>
             <th>Status</th>
             <th>Assigned Employee</th>
-            <th>Employee ID</th>
+            <!-- <th>Employee ID</th> -->
             <th class="actions-column">Actions</th>
+             <th>Payment</th>
           </tr>
         </thead>
         <tbody>
@@ -131,9 +132,9 @@
             <td class="employee-name">
               {{ o.name || 'Not assigned' }}
             </td>
-            <td class="employee-id">
+            <!-- <td class="employee-id">
               {{ o.employeeId || '-' }}
-            </td>
+            </td> -->
             <td class="order-actions">
               <div class="action-buttons">
                 <button *ngIf="o.status === 'Pending'" 

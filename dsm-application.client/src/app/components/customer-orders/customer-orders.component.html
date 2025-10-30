@@ -84,7 +84,7 @@
               {{ order.orderDate | date:'medium' }}
             </span>
           </div>
-          <span class="status-badge" [class]="order.status?.toLowerCase()">
+          <span class="status-badge" [class]="order.status.toLowerCase()">
             {{ order.status }}
           </span>
         </div>

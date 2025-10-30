@@ -21,6 +21,9 @@ export class ProductsByDistComponent implements OnInit {
 
     cart: { product: Product; quantity: number }[] = [];
   // customerId = localStorage.getItem('customerId') || '';
+    showPopup = false;
+  selectedProduct: Product | null = null;
+  selectedQuantity = 1;
 
 
   constructor(
@@ -54,11 +57,47 @@ export class ProductsByDistComponent implements OnInit {
       }
     });
   }
+    // 🛒 When user clicks Add to Cart
+  openAddToCartPopup(product: Product) {
+    this.selectedProduct = product;
+    this.selectedQuantity = 1;
+    this.showPopup = true;
+  }
+    // ➕ Increase quantity
+  increaseQty() {
+    if (this.selectedProduct && this.selectedQuantity < (this.selectedProduct.stock || 1))
+      this.selectedQuantity++;
+  }
+    // ➖ Decrease quantity
+  decreaseQty() {
+    if (this.selectedQuantity > 1) this.selectedQuantity--;
+  }
   
-  addToCart(product: Product) {
-    const found = this.cart.find(c => c.product.productId === product.productId);
-    if (found) found.quantity++;
-    else this.cart.push({ product, quantity: 1 });
+  // addToCart(product: Product) {
+  //   const found = this.cart.find(c => c.product.productId === product.productId);
+  //   if (found) found.quantity++;
+  //   else this.cart.push({ product, quantity: 1 });
+  // }
+    // ✅ Confirm add to cart
+  confirmAddToCart() {
+    if (!this.selectedProduct) return;
+
+    const existing = this.cart.find(c => c.product.productId === this.selectedProduct!.productId);
+    if (existing) {
+      existing.quantity += this.selectedQuantity;
+    } else {
+      this.cart.push({ product: this.selectedProduct, quantity: this.selectedQuantity });
+    }
+
+    this.showPopup = false;
+    this.selectedProduct = null;
+    alert('Product added to cart');
+  }
+
+  // ❌ Cancel popup
+  closePopup() {
+    this.showPopup = false;
+    this.selectedProduct = null;
   }
 
   removeFromCart(productId?: string) {

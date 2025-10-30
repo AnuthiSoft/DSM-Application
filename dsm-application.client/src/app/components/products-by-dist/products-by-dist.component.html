@@ -1,50 +1,4 @@
-<!-- <div class="container mt-4">
-  <h2>Distributor Products</h2>
 
-  <div *ngIf="loading">Loading...</div>
-
-  <div *ngIf="!loading && products.length === 0">
-    <p>No products available.</p>
-  </div>
-
-  <div *ngIf="!loading && products.length > 0" class="row">
-    <div class="col-md-3 mb-3" *ngFor="let prod of products">
-      <div class="card">
-        <div class="card-body">
-          <img *ngIf="prod.imageUrl" [src]="'https://localhost:7189' + prod.imageUrl" class="img-fluid mb-2" />
-          <h6 class="card-title">{{ prod.productName }}</h6>
-          <p>Code: {{ prod.productCode }}</p>
-          <p>Price: {{ prod.price }}</p>
-          <p>Stock: {{ prod.stock }}</p>
-          <p>Brand: {{ prod.brand }}</p>
-          <p>Category: {{ prod.category }}</p>
-           <button class="btn btn-primary btn-sm" (click)="addToCart(prod)">Add to Cart</button>
-        </div>
-      </div>
-    </div>
-  </div>
-   <div class="mt-4" *ngIf="cart.length > 0">
-    <h4>Your Cart</h4>
-    <table class="table table-bordered">
-      <thead>
-        <tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of cart">
-          <td>{{ item.product.productName }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>₹{{ item.product.price }}</td>
-          <td>₹{{ item.product.price * item.quantity }}</td>
-          <td><button class="btn btn-sm btn-danger" (click)="removeFromCart(item.product.productId)">Remove</button></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p class="fw-bold">Total: ₹{{ getTotal() }}</p>
-    <button class="btn btn-success" (click)="placeOrder()">Place Order</button>
-  </div>
-
-</div> -->
 <div class="products-section">
   <div class="welcome-header">
     <h2>Distributor Products</h2>
@@ -87,12 +41,13 @@
       
           </div>
           
-          <button class="btn btn-primary add-to-cart-btn" 
-                  (click)="addToCart(prod)"
-                  [disabled]="prod.stock === 0">
-            <i class="fas fa-cart-plus"></i>
-            {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
-          </button>
+        <button class="btn btn-primary add-to-cart-btn"
+        (click)="openAddToCartPopup(prod)"
+        [disabled]="prod.stock === 0">
+  <i class="fas fa-cart-plus"></i>
+  {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+</button>
+
         </div>
       </div>
     </div>
@@ -148,4 +103,27 @@
       </div>
     </div>
   </div>
+  <!-- 🧩 Add to Cart Popup Modal -->
+<div class="popup-overlay" *ngIf="showPopup">
+  <div class="popup-content">
+    <h3>Add to Cart</h3>
+    <div class="popup-body" *ngIf="selectedProduct">
+      <p><strong>{{ selectedProduct.productName }}</strong></p>
+      <p>Price: ₹{{ selectedProduct.price }}</p>
+      <p>Available Stock: {{ selectedProduct.stock }}</p>
+
+      <div class="quantity-control">
+        <button (click)="decreaseQty()" [disabled]="selectedQuantity <= 1">-</button>
+        <span>{{ selectedQuantity }}</span>
+        <button (click)="increaseQty()" [disabled]="selectedQuantity >= (selectedProduct.stock || 1)">+</button>
+      </div>
+    </div>
+
+    <div class="popup-actions">
+      <button class="btn btn-success" (click)="confirmAddToCart()">Add</button>
+      <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </div>

@@ -37,12 +37,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()    // or restrict to your Angular domain later
+    //options.AddPolicy("AllowAll", policy =>
+    //{
+    //    policy.AllowAnyOrigin()    // or restrict to your Angular domain later
+    //          .AllowAnyHeader()
+    //          .AllowAnyMethod();
+    //});
+    options.AddPolicy("AllowRender", policy =>
+        policy.WithOrigins("https://dsm-application-l84p.onrender.com/")
               .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -63,7 +68,7 @@ var app = builder.Build();
 var dbService = app.Services.GetRequiredService<MongoDbService>();
 app.UseStaticFiles();
 
-app.UseCors("AllowAll");
+app.UseCors("AllowRender");
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();

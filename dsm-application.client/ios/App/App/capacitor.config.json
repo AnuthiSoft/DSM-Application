@@ -1,6 +1,10 @@
 {
-	"appId": "com.example.app",
-	"appName": "Distnet",
-	"webDir": "www",
+	"appId": "com.dsm.application",
+	"appName": "DistNet",
+	"webDir": "dist/dsm-application.client",
+	"server": {
+		"url": "https://dsm-application.web.app",
+		"cleartext": true
+	},
 	"packageClassList": []
 }

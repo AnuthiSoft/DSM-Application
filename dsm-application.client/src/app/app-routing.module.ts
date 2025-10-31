@@ -23,6 +23,7 @@ import { CustomerOrdersComponent } from './components/customer-orders/customer-o
 import { EmployeeOrdersComponent } from './components/employee-orders/employee-orders.component';
 import { CustDashboardComponent } from './components/cust-dashboard/cust-dashboard.component';
 import { DistributorConnectionRequestsComponent } from './components/distributor-connection-requests/distributor-connection-requests.component';
+import { TestComponent } from './components/test/test.component';
 
 
 
@@ -50,6 +51,7 @@ const routes: Routes = [
         { path: 'employee-orders', component: EmployeeOrdersComponent },
           { path: 'cust-dash', component: CustDashboardComponent },
           { path: 'connectionrequests', component:DistributorConnectionRequestsComponent },
+          { path: 'test', component:TestComponent },
    
       
 

@@ -30,6 +30,7 @@ import { CustDashboardComponent } from './components/cust-dashboard/cust-dashboa
 import { DistributorConnectionRequestsComponent } from './components/distributor-connection-requests/distributor-connection-requests.component';
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { TestComponent } from './components/test/test.component';
 
 
 
@@ -59,7 +60,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
       CustomerOrdersComponent,
       EmployeeOrdersComponent,
       CustDashboardComponent,
-      DistributorConnectionRequestsComponent
+      DistributorConnectionRequestsComponent,
+      TestComponent
    
 
 

@@ -36,8 +36,8 @@
       <div class="nav-item" [class.active]="isActive('settings')" (click)="setActiveTab('settings')">
         <i class="fas fa-cog"></i> <span>Settings</span>
       </div>
-        <div class="nav-item" [class.active]="isActive('settings')" (click)="setActiveTab('settings')">
-        <i class="fas fa-clipboard-check"></i> <span>mmmm</span>
+        <div class="nav-item" [class.active]="isActive('test')" (click)="setActiveTab('test')">
+        <i class="fas fa-clipboard-check"></i> <span>Test</span>
       </div>
 
       <div class="nav-item" (click)="logout()">
@@ -91,6 +91,8 @@
     <!-- Employees Tab -->
     <app-distributor-orders *ngIf="activeTab === 'orders'"></app-distributor-orders>
     <app-distributor-connection-requests *ngIf="activeTab === 'connectionrequests'"></app-distributor-connection-requests>
+    <app-test *ngIf="activeTab === 'test'"></app-test>
+
 
 
 

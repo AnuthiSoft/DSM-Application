@@ -67,7 +67,15 @@ namespace DistributorManagementSystem.Server.Controllers
                 };
 
                 var tokenc = _jwt.GenerateToken(adminUser);
-                return Ok(new { tokenc, role = adminUser.Role });
+                var refreshToken = _jwt.GenerateRefreshToken();
+                await _db.RefreshTokens.InsertOneAsync(new RefreshToken
+                {
+                    UserId = adminUser.Email,
+                    Token = refreshToken,
+                    ExpiryDate = DateTime.UtcNow.AddDays(7)
+                });
+
+                return Ok(new { tokenc, refreshToken, role = adminUser.Role });
             }
 
             // ✅ Allow login using either email or phone number
@@ -110,10 +118,22 @@ namespace DistributorManagementSystem.Server.Controllers
                 await _db.Users.UpdateOneAsync(u => u.Id == user.Id, update);
             }
 
+
             var token = _jwt.GenerateToken(user);
+            var newRefreshToken = _jwt.GenerateRefreshToken();
+
+            await _db.RefreshTokens.InsertOneAsync(new RefreshToken
+            {
+                UserId = user.Id,
+                Token = newRefreshToken,
+                ExpiryDate = DateTime.UtcNow.AddDays(7)
+            });
             return Ok(new
             {
+
                 token,
+                refreshToken = newRefreshToken,
+
                 role = user.Role,
                 distributorId = user.DistributorId,
                 employeeId = user.EmployeeId
@@ -211,7 +231,53 @@ namespace DistributorManagementSystem.Server.Controllers
 
             return Ok("Password reset successfully. You can now login.");
         }
-      
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var refreshToken = await _db.RefreshTokens
+                .Find(rt => rt.Token == request.RefreshToken && !rt.IsRevoked)
+                .FirstOrDefaultAsync();
+
+            if (refreshToken == null || refreshToken.ExpiryDate < DateTime.UtcNow)
+                return Unauthorized("Invalid or expired refresh token");
+
+            var user = await _db.Users.Find(u => u.Id == refreshToken.UserId).FirstOrDefaultAsync();
+            if (user == null) return Unauthorized("User not found");
+
+            // Generate new tokens
+            var newJwt = _jwt.GenerateToken(user);
+            var newRefreshToken = _jwt.GenerateRefreshToken();
+
+            // Revoke old token
+            var update = Builders<RefreshToken>.Update
+                .Set(r => r.IsRevoked, true);
+            await _db.RefreshTokens.UpdateOneAsync(r => r.Id == refreshToken.Id, update);
+
+            // Save new token
+            await _db.RefreshTokens.InsertOneAsync(new RefreshToken
+            {
+                UserId = user.Id,
+                Token = newRefreshToken,
+                ExpiryDate = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { token = newJwt, refreshToken = newRefreshToken });
+        }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+        {
+            var update = Builders<RefreshToken>.Update
+                .Set(r => r.IsRevoked, true);
+            await _db.RefreshTokens.UpdateOneAsync(r => r.Token == request.RefreshToken, update);
+            return Ok("Logged out successfully");
+        }
+
+
+        public class RefreshTokenRequest
+        {
+            public string RefreshToken { get; set; }
+        }
+
         private string ComputeHash(string input)
         {
             using var sha = SHA256.Create();

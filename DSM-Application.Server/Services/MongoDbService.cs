@@ -26,6 +26,8 @@ namespace DistributorManagementSystem.Server.Services
         // ✅ Add this for connections
         public IMongoCollection<CustomerDistributorConnection> Connections =>
             _db.GetCollection<CustomerDistributorConnection>("Connections");
+        public IMongoCollection<RefreshToken> RefreshTokens =>
+    _db.GetCollection<RefreshToken>("RefreshTokens");
     }
 
     public class MongoDbSettings

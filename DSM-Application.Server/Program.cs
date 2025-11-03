@@ -2,6 +2,7 @@ using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.Security.Cryptography;
@@ -70,6 +71,18 @@ var app = builder.Build();
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
 app.UseStaticFiles();
+
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
 
 app.UseCors("AllowRender");
 

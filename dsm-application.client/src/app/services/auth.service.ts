@@ -13,23 +13,20 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.api.post<any>(`auth/login`, { email, password }).pipe(
       tap(res => {
-         const token = res.token || res.tokenc;
-           const refreshToken = res.refreshToken; // ✅ new field from backend
+          const token = res.token || res.tokenc;
+  const refreshToken = res.refreshToken;
 
-        if (res.token || res.tokenc) {
-          localStorage.setItem('token', res.token || res.tokenc);
-             if (refreshToken) localStorage.setItem('refreshToken', refreshToken); // ✅ new line
-          localStorage.setItem('role', res.role);
-            if (res.distributorId) {
-    localStorage.setItem('DistributorId', res.distributorId); 
+  if (token) {
+    localStorage.setItem('token', token);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('role', res.role);
+    if (res.distributorId)
+      localStorage.setItem('DistributorId', res.distributorId);
+    if (res.employeeId)
+      localStorage.setItem('EmployeeId', res.employeeId);
 
+    this.authStatus.next(true);
   }
-     if (res.employeeId) {
-    localStorage.setItem('EmployeeId', res.employeeId); 
-    
-  }
-     this.authStatus.next(true); // ✅ mark user as logged in
-        }
       })
     );
   }
@@ -47,7 +44,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken'); // ✅ new line
+    
     localStorage.removeItem('role');
     this.authStatus.next(false);
      localStorage.removeItem('EmployeeId');

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13cf6e84fb07d216b96e25c8e68bc8d2472d626c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74aaecf4dea434c216dc6f944b506e268c0f1a63")]
 [assembly: System.Reflection.AssemblyProductAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

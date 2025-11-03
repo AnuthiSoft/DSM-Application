@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://dsm-application.onrender.com/api'  // 👈 base API URL for local dev
+  apiUrl: 'https://localhost:7189/api'  // 👈 base API URL for local dev
 };

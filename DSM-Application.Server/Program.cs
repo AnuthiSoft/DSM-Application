@@ -46,8 +46,10 @@ builder.Services.AddCors(options =>
     //});
     options.AddPolicy("AllowRender", policy =>
         policy.WithOrigins(
+            "https://localhost:58555",
             "https://dsm-application.web.app",
-            "https://dsm-application-l84p.onrender.com"
+            "https://dsm-application-l84p.onrender.com",
+           "http://localhost:58555"
         )
               .AllowAnyHeader()
               .AllowAnyMethod()

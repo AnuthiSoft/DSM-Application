@@ -13,8 +13,12 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.api.post<any>(`auth/login`, { email, password }).pipe(
       tap(res => {
+         const token = res.token || res.tokenc;
+           const refreshToken = res.refreshToken; // ✅ new field from backend
+
         if (res.token || res.tokenc) {
           localStorage.setItem('token', res.token || res.tokenc);
+             if (refreshToken) localStorage.setItem('refreshToken', refreshToken); // ✅ new line
           localStorage.setItem('role', res.role);
             if (res.distributorId) {
     localStorage.setItem('DistributorId', res.distributorId); 
@@ -43,6 +47,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken'); // ✅ new line
     localStorage.removeItem('role');
     this.authStatus.next(false);
      localStorage.removeItem('EmployeeId');
@@ -65,6 +70,32 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('token');
   }
+  getRefreshToken(): string | null {
+  return localStorage.getItem('refreshToken');
+}
+
+saveTokens(token: string, refreshToken: string) {
+  localStorage.setItem('token', token);
+  localStorage.setItem('refreshToken', refreshToken);
+}
+
+refreshAccessToken(): Observable<any> {
+  const refreshToken = this.getRefreshToken();
+  if (!refreshToken) return throwError(() => new Error('No refresh token'));
+
+  return this.api.post<any>('auth/refresh-token', { refreshToken }).pipe(
+    tap(res => {
+      if (res.token && res.refreshToken) {
+        this.saveTokens(res.token, res.refreshToken);
+      }
+    }),
+    catchError(err => {
+      this.logout();
+      return throwError(() => err);
+    })
+  );
+}
+
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');

@@ -108,7 +108,7 @@ productsLoading: boolean = true;
  loadDashboard() {
   this.loading = true;
   this.http
-    .get<DashboardResponse>(`https://localhost:7189/api/customers/dashboard/${this.customerId}`)
+    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
     .subscribe({
       next: (data) => {
         this.dashboardData = data;
@@ -138,7 +138,7 @@ productsLoading: boolean = true;
       distributorId: distributor.distributorId
     };
 
-    this.http.post('https://localhost:7189/api/customers/connect-distributor', body)
+    this.http.post('http://localhost:5164/api/customers/connect-distributor', body)
       .subscribe({
         next: (res: any) => {
           alert(res);

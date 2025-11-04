@@ -68,7 +68,7 @@
     <div *ngFor="let product of filteredProducts" class="product-card">
       <div class="product-image">
         <img
-          [src]="'https://localhost:7189' + product.imageUrl"
+          [src]="'http://localhost:5164' + product.imageUrl"
           [alt]="product.productName"
         />
       </div>

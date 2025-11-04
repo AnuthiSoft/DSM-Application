@@ -66,7 +66,7 @@ export class CustDashboardComponent {
 loadDistributors() {
   this.loading = true;
   this.http
-    .get<DashboardResponse>(`https://localhost:7189/api/customers/dashboard/${this.customerId}`)
+    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
     .subscribe({
       next: (res) => {
         console.log('Dashboard response:', res);
@@ -94,7 +94,7 @@ loadDistributors() {
   connectDistributor(distributorId: string) {
   const body = { customerId: this.customerId, distributorId };
   this.http
-    .post<{message: string, status: string}>('https://localhost:7189/api/customers/connect-distributor', body)
+    .post<{message: string, status: string}>('http://localhost:5164/api/customers/connect-distributor', body)
     .subscribe({
       next: (res) => {
         alert(res.message);

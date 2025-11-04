@@ -24,7 +24,7 @@ export class ProfileComponent implements OnInit{
     const headers = new HttpHeaders({
   Authorization: `Bearer ${localStorage.getItem('token')}`
 });
-    this.http.get('https://localhost:7189/api/customers/profile',{ headers }).subscribe({
+    this.http.get('http://localhost:5164/api/customers/profile',{ headers }).subscribe({
       next: (res) => {
         this.customer = res;
          this.originalCustomer = { ...res }; // store original data
@@ -40,7 +40,7 @@ export class ProfileComponent implements OnInit{
 
   saveProfile() {
     this.isSaving = true;
-    this.http.put('https://localhost:7189/api/customers/profile', this.customer).subscribe({
+    this.http.put('http://localhost:5164/api/customers/profile', this.customer).subscribe({
       next: () => {
         alert('Profile updated successfully!');
            this.originalCustomer = { ...this.customer }; // update original copy

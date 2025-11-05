@@ -1,0 +1,136 @@
+/* :root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --accent-color: #e74c3c;
+  --light-color: #ecf0f1;
+} */
+
+.body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #f8f9fa, #ecf0f1);
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.signup-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.signup-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.signup-header {
+  background: #2c3e50;
+  color: white;
+  padding: 25px;
+  text-align: center;
+}
+
+.signup-body {
+  padding: 25px;
+}
+
+.form-control {
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.btn-signup {
+  background-color:#3498db;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.btn-signup:hover {
+  background-color: #2980b9;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider-text {
+  padding: 0 15px;
+  color: #777;
+  font-size: 14px;
+}
+
+footer {
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.password-toggle {
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-strength {
+  height: 5px;
+  border-radius: 5px;
+  margin-top: 5px;
+  background: #eee;
+}
+
+.password-strength-bar {
+  height: 100%;
+  border-radius: 5px;
+  width: 0%;
+  transition: width 0.3s, background 0.3s;
+}
+
+.terms-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 15px;
+}

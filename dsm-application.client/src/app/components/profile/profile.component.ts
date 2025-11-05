@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ProfileService } from '../../services/profile.service';
 
 @Component({
   selector: 'app-profile',
@@ -13,21 +14,20 @@ export class ProfileComponent implements OnInit{
   errorMessage: string = '';
     originalCustomer: any = {}; // keep a copy for change detection
 
-  constructor(private http: HttpClient) {}
+     
+
+  constructor(private http: HttpClient,private profileService: ProfileService) {}
 
   ngOnInit(): void {
     this.loadProfile();
   }
 
-  loadProfile() {
+    loadProfile(): void {
     this.isLoading = true;
-    const headers = new HttpHeaders({
-  Authorization: `Bearer ${localStorage.getItem('token')}`
-});
-    this.http.get('http://localhost:5164/api/customers/profile',{ headers }).subscribe({
+    this.profileService.getProfile().subscribe({
       next: (res) => {
         this.customer = res;
-         this.originalCustomer = { ...res }; // store original data
+        this.originalCustomer = { ...res }; // copy original
         this.isLoading = false;
       },
       error: (err) => {
@@ -38,12 +38,13 @@ export class ProfileComponent implements OnInit{
     });
   }
 
-  saveProfile() {
+ // ✅ uses service instead of raw http
+  saveProfile(): void {
     this.isSaving = true;
-    this.http.put('http://localhost:5164/api/customers/profile', this.customer).subscribe({
+    this.profileService.updateProfile(this.customer).subscribe({
       next: () => {
         alert('Profile updated successfully!');
-           this.originalCustomer = { ...this.customer }; // update original copy
+        this.originalCustomer = { ...this.customer }; // update original copy
         this.isSaving = false;
       },
       error: (err) => {

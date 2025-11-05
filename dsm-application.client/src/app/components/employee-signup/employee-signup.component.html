@@ -1,0 +1,138 @@
+<!-- Navigation Bar -->
+ <div class="body">
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container">
+    <a class="navbar-brand" href="#">
+      <i class="fas fa-building me-2"></i>BusinessPortal
+    </a>
+    <div class="navbar-nav ms-auto">
+      <a href="#" class="nav-link">Return to Home</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Signup Section -->
+<div class="signup-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="signup-card">
+          <div class="signup-header">
+            <h3><i class="fas fa-truck me-2"></i>Employee  Signup</h3>
+            <p class="mb-0">Create your employee account</p>
+          </div>
+          <div class="signup-body">
+            <form (ngSubmit)="onSignup()">
+              <div class="mb-3">
+               <label for="identifier" class="form-label">Email or Phone Number</label>
+<input
+  [(ngModel)]="identifier"
+  name="identifier"
+  type="text"
+  class="form-control"
+  placeholder="Enter your email or phone number"
+  required
+/>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="password-container">
+                  <input
+                    [(ngModel)]="password"
+                    name="password"
+                    [type]="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    placeholder="Create a password"
+                    required
+                    (input)="checkPasswordStrength(); checkPasswordMatch()"
+                  />
+                  <span class="password-toggle" (click)="togglePassword()">
+                    <i class="far" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </span>
+
+                 
+                </div>
+                <div class="progress mt-2" style="height: 6px;">
+        <div
+          class="progress-bar"
+          role="progressbar"
+          [style.width.%]="passwordStrength"
+          [ngStyle]="{
+            'background': passwordStrength < 40 ? '#e74c3c' : (passwordStrength < 80 ? '#f39c12' : '#2ecc71')
+          }"
+        ></div>
+      </div>
+                <small class="text-muted"
+                  >Use at least 8 characters with a mix of letters and
+                  numbers</small
+                >
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label"
+                  >Confirm Password</label
+                >
+                <div class="password-container">
+                 <input
+                [(ngModel)]="confirmPassword"
+                name="confirmPassword"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                class="form-control"
+                required
+                (input)="checkPasswordMatch()"
+                />
+                  <span class="password-toggle" (click)="toggleConfirmPassword()">
+        <i class="far" [ngClass]="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+      </span>
+                </div>
+                   <small [ngClass]="passwordMatchClass">{{ passwordMatchMessage }}</small>
+              </div>
+
+              <!-- <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="termsAgree"
+                  required
+                />
+                <label class="form-check-label" for="termsAgree"
+                  >I agree to the <a href="#">Terms of Service</a> and
+                  <a href="#">Privacy Policy</a></label
+                >
+              </div> -->
+
+              <button type="submit" class="btn btn-signup">
+                Sign Up
+              </button>
+
+              <p class="text-success mt-2">{{ message }}</p>
+              <p class="text-danger mt-2">{{ error }}</p>
+
+              <div class="divider">
+                <span class="divider-text">Already have an account?</span>
+              </div>
+
+              <div class="text-center">
+                <p>Sign in to your existing account <a routerLink="/employee-login">Login here</a></p>
+              </div>
+
+              <p class="terms-text">
+                By creating an account, you agree to our Terms of Service and
+                confirm that you have read our Privacy Policy.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+  </div>
+</footer>
+</div>

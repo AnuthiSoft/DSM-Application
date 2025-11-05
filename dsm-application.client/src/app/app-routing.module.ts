@@ -24,6 +24,8 @@ import { EmployeeOrdersComponent } from './components/employee-orders/employee-o
 import { CustDashboardComponent } from './components/cust-dashboard/cust-dashboard.component';
 import { DistributorConnectionRequestsComponent } from './components/distributor-connection-requests/distributor-connection-requests.component';
 import { TestComponent } from './components/test/test.component';
+import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
+import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 
 
 
@@ -52,6 +54,8 @@ const routes: Routes = [
           { path: 'cust-dash', component: CustDashboardComponent },
           { path: 'connectionrequests', component:DistributorConnectionRequestsComponent },
           { path: 'test', component:TestComponent },
+           {path: 'employee-login', component: EmployeeLoginComponent},
+            {path: 'employee-signup', component:EmployeeSignupComponent},
    
       
 

@@ -31,6 +31,8 @@ import { DistributorConnectionRequestsComponent } from './components/distributor
 import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TestComponent } from './components/test/test.component';
+import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
+import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 
 
 
@@ -61,7 +63,9 @@ import { TestComponent } from './components/test/test.component';
       EmployeeOrdersComponent,
       CustDashboardComponent,
       DistributorConnectionRequestsComponent,
-      TestComponent
+      TestComponent,
+      EmployeeLoginComponent,
+      EmployeeSignupComponent
    
 
 

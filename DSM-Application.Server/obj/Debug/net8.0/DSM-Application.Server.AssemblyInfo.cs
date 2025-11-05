@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+723777759aebff97909ccfd3bf672a21bd82f686")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9984226778a0de1623dc2fc9543bf8c6c4eb3a92")]
 [assembly: System.Reflection.AssemblyProductAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DSM-Application.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

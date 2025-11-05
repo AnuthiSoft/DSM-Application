@@ -139,7 +139,7 @@ debugger
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
     this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
+    this.previewUrl = product.imageUrl ? 'https://dsm-application.onrender.com' + product.imageUrl : null;
   }
 
  deleteProduct(id: string) {
@@ -177,7 +177,7 @@ debugger
   if (isEdit && product) {
     this.selectedProductId = product.productId;
     this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
+    this.previewUrl = product.imageUrl ? 'https://dsm-application.onrender.com' + product.imageUrl : null;
   } else {
     this.productForm.reset();
     this.selectedProductId = null;

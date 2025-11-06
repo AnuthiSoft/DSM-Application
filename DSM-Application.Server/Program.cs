@@ -72,14 +72,15 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
+app.UseStaticFiles();
 
-
-var uploadsPath = Path.Combine("/tmp", "uploads");
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);
 }
 
+// Serve static files including uploads
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),

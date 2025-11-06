@@ -10,10 +10,10 @@ namespace DSM_Application.Server.Services
         public FileUploadService(IConfiguration config)
         {
             var account = new Account(
-       config["Cloudinary:CloudName"],
-       config["Cloudinary:ApiKey"],
-       config["Cloudinary:ApiSecret"]
-   );
+                config["Cloudinary:dgtavzpw1"],
+                config["Cloudinary:474935927313747"],
+                config["Cloudinary:QvHTsecBN5UOMZiuoIG0l5js8No\r\n\r\n\r\n"]
+            );
             _cloudinary = new Cloudinary(account);
             _cloudinary.Api.Secure = true; // use https
         }

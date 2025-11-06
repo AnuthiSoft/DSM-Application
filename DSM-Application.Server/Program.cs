@@ -64,7 +64,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
-builder.Services.AddSingleton<FileUploadService>();
 builder.Services.AddSingleton<EmailService>();
 
 builder.Services.AddSwaggerGen();

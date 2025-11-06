@@ -6,24 +6,46 @@ namespace DSM_Application.Server.Services
     public class FileUploadService
     {
         private readonly Cloudinary _cloudinary;
+
         public FileUploadService(IConfiguration config)
         {
             var account = new Account(
-                config["Cloudinary:CloudName"],
-                config["Cloudinary:ApiKey"],
-                config["Cloudinary:ApiSecret"]);
+                config["Cloudinary:dgtavzpw1"],
+                config["Cloudinary:474935927313747"],
+                config["Cloudinary:QvHTsecBN5UOMZiuoIG0l5js8No\r\n\r\n\r\n"]
+            );
             _cloudinary = new Cloudinary(account);
+            _cloudinary.Api.Secure = true; // use https
         }
 
-        public async Task<string> UploadImageAsync(IFormFile file)
+        public async Task<string> UploadImageAsync(IFormFile file, string? folder = "dsm-app")
         {
+            if (file == null || file.Length == 0) return string.Empty;
+
             using var stream = file.OpenReadStream();
             var uploadParams = new ImageUploadParams
             {
-                File = new FileDescription(file.FileName, stream)
+                File = new FileDescription(file.FileName, stream),
+                Folder = folder, // optional: stores under folder in Cloudinary
+                PublicId = Path.GetFileNameWithoutExtension(file.FileName) + "-" + Guid.NewGuid().ToString("N"),
+                Overwrite = false
             };
-            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            return uploadResult.SecureUrl.AbsoluteUri;
+
+            var result = await _cloudinary.UploadAsync(uploadParams);
+            if (result.StatusCode == System.Net.HttpStatusCode.OK || result.StatusCode == System.Net.HttpStatusCode.Created)
+            {
+                return result.SecureUrl.ToString();
+            }
+
+            // Log result.Error if needed
+            return string.Empty;
+        }
+
+        public async Task<bool> DeleteImageByPublicIdAsync(string publicId)
+        {
+            var deletionParams = new DeletionParams(publicId);
+            var result = await _cloudinary.DestroyAsync(deletionParams);
+            return result.Result == "ok" || result.Result == "not found";
         }
     }
 }

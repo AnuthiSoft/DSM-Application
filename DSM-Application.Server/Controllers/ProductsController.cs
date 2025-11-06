@@ -16,11 +16,13 @@ namespace DSM_Application.Server.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
+        private readonly FileUploadService _cloudinary;
 
 
-        public ProductsController(ProductService productService)
+        public ProductsController(ProductService productService,FileUploadService cloudinary)
         {
             _productService = productService;
+            _cloudinary = cloudinary;
         }
 
         [HttpGet]
@@ -59,21 +61,30 @@ namespace DSM_Application.Server.Controllers
                 return BadRequest($"Category '{dto.Category}' is not available for this distributor.");
             }
 
+            //if (dto.Image != null)
+            //{
+            //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            //    if (!Directory.Exists(uploadsFolder))
+            //        Directory.CreateDirectory(uploadsFolder);
+
+            //    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Image.FileName);
+            //    var filePath = Path.Combine(uploadsFolder, fileName);
+
+            //    using (var stream = new FileStream(filePath, FileMode.Create))
+            //    {
+            //        await dto.Image.CopyToAsync(stream);
+            //    }
+
+            //    dto.ImageUrl = $"/uploads/{fileName}";
+            //}
+            // Upload image to Cloudinary (if present)
             if (dto.Image != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Image.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                var url = await _cloudinary.UploadImageAsync(dto.Image);
+                if (!string.IsNullOrEmpty(url))
                 {
-                    await dto.Image.CopyToAsync(stream);
+                    dto.ImageUrl = url; // absolute https://res.cloudinary...
                 }
-
-                dto.ImageUrl = $"/uploads/{fileName}";
             }
 
             var product = new Product
@@ -106,22 +117,31 @@ namespace DSM_Application.Server.Controllers
             var existing = await _productService.GetByIdAsync(id);
             if (existing == null) return NotFound();
 
+            //if (dto.Image != null)
+            //{
+            //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            //    if (!Directory.Exists(uploadsFolder))
+            //        Directory.CreateDirectory(uploadsFolder);
+
+            //    var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+            //    var filePath = Path.Combine
+            //        (uploadsFolder, fileName);
+
+            //    using (var stream = new FileStream(filePath, FileMode.Create))
+            //    {
+            //        await dto.Image.CopyToAsync(stream);
+            //    }
+
+            //    existing.ImageUrl = $"/uploads/{fileName}";
+            //}
+            // If new image provided, upload to Cloudinary and replace URL
             if (dto.Image != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
-                var filePath = Path.Combine
-                    (uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                var url = await _cloudinary.UploadImageAsync(dto.Image);
+                if (!string.IsNullOrEmpty(url))
                 {
-                    await dto.Image.CopyToAsync(stream);
+                    existing.ImageUrl = url;
                 }
-
-                existing.ImageUrl = $"/uploads/{fileName}";
             }
 
             // Update fields

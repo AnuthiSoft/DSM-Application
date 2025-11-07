@@ -10,7 +10,7 @@
       <i class="fas fa-plus me-2"></i>Add New Product
     </button>
   </div>
-
+ 
   <!-- Search and Filter Section -->
   <div class="search-section">
     <div class="search-box">
@@ -45,7 +45,7 @@
       </select>
     </div>
   </div>
-
+ 
   <!-- Product Grid -->
   <div class="product-grid">
     <div
@@ -64,7 +64,7 @@
         <i class="fas fa-plus me-2"></i>Add New Product
       </button>
     </div>
-
+ 
     <div *ngFor="let product of filteredProducts" class="product-card">
       <div class="product-image">
         <img
@@ -78,7 +78,7 @@
         <div class="product-category">{{ product.category }}</div>
         </div>
         <div class="product-price">{{ product.price | currency }}</div>
-
+ 
         <div class="product-details">
           <div class="product-meta">
             <span>Code: {{ product.productCode }}</span>
@@ -94,7 +94,7 @@
             <span>GST: {{ product.gst }}%</span>
           </div>
         </div>
-
+ 
         <div class="product-actions">
           <button class="btn btn-primary btn-sm" (click)="openModal(true, product)">
             <i class="fas fa-edit me-1"></i>Edit
@@ -110,7 +110,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Product Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -145,7 +145,7 @@
               />
             </div>
           </div>
-
+ 
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="form-label">Price ($)</label>
@@ -172,7 +172,7 @@
               />
             </div>
           </div>
-
+ 
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="form-label">Discount (%)</label>
@@ -196,7 +196,7 @@
               </select>
             </div>
           </div>
-
+ 
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Brand</label>
@@ -207,7 +207,7 @@
               <input type="text" class="form-control" formControlName="unit" />
             </div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Product Image</label>
             <input
@@ -220,7 +220,7 @@
               <img [src]="previewUrl" class="image-preview" />
             </div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Description</label>
             <textarea

@@ -1,67 +1,66 @@
-
 <div class="products-section">
   <div class="welcome-header">
     <h2>Distributor Products</h2>
   </div>
-
+ 
   <div *ngIf="loading" class="loading-state">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Loading products...</span>
   </div>
-
+ 
   <div *ngIf="!loading && products.length === 0" class="no-products">
     <i class="fas fa-box-open"></i>
     <h3>No Products Available</h3>
     <p>There are no products available from this distributor at the moment.</p>
   </div>
-
+ 
   <div *ngIf="!loading && products.length > 0" class="products-content">
     <div class="products-grid">
       <div class="product-card" *ngFor="let prod of products">
         <div class="product-image">
-          <img *ngIf="prod.imageUrl" [src]="'https://dsm-application.onrender.com' + prod.imageUrl" [alt]="prod.productName" />
+          <img *ngIf="prod.imageUrl" [src]="'http://localhost:5164' + prod.imageUrl" [alt]="prod.productName" />
           <div *ngIf="!prod.imageUrl" class="product-image-placeholder">
             <i class="fas fa-box"></i>
           </div>
         </div>
-        
+       
         <div class="product-body">
                <p>Distributor: {{ prod.distributorName }}</p>
           <h4 class="product-title">{{ prod.productName }}</h4>
           <div class="product-details">
             <p><strong>Code:</strong> {{ prod.productCode }}</p>
             <p class="product-price">₹{{ prod.price }}</p>
-            <p><strong>Stock:</strong> 
+            <p><strong>Stock:</strong>
               <span [class]="prod.stock > 10 ? 'stock-high' : prod.stock > 0 ? 'stock-low' : 'stock-out'">
                 {{ prod.stock > 0 ? prod.stock + ' available' : 'Out of stock' }}
               </span>
             </p>
             <p><strong>Brand:</strong> {{ prod.brand }}</p>
             <p><strong>Category:</strong> {{ prod.category }}</p>
-      
+     
           </div>
-          
+         
         <button class="btn btn-primary add-to-cart-btn"
         (click)="openAddToCartPopup(prod)"
         [disabled]="prod.stock === 0">
   <i class="fas fa-cart-plus"></i>
   {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
 </button>
-
+ 
         </div>
       </div>
     </div>
-
+ 
     <!-- Cart Section -->
     <div class="cart-section" *ngIf="cart.length > 0">
       <div class="cart-header">
         <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
         <span class="cart-count">{{ cart.length }} item(s)</span>
       </div>
-      
+     
       <div class="cart-table">
         <div class="cart-header-row">
-              
+             
           <div class="cart-col product-col">Product</div>
            <div class="cart-col distributor-col">Distributor</div>
           <div class="cart-col quantity-col">Quantity</div>
@@ -69,7 +68,7 @@
           <div class="cart-col subtotal-col">Subtotal</div>
           <div class="cart-col action-col">Action</div>
         </div>
-        
+       
         <div class="cart-item" *ngFor="let item of cart">
           <div class="cart-col product-col">
             <strong>{{ item.product.productName }}</strong>
@@ -83,14 +82,14 @@
           <div class="cart-col price-col">₹{{ item.product.price }}</div>
           <div class="cart-col subtotal-col">₹{{ item.product.price * item.quantity }}</div>
           <div class="cart-col action-col">
-            <button class="btn btn-danger btn-sm remove-btn" 
+            <button class="btn btn-danger btn-sm remove-btn"
                     (click)="removeFromCart(item.product.productId)">
               <i class="fas fa-trash"></i>
             </button>
           </div>
         </div>
       </div>
-
+ 
       <div class="cart-footer">
         <div class="total-section">
           <span class="total-label">Total Amount:</span>
@@ -111,19 +110,19 @@
       <p><strong>{{ selectedProduct.productName }}</strong></p>
       <p>Price: ₹{{ selectedProduct.price }}</p>
       <p>Available Stock: {{ selectedProduct.stock }}</p>
-
+ 
       <div class="quantity-control">
         <button (click)="decreaseQty()" [disabled]="selectedQuantity <= 1">-</button>
         <span>{{ selectedQuantity }}</span>
         <button (click)="increaseQty()" [disabled]="selectedQuantity >= (selectedProduct.stock || 1)">+</button>
       </div>
     </div>
-
+ 
     <div class="popup-actions">
       <button class="btn btn-success" (click)="confirmAddToCart()">Add</button>
       <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
     </div>
   </div>
 </div>
-
+ 
 </div>

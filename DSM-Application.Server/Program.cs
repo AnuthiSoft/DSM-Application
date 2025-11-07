@@ -41,7 +41,6 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     {
         policy.WithOrigins(
-            "https://dsm-application.web.app",
             "http://localhost:58555",         // local Angular dev
             "https://dsm-application.onrender.com" // deployed Angular
         )

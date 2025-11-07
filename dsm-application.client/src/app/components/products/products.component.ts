@@ -3,6 +3,8 @@ import { Category, ProductService } from '../../services/product.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { Product } from '../../models/products.model';
+import { environment } from '../../../environments/environment.prod';
+// import { environment } from '../../../environments/environment';
  
  
 @Component({
@@ -10,7 +12,10 @@ import { Product } from '../../models/products.model';
   templateUrl: './products.component.html',
   styleUrl: './products.component.css'
 })
+
 export class ProductsComponent {
+    apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
  
   products: Product[] = [];
@@ -139,7 +144,8 @@ debugger
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
     this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
+   this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
+
   }
  
  deleteProduct(id: string) {
@@ -177,7 +183,8 @@ debugger
   if (isEdit && product) {
     this.selectedProductId = product.productId;
     this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrl ? 'https://localhost:7189' + product.imageUrl : null;
+    this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
+
   } else {
     this.productForm.reset();
     this.selectedProductId = null;

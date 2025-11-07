@@ -67,10 +67,10 @@
  
     <div *ngFor="let product of filteredProducts" class="product-card">
       <div class="product-image">
-        <img
-          [src]="'http://localhost:5164' + product.imageUrl"
-          [alt]="product.productName"
-        />
+        <img *ngIf="product.imageUrl"
+     [src]="apiBaseUrl + product.imageUrl"
+     [alt]="product.productName">
+
       </div>
       <div class="product-info">
         <div class="product-header">

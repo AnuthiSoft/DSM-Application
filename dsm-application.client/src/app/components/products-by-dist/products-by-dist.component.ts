@@ -3,6 +3,8 @@ import {  ProductService } from '../../services/product.service';
 import { ActivatedRoute } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Product } from '../../models/products.model';
+import { environment } from '../../../environments/environment.prod';
+// import { environment } from '../../../environments/environment';
 // import { Product } from '../../services/customer-api.service';
  
 @Component({
@@ -11,6 +13,7 @@ import { Product } from '../../models/products.model';
   styleUrl: './products-by-dist.component.css'
 })
 export class ProductsByDistComponent implements OnInit {
+      apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
  @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];

@@ -7,13 +7,14 @@ namespace DSM_Application.Server.Models.DTOs
         public string CustomerId { get; set; }
         public string DistributorId { get; set; }
         public List<OrderProductDto> Products { get; set; }
+        public decimal SpecialDiscountPercent { get; set; }
     }
 
     public class OrderProductDto
     {
         public string ProductId { get; set; }
         public string ProductName { get; set; }
-        public double Price { get; set; }
+        public decimal Price { get; set; }
         public int Quantity { get; set; }
     }
     public class AssignOrderDto
@@ -29,7 +30,7 @@ namespace DSM_Application.Server.Models.DTOs
     {
         public string Status { get; set; } // e.g., "Delivered", "FailedDelivery"
         public bool PaymentCollected { get; set; } = false;
-        public double? CollectedAmount { get; set; }
+        public decimal? CollectedAmount { get; set; }
         public string PaymentMethod { get; set; } // "COD", "Online"
         public string Remarks { get; set; }
     }
@@ -37,7 +38,7 @@ namespace DSM_Application.Server.Models.DTOs
     {
         public string Status { get; set; }
         public string? PaymentMethod { get; set; } // "Cash" or "Online"
-        public double? CollectedAmount { get; set; }
+        public decimal? CollectedAmount { get; set; }
     }
 
     public class DistributorOrderDto
@@ -48,14 +49,22 @@ namespace DSM_Application.Server.Models.DTOs
         public string CustomerEmail { get; set; }
         public string CustomerPhone { get; set; }
         public List<OrderProduct> Products { get; set; }
-        public double TotalAmount { get; set; }
+        public decimal Subtotal { get; set; }
+        public decimal TotalDiscount { get; set; }
+        public decimal TotalAmount { get; set; }
+
+        public decimal SpecialDiscountPercent { get; set; }
+        public decimal QuantityDiscountPercent { get; set; }
+        public decimal PriceDiscountPercent { get; set; }
+        public decimal TotalDiscountPercent { get; set; }
+
         public DateTime OrderDate { get; set; }
         public string Status { get; set; }
         // ✅ Add these fields
         public string? EmployeeId { get; set; }
         public string? Name { get; set; }
         public bool PaymentCollectedByEmployee { get; set; } = false;
-        public double? CollectedAmount { get; set; } // amount collected physically by employee (if COD)
+        public decimal? CollectedAmount { get; set; } // amount collected physically by employee (if COD)
         public string PaymentMethod { get; set; } // "COD", "Online", etc.
         public DateTime? CollectedOn { get; set; }
 

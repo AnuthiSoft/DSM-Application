@@ -1,6 +1,8 @@
-﻿using DistributorManagementSystem.Server.Services;
+﻿using CloudinaryDotNet.Actions;
+using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,11 +18,49 @@ namespace DSM_Application.Server.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly MongoDbService _mongo;
+        private readonly IMongoCollection<Product> _products;
+        private readonly IMongoCollection<Order> _orders;
+        private readonly DiscountService _discountService;
 
-        public OrdersController(MongoDbService mongo)
+
+        public OrdersController(MongoDbService mongo, DiscountService discountService)
         {
             _mongo = mongo;
+            _products = _mongo.Database.GetCollection<Product>("Products");
+            _orders = _mongo.Database.GetCollection<Order>("Orders");
+            _discountService = discountService;
         }
+
+
+        //[HttpPost]
+        //public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
+        //{
+        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
+        //        return BadRequest("No products provided");
+
+        //    var order = new Order
+        //    {
+        //        CustomerId = dto.CustomerId,
+        //        DistributorId = dto.DistributorId,
+        //        Products = dto.Products.Select(p => new OrderProduct
+        //        {
+        //            ProductId = p.ProductId,
+        //            ProductName = p.ProductName,
+        //            Price = p.Price,
+        //            Quantity = p.Quantity
+        //        }).ToList(),
+        //        TotalAmount = dto.Products.Sum(p => p.Price * p.Quantity),
+        //        OrderDate = DateTime.UtcNow,
+        //        Status = "Pending"
+        //    };
+
+        //    await _mongo.Orders.InsertOneAsync(order);
+        //    return Ok(new { message = "Order placed successfully", orderId = order.Id });
+        //}
+
+
+
+
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
@@ -28,25 +68,61 @@ namespace DSM_Application.Server.Controllers
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
                 return BadRequest("No products provided");
 
+            decimal totalSubtotal = 0;
+            decimal totalDiscountAmount = 0;
+            decimal totalFinalAmount = 0;
+
+            var orderProducts = new List<OrderProduct>();
+
+            foreach (var p in dto.Products)
+            {
+                var product = await _products.Find(x => x.ProductId == p.ProductId).FirstOrDefaultAsync();
+                if (product == null)
+                    return NotFound($"Product not found: {p.ProductId}");
+
+                decimal unitPrice = product.Price;
+                decimal subtotal = unitPrice * p.Quantity;
+
+                var calc = _discountService.Calculate(p.Quantity, subtotal, dto.SpecialDiscountPercent);
+
+                orderProducts.Add(new OrderProduct
+                {
+                    ProductId = p.ProductId,
+                    ProductName = product.ProductName,
+                    UnitPrice = unitPrice,
+                    Quantity = p.Quantity,
+                    QuantityDiscountPercent = calc.qtyPct,
+                    PriceDiscountPercent = calc.pricePct,
+                    SpecialDiscountPercent = dto.SpecialDiscountPercent,
+                    TotalDiscountPercent = calc.totalPercent,
+                    DiscountAmount = calc.discountAmount,
+                    FinalPrice = calc.finalPrice
+                });
+
+                totalSubtotal += subtotal;
+                totalDiscountAmount += calc.discountAmount;
+                totalFinalAmount += calc.finalPrice;
+            }
+
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
-                Products = dto.Products.Select(p => new OrderProduct
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    Price = p.Price,
-                    Quantity = p.Quantity
-                }).ToList(),
-                TotalAmount = dto.Products.Sum(p => p.Price * p.Quantity),
+                Products = orderProducts,
+                Subtotal = totalSubtotal,
+                TotalDiscount = totalDiscountAmount,
+                TotalAmount = totalFinalAmount,
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending"
             };
 
-            await _mongo.Orders.InsertOneAsync(order);
+            await _orders.InsertOneAsync(order);
             return Ok(new { message = "Order placed successfully", orderId = order.Id });
         }
+
+
+
+
         [Authorize(Roles = "Customer")]
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetCustomerOrders(string customerId)
@@ -66,8 +142,59 @@ namespace DSM_Application.Server.Controllers
                 .SortByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            return Ok(orders);
+            // ✅ Map orders to DTO including discount fields
+            var result = orders.Select(o => new DistributorOrderDto
+            {
+                Id = o.Id,
+                CustomerId = o.CustomerId,
+
+                Products = o.Products,
+
+                // ✅ Discount totals
+                Subtotal = o.Subtotal,
+                TotalDiscount = o.TotalDiscount,
+                TotalAmount = o.TotalAmount,
+
+                // ✅ Discount breakdown per item (use first item)
+                SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
+                QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
+                PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
+                TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
+
+                OrderDate = o.OrderDate,
+                Status = o.Status,
+                EmployeeId = o.EmployeeId,
+                Name = o.Name
+            }).ToList();
+
+            return Ok(result);
         }
+
+
+
+
+
+        //[Authorize(Roles = "Customer")]
+        //[HttpGet("customer/{customerId}")]
+        //public async Task<IActionResult> GetCustomerOrders(string customerId)
+        //{
+        //    // ✅ Read CustomerId from JWT token
+        //    var customerIdFromToken = User.FindFirst("CustomerId")?.Value;
+
+        //    if (string.IsNullOrEmpty(customerIdFromToken))
+        //        return Unauthorized("CustomerId missing from token");
+
+        //    // Ensure the customerId matches the logged-in user's customerId
+        //    if (customerId != customerIdFromToken)
+        //        return Forbid("Not authorized to view other customers' orders");
+
+        //    var orders = await _mongo.Orders
+        //        .Find(o => o.CustomerId == customerId)
+        //        .SortByDescending(o => o.OrderDate)
+        //        .ToListAsync();
+
+        //    return Ok(orders);
+        //}
 
         [HttpGet("distributor/{distributorId}")]
         public async Task<IActionResult> GetOrdersByDistributor(string distributorId, [FromQuery] string? status = null)
@@ -102,7 +229,13 @@ namespace DSM_Application.Server.Controllers
                     CustomerEmail = customer?.Email,
                     CustomerPhone = customer?.PhoneNumber,
                     Products = o.Products,
+                    Subtotal = o.Subtotal,
+                    TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
+                    SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
+                    QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
+                    PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
+                    TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
                     OrderDate = o.OrderDate,
                     Status = o.Status,
                     EmployeeId = employee?.EmployeeId,
@@ -143,12 +276,42 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(orders);
         }
+        //[HttpGet("{orderId}")]
+        //public async Task<IActionResult> GetOrder(string orderId)
+        //{
+        //    var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+        //    if (order == null) return NotFound();
+        //    var customer = await _mongo.Customers.Find(c => c.CustomerId == order.CustomerId).FirstOrDefaultAsync();
+        //    var dto = new DistributorOrderDto
+        //    {
+        //        Id = order.Id,
+        //        CustomerId = order.CustomerId,
+        //        CustomerName = customer?.Name,
+        //        CustomerEmail = customer?.Email,
+        //        CustomerPhone = customer?.PhoneNumber,
+        //        Products = order.Products,
+        //        Subtotal = order.Subtotal,
+        //        TotalDiscount = order.TotalDiscount,
+        //        TotalAmount = order.TotalAmount,
+
+
+        //        OrderDate = order.OrderDate,
+        //        Status = order.Status,
+        //        EmployeeId=order.EmployeeId,
+
+        //    };
+        //    return Ok(dto);
+        //}
+
+
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrder(string orderId)
         {
             var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order == null) return NotFound();
+
             var customer = await _mongo.Customers.Find(c => c.CustomerId == order.CustomerId).FirstOrDefaultAsync();
+
             var dto = new DistributorOrderDto
             {
                 Id = order.Id,
@@ -156,15 +319,38 @@ namespace DSM_Application.Server.Controllers
                 CustomerName = customer?.Name,
                 CustomerEmail = customer?.Email,
                 CustomerPhone = customer?.PhoneNumber,
+
                 Products = order.Products,
+
+                // ✅ Discount totals
+                Subtotal = order.Subtotal,
+                TotalDiscount = order.TotalDiscount,
                 TotalAmount = order.TotalAmount,
+
+                // ✅ Discount breakdown per product
+                SpecialDiscountPercent = order.Products.First().SpecialDiscountPercent,
+                QuantityDiscountPercent = order.Products.First().QuantityDiscountPercent,
+                PriceDiscountPercent = order.Products.First().PriceDiscountPercent,
+                TotalDiscountPercent = order.Products.First().TotalDiscountPercent,
+
                 OrderDate = order.OrderDate,
                 Status = order.Status,
-                EmployeeId=order.EmployeeId,
-
+                EmployeeId = order.EmployeeId,
+                Name = order.Name,
+                PaymentCollectedByEmployee = order.PaymentCollectedByEmployee,
+                CollectedAmount = order.CollectedAmount,
+                PaymentMethod = order.PaymentMethod,
+                CollectedOn = order.CollectedOn,
+                DeliveredOn = order.DeliveredOn
             };
+
             return Ok(dto);
         }
+
+
+
+
+
 
         // Distributor-only endpoint to update status.
         // It ensures the logged-in distributor owns the order.
@@ -418,6 +604,24 @@ namespace DSM_Application.Server.Controllers
             if (existingOrder.Status != "Delivered")
                 return BadRequest($"Only delivered orders can be reordered. Current status: '{existingOrder.Status}'");
 
+            //var newOrder = new Order
+            //{
+            //    CustomerId = existingOrder.CustomerId,
+            //    DistributorId = existingOrder.DistributorId,
+            //    Products = existingOrder.Products.Select(p => new OrderProduct
+            //    {
+            //        ProductId = p.ProductId,
+            //        ProductName = p.ProductName,
+            //        UnitPrice = p.UnitPrice,
+            //        Quantity = p.Quantity
+            //    }).ToList(),
+            //    TotalAmount = existingOrder.Products.Sum(p => p.UnitPrice * p.Quantity),
+            //    OrderDate = DateTime.UtcNow,
+            //    Status = "Pending"
+            //};
+
+
+
             var newOrder = new Order
             {
                 CustomerId = existingOrder.CustomerId,
@@ -426,17 +630,43 @@ namespace DSM_Application.Server.Controllers
                 {
                     ProductId = p.ProductId,
                     ProductName = p.ProductName,
-                    Price = p.Price,
-                    Quantity = p.Quantity
+                    UnitPrice = p.UnitPrice,
+                    Quantity = p.Quantity,
+                    Subtotal = p.Subtotal,
+                    QuantityDiscountPercent = p.QuantityDiscountPercent,
+                    PriceDiscountPercent = p.PriceDiscountPercent,
+                    SpecialDiscountPercent = p.SpecialDiscountPercent,
+                    TotalDiscountPercent = p.TotalDiscountPercent,
+                    DiscountAmount = p.DiscountAmount,
+                    FinalPrice = p.FinalPrice
                 }).ToList(),
-                TotalAmount = existingOrder.Products.Sum(p => p.Price * p.Quantity),
+
+                Subtotal = existingOrder.Subtotal,
+                TotalDiscount = existingOrder.TotalDiscount,
+                TotalAmount = existingOrder.TotalAmount,
+
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending"
             };
 
+
+
+
+
             await _mongo.Orders.InsertOneAsync(newOrder);
 
-            return Ok(new { message = "Order placed successfully", orderId = newOrder.Id });
+            //return Ok(new { message = "Order placed successfully", orderId = newOrder.Id });
+
+
+            return Ok(new
+            {
+                message = "Order placed successfully",
+                orderId = newOrder.Id,
+                subtotal = newOrder.Subtotal,
+                discount = newOrder.TotalDiscount,
+                finalAmount = newOrder.TotalAmount
+            });
+
         }
     }
 }

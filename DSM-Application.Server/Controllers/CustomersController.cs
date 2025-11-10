@@ -207,18 +207,65 @@ namespace DSM_Application.Server.Controllers
             await _db.Customers.UpdateOneAsync(c => c.CustomerId == customer.CustomerId, update);
             return Ok("Password created successfully. You can now login.");
         }
-        //[Authorize(Roles = "Customer")]
+        ////[Authorize(Roles = "Customer")]
+        //[HttpGet("dashboard/{customerId}")]
+        //public async Task<IActionResult> GetCustomerDashboard(string customerId)
+        //{
+
+        //    var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+        //    if (customer == null) return NotFound("Customer not found");
+
+        //    var connections = await _db.Connections
+        //        .Find(c => c.CustomerId == customerId)
+        //        .ToListAsync();
+
+        //    var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
+        //    var distributorsWithProducts = new List<object>();
+
+        //    foreach (var dist in allDistributors)
+        //    {
+        //        var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+        //        dist.Status = conn?.Status.ToString();
+
+        //        List<Product> products = new();
+
+        //        // Show products only if:
+        //        // 1. Customer is added by this distributor, or
+        //        // 2. Connection exists and accepted
+        //        if ((customer.AddedByDistributorId == dist.DistributorId) ||
+        //            (conn != null && conn.Status == ConnectionStatus.Accepted))
+        //        {
+        //            products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
+        //        }
+
+        //        distributorsWithProducts.Add(new
+        //        {
+        //            distributor = dist,
+        //            products = products
+        //        });
+        //    }
+
+        //    return Ok(new
+        //    {
+        //        isGlobal = true, // All customers see global distributor list
+        //        distributors = distributorsWithProducts
+        //    });
+        //}
+
+
         [HttpGet("dashboard/{customerId}")]
         public async Task<IActionResult> GetCustomerDashboard(string customerId)
         {
-
+            // 1) Fetch customer
             var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
             if (customer == null) return NotFound("Customer not found");
 
+            // 2) Fetch distributor/customer connection records
             var connections = await _db.Connections
                 .Find(c => c.CustomerId == customerId)
                 .ToListAsync();
 
+            // 3) Load all distributors and attach products based on connection rules
             var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
             var distributorsWithProducts = new List<object>();
 
@@ -229,9 +276,6 @@ namespace DSM_Application.Server.Controllers
 
                 List<Product> products = new();
 
-                // Show products only if:
-                // 1. Customer is added by this distributor, or
-                // 2. Connection exists and accepted
                 if ((customer.AddedByDistributorId == dist.DistributorId) ||
                     (conn != null && conn.Status == ConnectionStatus.Accepted))
                 {
@@ -245,12 +289,60 @@ namespace DSM_Application.Server.Controllers
                 });
             }
 
+            // 4) Fetch customer orders
+            var orders = await _db.Orders
+                .Find(o => o.CustomerId == customerId)
+                .SortByDescending(o => o.OrderDate)
+                .ToListAsync();
+
+            // 5) Map orders to DTO including discount breakdown
+            var orderDtos = orders.Select(o =>
+            {
+                var first = o.Products.FirstOrDefault(); // avoid null errors
+
+                return new DistributorOrderDto
+                {
+                    Id = o.Id,
+                    CustomerId = o.CustomerId,
+                    Products = o.Products,
+
+                    // ✅ Discount Totals
+                    Subtotal = o.Subtotal,
+                    TotalDiscount = o.TotalDiscount,
+                    TotalAmount = o.TotalAmount,
+
+                    // ✅ Discount Breakdown (if multiple products, use first)
+                    SpecialDiscountPercent = first?.SpecialDiscountPercent ?? 0,
+                    QuantityDiscountPercent = first?.QuantityDiscountPercent ?? 0,
+                    PriceDiscountPercent = first?.PriceDiscountPercent ?? 0,
+                    TotalDiscountPercent = first?.TotalDiscountPercent ?? 0,
+
+                    OrderDate = o.OrderDate,
+                    Status = o.Status,
+                    EmployeeId = o.EmployeeId,
+                    Name = o.Name,
+                    PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
+                    CollectedAmount = o.CollectedAmount,
+                    PaymentMethod = o.PaymentMethod,
+                    CollectedOn = o.CollectedOn,
+                    DeliveredOn = o.DeliveredOn
+                };
+            }).ToList();
+
+            // 6) Return dashboard data + orders
             return Ok(new
             {
-                isGlobal = true, // All customers see global distributor list
-                distributors = distributorsWithProducts
+                isGlobal = true,
+                distributors = distributorsWithProducts,
+                orders = orderDtos   // ✅ UI receives discount data here
             });
         }
+
+
+
+
+
+
         [HttpPost("connect-distributor")]
         public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
         {

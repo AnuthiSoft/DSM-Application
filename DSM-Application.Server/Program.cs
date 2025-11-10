@@ -17,6 +17,8 @@ builder.Services.Configure<MongoDbSettings>(
 
 
 builder.Services.AddSingleton<MongoDbService>();
+builder.Services.AddSingleton<DiscountService>();
+
 // JWT
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

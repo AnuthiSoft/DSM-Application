@@ -2,7 +2,7 @@
 {
     public class CollectPaymentDto
     {
-        public double CollectedAmount { get; set; }
+        public decimal? CollectedAmount { get; set; }
         public string PaymentMethod { get; set; } = "COD"; // or "Online"
     }
 }

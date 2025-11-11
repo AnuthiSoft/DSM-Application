@@ -12,7 +12,6 @@ namespace DSM_Application.Server.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
@@ -90,7 +89,7 @@ namespace DSM_Application.Server.Controllers
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
                 ImageUrl = dto.ImageUrl,
-                  DistributorId = dto.DistributorId ,
+                DistributorId = dto.DistributorId,
                 DistributorName = distributor.Name,
                 //Name =distributor.Name,
                 Category = dto.Category // ✅ store selected category
@@ -172,6 +171,5 @@ namespace DSM_Application.Server.Controllers
                 return StatusCode(500, new { message = "Error fetching products", error = ex.Message });
             }
         }
-     
     }
 }

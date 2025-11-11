@@ -49,6 +49,29 @@
                             </a>
                         </div>
                     </li>
+                     <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="distributorDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-tie me-1"></i> Employee
+                        </a>
+                        <div class="dropdown-menu nav-dropdown-menu" aria-labelledby="employeeDropdown">
+                            <a class="dropdown-item nav-dropdown-item" routerLink="/employee-login">Employee Login</a>
+                         
+                            <div class="dropdown-divider"></div>
+                            <h6 class="dropdown-header">Employee Services</h6>
+                           <a class="dropdown-item nav-dropdown-item" routerLink="/employee/attendance">
+            <i class="fas fa-calendar-check me-2"></i> Attendance
+        </a>
+        <a class="dropdown-item nav-dropdown-item" routerLink="/employee/leave">
+            <i class="fas fa-plane-departure me-2"></i> Leave Requests
+        </a>
+        <a class="dropdown-item nav-dropdown-item" routerLink="/employee/salary">
+            <i class="fas fa-money-bill-wave me-2"></i> Salary Details
+        </a>
+        <a class="dropdown-item nav-dropdown-item" routerLink="/employee/profile">
+            <i class="fas fa-id-card me-2"></i> Profile
+        </a>
+                        </div>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#about">About</a>
                     </li>
@@ -153,6 +176,33 @@
             </div>
         </div>
     </section>
+    <!-- Employee Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Text Section -->
+            <div class="col-lg-6">
+                <h2 class="section-title">For Employees</h2>
+                <p>Our employee portal provides efficient tools to manage attendance, leaves, and performance while keeping you connected with your organization.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Easy attendance tracking</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Apply and manage leaves online</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> View salary slips and pay details</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-primary me-2"></i> Access employee profile anytime</li>
+                </ul>
+                <!-- <a href="#" class="btn btn-primary mt-3">Employee Login</a> -->
+            </div>
+
+            <!-- Image Section -->
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80" 
+                     alt="Employee Portal" 
+                     class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</section>
+
     <!-- Footer -->
     <footer>
         <div class="container">

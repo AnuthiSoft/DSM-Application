@@ -1,0 +1,43 @@
+import { Component } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-employee-login',
+  templateUrl: './employee-login.component.html',
+  styleUrl: './employee-login.component.css'
+})
+export class EmployeeLoginComponent {
+   email = '';
+      password = '';
+      error = '';
+      showPassword = false; 
+    
+      constructor(private auth: AuthService, private router: Router) {}
+  
+       togglePassword(): void {
+      this.showPassword = !this.showPassword;
+    }
+    
+      onLogin(): void {
+        this.auth.login(this.email, this.password).subscribe({
+          next: (res: any) => {
+            const role = this.auth.getRole();
+               localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId
+               localStorage.setItem('EmployeeId', res.employeeId);
+                  localStorage.setItem('employeeId', res.employeeId); // ✅ store employeeId
+            if (role === 'Admin') {
+              this.router.navigate(['/admin-dashboard']);
+            } else if (role === 'Distributor') {
+              this.router.navigate(['/distributor-dashboard']);
+            } else if (role === 'Employee') {
+              this.router.navigate(['/employee-dashboard']);
+            } else {
+              this.error = 'Unauthorized role';
+            }
+          },
+          error: err => this.error = err.error || 'Login failed'
+        });
+      }
+
+}

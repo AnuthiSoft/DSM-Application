@@ -17,6 +17,8 @@ builder.Services.Configure<MongoDbSettings>(
 
 
 builder.Services.AddSingleton<MongoDbService>();
+builder.Services.AddSingleton<DiscountService>();
+
 // JWT
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -38,23 +40,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
-    //options.AddPolicy("AllowAll", policy =>
-    //{
-    //    policy.AllowAnyOrigin()    // or restrict to your Angular domain later
-    //          .AllowAnyHeader()
-    //          .AllowAnyMethod();
-    //});
-    options.AddPolicy("AllowRender", policy =>
+    options.AddPolicy("AllowAngular", policy =>
+    {
         policy.WithOrigins(
-            "https://localhost:58555",
-            "https://dsm-application.web.app",
-            "https://dsm-application-l84p.onrender.com",
-           "http://localhost:58555"
+            "http://localhost:58555",         // local Angular dev
+            "https://dsm-application.onrender.com" // deployed Angular
         )
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+
 });
+
+
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -72,9 +71,10 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
-app.UseStaticFiles();
+app.UseStaticFiles(); // Default wwwroot support
 
-var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+// Serve /uploads from wwwroot/uploads
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);
@@ -85,8 +85,7 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads"
 });
-
-app.UseCors("AllowRender");
+app.UseCors("AllowAngular");
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();

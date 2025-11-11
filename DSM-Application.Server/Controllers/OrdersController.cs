@@ -1,7 +1,6 @@
 ﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
-using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +16,10 @@ namespace DSM_Application.Server.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly MongoDbService _mongo;
-        private readonly ProductService _productService;
 
-
-        public OrdersController(MongoDbService mongo, ProductService productService)
+        public OrdersController(MongoDbService mongo)
         {
             _mongo = mongo;
-            _productService = productService;
         }
 
         [HttpPost]
@@ -32,17 +28,6 @@ namespace DSM_Application.Server.Controllers
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
                 return BadRequest("No products provided");
 
-            // ✅ Step 1: Validate all products before placing the order
-            foreach (var p in dto.Products)
-            {
-                var product = await _productService.GetByIdAsync(p.ProductId);
-                if (product == null || !product.IsActive)
-                {
-                    return BadRequest($"Product '{p.ProductName}' is no longer available or has been deleted.");
-                }
-            }
-
-            // ✅ Step 2: Create the order
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
@@ -59,38 +44,9 @@ namespace DSM_Application.Server.Controllers
                 Status = "Pending"
             };
 
-            // ✅ Step 3: Save to DB
             await _mongo.Orders.InsertOneAsync(order);
-
             return Ok(new { message = "Order placed successfully", orderId = order.Id });
         }
-
-        //[HttpPost]
-        //public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
-        //{
-        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
-        //        return BadRequest("No products provided");
-
-        //    var order = new Order
-        //    {
-        //        CustomerId = dto.CustomerId,
-        //        DistributorId = dto.DistributorId,
-        //        Products = dto.Products.Select(p => new OrderProduct
-        //        {
-        //            ProductId = p.ProductId,
-        //            ProductName = p.ProductName,
-        //            Price = p.Price,
-        //            Quantity = p.Quantity
-        //        }).ToList(),
-        //        TotalAmount = dto.Products.Sum(p => p.Price * p.Quantity),
-        //        OrderDate = DateTime.UtcNow,
-        //        Status = "Pending"
-        //    };
-
-        //    await _mongo.Orders.InsertOneAsync(order);
-        //    return Ok(new { message = "Order placed successfully", orderId = order.Id });
-        //}
-
         [Authorize(Roles = "Customer")]
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetCustomerOrders(string customerId)

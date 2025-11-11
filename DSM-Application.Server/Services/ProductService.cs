@@ -1,8 +1,10 @@
 ﻿using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Xml.Linq;
 
 namespace DSM_Application.Server.Services
 {
@@ -11,10 +13,21 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<Product> _products;
         private readonly IMongoCollection<Distributor> _distributors;
 
+
         public ProductService(MongoDbService db)
         {
             _products = db.Products;
             _distributors = db.Distributors;
+        }
+
+        public async Task<List<Product>> GetAllAsync(string distributorId)
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId),
+                Builders<Product>.Filter.Eq(p => p.IsActive, true)
+            );
+
+            return await _products.Find(filter).ToListAsync();
         }
 
         // Get all active products
@@ -22,15 +35,25 @@ namespace DSM_Application.Server.Services
         {
             // _products is already IMongoCollection<Product>
             return await _products
-                .Find(p => p.DistributorId == distributorId)
+                .Find(p => p.DistributorId == distributorId && p.IsActive)
                 .ToListAsync();
         }
-             
-     
+
         public async Task<Product> GetByIdAsync(string id)
         {
-            return await _products.Find(p => p.ProductId == id).FirstOrDefaultAsync();
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(p => p.ProductId, id),
+                Builders<Product>.Filter.Eq(p => p.IsActive, true)
+            );
+
+            return await _products.Find(filter).FirstOrDefaultAsync();
         }
+
+
+        //public async Task<Product> GetByIdAsync(string id)
+        //{
+        //    return await _products.Find(p => p.ProductId == id).FirstOrDefaultAsync();
+        //}
 
         // Create product
         public async Task<Product> CreateAsync(Product product)
@@ -54,6 +77,7 @@ namespace DSM_Application.Server.Services
             var update = Builders<Product>.Update.Set(p => p.IsActive, false).Set(p => p.UpdatedDate, DateTime.UtcNow);
             await _products.UpdateOneAsync(p => p.ProductId == id, update);
         }
+
         public async Task<Distributor?> GetDistributorByIdAsync(string distributorId)
         {
             return await _distributors.Find(d => d.DistributorId == distributorId).FirstOrDefaultAsync();
@@ -69,13 +93,186 @@ namespace DSM_Application.Server.Services
 
             return distributor.Categories;
         }
+
+
         public async Task<List<Product>> GetProductsByDistributorAsync(string distributorId)
         {
-            // Filter by string
-            var filter = Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId);
-            var products = await _products.Find(filter).ToListAsync();
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId),
+                Builders<Product>.Filter.Eq(p => p.IsActive, true),
+                Builders<Product>.Filter.Or(
+                    Builders<Product>.Filter.Eq(p => p.IsDeleted, false),
+                    Builders<Product>.Filter.Exists(p => p.IsDeleted, false) // ✅ include if missing
+                )
+            );
 
-            return products ?? new List<Product>();
+            return await _products.Find(filter).ToListAsync();
         }
+
+
+        //public async Task<List<Product>> GetProductsByDistributorAsync(string distributorId)
+        //{
+        //    // Filter by string
+        //    var filter = Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId);
+        //    var products = await _products.Find(filter).ToListAsync();
+
+        //    return products ?? new List<Product>();
+        //}
+
+        // 🔍 SEARCH SECTION STARTS HERE -----------------------------------
+
+        // ✅ Search by Category
+        public async Task<List<Product>> SearchByCategoryAsync(string distributorId, string category)
+        {
+            if (string.IsNullOrWhiteSpace(distributorId) || string.IsNullOrWhiteSpace(category))
+                return new List<Product>();
+
+            distributorId = distributorId.Trim();
+            category = System.Text.RegularExpressions.Regex.Replace(category.Trim(), @"\s+", " ");
+
+            // ✅ If your DistributorId in MongoDB is stored as a string (check your DB):
+            var distributorFilter = Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId);
+
+            // ✅ Case-insensitive category search (matches "Electronics", "electronics", etc.)
+            var categoryFilter = Builders<Product>.Filter.Regex(
+                p => p.Category,
+                new BsonRegularExpression($"^{System.Text.RegularExpressions.Regex.Escape(category)}$", "i")
+            );
+
+            var isActiveFilter = Builders<Product>.Filter.Eq(p => p.IsActive, true);
+
+            var finalFilter = Builders<Product>.Filter.And(distributorFilter, categoryFilter, isActiveFilter);
+
+            return await _products.Find(finalFilter).ToListAsync();
+        }
+
+        // ✅ Search by Name (case-insensitive)
+        public async Task<List<Product>> SearchByNameAsync(string distributorId, string name)
+        {
+            if (string.IsNullOrWhiteSpace(distributorId) || string.IsNullOrWhiteSpace(name))
+                return new List<Product>();
+
+            // Normalize input (trim spaces and case-insensitive search)
+            distributorId = distributorId.Trim();
+            name = name.Trim();
+
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId),
+                Builders<Product>.Filter.Regex(p => p.ProductName, new BsonRegularExpression(name, "i")),
+                Builders<Product>.Filter.Eq(p => p.IsActive, true)
+            );
+
+            return await _products.Find(filter).ToListAsync();
+        }
+
+        // ✅ Search by Price Range
+
+        public async Task<List<Product>> SearchByPriceAsync(string distributorId, decimal? minPrice, decimal? maxPrice)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(distributorId))
+                    return new List<Product>();
+
+                distributorId = distributorId.Trim();
+
+                // 🧠 Base filter — match distributor and active products
+                var filters = new List<FilterDefinition<Product>>
+        {
+            Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId),
+            Builders<Product>.Filter.Eq(p => p.IsActive, true)
+        };
+
+                // 🧮 Add price range filters dynamically
+                if (minPrice.HasValue && maxPrice.HasValue)
+                {
+                    filters.Add(Builders<Product>.Filter.And(
+                        Builders<Product>.Filter.Gte(p => p.Price, minPrice.Value),
+                        Builders<Product>.Filter.Lte(p => p.Price, maxPrice.Value)
+                    ));
+                }
+                else if (minPrice.HasValue)
+                {
+                    filters.Add(Builders<Product>.Filter.Gte(p => p.Price, minPrice.Value));
+                }
+                else if (maxPrice.HasValue)
+                {
+                    filters.Add(Builders<Product>.Filter.Lte(p => p.Price, maxPrice.Value));
+                }
+
+                // ✅ Combine all filters
+                var finalFilter = Builders<Product>.Filter.And(filters);
+
+                var results = await _products.Find(finalFilter).ToListAsync();
+
+                // 🔍 Debug logs (optional — check in your console)
+                Console.WriteLine($"[DEBUG] DistributorId: {distributorId}, MinPrice: {minPrice}, MaxPrice: {maxPrice}, Results: {results.Count}");
+
+                return results;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] SearchByPriceAsync failed: {ex.Message}");
+                return new List<Product>();
+            }
+        }
+
+        // ✅ Search by Color (case-insensitive)
+        public async Task<List<Product>> SearchByColorAsync(string distributorId, string color)
+        {
+            if (string.IsNullOrWhiteSpace(distributorId) || string.IsNullOrWhiteSpace(color))
+                return new List<Product>();
+
+            color = color.Trim();
+
+            // Case-insensitive match using Regex
+            var colorFilter = Builders<Product>.Filter.Regex(
+                p => p.Color,
+                new BsonRegularExpression(color, "i")
+            );
+
+            var distributorFilter = Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId);
+            var isActiveFilter = Builders<Product>.Filter.Eq(p => p.IsActive, true);
+
+            var filter = Builders<Product>.Filter.And(distributorFilter, colorFilter, isActiveFilter);
+
+            return await _products.Find(filter).ToListAsync();
+        }
+
+        public async Task<List<Product>> GetAllActiveAsync()
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(p => p.IsActive, true),
+                Builders<Product>.Filter.Or(
+                    Builders<Product>.Filter.Eq(p => p.IsDeleted, false),
+                    Builders<Product>.Filter.Exists(p => p.IsDeleted, false)
+                )
+            );
+
+            return await _products.Find(filter).ToListAsync();
+        }
+
+
+        // ✅ (Optional) Search by Product Quality Details
+        //public async Task<List<Product>> SearchByQualityAsync(string distributorId, string? qualityGrade, string? originCountry, string? certification)
+        //{
+        //    var filters = new List<FilterDefinition<Product>>
+        //    {
+        //        Builders<Product>.Filter.Eq(p => p.DistributorId, distributorId),
+        //        Builders<Product>.Filter.Eq(p => p.IsActive, true)
+        //    };
+
+        //    if (!string.IsNullOrEmpty(qualityGrade))
+        //        filters.Add(Builders<Product>.Filter.Eq(p => p.QualityGrade, qualityGrade));
+
+        //    if (!string.IsNullOrEmpty(originCountry))
+        //        filters.Add(Builders<Product>.Filter.Eq(p => p.OriginCountry, originCountry));
+
+        //    if (!string.IsNullOrEmpty(certification))
+        //        filters.Add(Builders<Product>.Filter.Eq(p => p.Certification, certification));
+
+        //    var filter = Builders<Product>.Filter.And(filters);
+        //    return await _products.Find(filter).ToListAsync();
     }
 }
+

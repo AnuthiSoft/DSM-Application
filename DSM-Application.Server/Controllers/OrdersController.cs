@@ -99,7 +99,7 @@ namespace DSM_Application.Server.Controllers
                 {
                     ProductId = p.ProductId,
                     ProductName = product.ProductName,
-                    UnitPrice = unitPrice,
+                    Price = unitPrice,
                     Quantity = p.Quantity,
                     QuantityDiscountPercent = calc.qtyPct,
                     PriceDiscountPercent = calc.pricePct,
@@ -640,7 +640,7 @@ namespace DSM_Application.Server.Controllers
                 {
                     ProductId = p.ProductId,
                     ProductName = p.ProductName,
-                    UnitPrice = p.UnitPrice,
+                    Price = p.Price,
                     Quantity = p.Quantity,
                     Subtotal = p.Subtotal,
                     QuantityDiscountPercent = p.QuantityDiscountPercent,

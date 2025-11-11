@@ -18,18 +18,28 @@ namespace DSM_Application.Server.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly MongoDbService _mongo;
+
         private readonly IMongoCollection<Product> _products;
+
         private readonly IMongoCollection<Order> _orders;
+
         private readonly DiscountService _discountService;
 
-
         public OrdersController(MongoDbService mongo, DiscountService discountService)
+
         {
+
             _mongo = mongo;
-            _products = _mongo.Database.GetCollection<Product>("Products");
-            _orders = _mongo.Database.GetCollection<Order>("Orders");
+
+            _products = _mongo.Products;   // ✅ use properties from MongoDbService
+
+            _orders = _mongo.Orders;       // ✅ use properties from MongoDbService
+
             _discountService = discountService;
+
         }
+
+
 
 
         //[HttpPost]

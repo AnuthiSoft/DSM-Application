@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DSM_Application.Server.Models
 {
@@ -16,6 +17,19 @@ namespace DSM_Application.Server.Models
         public string Email { get; set; } = string.Empty;
         [BsonElement("PhoneNumber")]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [BsonElement("Address")]
+        public string Address { get; set; } = string.Empty; // 🏠 employee address
+
+        // 🖼️ Image fields stored inside MongoDB
+        [BsonElement("ProfileImageData")]
+        public byte[]? ProfileImageData { get; set; }
+
+        [BsonElement("ProfileImageName")]
+        public string? ProfileImageName { get; set; }
+
+        [BsonElement("ProfileImageType")]
+        public string? ProfileImageType { get; set; }
 
         [BsonElement("Name")]
         public string Name { get; set; } = string.Empty;

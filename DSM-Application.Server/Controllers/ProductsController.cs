@@ -141,7 +141,8 @@ namespace DSM_Application.Server.Controllers
                 DistributorName = distributor.Name,
                 Category = dto.Category,
                 IsActive = true,        // ✅ must be true when creating
-                IsDeleted = false       // ✅ must be false when creating
+                IsDeleted = false ,      // ✅ must be false when creating
+                Color = dto.Color
             };
 
             var created = await _productService.CreateAsync(product);
@@ -206,6 +207,7 @@ namespace DSM_Application.Server.Controllers
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
             existing.Category = dto.Category; // ✅ update category
+            existing.Color = dto.Color;
 
             await _productService.UpdateAsync(id, existing);
 

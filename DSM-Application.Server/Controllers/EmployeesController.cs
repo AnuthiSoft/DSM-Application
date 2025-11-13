@@ -1,10 +1,6 @@
 ﻿using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
-
-
-
-
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,11 +18,13 @@ namespace DSM_Application.Server.Controllers
     {
         private readonly EmployeeService _service;
         private readonly MongoDbService _db;
+        
 
         public EmployeesController(EmployeeService service, MongoDbService db)
         {
             _service = service;
             _db = db;
+
         }
         [HttpGet("{distributorId}")]
         public async Task<IActionResult> GetEmployees(string distributorId)
@@ -293,6 +291,96 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Order picked up (status=Shipped)" });
         }
-        
+
+       [Authorize(Roles = "Employee")]
+        [HttpGet("my-profile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing from token");
+
+            var employee = await _db.Employees
+                .Find(e => e.EmployeeId == employeeId)
+                .FirstOrDefaultAsync();
+
+            if (employee == null)
+                return NotFound("Employee not found");
+
+            return Ok(employee);
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpPut("my-profile")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] EmployeeUpdateDto dto)
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing from token");
+
+            var update = Builders<Employee>.Update
+                .Set(e => e.PhoneNumber, dto.PhoneNumber)
+                .Set(e => e.Address, dto.Address)
+                .Set(e => e.Name, dto.Name)
+                .Set(e => e.Email, dto.Email);
+
+            var result = await _db.Employees.UpdateOneAsync(e => e.EmployeeId == employeeId, update);
+
+            if (result.ModifiedCount == 0)
+                return NotFound("Employee not found or no changes made");
+
+            return Ok(new { message = "Profile updated successfully" });
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpPost("my-profile/upload-image")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadProfileImage([FromForm] IFormFile file)
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing from token");
+
+            if (file == null || file.Length == 0)
+                return BadRequest("File is empty");
+
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
+
+            var update = Builders<Employee>.Update
+                .Set(e => e.ProfileImageData, bytes)
+                .Set(e => e.ProfileImageName, file.FileName)
+                .Set(e => e.ProfileImageType, file.ContentType);
+
+            var result = await _db.Employees.UpdateOneAsync(
+                e => e.EmployeeId == employeeId, update);
+
+            if (result.ModifiedCount == 0)
+                return NotFound("Employee not found or image not updated");
+
+            return Ok(new { message = "Profile image uploaded successfully!" });
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpGet("my-profile/image")]
+        public async Task<IActionResult> GetMyProfileImage()
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing from token");
+
+            var emp = await _db.Employees
+                .Find(e => e.EmployeeId == employeeId)
+                .FirstOrDefaultAsync();
+
+            if (emp == null || emp.ProfileImageData == null)
+                return NotFound("No image found for this employee");
+
+            return File(emp.ProfileImageData, emp.ProfileImageType ?? "image/jpeg", emp.ProfileImageName);
+        }
+
+
+
     }
 }

@@ -41,8 +41,12 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular", policy =>
     {
         policy.WithOrigins(
-            "http://localhost:58555",         // local Angular dev
-            "https://dsm-application.onrender.com" // deployed Angular
+                 "https://dsm-application.web.app",
+                 "http://localhost:58555",   
+
+            "https://dsm-application.onrender.com"
+          
+        // deployed Angular
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -62,6 +66,8 @@ builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
 builder.Services.AddSingleton<EmailService>();
+builder.Services.AddSingleton<ReviewService>();
+builder.Services.AddSingleton<FraudService>();
 
 builder.Services.AddSwaggerGen();
 

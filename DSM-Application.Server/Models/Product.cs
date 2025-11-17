@@ -82,5 +82,36 @@ namespace DSM_Application.Server.Models
 
         [BsonElement("ImageUrl")]
         public string ImageUrl { get; set; }
+
+        // ✅ Added Real-Time Product Standard Qualities
+        [BsonElement("QualityGrade")]
+        public string? QualityGrade { get; set; }
+
+        [BsonElement("OriginCountry")]
+        public string? OriginCountry { get; set; }
+
+        [BsonElement("MaterialType")]
+        public string? MaterialType { get; set; }
+
+        [BsonElement("ManufactureDate")]
+        public DateTime? ManufactureDate { get; set; }
+
+        [BsonElement("ExpiryDate")]
+        public DateTime? ExpiryDate { get; set; }
+
+        [BsonElement("Certification")]
+        public string? Certification { get; set; }
+
+        [BsonElement("Color")]
+        public string? Color { get; set; }
+
+        [BsonElement("SizeOrWeight")]
+        public string? SizeOrWeight { get; set; }
+
+        [BsonElement("IsDeleted")]
+        public bool IsDeleted { get; set; } = false;
+
     }
+
 }
+

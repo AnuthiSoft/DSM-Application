@@ -24,6 +24,8 @@ namespace DSM_Application.Server.Models.DTOs
         public string? ImageUrl { get; set; }
         [Required]
         public string DistributorId { get; set; }
+
+        public string Color { get; set; }
         //[BsonElement("Name")]
         //public string Name { get; set; }
 
@@ -34,7 +36,7 @@ namespace DSM_Application.Server.Models.DTOs
         public DateTime? ManufactureDate { get; set; }
         public DateTime? ExpiryDate { get; set; }
         public string? Certification { get; set; }
-        public string? Color { get; set; }
+        //public string? Color { get; set; }
         public string? SizeOrWeight { get; set; }
 
 

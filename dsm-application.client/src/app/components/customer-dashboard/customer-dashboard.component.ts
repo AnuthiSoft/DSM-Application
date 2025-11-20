@@ -5,6 +5,7 @@ import { Customer } from '../../models/customer.model';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
+import { FormsModule } from '@angular/forms';
 
 
 interface Distributor {
@@ -68,7 +69,6 @@ interface DashboardResponse {
 })
 export class CustomerDashboardComponent {
   customerEmail: string | null = '';
-  customerId: string = '';
   dashboardData!: DashboardResponse;
   loading = true;
   status: string = '';
@@ -84,6 +84,10 @@ revenueStats: { total: number } = { total: 0 };
 recentOrders: any[] = [];
 // products: any[] = [];
 productsLoading: boolean = true;
+
+
+  selectedCartProduct: Product | null = null;
+  customerId = localStorage.getItem('customerId') ?? '';
 
   constructor(private customerService: CustomerService, private router: Router, private http: HttpClient, private productservice: ProductService) { }
 
@@ -155,13 +159,23 @@ productsLoading: boolean = true;
     this.router.navigate(['/products', distributorId]);
   }
 
+
+ 
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+
+  onAddToCart(product: Product) {
+    this.selectedCartProduct = product;   // store selected product
+    this.activeTab = 'cart';              // switch to Add-to-Cart tab
+  }
+
   logout() {
     localStorage.clear();
     this.router.navigate(['/customer/login']);
   }
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-  }
+ 
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;

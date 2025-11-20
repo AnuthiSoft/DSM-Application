@@ -58,6 +58,9 @@ namespace DSM_Application.Server.Models
         [BsonElement("Stock")]
         public int Stock { get; set; } // Current quantity in stock
 
+        [BsonElement("Color")]
+        public string Color { get; set; } //color property
+
         [BsonElement("ReorderLevel")]
         public int ReorderLevel { get; set; } // Minimum stock level
 
@@ -102,8 +105,7 @@ namespace DSM_Application.Server.Models
         [BsonElement("Certification")]
         public string? Certification { get; set; }
 
-        [BsonElement("Color")]
-        public string? Color { get; set; }
+        
 
         [BsonElement("SizeOrWeight")]
         public string? SizeOrWeight { get; set; }

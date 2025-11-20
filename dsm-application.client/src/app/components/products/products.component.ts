@@ -14,31 +14,48 @@ import { environment } from '../../../environments/environment.prod';
 })
 
 export class ProductsComponent {
-    apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+       apiBaseUrl = environment.apiUrl.replace('/api', ''); // for image path
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
- 
+
+  // ==============================================
+  // DATA
+  // ==============================================
   products: Product[] = [];
   filteredProducts: Product[] = [];
- 
+  categories: Category[] = [];
+
+  // ==============================================
+  // FORM & STATE
+  // ==============================================
   productForm: FormGroup;
   isEdit = false;
   selectedProductId: string | null = null;
- 
+
   selectedFile?: File;
   previewUrl: string | ArrayBuffer | null = null;
- 
-  categories: any[] = [];
+
+  // ==============================================
+  // FILTERS
+  // ==============================================
   searchTerm = '';
   categoryFilter = '';
+  color = '';
   stockFilter = '';
- 
+  minPriceFilter?: number;
+  maxPriceFilter?: number;
+
   modalRef: any;
- 
-  constructor(private productService: ProductService, private fb: FormBuilder) {
+
+  constructor(
+    private productService: ProductService,
+    private fb: FormBuilder
+  ) {
+    // Build product form
     this.productForm = this.fb.group({
       productName: ['', Validators.required],
       productCode: ['', Validators.required],
+      color:['', Validators.required],
       category: ['', Validators.required],
       description: [''],
       unit: ['', Validators.required],
@@ -52,154 +69,294 @@ export class ProductsComponent {
       imageUrl: [''],
     });
   }
- 
+
+  // ==============================================
+  // INIT
+  // ==============================================
   ngOnInit(): void {
-    this.loadProducts();
     const distributorId = localStorage.getItem('DistributorId');
     if (distributorId) {
-      this.productService.getCategoriesByDistributor(distributorId).subscribe({
-        next: data => this.categories = data,
-        error: err => console.error(err)
-      });
+      this.loadProducts(distributorId);
+      this.loadCategories(distributorId);
     }
-     
- 
   }
- 
-  loadProducts() {
-    this.productService.getAll().subscribe(data => {
-      this.products = data;
-       this.filteredProducts = [...data];
+
+  loadProducts(distributorId: string) {
+    this.productService.getProductsByDistributor(distributorId).subscribe({
+      next: (data) => {
+        this.products = data;
+        this.filteredProducts = [...data];
+      },
+      error: (err) => console.error('Error loading products:', err)
     });
   }
- 
-  filterProducts() {
-    this.filteredProducts = this.products.filter(p => {
-      const matchesSearch = p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                            p.productCode.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
-debugger
-      let matchesStock = true;
-      if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
-      else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
-      else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
- 
-      return matchesSearch && matchesCategory && matchesStock;
+
+  loadCategories(distributorId: string) {
+    this.productService.getCategoriesByDistributor(distributorId).subscribe({
+      next: (data) => this.categories = data as any[],
+      error: (err) => console.error('Error loading categories:', err)
     });
   }
- 
-  getStockStatus(stock: number) {
-    if (stock > 10) return { class: 'in-stock', text: 'In Stock' };
-    if (stock > 0) return { class: 'low-stock', text: 'Low Stock' };
-    return { class: 'out-of-stock', text: 'Out of Stock' };
-  }
- 
+
+  // ==============================================
+  // CRUD
+  // ==============================================
   submitForm() {
+   
+    if (this.productForm.invalid) return;
+
     const product = this.productForm.value;
     const formData = new FormData();
- 
-    Object.keys(product).forEach(key => {
-      const value = product[key as keyof Product];
-      if (value !== null && value !== undefined) {
-        formData.append(key, value.toString());
-      }
-    });
- 
+
+   Object.keys(product).forEach(key => {
+  const value = product[key as keyof Product];
+  if (value !== null && value !== undefined) {
+    formData.append(key, value.toString());
+  }
+});
     const distributorId = localStorage.getItem('DistributorId');
-    if (distributorId) {
-      formData.append('DistributorId', distributorId);
-    }
- 
+    if (distributorId) formData.append('DistributorId', distributorId);
+
     if (this.selectedFile) {
       formData.append('Image', this.selectedFile, this.selectedFile.name);
     }
- 
+
     if (this.isEdit && this.selectedProductId) {
-      this.productService.update(this.selectedProductId, formData).subscribe(() => {
-        this.loadProducts();
-        this.resetForm();
-        this.modalRef.hide();
+      this.productService.update(this.selectedProductId, formData).subscribe({
+        next: () => {
+          if (distributorId) this.loadProducts(distributorId);
+          this.closeModal();
+          this.resetForm();
+        },
+        error: (err) => console.error('Error updating product:', err)
       });
     } else {
-      this.productService.create(formData).subscribe(() => {
-        this.loadProducts();
-       
-        this.resetForm();
-         this.modalRef.hide();
+      this.productService.create(formData).subscribe({
+        next: () => {
+          if (distributorId) this.loadProducts(distributorId);
+          this.closeModal();
+          this.resetForm();
+        },
+        error: (err) => console.error('Error creating product:', err)
       });
     }
   }
- 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-    this.selectedFile = file;
- 
-    const reader = new FileReader();
-    reader.onload = () => this.previewUrl = reader.result;
-    reader.readAsDataURL(file);
-  }
- 
+
   editProduct(product: Product) {
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
     this.productForm.patchValue(product);
-   this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
+    this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
+    this.openModal(true, product);
+  }
 
+  deleteProduct(id: string) {
+    if (confirm('Are you sure you want to delete this product?')) {
+      this.productService.delete(id).subscribe({
+        next: () => {
+          this.products = this.products.filter(p => p.productId !== id);
+          this.filteredProducts = this.filteredProducts.filter(p => p.productId !== id);
+        },
+        error: (err) => console.error('Error deleting product:', err)
+      });
+    }
   }
- 
- deleteProduct(id: string) {
-  console.log("Deleting product with id:", id);  
-  if (confirm('Are you sure you want to delete this product?')) {
-    this.productService.delete(id).subscribe({
-      next: () => {
-        console.log("Deleted successfully");
-       this.products = this.products.filter(p => p.productId !== id);
-        this.filteredProducts = this.filteredProducts.filter(p => p.productId !== id);
-      },
-      error: err => {
-        console.error("Delete failed:", err);
-      }
-    });
-  }
-}
- 
- 
+
   resetForm() {
     this.productForm.reset();
     this.selectedFile = undefined;
     this.previewUrl = null;
     this.selectedProductId = null;
     this.isEdit = false;
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
+    if (this.fileInput) this.fileInput.nativeElement.value = '';
+  }
+
+  // ==============================================
+  // IMAGE HANDLING
+  // ==============================================
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl = reader.result;
+    reader.readAsDataURL(file);
+  }
+
+  // ==============================================
+  // FILTERS & SEARCH
+  // ==============================================
+  searchByName() {
+    const distributorId = localStorage.getItem('DistributorId');
+    if (!distributorId || !this.searchTerm.trim()) return;
+
+    this.productService.searchByName(distributorId, this.searchTerm).subscribe({
+      next: data => this.filteredProducts = data,
+      error: err => console.error('Error searching by name:', err)
+    });
+  }
+
+  onCategoryChange(category: string) {
+    const distributorId = localStorage.getItem('DistributorId');
+    if (!distributorId) return;
+
+    this.categoryFilter = category;
+
+  // 🔥 If "All Categories" selected → show all products
+  if (!category || category.trim() === '') {
+    this.filteredProducts = [...this.products];
+    return;
+  }
+
+  // Otherwise, filter by category
+  this.productService.searchByCategory(distributorId, category).subscribe({
+    next: data => this.filteredProducts = data,
+    error: err => console.error('Error filtering by categories:', err)
+  });
+}
+
+  onColorChange(color: string) {
+    
+    const distributorId = localStorage.getItem('DistributorId');
+    if (!distributorId) return;
+
+    this.color = color;
+    this.productService.searchByColor(distributorId, color).subscribe({
+      next: data => this.filteredProducts = data,
+      error: err => console.error('Error filtering by color:', err)
+    });
+  }
+
+  applyPriceFilter() {
+    const distributorId = localStorage.getItem('DistributorId');
+    if (!distributorId) return;
+
+    this.productService.searchByPrice(distributorId, this.minPriceFilter, this.maxPriceFilter)
+      .subscribe({
+        next: data => this.filteredProducts = data,
+        error: err => console.error('Error filtering by price:', err)
+      });
+  }
+
+
+  onSmartSearch() {
+  const term = this.searchTerm.toLowerCase().trim();
+  if (!term) {
+    this.filteredProducts = [...this.products];
+    return;
+  }
+
+  // Parse common keywords for price ranges
+  let minPrice: number | null = null;
+  let maxPrice: number | null = null;
+
+  // Match "under 500", "below 200", "less than 100"
+  const underMatch = term.match(/(under|below|less than)\s*(\d+)/);
+  if (underMatch) maxPrice = Number(underMatch[2]);
+
+  // Match "above 100", "over 200", "greater than 300"
+  const aboveMatch = term.match(/(above|over|greater than)\s*(\d+)/);
+  if (aboveMatch) minPrice = Number(aboveMatch[2]);
+
+  // Match "between 100 and 300"
+  const betweenMatch = term.match(/between\s*(\d+)\s*(and|-)\s*(\d+)/);
+  if (betweenMatch) {
+    minPrice = Number(betweenMatch[1]);
+    maxPrice = Number(betweenMatch[3]);
+  }
+
+  // Remove numeric/price words for better text matching
+  const cleanedTerm = term
+    .replace(/(under|below|less than|above|over|greater than|between|and|under|over)\s*\d+/g, "")
+    .replace(/\d+/g, "")
+    .trim();
+
+  this.filteredProducts = this.products.filter(p => {
+    const nameMatch = p.productName?.toLowerCase().includes(cleanedTerm);
+    const categoryMatch = p.category?.toLowerCase().includes(cleanedTerm);
+    const colorMatch = p.color?.toLowerCase().includes(cleanedTerm);
+    const brandMatch = p.brand?.toLowerCase().includes(cleanedTerm);
+
+    // Price filtering
+    let priceMatch = true;
+    if (minPrice !== null && p.price < minPrice) priceMatch = false;
+    if (maxPrice !== null && p.price > maxPrice) priceMatch = false;
+
+    // Stock keyword detection
+    const stockMatch =
+      (term.includes("in stock") && p.stock > 0) ||
+      (term.includes("out of stock") && p.stock === 0) ||
+      (!term.includes("stock") && true);
+
+    return (
+      (nameMatch || categoryMatch || colorMatch || brandMatch) &&
+      priceMatch &&
+      stockMatch
+    );
+  });
+}
+
+
+
+  filterProducts() {
+  this.filteredProducts = this.products.filter(p => {
+    const matchesSearch =
+      p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      p.productCode.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+    const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
+
+    let matchesStock = true;
+    if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
+    else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
+    else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
+
+    const matchesColor =
+      !this.color || p.color.toLowerCase().includes(this.color.toLowerCase());
+
+    const matchesMinPrice = this.minPriceFilter == null || p.price >= this.minPriceFilter;
+    const matchesMaxPrice = this.maxPriceFilter == null || p.price <= this.maxPriceFilter;
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesStock &&
+      matchesColor &&
+      matchesMinPrice &&
+      matchesMaxPrice
+    );
+  });
+}
+
+
+  getStockStatus(stock: number) {
+    if (stock > 10) return { class: 'in-stock', text: 'In Stock' };
+    if (stock > 0) return { class: 'low-stock', text: 'Low Stock' };
+    return { class: 'out-of-stock', text: 'Out of Stock' };
+  }
+
+  // ==============================================
+  // MODAL HANDLING
+  // ==============================================
+  openModal(isEdit = false, product?: Product) {
+    this.isEdit = isEdit;
+
+    if (isEdit && product) {
+      this.productForm.patchValue(product);
+      this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
+    } else {
+      this.resetForm();
+    }
+
+    const modalEl = document.getElementById('productModal');
+    if (modalEl) {
+      this.modalRef = new bootstrap.Modal(modalEl);
+      this.modalRef.show();
     }
   }
- 
-  openModal(isEdit = false, product?: any) {
-  this.isEdit = isEdit;
-  this.previewUrl = null;
- 
-  if (isEdit && product) {
-    this.selectedProductId = product.productId;
-    this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
 
-  } else {
-    this.productForm.reset();
-    this.selectedProductId = null;
+  closeModal() {
+    if (this.modalRef) this.modalRef.hide();
   }
- 
-  const modalEl = document.getElementById('productModal');
-  if (modalEl) {
-    this.modalRef = new bootstrap.Modal(modalEl);
-    this.modalRef.show();
-  }
-}
- 
-closeModal() {
-  if (this.modalRef) {
-    this.modalRef.hide();
-  }
-}
 }

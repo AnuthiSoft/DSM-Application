@@ -1,4 +1,6 @@
-﻿using DistributorManagementSystem.Server.Models;
+﻿using System.Data;
+using System.Drawing;
+using DistributorManagementSystem.Server.Models;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
@@ -6,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using System.Data;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -125,6 +126,7 @@ namespace DSM_Application.Server.Controllers
 
             var product = new Product
             {
+                Color = dto.Color,
                 ProductName = dto.ProductName,
                 ProductCode = dto.ProductCode,
                 Description = dto.Description,
@@ -206,6 +208,7 @@ namespace DSM_Application.Server.Controllers
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
             existing.Category = dto.Category; // ✅ update category
+            existing.Color = dto.Color;
 
             await _productService.UpdateAsync(id, existing);
 

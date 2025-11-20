@@ -26,6 +26,7 @@ import { DistributorConnectionRequestsComponent } from './components/distributor
 import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
+import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 
 
 
@@ -56,6 +57,7 @@ const routes: Routes = [
           { path: 'test', component:TestComponent },
            {path: 'employee-login', component: EmployeeLoginComponent},
             {path: 'employee-signup', component:EmployeeSignupComponent},
+            {path:'add-to-cart',component:AddToCartComponent},
    
       
 

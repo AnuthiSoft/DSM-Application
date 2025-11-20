@@ -33,6 +33,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
+import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 
 
 
@@ -65,7 +66,8 @@ import { EmployeeSignupComponent } from './components/employee-signup/employee-s
       DistributorConnectionRequestsComponent,
       TestComponent,
       EmployeeLoginComponent,
-      EmployeeSignupComponent
+      EmployeeSignupComponent,
+      AddToCartComponent,
    
 
 

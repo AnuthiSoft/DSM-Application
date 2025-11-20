@@ -7,30 +7,26 @@
   <div *ngFor="let o of orders" class="card mb-3 shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
       <div>
-        <strong>Order #{{ o.id }}</strong> — <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
+        <strong>Order #{{ o.id }}</strong> — 
+        <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
       </div>
-     <button *ngIf="o.status === 'Assigned' && !o.paymentCollectedByEmployee"
-        [disabled]="o.loading"
+      <button *ngIf="o.status === 'Assigned' && !o.paymentCollectedByEmployee"
         class="btn btn-success btn-sm"
-        (click)="markDelivered(o)">
-  Mark Delivered & Collect Payment
-</button>
+        (click)="openPaymentModal(o)">
+        Mark Delivered & Collect Payment
+      </button>
     </div>
     <div class="card-body">
       <p><strong>Customer:</strong> {{ o.customerName }}</p>
-     <p><strong>Phone:</strong>
-  <a [href]="'tel:' + o.customerPhone">{{ o.customerPhone }}</a>
-</p>
-<p><strong>Email:</strong>
-  <a [href]="'mailto:' + o.customerEmail">{{ o.customerEmail }}</a>
-</p>
+      <p><strong>Phone:</strong> <a [href]="'tel:' + o.customerPhone">{{ o.customerPhone }}</a></p>
+      <p><strong>Email:</strong> <a [href]="'mailto:' + o.customerEmail">{{ o.customerEmail }}</a></p>
       <p><strong>Address:</strong> {{ o.customerAddress }}</p>
       
-  <!-- ✅ Payment info -->
-  <div *ngIf="o.paymentCollectedByEmployee">
-    <p><strong>Payment Collected:</strong> ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
-    <p><strong>Collected On:</strong> {{ o.collectedOn | date:'short' }}</p>
-  </div>
+      <div *ngIf="o.paymentCollectedByEmployee">
+        <p><strong>Payment Collected:</strong> ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
+        <p><strong>Collected On:</strong> {{ o.collectedOn | date:'short' }}</p>
+      </div>
+
       <table class="table table-sm table-bordered">
         <thead>
           <tr>
@@ -51,6 +47,35 @@
       </table>
       <div class="text-end">
         <strong>Subtotal:</strong> {{ subtotal(o) | currency:'INR' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal" tabindex="-1" [ngClass]="{'show d-block': showPaymentModal}" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Collect Payment for Order #{{ selectedOrder?.id }}</h5>
+        <button type="button" class="btn-close" (click)="closePaymentModal()"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p>
+
+        <div class="mb-3">
+          <label class="form-label">Payment Method</label>
+          <select class="form-select" [(ngModel)]="paymentMethod">
+            <option value="Cash">Cash</option>
+            <option value="Online">Online</option>
+          </select>
+        </div>
+
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closePaymentModal()">Cancel</button>
+        <button type="button" class="btn btn-success" (click)="confirmPayment()">Confirm Payment</button>
       </div>
     </div>
   </div>

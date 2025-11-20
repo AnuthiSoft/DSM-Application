@@ -1,0 +1,97 @@
+<div class="products-section">  
+  <h2>Cart Products</h2>
+
+  <!-- Cart Section -->
+  <div class="cart-section" *ngIf="cart.length > 0">
+    <div class="cart-header">
+      <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+      <span class="cart-count">{{ cart.length }} item(s)</span>
+    </div>
+
+    <div class="cart-table">
+      <div class="cart-header-row">
+        <div class="cart-col product-col">Product</div>
+        <div class="cart-col distributor-col">Distributor</div>
+        <div class="cart-col quantity-col">Quantity</div>
+        <div class="cart-col price-col">Price</div>
+        <div class="cart-col subtotal-col">Subtotal</div>
+        <div class="cart-col action-col">Action</div>
+      </div>
+
+      <div class="cart-item" *ngFor="let item of cart">
+        <div class="cart-col product-col">
+          <strong>{{ item.product.productName }}</strong>
+          <small>Code: {{ item.product.productCode }}</small>
+          <strong>{{ item.product.color }}</strong>
+        </div>
+
+        <div class="cart-col distributor-col">{{ item.product.distributorName }}</div>
+
+        <div class="cart-col quantity-col">
+          <span class="quantity-badge">{{ item.quantity }}</span>
+        </div>
+
+        <div class="cart-col price-col">₹{{ item.product.price }}</div>
+
+        <div class="cart-col subtotal-col">
+          ₹{{ item.product.price * item.quantity }}
+        </div>
+
+        <div class="cart-col action-col">
+          <button class="btn btn-danger btn-sm remove-btn"
+                  (click)="removeFromCart(item.product.productId)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-footer">
+      <div class="total-section">
+        <span class="total-label">Total Amount:</span>
+        <span class="total-amount">₹{{ getTotal() }}</span>
+      </div>
+
+      <button class="btn btn-success place-order-btn" (click)="placeOrder()">
+        <i class="fas fa-shopping-bag"></i> Place Order
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 🛒 Add to Cart Popup Modal -->
+<div class="popup-overlay" *ngIf="showPopup && selectedProduct">
+  <div class="popup-content">
+    <h3>Add to Cart</h3>
+
+    <div class="popup-body">
+      <p><strong>{{ selectedProduct.productName }}</strong></p>
+      <p>Price: ₹{{ selectedProduct.price }}</p>
+      <p>Available Stock: {{ selectedProduct.stock }}</p>
+
+      <div class="quantity-control">
+        <button (click)="decreaseQty()" 
+                [disabled]="selectedQuantity <= 1">-</button>
+
+        <span>{{ selectedQuantity }}</span>
+
+        <button (click)="increaseQty()" 
+                [disabled]="selectedQuantity >= selectedProduct.stock">
+          +
+        </button>
+      </div>
+    </div>
+
+    <div class="popup-actions">
+      <button class="btn btn-success" (click)="confirmAddToCart()">Add</button>
+      <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- If cart is EMPTY -->
+<div class="empty-cart" *ngIf="cart.length === 0">
+  <img src="https://cdn-icons-png.flaticon.com/512/4555/4555971.png" alt="Empty Cart" class="empty-cart-img">
+  <h3>Your Cart is Empty</h3>
+</div>

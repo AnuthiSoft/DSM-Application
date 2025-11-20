@@ -1,4 +1,10 @@
 export interface Product {
+  color: any;
+  Color: any;
+  productColor: any;
+  colorFilter : any;       
+  minPriceFilter?: number;
+  maxPriceFilter?: number;
   productId?: string;
   productName: string;
   productCode: string;

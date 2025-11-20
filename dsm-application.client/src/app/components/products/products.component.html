@@ -1,245 +1,242 @@
 <div class="body">
-<div class="container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <h2><i class="fas fa-box me-2"></i>Product Management</h2>
-    <button  *ngIf="filteredProducts.length > 0"
-      class="btn btn-primary"
-      (click)="openModal(false)"
-    >
-      <i class="fas fa-plus me-2"></i>Add New Product
-    </button>
-  </div>
- 
-  <!-- Search and Filter Section -->
-  <div class="search-section">
-    <div class="search-box">
-      <input
-        type="text"
-        class="form-control"
-        placeholder="Search products..."
-        [(ngModel)]="searchTerm"
-        (input)="filterProducts()"
-      />
-    </div>
-    <div class="filter-dropdown">
-      <select
-        class="form-select"
-        [(ngModel)]="categoryFilter"
-        (change)="filterProducts()"
-      >
-        <option value="">All Categories</option>
-        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-      </select>
-    </div>
-    <div class="filter-dropdown">
-      <select
-        class="form-select"
-        [(ngModel)]="stockFilter"
-        (change)="filterProducts()"
-      >
-        <option value="">All Stock Status</option>
-        <option value="inStock">In Stock</option>
-        <option value="lowStock">Low Stock</option>
-        <option value="outOfStock">Out of Stock</option>
-      </select>
-    </div>
-  </div>
- 
-  <!-- Product Grid -->
-  <div class="product-grid">
-    <div
-      *ngIf="filteredProducts.length === 0"
-      id="emptyState"
-      class="text-center py-5"
-    >
-      <i class="fas fa-box-open fa-3x mb-3" style="color: #d1d5db"></i>
-      <h4>No products found</h4>
-      <p>Try adjusting your search or filter criteria</p>
-      <button
-        class="btn btn-primary mt-2"
-        data-bs-toggle="modal"
-        data-bs-target="#productModal"
-      >
+  <div class="container">
+    <!-- 🧱 PAGE HEADER -->
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="fas fa-box me-2"></i>Product Management</h2>
+      <button class="btn btn-primary" (click)="openModal(false)">
         <i class="fas fa-plus me-2"></i>Add New Product
       </button>
     </div>
- 
-    <div *ngFor="let product of filteredProducts" class="product-card">
-      <div class="product-image">
-        <img *ngIf="product.imageUrl"
-     [src]="apiBaseUrl + product.imageUrl"
-     [alt]="product.productName">
 
-      </div>
-      <div class="product-info">
-        <div class="product-header">
-        <h3 class="product-title">{{ product.productName }}</h3>
-        <div class="product-category">{{ product.category }}</div>
-        </div>
-        <div class="product-price">{{ product.price | currency }}</div>
- 
-        <div class="product-details">
-          <div class="product-meta">
-            <span>Code: {{ product.productCode }}</span>
-            <span
-              class="stock-status"
-              [ngClass]="getStockStatus(product.stock).class"
-            >
-              {{ getStockStatus(product.stock).text }}
-            </span>
-          </div>
-          <div class="product-meta">
-            <span>Stock: {{ product.stock }} {{ product.unit }}</span>
-            <span>GST: {{ product.gst }}%</span>
-          </div>
-        </div>
- 
-        <div class="product-actions">
-          <button class="btn btn-primary btn-sm" (click)="openModal(true, product)">
-            <i class="fas fa-edit me-1"></i>Edit
-          </button>
-          <button
-            class="btn btn-danger btn-sm"
-            (click)="deleteProduct(product.productId!)"
-          >
-            <i class="fas fa-trash me-1"></i>Delete
-          </button>
-        </div>
-      </div>
-    </div>
+<!-- 🔍 UNIFIED SEARCH SECTION -->
+<div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
+  
+  <!-- Search Box -->
+  <div class="search-box">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search products"
+      [(ngModel)]="searchTerm"
+      (input)="onSmartSearch()"
+    />
   </div>
+
+  
+  <!-- Category Filter -->
+  <select
+    class="form-select"
+    [(ngModel)]="categoryFilter"
+    (change)="onCategoryChange(categoryFilter)"
+    style="width: 180px;"
+  >
+    <option value="">All Categories</option>
+    <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+  </select>
+
+  <!-- Stock Filter -->
+  <select
+    class="form-select"
+    [(ngModel)]="stockFilter"
+    (change)="filterProducts()"
+    style="width: 160px;"
+  >
+    <option value="">All Stock</option>
+    <option value="inStock">In Stock</option>
+    <option value="lowStock">Low Stock</option>
+    <option value="outOfStock">Out of Stock</option>
+  </select>
+
 </div>
- 
-<!-- Product Modal -->
-<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">
-          {{ isEdit ? "Edit Product" : "Add New Product" }}
-        </h5>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="modal"
-        ></button>
+
+
+      
+
+    <!-- 🧾 PRODUCT GRID -->
+    <div class="product-grid row g-4">
+      <!-- Empty State -->
+      <div
+        *ngIf="filteredProducts.length === 0"
+        class="text-center py-5 border rounded bg-light"
+      >
+        <i class="fas fa-box-open fa-3x mb-3 text-secondary"></i>
+        <h4>No products found</h4>
+        <p>Try adjusting your search or filters.</p>
+        <button class="btn btn-primary mt-2" (click)="openModal(false)">
+          <i class="fas fa-plus me-2"></i>Add New Product
+        </button>
       </div>
-      <div class="modal-body">
-        <form [formGroup]="productForm">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Product Name</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="productName"
-              />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Product Code</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="productCode"
-              />
-            </div>
-          </div>
- 
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Price ($)</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="price"
-              />
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Cost Price ($)</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="costPrice"
-              />
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Stock</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="stock"
-              />
-            </div>
-          </div>
- 
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Discount (%)</label>
-              <input
-                type="number"
-                class="form-control"
-                formControlName="discount"
-              />
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">GST (%)</label>
-              <input type="number" class="form-control" formControlName="gst" />
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">Category</label>
-              <select class="form-select" formControlName="category">
-                <option value="">Select Category</option>
-                <option *ngFor="let c of categories" [value]="c">
-                  {{ c }}
-                </option>
-              </select>
-            </div>
-          </div>
- 
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Brand</label>
-              <input type="text" class="form-control" formControlName="brand" />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Unit</label>
-              <input type="text" class="form-control" formControlName="unit" />
-            </div>
-          </div>
- 
-          <div class="mb-3">
-            <label class="form-label">Product Image</label>
-            <input
-              type="file"
-              class="form-control"
-              (change)="onFileSelected($event)"
-              #fileInput
+
+      <!-- Product Cards -->
+      <div *ngFor="let product of filteredProducts" class="col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm product-card">
+          <div class="product-image text-center p-3">
+            <img
+              *ngIf="product.imageUrl"
+              [src]="apiBaseUrl + product.imageUrl"
+              [alt]="product.productName"
+              class="img-fluid rounded"
+              style="max-height: 180px; object-fit: contain;"
             />
-            <div *ngIf="previewUrl" class="mt-2">
-              <img [src]="previewUrl" class="image-preview" />
+          </div>
+
+          <div class="card-body d-flex flex-column justify-content-between">
+            <div>
+              <h5 class="product-title mb-1">{{ product.productName }}</h5>
+              <p class="text-muted mb-2">{{ product.category }}</p>
+              <h6 class="text-primary mb-2">{{ product.price | currency }}</h6>
+
+              <div class="product-meta small text-muted mb-2">
+                <span>Code: {{ product.productCode }}</span><br />
+                <span>Color: {{ product.color }}</span><br />
+                <span>Stock: {{ product.stock }} {{ product.unit }}</span><br />
+                <span>GST: {{ product.gst }}%</span>
+              </div>
+
+              <span
+                class="badge"
+                [ngClass]="getStockStatus(product.stock).class"
+              >
+                {{ getStockStatus(product.stock).text }}
+              </span>
+            </div>
+
+            <div class="product-actions mt-3 d-flex justify-content-between">
+              <button
+                class="btn btn-sm btn-outline-primary"
+                (click)="openModal(true, product)"
+              >
+                <i class="fas fa-edit me-1"></i>Edit
+              </button>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteProduct(product.productId!)"
+              >
+                <i class="fas fa-trash me-1"></i>Delete
+              </button>
             </div>
           </div>
- 
-          <div class="mb-3">
-            <label class="form-label">Description</label>
-            <textarea
-              class="form-control"
-              formControlName="description"
-              rows="3"
-            ></textarea>
-          </div>
-        </form>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Cancel
-        </button>
-        <button type="button" class="btn btn-primary " (click)="submitForm()">
-          {{ isEdit ? "Update" : "Save" }} Product
-        </button>
+    </div>
+
+    <!-- 🪟 PRODUCT MODAL -->
+    <div
+      class="modal fade"
+      id="productModal"
+      tabindex="-1"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              {{ isEdit ? "Edit Product" : "Add New Product" }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+
+          <div class="modal-body">
+            <form [formGroup]="productForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Product Name</label>
+                  <input type="text" class="form-control" formControlName="productName" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Product Code</label>
+                  <input type="text" class="form-control" formControlName="productCode" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Color</label>
+                  <input type="text" class="form-control" formControlName="color" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Price ($)</label>
+                  <input type="number" class="form-control" formControlName="price" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Cost Price ($)</label>
+                  <input type="number" class="form-control" formControlName="costPrice" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Stock</label>
+                  <input type="number" class="form-control" formControlName="stock" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Discount (%)</label>
+                  <input type="number" class="form-control" formControlName="discount" />
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">GST (%)</label>
+                  <input type="number" class="form-control" formControlName="gst" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Category</label>
+                  <select class="form-select" formControlName="category">
+                    <option value="">Select Category</option>
+                    <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+                  </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Brand</label>
+                  <input type="text" class="form-control" formControlName="brand" />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label">Unit</label>
+                  <input type="text" class="form-control" formControlName="unit" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Product Image</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  (change)="onFileSelected($event)"
+                  #fileInput
+                />
+                <div *ngIf="previewUrl" class="mt-3 text-center">
+                  <img
+                    [src]="previewUrl"
+                    class="img-thumbnail"
+                    style="max-width: 200px; max-height: 200px;"
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  formControlName="description"
+                ></textarea>
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer">
+            
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" (click)="submitForm()">
+              {{ isEdit ? "Update" : "Save" }} Product
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>

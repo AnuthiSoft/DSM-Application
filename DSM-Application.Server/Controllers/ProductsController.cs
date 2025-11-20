@@ -143,7 +143,8 @@ namespace DSM_Application.Server.Controllers
                 DistributorName = distributor.Name,
                 Category = dto.Category,
                 IsActive = true,        // ✅ must be true when creating
-                IsDeleted = false       // ✅ must be false when creating
+                IsDeleted = false ,      // ✅ must be false when creating
+                Color = dto.Color
             };
 
             var created = await _productService.CreateAsync(product);

@@ -17,6 +17,7 @@ interface Distributor {
   address?: string;
   categories?: string[];
   createdDate?: string;
+   canConnect?: boolean;
 }
 
 // interface Product {
@@ -33,11 +34,18 @@ interface Distributor {
 //   distributorName?: string;
 // }
 
+interface DashboardDistributor {
+  distributor: Distributor;
+  products: Product[];
+  canConnect: boolean;
+}
+
 interface DashboardResponse {
   isGlobal: boolean;
   distributors: {
     distributor: Distributor;
     products: Product[];
+    canConnect: boolean;   // <-- IMPORTANT: Add this
   }[];
   distributor?: Distributor;
   products?: Product[];
@@ -45,6 +53,20 @@ interface DashboardResponse {
   totalProducts?: number;
   totalDistributors?: number;
 }
+
+// interface DashboardResponse {
+//   isGlobal: boolean;
+//   distributors: {
+//     distributor: Distributor;
+//     products: Product[];
+//   }[];
+
+//   distributor?: Distributor;
+//   products?: Product[];
+//   totalOrders?: number;
+//   totalProducts?: number;
+//   totalDistributors?: number;
+// }
 @Component({
   selector: 'app-cust-dashboard',
   templateUrl: './cust-dashboard.component.html',
@@ -73,7 +95,12 @@ loadDistributors() {
 
         if (res.isGlobal && res.distributors?.length) {
           this.dashboardType = 'global';
-          this.distributors = res.distributors.map(d => d.distributor);
+          this.distributors = res.distributors.map(d => ({
+  ...d.distributor,
+  canConnect: d.canConnect
+}));
+
+          // this.distributors = res.distributors.map(d => d.distributor);
         } else if (!res.isGlobal && res.distributor) {
           this.dashboardType = 'local';
           this.distributors = [res.distributor];

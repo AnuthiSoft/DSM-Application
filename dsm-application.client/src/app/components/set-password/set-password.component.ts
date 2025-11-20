@@ -27,14 +27,14 @@ export class SetPasswordComponent {
 
   this.customerService.setPassword(request).subscribe({
     next: (res: any) => {
-      this.message = res;
+      this.message = res.message;
       this.error = '';
       this.identifier = '';
       this.password = '';
       this.isProcessing = false;
     },
     error: (err) => {
-      this.error = err.error || 'Failed to set password';
+      this.error = err.error?.message || 'Failed to set password';
       this.message = '';
       this.isProcessing = false;
     }

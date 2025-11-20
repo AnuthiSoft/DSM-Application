@@ -1,23 +1,24 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
-import { Profile } from '../models/profile.model';
+import { CustomerProfileDto } from '../models/customer.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
 
-
-   private readonly endpoint = 'customers/profile'; // 👈 match controller route
+  private readonly endpoint = 'customers/profile';
 
   constructor(private api: ApiService) {}
 
-  getProfile(): Observable<Profile> {
-    return this.api.get<Profile>(this.endpoint);
+  // GET profile
+  getProfile(): Observable<CustomerProfileDto> {
+    return this.api.get<CustomerProfileDto>(this.endpoint);
   }
 
-  updateProfile(profile: Profile): Observable<void> {
-    return this.api.put<void>(this.endpoint, profile);
+  // UPDATE profile (FormData)
+  updateProfile(formData: FormData): Observable<any> {
+    return this.api.put<any>(this.endpoint, formData);
   }
 }

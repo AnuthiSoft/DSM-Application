@@ -43,11 +43,13 @@
     <h2>My Profile</h2>
   </div>
 
+  <!-- Loading -->
   <div *ngIf="isLoading" class="loading-state">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Loading profile...</span>
   </div>
 
+  <!-- Error -->
   <div *ngIf="errorMessage" class="error-state">
     <i class="fas fa-exclamation-triangle"></i>
     <div class="error-content">
@@ -56,87 +58,95 @@
     </div>
   </div>
 
+  <!-- Profile -->
   <div *ngIf="!isLoading && customer" class="profile-content">
+
     <div class="profile-card">
+
+      <!-- Avatar Section -->
       <div class="profile-header">
-        <div class="profile-avatar">
-          <i class="fas fa-user"></i>
+        <div class="profile-avatar" (click)="triggerFileInput()">
+          <img *ngIf="previewImage" [src]="previewImage" class="avatar-img" />
+          <i *ngIf="!previewImage" class="fas fa-user avatar-placeholder"></i>
+          <input type="file"
+             #fileInput
+             accept="image/*"
+             (change)="onFileSelected($event)"
+             style="display: none;" />
         </div>
-        <div class="profile-info">
-          <h3>{{ customer.name }}</h3>
-          <p class="profile-email">{{ customer.email }}</p>
-          <span class="profile-badge">Customer</span>
-        </div>
+
+        <!-- ⭐ Profile Info (Name, Email, Role) -->
+  <div class="profile-info">
+    <h3>{{ customer.name }}</h3>
+    <p class="profile-email">{{ customer.email }}</p>
+    <span class="profile-badge">{{ customer.role || 'Customer' }}</span>
+  </div>
       </div>
 
+      
+
       <form (ngSubmit)="saveProfile()" class="profile-form">
+
         <div class="form-grid">
+
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-user"></i>
-              Full Name
-            </label>
-            <input type="text" class="form-control" 
-                   [(ngModel)]="customer.name" 
-                   name="name" 
-                   required
-                   placeholder="Enter your full name">
+            <label class="form-label"><i class="fas fa-user"></i> Full Name</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required />
           </div>
 
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-envelope"></i>
-              Email Address
-            </label>
-            <input type="email" class="form-control" 
-                   [(ngModel)]="customer.email" 
-                   name="email" 
-                   required
-                   placeholder="Enter your email address">
+            <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" class="form-control" [(ngModel)]="customer.email" name="email" readonly />
           </div>
 
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-phone"></i>
-              Phone Number
-            </label>
-            <input type="text" class="form-control" 
-                   [(ngModel)]="customer.phoneNumber" 
-                   name="phone"
-                   placeholder="Enter your phone number">
+            <label class="form-label"><i class="fas fa-phone"></i> Phone</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.phoneNumber" name="phone" />
           </div>
 
           <div class="form-group full-width">
-            <label class="form-label">
-              <i class="fas fa-map-marker-alt"></i>
-              Address
-            </label>
-            <textarea class="form-control" 
-                      [(ngModel)]="customer.address" 
-                      name="address" 
-                      rows="3"
-                      placeholder="Enter your complete address"></textarea>
+            <label class="form-label"><i class="fas fa-road"></i> Street</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.street" name="street" />
           </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-city"></i> City</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-flag"></i> State</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.state" name="state" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-hashtag"></i> Pincode</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.pincode" name="pincode" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-globe"></i> Country</label>
+            <input type="text" class="form-control" [(ngModel)]="customer.country" name="country" />
+          </div>
+
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-primary save-btn" 
-                  type="submit" 
-                  [disabled]="isSaving">
+          <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving">
             <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
-            {{ isSaving ? 'Saving Changes...' : 'Save Changes' }}
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>
-          
-          <button type="button" class="btn btn-outline-secondary" 
+
+          <button class="btn btn-outline-secondary"
+                  type="button"
                   (click)="cancelEdit()"
-                  *ngIf="hasChanges()">
-            Cancel
-          </button>
+                  *ngIf="hasChanges()">Cancel</button>
         </div>
+
       </form>
     </div>
 
-    <!-- Additional Profile Info Card -->
+    <!-- Info Card -->
     <div class="info-card">
       <h4><i class="fas fa-info-circle"></i> Profile Information</h4>
       <div class="info-grid">
@@ -154,5 +164,7 @@
         </div>
       </div>
     </div>
+
   </div>
+
 </div>

@@ -58,19 +58,38 @@ export class EmployeeSignupComponent {
     }
   
     onSignup(): void {
-      if (this.password !== this.confirmPassword) {
-        this.error = 'Passwords do not match';
-        return;
-      }
-  
-      this.auth.signup(this.identifier, this.password).subscribe({
-        next: res => {
-          this.message = res;
-          setTimeout(() => this.router.navigate(['/distributor-login']), 1500);
-        },
-        error: err => this.error = err.error || 'Signup failed'
-      });
+  if (this.password !== this.confirmPassword) {
+    this.error = 'Passwords do not match';
+    return;
+  }
+
+  this.auth.signup(this.identifier, this.password).subscribe({
+    next: (res: any) => {
+      this.message = res?.message || "Signup successful";
+      this.error = "";
+      setTimeout(() => this.router.navigate(['/distributor-login']), 1500);
+    },
+    error: (err) => {
+      this.error = err.error?.message || 'Signup failed';
+      this.message = "";
     }
+  });
+}
+
+    // onSignup(): void {
+    //   if (this.password !== this.confirmPassword) {
+    //     this.error = 'Passwords do not match';
+    //     return;
+    //   }
+  
+    //   this.auth.signup(this.identifier, this.password).subscribe({
+    //     next: res => {
+    //       this.message = res;
+    //       setTimeout(() => this.router.navigate(['/distributor-login']), 1500);
+    //     },
+    //     error: err => this.error = err.error || 'Signup failed'
+    //   });
+    // }
 
 
 }

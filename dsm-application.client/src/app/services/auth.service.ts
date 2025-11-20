@@ -119,6 +119,25 @@ resetPassword(email: string, otp: string, newPassword: string) {
     return customer ? JSON.parse(customer) : null;
   }
   
+  //Me added this
+  employeeLogin(email: string, password: string): Observable<any> {
+  return this.api.post<any>(`auth/employee-login`, { email, password }).pipe(
+    tap(res => {
+      const token = res.token;
+      const refreshToken = res.refreshToken;
+
+      if (token) {
+        localStorage.setItem('token', token);
+        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+
+        localStorage.setItem('role', res.role);
+        localStorage.setItem('EmployeeId', res.employeeId);
+        localStorage.setItem('DistributorId', res.distributorId);
+      }
+    })
+  );
+}
+
 }
 
 

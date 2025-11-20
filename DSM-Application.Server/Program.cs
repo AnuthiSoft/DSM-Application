@@ -2,12 +2,14 @@ using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -60,10 +62,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; // preserves property names
+
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());// me added
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
+builder.Services.AddSingleton<TaskService>(); // aded this
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
 builder.Services.AddSingleton<EmailService>();
 
@@ -76,17 +81,33 @@ var dbService = app.Services.GetRequiredService<MongoDbService>();
 app.UseStaticFiles(); // Default wwwroot support
 
 // Serve /uploads from wwwroot/uploads
-var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads");
+
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);
 }
+var provider = new FileExtensionContentTypeProvider();
+provider.Mappings[".avif"] = "image/avif";
 
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/uploads"
+    RequestPath = "/uploads",
+    ContentTypeProvider = provider
 });
+
+//var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+//if (!Directory.Exists(uploadsPath))
+//{
+//    Directory.CreateDirectory(uploadsPath);
+//}
+
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(uploadsPath),
+//    RequestPath = "/uploads"
+//});
 app.UseCors("AllowAngular");
 
 //app.UseHttpsRedirection();

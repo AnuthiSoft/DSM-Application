@@ -33,4 +33,33 @@ export interface CustomerLoginResponse {
   role:string;
 }
 
+export interface CustomerProfileDto {
+  customerId?: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+
+  // IMAGE
+  profileImageUrl?: string;
+  
+
+  // Address
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+
+  // Old single address field (your HTML uses this!)
+  address?: string;
+
+  // Metadata
+  role?: string;
+  isRegistered?: boolean;
+  addedByDistributorId?: string;
+
+  createdDate?: string;
+  updatedDate?: string;
+}
+
 

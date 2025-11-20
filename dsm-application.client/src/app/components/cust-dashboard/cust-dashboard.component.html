@@ -63,7 +63,7 @@
           </button> -->
 
           <!-- Connect Button -->
-          <button class="btn btn-primary"
+          <!-- <button class="btn btn-primary"
                   *ngIf="dashboardType === 'global'" 
                   [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
                   (click)="connectDistributor(d.distributorId)">
@@ -72,6 +72,24 @@
               : d.status === 'Accepted'
               ? 'Connected'
               : 'Connect' }}
+          </button> -->
+
+              <!-- Connect Button -->
+          <button class="btn btn-primary"
+        *ngIf="dashboardType === 'global'"
+        [disabled]="!d.canConnect || d.status === 'Pending' || d.status === 'Accepted'"
+        (click)="connectDistributor(d.distributorId)">
+
+    {{ 
+  !d.canConnect
+    ? 'Connected'
+    : d.status === 'Pending'
+      ? 'Pending'
+      : d.status === 'Accepted'
+        ? 'Connected'
+        : 'Connect'
+}}
+
           </button>
         </div>
       </div>

@@ -20,7 +20,7 @@ export class EmployeeLoginComponent {
     }
     
       onLogin(): void {
-        this.auth.login(this.email, this.password).subscribe({
+        this.auth.employeeLogin(this.email, this.password).subscribe({  // replaced this.authService.login(email, password).subscribe(...)
           next: (res: any) => {
             const role = this.auth.getRole();
                localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId

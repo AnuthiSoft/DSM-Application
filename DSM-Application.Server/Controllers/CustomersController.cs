@@ -94,34 +94,83 @@ namespace DSM_Application.Server.Controllers
             });
         }
 
-
         [Authorize(Roles = "Distributor")]
         [HttpPost("create-by-distributor")]
-        public async Task<IActionResult> CreateByDistributor([FromBody] Customer customer)
+        public async Task<IActionResult> CreateByDistributor([FromBody] DistributorCreateCustomerDto dto)
         {
+            if(!ModelState.IsValid)
+            return BadRequest(ModelState); // ⛔ STOP empty or invalid values
+
+            // Duplicate check
             var existing = await _db.Customers
-         .Find(c => c.Email == customer.Email || c.PhoneNumber == customer.PhoneNumber)
-         .FirstOrDefaultAsync();
+                .Find(c =>
+                    (!string.IsNullOrEmpty(dto.Email) && c.Email == dto.Email) ||
+                    (!string.IsNullOrEmpty(dto.PhoneNumber) && c.PhoneNumber == dto.PhoneNumber)
+                )
+                .FirstOrDefaultAsync();
+
             if (existing != null)
             {
-                if (existing.Email == customer.Email)
+                if (!string.IsNullOrEmpty(dto.Email) && existing.Email == dto.Email)
                     return BadRequest("A customer with this email already exists.");
-                if (existing.PhoneNumber == customer.PhoneNumber)
+                if (!string.IsNullOrEmpty(dto.PhoneNumber) && existing.PhoneNumber == dto.PhoneNumber)
                     return BadRequest("A customer with this phone number already exists.");
             }
-            // ✅ Read "DistributorId" claim instead of ClaimTypes.NameIdentifier
+
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (distributorId == null)
                 return Unauthorized("Distributor ID not found in token");
 
-            customer.AddedByDistributorId = distributorId;
-            customer.IsRegistered = false;
-            customer.PasswordHash = null;
+            var customer = new Customer
+            {
+                Name = dto.Name,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Address = dto.Address,   // ✔ simple address only
+
+                Role = "Customer",
+                AddedByDistributorId = distributorId,
+                IsRegistered = false,
+                PasswordHash = null
+            };
 
             await _db.Customers.InsertOneAsync(customer);
 
-            return Ok(new { message = "Customer created by distributor. Customer must set password.", customer });
+            return Ok(new
+            {
+                message = "Customer created by distributor. Customer must set password.",
+                customerId = customer.CustomerId
+            });
         }
+
+        //[Authorize(Roles = "Distributor")]
+        //[HttpPost("create-by-distributor")]
+        //public async Task<IActionResult> CreateByDistributor([FromBody] Customer customer)
+        //{
+        //    var existing = await _db.Customers
+        // .Find(c => c.Email == customer.Email || c.PhoneNumber == customer.PhoneNumber)
+        // .FirstOrDefaultAsync();
+        //    if (existing != null)
+        //    {
+        //        if (existing.Email == customer.Email)
+        //            return BadRequest("A customer with this email already exists.");
+        //        if (existing.PhoneNumber == customer.PhoneNumber)
+        //            return BadRequest("A customer with this phone number already exists.");
+        //    }
+        //    // ✅ Read "DistributorId" claim instead of ClaimTypes.NameIdentifier
+        //    var distributorId = User.FindFirst("DistributorId")?.Value;
+        //    if (distributorId == null)
+        //        return Unauthorized("Distributor ID not found in token");
+
+        //    customer.AddedByDistributorId = distributorId;
+        //    customer.IsRegistered = false;
+        //    customer.PasswordHash = null;
+
+        //    await _db.Customers.InsertOneAsync(customer);
+
+        //    return Ok(new { message = "Customer created by distributor. Customer must set password.", customer });
+        //}
+
         [Authorize(Roles = "Distributor")]
         [HttpGet("my-customers")]
         public async Task<IActionResult> GetCustomersByDistributor()
@@ -181,11 +230,43 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Customer deleted successfully" });
         }
+        //// ----- Set Password -----
+        //[HttpPost("set-password")]
+        //public async Task<IActionResult> SetPassword([FromBody] CustomerLoginRequest request)
+        //{
+        //    if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+        //        return BadRequest(new { message = "Either Email or Phone Number must be provided." });
+
+        //    var customer = await _db.Customers
+        //        .Find(c =>
+        //            (!string.IsNullOrEmpty(request.Email) && c.Email.ToLower() == request.Email.ToLower()) ||
+        //            (!string.IsNullOrEmpty(request.PhoneNumber) && c.PhoneNumber == request.PhoneNumber)
+        //        )
+        //        .FirstOrDefaultAsync();
+
+        //    if (customer == null)
+        //        return NotFound(new { message = "Customer not found" });
+
+        //    // ⚠ IMPORTANT FIX
+        //    if (customer.IsRegistered)
+        //        return BadRequest(new { message = "Password already created. Please login." });
+
+        //    // SET PASSWORD
+        //    var update = Builders<Customer>.Update
+        //        .Set(c => c.PasswordHash, ComputeHash(request.Password))
+        //        .Set(c => c.IsRegistered, true);
+
+        //    await _db.Customers.UpdateOneAsync(c => c.CustomerId == customer.CustomerId, update);
+
+        //    return Ok(new { message = "Password created successfully" });
+        //}
+
         [HttpPost("set-password")]
         public async Task<IActionResult> SetPassword([FromBody] CustomerLoginRequest request)
         {
             if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
-                return BadRequest("Either Email or Phone Number must be provided.");
+                return BadRequest(new { message = "Either Email or Phone Number must be provided." });
+            //return BadRequest("Either Email or Phone Number must be provided.");
 
             var customer = await _db.Customers
                 .Find(c =>
@@ -195,18 +276,22 @@ namespace DSM_Application.Server.Controllers
                 .FirstOrDefaultAsync();
 
             if (customer == null)
-                return NotFound("Customer not found");
+                return NotFound(new { message = "Customer not found" });
+            //return NotFound("Customer not found");
 
             if (customer.IsRegistered)
-                return BadRequest("Password already created. Please login.");
+                return BadRequest(new { message = "Password already created. Please login." });
+            //return BadRequest("Password already created. Please login.");
 
             var update = Builders<Customer>.Update
                 .Set(c => c.PasswordHash, ComputeHash(request.Password))
                 .Set(c => c.IsRegistered, true);
 
             await _db.Customers.UpdateOneAsync(c => c.CustomerId == customer.CustomerId, update);
-            return Ok("Password created successfully. You can now login.");
+            return Ok(new { message = "Password created successfully" });
+
         }
+
         ////[Authorize(Roles = "Customer")]
         //[HttpGet("dashboard/{customerId}")]
         //public async Task<IActionResult> GetCustomerDashboard(string customerId)
@@ -272,12 +357,34 @@ namespace DSM_Application.Server.Controllers
             foreach (var dist in allDistributors)
             {
                 var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
-                dist.Status = conn?.Status.ToString();
+                bool isCreator = customer.AddedByDistributorId == dist.DistributorId;
+
+                // ✅ Correct Status Logic for Creator Distributor
+                if (isCreator)
+                {
+                    // If connection exists AND it is Accepted → show "Accepted"
+                    if (conn != null && conn.Status == ConnectionStatus.Accepted)
+                    {
+                        dist.Status = "Accepted";
+                    }
+                    else
+                    {
+                        // If creator and no connection → auto "Connected"
+                        dist.Status = "Accepted";
+                    }
+                }
+                else
+                {
+                    // Normal distributors → show their DB status OR "Available"
+                    dist.Status = conn?.Status.ToString() ?? "Available";
+                }
 
                 List<Product> products = new();
 
-                if ((customer.AddedByDistributorId == dist.DistributorId) ||
-                    (conn != null && conn.Status == ConnectionStatus.Accepted))
+                // Products only visible if:
+                // 1. Creator distributor
+                // 2. Connection accepted
+                if (isCreator || (conn != null && conn.Status == ConnectionStatus.Accepted))
                 {
                     products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
                 }
@@ -285,9 +392,59 @@ namespace DSM_Application.Server.Controllers
                 distributorsWithProducts.Add(new
                 {
                     distributor = dist,
-                    products = products
+                    products = products,
+
+                    // Creator cannot connect → false
+                    // Others can connect only if not already Accepted
+                    canConnect = !isCreator && (conn == null || conn.Status != ConnectionStatus.Accepted)
                 });
             }
+
+
+            //foreach (var dist in allDistributors)
+            //{
+            //    var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+            //    dist.Status = conn?.Status.ToString();
+
+            //    List<Product> products = new();
+
+            //    if ((customer.AddedByDistributorId == dist.DistributorId) ||
+            //        (conn != null && conn.Status == ConnectionStatus.Accepted))
+            //    {
+            //        products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
+            //    }
+
+            //    distributorsWithProducts.Add(new
+            //    {
+            //        distributor = dist,
+            //        products = products,
+
+            //        // ⭐ SUPER IMPORTANT ⭐
+            //        canConnect = (customer.AddedByDistributorId == null
+            //                     || customer.AddedByDistributorId != dist.DistributorId)
+            //    });
+            //}
+
+
+            //foreach (var dist in allDistributors)
+            //{
+            //    var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+            //    dist.Status = conn?.Status.ToString();
+
+            //    List<Product> products = new();
+
+            //    if ((customer.AddedByDistributorId == dist.DistributorId) ||
+            //        (conn != null && conn.Status == ConnectionStatus.Accepted))
+            //    {
+            //        products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
+            //    }
+
+            //    distributorsWithProducts.Add(new
+            //    {
+            //        distributor = dist,
+            //        products = products
+            //    });
+            //}
 
             // 4) Fetch customer orders
             var orders = await _db.Orders
@@ -338,11 +495,6 @@ namespace DSM_Application.Server.Controllers
             });
         }
 
-
-
-
-
-
         [HttpPost("connect-distributor")]
         public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
         {
@@ -388,49 +540,165 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = "Connection request sent successfully", status = "Pending" });
         }
         // GET: api/customer/profile
+
         [HttpGet("profile")]
-        public async Task<ActionResult<Customer>> GetProfile()
+        public async Task<ActionResult<CustomerProfileDto>> GetProfile()
         {
-            var customerId = User.FindFirstValue("CustomerId"); // matches JWT claim
+            var customerId = User.FindFirstValue("CustomerId");
             if (string.IsNullOrEmpty(customerId))
                 return Unauthorized();
 
-            var customer = await _customersCollection.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+            var customer = await _customersCollection
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
             if (customer == null)
                 return NotFound();
 
-            return Ok(customer);
+            var dto = new CustomerProfileDto
+            {
+                CustomerId = customer.CustomerId,
+                Name = customer.Name,
+                Email = customer.Email,
+                PhoneNumber = customer.PhoneNumber,
+                ProfileImageUrl = customer.ProfileImageUrl,
+                Street = customer.Street,
+                City = customer.City,
+                State = customer.State,
+                Pincode = customer.Pincode,
+                Country = customer.Country,
+                Role = customer.Role,
+                IsRegistered = customer.IsRegistered,
+                AddedByDistributorId = customer.AddedByDistributorId
+            };
+
+            return Ok(dto);
         }
 
+        //[HttpGet("profile")]
+        //public async Task<ActionResult<Customer>> GetProfile()
+        //{
+        //    var customerId = User.FindFirstValue("CustomerId"); // matches JWT claim
+        //    if (string.IsNullOrEmpty(customerId))
+        //        return Unauthorized();
+
+        //    var customer = await _customersCollection.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
+        //    if (customer == null)
+        //        return NotFound();
+
+        //    return Ok(customer);
+        //}
+
         // PUT: api/customer/profile
+
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromBody] Customer updatedCustomer)
+        public async Task<IActionResult> UpdateProfile([FromForm] UpdateCustomerProfileDto dto)
         {
-            Console.WriteLine("Incoming JWT Claims:");
-            foreach (var claim in User.Claims)
-            {
-                Console.WriteLine($"{claim.Type} = {claim.Value}");
-            }
-            var customerId = User.FindFirstValue("CustomerId"); // match JWT
+            var customerId = User.FindFirst("CustomerId")?.Value;
+
             if (string.IsNullOrEmpty(customerId))
-                return Unauthorized();
+                return Unauthorized("Customer ID missing in token");
+
+            var customer = await _customersCollection
+                .Find(x => x.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
+
+
+            // Update fields
+            customer.Name = dto.Name ?? customer.Name;
+            customer.Email = dto.Email ?? customer.Email;  // ✅ ADD THIS
+            customer.PhoneNumber = dto.PhoneNumber ?? customer.PhoneNumber;
+            customer.Street = dto.Street ?? customer.Street;
+            customer.City = dto.City ?? customer.City;
+            customer.State = dto.State ?? customer.State;
+            customer.Pincode = dto.Pincode ?? customer.Pincode;
+            customer.Country = dto.Country ?? customer.Country;
+
+            // Image upload
+            if (dto.ProfileImage != null)
+            {
+                var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadPath)) Directory.CreateDirectory(uploadPath);
+
+                var fileName = $"{Guid.NewGuid()}_{dto.ProfileImage.FileName}";
+
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.ProfileImage.CopyToAsync(stream);
+                }
+
+                customer.ProfileImageUrl = $"/uploads/{fileName}";
+            }
+
+
+            await _customersCollection.ReplaceOneAsync(x => x.CustomerId == customerId, customer);
+
+            return Ok(new { message = "Profile updated successfully" });
+
+        }
+
+
+        [HttpPost("upload-profile-picture")]
+        public async Task<IActionResult> UploadProfilePicture([FromForm] IFormFile file)
+        {
+            var customerId = User.FindFirstValue("CustomerId");
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized(new { message = "Unauthorized" });
+
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "Invalid image file" });
+
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+
+            if (!Directory.Exists(uploadsPath))
+                Directory.CreateDirectory(uploadsPath);
+
+            // Clean filename using FILE (NOT DTO!)
+            var originalName = Path.GetFileNameWithoutExtension(file.FileName);
+            var extension = Path.GetExtension(file.FileName);
+
+            originalName = originalName.Replace(" ", "_")
+                                       .Replace("(", "")
+                                       .Replace(")", "")
+                                       .Replace("%", "")
+                                       .Replace("&", "")
+                                       .Replace("#", "")
+                                       .Replace("@", "")
+                                       .Replace(",", "")
+                                       .Replace(";", "");
+
+            var fileName = $"{Guid.NewGuid()}_{originalName}{extension}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var imageUrl = $"/uploads/{fileName}";
 
             var update = Builders<Customer>.Update
-                .Set(c => c.Name, updatedCustomer.Name)
-                .Set(c => c.Email, updatedCustomer.Email)
-                .Set(c => c.PhoneNumber, updatedCustomer.PhoneNumber)
-                .Set(c => c.Address, updatedCustomer.Address);
+                .Set(c => c.ProfileImageUrl, imageUrl);
 
-            var result = await _customersCollection.UpdateOneAsync(
+            await _customersCollection.UpdateOneAsync(
                 c => c.CustomerId == customerId,
                 update
             );
 
-            if (result.ModifiedCount == 0)
-                return BadRequest("Profile update failed.");
-
-            return NoContent();
+            return Ok(new
+            {
+                message = "Profile picture updated successfully",
+                imageUrl
+            });
         }
+
+
+
         [HttpGet("connected/{customerId}")]
         public async Task<IActionResult> GetConnectedDistributors(string customerId)
         {
@@ -448,9 +716,6 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(distributors);
         }
-
-
-
         public class ConnectRequest
         {
             public string CustomerId { get; set; }

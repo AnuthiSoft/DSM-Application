@@ -113,7 +113,7 @@ namespace DistributorManagementSystem.Server.Services
 
             // ✅ Include EmployeeId if this is an Employee
             if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
-                claims.Add(new Claim("EmployeeId", user.EmployeeId));
+                claims.Add(new Claim("employeeId", user.EmployeeId));
 
             // ✅ Build final token
             return BuildToken(claims);

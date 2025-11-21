@@ -1,0 +1,110 @@
+.profile-container {
+  width: 90%;
+  margin: auto;
+}
+
+.title {
+  font-size: 32px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.profile-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.avatar-container {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: #e8f2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: 0.2s;
+}
+
+.avatar-container:hover {
+  opacity: 0.85;
+}
+
+.default-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #e8f2ff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.default-avatar i {
+  font-size: 48px;
+  color: #0d6efd; /* blue icon */
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.name {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.email {
+  font-size: 14px;
+  color: gray;
+}
+
+.role-badge {
+  background: #e8f4fd;
+  color: #3498db;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.col {
+  flex: 1;
+  
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.save-btn {
+  background: #28a3ff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #007bff;
+}

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "run-script-os",
+    "start": "ng serve ",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -31,6 +31,7 @@
     "ngx-toastr": "^19.1.0",
     "run-script-os": "*",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.26.3",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },

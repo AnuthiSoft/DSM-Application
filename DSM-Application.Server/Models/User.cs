@@ -19,6 +19,13 @@ namespace DistributorManagementSystem.Server.Models
         public bool IsActive { get; set; } = true;
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+        public string ProfileImageUrl { get; set; }
+        public byte[]? ProfileImageData { get; set; }
+        public string? ProfileImageName { get; set; }
+        public string? ProfileImageType { get; set; }
+
+
+        public string Address { get; set; }
 
         public bool IsRegistered { get; set; } = true; // true if password created by distributor
         [BsonElement("ResetOtp")]

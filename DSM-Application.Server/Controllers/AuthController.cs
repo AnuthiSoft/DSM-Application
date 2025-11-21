@@ -186,14 +186,32 @@ namespace DistributorManagementSystem.Server.Controllers
                 return Unauthorized("Invalid password");
 
             // --------- 7) Auto-assign EmployeeId if missing ----------
+            //if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
+            //{
+            //    user.EmployeeId = ObjectId.GenerateNewId().ToString();
+            //    var update = Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId);
+            //    await _db.Users.UpdateOneAsync(u => u.Id == user.Id, update);
+            //}
+
+
             if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
             {
                 user.EmployeeId = ObjectId.GenerateNewId().ToString();
-                var update = Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId);
-                await _db.Users.UpdateOneAsync(u => u.Id == user.Id, update);
+
+                // Update User table
+                var updateUser = Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId);
+                await _db.Users.UpdateOneAsync(u => u.Id == user.Id, updateUser);
+
+                // 🔥 Also update Employees collection
+                await _db.Employees.UpdateOneAsync(
+                    e => e.Email == user.Email,
+                    Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId)
+                );
             }
 
-            // --------- 8) Token generation ----------
+
+
+
             var token = _jwt.GenerateToken(user);
             var newRefreshToken = _jwt.GenerateRefreshToken();
 

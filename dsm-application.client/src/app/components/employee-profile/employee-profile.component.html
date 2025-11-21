@@ -1,0 +1,78 @@
+<div class="profile-container">
+
+  <h2 class="title">My Profile</h2>
+
+  <div class="profile-card">
+
+    <!-- Top section -->
+    <div class="profile-header">
+      <div class="avatar-container" (click)="triggerFileInput()">
+
+  <!-- If profile image exists, show it -->
+  <img 
+    *ngIf="profileImageUrl && profileImageUrl !== ''; else defaultAvatar"
+    [src]="profileImageUrl"
+    class="avatar-img"
+  />
+
+  <!-- Default icon when no image uploaded -->
+  <ng-template #defaultAvatar>
+    <div class="default-avatar">
+    <i class="fa fa-user"></i>
+    </div>
+  </ng-template>
+
+  <!-- Hidden input -->
+  <input
+    type="file"
+    #fileInput
+    accept="image/*"
+    (change)="onFileSelected($event)"
+    style="display: none"
+  />
+</div>
+
+
+      <div>
+        <h3 class="name">{{ profile.name }}</h3>
+        <p class="email">{{ profile.email }}</p>
+        <span class="role-badge">Employee</span>
+      </div>
+    </div>
+
+    <hr />
+
+    <form (ngSubmit)="updateProfile()">
+
+  <div class="row">
+    <div class="col">
+      <label>Full Name</label>
+      <input type="text" class="form-control" [(ngModel)]="profile.name" name="name" />
+    </div>
+
+    <div class="col">
+      <label>Email Address</label>
+      <input type="email" class="form-control" [(ngModel)]="profile.email" name="email" />
+    </div>
+  </div>
+
+  <div class="row" style="width: 525px;">
+    <div class="col">
+      <label>Phone Number</label>
+      <input type="text" class="form-control" [(ngModel)]="profile.phoneNumber" name="phoneNumber" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <label>Address</label>
+      <textarea class="form-control"
+                rows="3"
+                [(ngModel)]="profile.address"
+                name="address"></textarea>
+    </div>
+  </div>
+
+  <button class="save-btn" type="submit">Save Changes</button>
+
+</form>

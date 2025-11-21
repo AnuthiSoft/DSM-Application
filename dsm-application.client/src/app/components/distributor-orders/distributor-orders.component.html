@@ -108,78 +108,61 @@
             <th>Total Amount</th>
             <th>Status</th>
             <th>Assigned Employee</th>
-            <!-- <th>Employee ID</th> -->
             <th class="actions-column">Actions</th>
-             <th>Payment</th>
+            <th>Payment</th>
           </tr>
         </thead>
+
         <tbody>
           <tr *ngFor="let o of orders" class="order-row">
-            <td class="order-id">
-              <strong>#{{ o.id }}</strong>
+            <td class="order-id"><strong>#{{ o.id }}</strong></td>
+            <td class="customer-name">{{ o.customerName }}</td>
+
+            <!-- ✅ Correct total amount column -->
+            <td class="order-total text-success fw-bold">
+              {{ totalAmount(o) | currency:'INR' }}
             </td>
-            <td class="customer-name">
-              {{ o.customerName }}
-            </td>
-            <td class="order-total">
-              <strong>{{ subtotal(o) | currency:'INR' }}</strong>
-            </td>
+
             <td class="order-status">
               <span class="status-badge" [class]="getStatusClass(o.status)">
                 {{ o.status }}
               </span>
             </td>
-            <td class="employee-name">
-              {{ o.name || 'Not assigned' }}
-            </td>
-            <!-- <td class="employee-id">
-              {{ o.employeeId || '-' }}
-            </td> -->
+
+            <td class="employee-name">{{ o.name || 'Not assigned' }}</td>
+
             <td class="order-actions">
               <div class="action-buttons">
-                <button *ngIf="o.status === 'Pending'" 
-                        class="btn btn-success btn-sm action-btn"
+                <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm action-btn"
                         (click)="confirmOrder(o)">
-                  <i class="fas fa-check"></i>
-                  Confirm
+                  <i class="fas fa-check"></i> Confirm
                 </button>
-                <button *ngIf="o.status === 'Pending'" 
-                        class="btn btn-danger btn-sm action-btn"
+                <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm action-btn"
                         (click)="rejectOrder(o)">
-                  <i class="fas fa-times"></i>
-                  Reject
+                  <i class="fas fa-times"></i> Reject
                 </button>
-                <button *ngIf="o.status === 'Confirmed'" 
-                        class="btn btn-primary btn-sm action-btn"
+                <button *ngIf="o.status === 'Confirmed'" class="btn btn-primary btn-sm action-btn"
                         (click)="openAssignModal(o)">
-                  <i class="fas fa-truck"></i>
-                  Assign & Ship
+                  <i class="fas fa-truck"></i> Assign & Ship
                 </button>
-                <button *ngIf="o.status === 'Shipped'" 
-                        class="btn btn-success btn-sm action-btn"
+                <button *ngIf="o.status === 'Shipped'" class="btn btn-success btn-sm action-btn"
                         (click)="markDelivered(o)">
-                  <i class="fas fa-box"></i>
-                  Mark Delivered
+                  <i class="fas fa-box"></i> Mark Delivered
                 </button>
               </div>
             </td>
-            <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
-  <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
-  <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
-</td>
 
-<ng-template #notCollected>
-  <span class="text-warning">Payment not collected</span>
-</ng-template>
-            
+            <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
+              <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
+              <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
+            </td>
+            <ng-template #notCollected>
+              <span class="text-warning">Payment not collected</span>
+            </ng-template>
           </tr>
         </tbody>
       </table>
     </div>
-    <!-- <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
-  <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
-  <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
-</td> -->
 
     <div *ngIf="orders.length === 0" class="empty-state">
       <i class="fas fa-shopping-cart"></i>
@@ -189,10 +172,10 @@
   </div>
 </div>
 
-<!-- Assign Modal -->
+<!-- ✅ Assign Modal -->
 <div *ngIf="selectedOrder" class="modal-overlay">
   <div class="modal-backdrop" (click)="closeAssignModal()"></div>
-  
+
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3><i class="fas fa-user-tie"></i> Assign Order to Employee</h3>
@@ -200,45 +183,40 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
+
     <div class="modal-body">
       <div class="order-info">
         <h4>Order #{{ selectedOrder.id }}</h4>
         <p><strong>Customer:</strong> {{ selectedOrder.customerName }}</p>
-        <p><strong>Total:</strong> {{ subtotal(selectedOrder) | currency:'INR' }}</p>
+
+        <!-- ✅ Fixed to show correct total amount -->
+        <p><strong>Total Amount:</strong> {{ totalAmount(selectedOrder) | currency:'INR' }}</p>
       </div>
 
       <div class="form-group">
         <label class="form-label">
-          <i class="fas fa-users"></i>
-          Select Employee
+          <i class="fas fa-users"></i> Select Employee
         </label>
-        <select *ngIf="employees.length > 0"
-                [(ngModel)]="employeeId"
-                class="form-select">
+        <select *ngIf="employees.length > 0" [(ngModel)]="employeeId" class="form-select">
           <option value="">-- Select Employee --</option>
           <option *ngFor="let e of employees" [value]="e.employeeId">
             {{ e.name }} (ID: {{ e.employeeId }})
           </option>
         </select>
-        
+
         <div *ngIf="!employees || employees.length === 0" class="no-employees">
           <i class="fas fa-exclamation-triangle"></i>
           <p>No employees available for assignment.</p>
         </div>
       </div>
     </div>
-    
+
     <div class="modal-footer">
       <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
-        <i class="fas fa-times"></i>
-        Cancel
+        <i class="fas fa-times"></i> Cancel
       </button>
-      <button class="btn btn-primary" 
-              (click)="assignAndShip()"
-              [disabled]="!employeeId">
-        <i class="fas fa-paper-plane"></i>
-        Assign & Ship
+      <button class="btn btn-primary" (click)="assignAndShip()" [disabled]="!employeeId">
+        <i class="fas fa-paper-plane"></i> Assign & Ship
       </button>
     </div>
   </div>

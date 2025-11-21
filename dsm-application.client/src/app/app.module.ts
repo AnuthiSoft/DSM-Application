@@ -34,6 +34,8 @@ import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
+import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
+
 
 
 
@@ -68,6 +70,8 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
       EmployeeLoginComponent,
       EmployeeSignupComponent,
       AddToCartComponent,
+      EmployeeProfileComponent,
+      
    
 
 
@@ -75,8 +79,8 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
   imports: [
     BrowserModule, HttpClientModule,
     AppRoutingModule, FormsModule, ReactiveFormsModule,  BrowserAnimationsModule, ToastrModule.forRoot({
-      timeOut: 3000,
-      positionClass: 'toast-bottom-right',
+      timeOut: 2000,
+      positionClass: 'toast-center-center',
       preventDuplicates: true,
     }),
   ],

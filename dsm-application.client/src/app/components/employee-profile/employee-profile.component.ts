@@ -1,0 +1,175 @@
+import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core';
+import { EmployeeService } from '../../services/employee.service';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
+
+
+@Component({
+  selector: 'app-employee-profile',
+  templateUrl: './employee-profile.component.html',
+  styleUrls: ['./employee-profile.component.css']
+})
+export class EmployeeProfileComponent implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
+  profile: any = {
+    name: '',
+    email: '',
+    phoneNumber: '',
+    address: ''
+  };
+  selectedImage: File | null = null;
+  profileImageUrl: string = '';
+
+  constructor(
+    private employeeService: EmployeeService,
+    private toastr: ToastrService,
+    
+  ) {}
+
+ ngOnInit() {
+  this.loadProfile();
+   this.loadImage();  
+
+  // Try loading image, but fallback handled in HTML
+  // this.profileImageUrl = this.employeeService.getProfileImage();
+}
+
+
+// onImgError(event: any) {
+//   event.target.src = 'assets/default-user.png';
+// }
+
+
+//   loadProfile() {
+//     this.employeeService.getMyProfile().subscribe({
+//       next: (res) => {
+//         this.profile = {
+//   name: res.name || '',
+//   email: res.email || '',
+//   phoneNumber: res.phoneNumber || '',
+//   address: res.address || ''
+// };
+//       },
+        
+//     error: () => {
+//         Swal.fire({
+//           icon: 'error',
+//           title: 'Failed!',
+//           text: 'Failed to load profile'
+//         });
+//       }
+//     });
+//   }
+
+loadProfile() {
+  this.employeeService.getMyProfile().subscribe({
+    next: (res) => {
+      this.profile = res;   // <-- Use entire response directly
+    },
+    error: () => {
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed!',
+        text: 'Failed to load profile'
+      });
+    }
+  });
+}
+        
+
+//   updateProfile() {
+//   console.log("SAVE BUTTON WORKING, profile:", this.profile);
+
+//   this.employeeService.updateMyProfile(this.profile).subscribe({
+//     next: () => {
+//       // this.toastr.success("Profile updated successfully");
+//        this.toastr.success("Profile saved successfully!", "Success");
+
+//     },
+//     error: (err) => {
+//       console.log("UPDATE ERROR:", err);
+//       this.toastr.error("Update failed");
+//     }
+//   });
+// }
+
+// 👉 Trigger hidden file input
+  triggerFileInput() {
+    this.fileInput.nativeElement.click();
+  }
+
+  // 👉 Handle selected file
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    this.selectedImage = file;  // <--- Save file
+    this.uploadImage(); // <--- Auto-upload when selected
+
+    // TODO: upload logic here
+    // this.uploadAvatar(file);
+  }
+
+updateProfile() {
+  this.employeeService.updateMyProfile(this.profile).subscribe({
+    next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Profile updated successfully!'
+        });
+      },
+      error: (err) => {
+        console.log("UPDATE ERROR:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Update Failed',
+          text: 'Something went wrong'
+        });
+      }
+    });
+  }
+  loadImage() {
+  this.employeeService.getProfileImage().subscribe({
+    next: (blob) => {
+      this.profileImageUrl = URL.createObjectURL(blob);
+    },
+    error: () => {
+      this.profileImageUrl = ''; // will use default avatar
+    }
+  });
+}
+
+uploadImage() {
+    if (!this.selectedImage) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Image Selected',
+        text: 'Please select an image'
+      });
+      return;
+    }
+
+    this.employeeService.uploadProfileImage(this.selectedImage).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Uploaded!',
+          text: 'Image uploaded successfully!'
+        });
+
+        this.loadImage(); // FIX: Reload image
+        // this.profileImageUrl = this.employeeService.getProfileImage() + '?t=' + Date.now();
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Upload Failed',
+          text: 'Image upload failed'
+        });
+      }
+    });
+  }
+}

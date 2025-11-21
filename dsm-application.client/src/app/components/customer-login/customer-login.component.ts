@@ -4,6 +4,8 @@ import { CustomerService } from '../../services/customer.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { CustomerLoginRequest } from '../../models/customer.model';
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-customer-login',
@@ -63,10 +65,18 @@ export class CustomerLoginComponent {
 
         // ✅ Navigate to dashboard only for customers
         if (res.role === 'Customer') {
-          console.log('Navigating to customer dashboard...');
-          this.ngZone.run(() => {
-            this.router.navigateByUrl('/customer-dashboard');
+          Swal.fire({
+            icon: 'success',
+            title: 'Login Successful',
+            text: 'Welcome Customer',
+            timer: 1500,
+            showConfirmButton: false
           });
+          setTimeout(() => {
+            this.ngZone.run(() => {
+              this.router.navigateByUrl('/customer-dashboard');
+            });
+          }, 1500);
         }
       },
       error: (err) => {

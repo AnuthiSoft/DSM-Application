@@ -96,28 +96,31 @@ namespace DistributorManagementSystem.Server.Services
             _config = config;
         }
 
-        // ✅ Generate token for all users (Admin / Distributor / Employee)
+
         public string GenerateToken(User user)
         {
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
-                new Claim("UserId", user.Id ?? ""),
-                new Claim("Role", user.Role ?? "User"),
-                new Claim(ClaimTypes.Role, user.Role ?? "User")
-            };
+    {
+        new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
+        new Claim("UserId", user.Id ?? ""),
+        new Claim("Role", user.Role ?? "User"),
+        new Claim(ClaimTypes.Role, user.Role ?? "User")
+    };
 
-            // ✅ Include DistributorId if applicable
-            if (!string.IsNullOrEmpty(user.DistributorId))
-                claims.Add(new Claim("DistributorId", user.DistributorId));
+            // Distributor — always include the claim
+            if (user.Role == "Distributor")
+                claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
 
-            // ✅ Include EmployeeId if this is an Employee
-            if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
-                claims.Add(new Claim("employeeId", user.EmployeeId));
+            // Employee — only include if exists
+            if (user.Role == "Employee" && !string.IsNullOrWhiteSpace(user.EmployeeId))
+                claims.Add(new Claim("EmployeeId", user.EmployeeId));
 
-            // ✅ Build final token
             return BuildToken(claims);
         }
+
+
+
+
 
         // ✅ Generate token specifically for Customer users
         public string GenerateCustomerToken(Customer customer)

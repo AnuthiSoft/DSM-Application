@@ -1,207 +1,153 @@
-<!-- <div class="customer-container">
-  <h2>Create Customer (Distributor)</h2>
-  <form (ngSubmit)="createCustomer()">
-    <input type="text" placeholder="Name" [(ngModel)]="customer.name" name="name" required />
-    <input type="email" placeholder="Email" [(ngModel)]="customer.email" name="email" required />
-    <input type="text" placeholder="Phone" [(ngModel)]="customer.phoneNumber" name="phoneNumber" />
-     <input type="text" placeholder="Address" [(ngModel)]="customer.address" name="address" />
-    <button type="submit">Create</button>
-  </form>
-  <p class="message text-green-600">{{ message }}</p>
+<div class="customer-management">
 
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h2><i class="fas fa-users"></i> Customer Management</h2>
 
-  <table class="customer-table" *ngIf="customers.length > 0">
-    <thead>
-      <tr> 
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-             <th>Address</th>
-        <th>Registered</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let c of customers">
-        <td>
-          <input [(ngModel)]="c.name" name="name-{{c.customerId}}" />
-        </td>
-        <td>
-          <input [(ngModel)]="c.email" name="email-{{c.customerId}}" />
-        </td>
-        <td>
-          <input [(ngModel)]="c.phoneNumber" name="phone-{{c.customerId}}" />
-        </td>
-         <td>
-          <input [(ngModel)]="c.address" name="phone-{{c.address}}" />
-        </td>
-        
-        <td>{{ c.isRegistered ? 'Yes' : 'No' }}</td>
-       <td>
-  <button class="update-btn" (click)="updateCustomer(c)">Update</button>
-  <button class="delete-btn" (click)="deleteCustomer(c.customerId!)">Delete</button>
-</td>
-      </tr>
-    </tbody>
-  </table>
-</div> -->
-<div class="customer-section">
-  <div class="welcome-header">
-    <h2>Create Customer (Distributor)</h2>
+    <button class="btn btn-primary add-btn" (click)="openCustomerModal()">
+      <i class="fas fa-plus"></i> Add Customer
+    </button>
   </div>
 
-  <div class="customer-content">
-    <!-- Create Customer Card -->
-    <div class="customer-card">
-      <div class="card-header">
-        <h3><i class="fas fa-user-plus"></i> Add New Customer</h3>
-      </div>
-      
-      <form (ngSubmit)="createCustomer()" class="customer-form">
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-user"></i>
-              Full Name
-            </label>
-            <input type="text" 
-                   class="form-control" 
-                   placeholder="Enter customer name" 
-                   [(ngModel)]="customer.name" 
-                   name="name" 
-                   required>
-          </div>
+  <!-- FILTER SECTION -->
+<div class="filter-card">
+  <div class="filter-header">
+    <h4><i class="fas fa-filter"></i> Filter Customers</h4>
+  </div>
 
-          <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-envelope"></i>
-              Email Address
-            </label>
-            <input type="email" 
-                   class="form-control" 
-                   placeholder="Enter email address" 
-                   [(ngModel)]="customer.email" 
-                   name="email" 
-                   required>
-          </div>
+  <div class="filters-row">
 
-          <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-phone"></i>
-              Phone Number
-            </label>
-            <input type="text" 
-                   class="form-control" 
-                   placeholder="Enter phone number" 
-                   [(ngModel)]="customer.phoneNumber" 
-                   name="phoneNumber">
-          </div>
+    <div class="filter-item search-box">
+  <i class="fas fa-search search-icon"></i>
+  <input 
+    type="text"
+    class="form-control"
+    placeholder="Search customers by name, email, or phone..."
+    [(ngModel)]="searchTerm"
+    (input)="applyFilters()"
+  />
+</div>
 
-          <div class="form-group full-width">
-            <label class="form-label">
-              <i class="fas fa-map-marker-alt"></i>
-              Address
-            </label>
-            <textarea class="form-control" 
-                      placeholder="Enter complete address" 
-                      [(ngModel)]="customer.address" 
-                      name="address" 
-                      rows="3"></textarea>
-          </div>
-        </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary create-btn">
-            <i class="fas fa-plus-circle"></i>
-            Create Customer
-          </button>
-        </div>
-      </form>
-
-      <div *ngIf="message" class="message-success">
-        <i class="fas fa-check-circle"></i>
-        {{ message }}
-      </div>
+    <!-- STATUS -->
+    <div class="filter-item">
+      <label>Status</label>
+      <select class="form-control" [(ngModel)]="statusFilter" (change)="applyFilters()">
+        <option value="">All Status</option>
+        <option value="registered">Registered</option>
+        <option value="unregistered">Not Registered</option>
+      </select>
     </div>
 
-    <!-- Customer List Card -->
-    <div class="customer-list-card" *ngIf="customers.length > 0">
-      <div class="card-header">
-        <h3><i class="fas fa-users"></i> Customer List</h3>
-        <span class="customer-count">{{ customers.length }} customer(s)</span>
-      </div>
-
-      <div class="table-container">
-        <table class="customer-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Address</th>
-              <th>Registered</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of customers" class="customer-row">
-              <td class="customer-name">
-                <input type="text" 
-                       class="form-control inline-input" 
-                       [(ngModel)]="c.name" 
-                       name="name-{{c.customerId}}"
-                       placeholder="Name">
-              </td>
-              <td class="customer-email">
-                <input type="email" 
-                       class="form-control inline-input" 
-                       [(ngModel)]="c.email" 
-                       name="email-{{c.customerId}}"
-                       placeholder="Email">
-              </td>
-              <td class="customer-phone">
-                <input type="text" 
-                       class="form-control inline-input" 
-                       [(ngModel)]="c.phoneNumber" 
-                       name="phone-{{c.customerId}}"
-                       placeholder="Phone">
-              </td>
-              <td class="customer-address">
-                <input type="text" 
-                       class="form-control inline-input" 
-                       [(ngModel)]="c.address" 
-                       name="address-{{c.customerId}}"
-                       placeholder="Address">
-              </td>
-              <td class="customer-status">
-                <span class="status-badge" [class]="c.isRegistered ? 'registered' : 'not-registered'">
-                  {{ c.isRegistered ? 'Yes' : 'No' }}
-                </span>
-              </td>
-              <td class="customer-actions">
-                <button class="btn btn-outline-primary btn-sm update-btn" 
-                        (click)="updateCustomer(c)">
-                  <i class="fas fa-edit"></i>
-                  Update
-                </button>
-                <button class="btn btn-outline-danger btn-sm delete-btn" 
-                        (click)="deleteCustomer(c.customerId!)">
-                  <i class="fas fa-trash"></i>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div *ngIf="customers.length === 0" class="empty-state">
-      <i class="fas fa-users"></i>
-      <h3>No Customers Yet</h3>
-      <p>Create your first customer to get started.</p>
-    </div>
   </div>
 </div>
+
+
+  <!-- CUSTOMER DIRECTORY -->
+  <div class="directory-card">
+    <div class="directory-header">
+      <h4><i class="fas fa-users-cog"></i> Customer Directory</h4>
+      <span class="count-badge">{{ filteredCustomers.length }} customer(s)</span>
+    </div>
+
+    <table class="directory-table" *ngIf="filteredCustomers.length > 0">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let c of filteredCustomers">
+
+          <td>
+            <div class="avatar-name">
+              <div class="avatar"><i class="fas fa-user"></i></div>
+              <span>{{ c.name }}</span>
+            </div>
+          </td>
+
+          <td>{{ c.email }}</td>
+          <td>{{ c.phoneNumber || '-' }}</td>
+          <td>{{ c.address || '-' }}</td>
+
+          <td>
+            <span class="status-badge"
+                  [class.registered]="c.isRegistered"
+                  [class.unregistered]="!c.isRegistered">
+              {{ c.isRegistered ? 'Registered' : 'Not Registered' }}
+            </span>
+          </td>
+
+          <td class="table-actions">
+  <button class="btn btn-outline-primary btn-sm" (click)="editCustomer(c)">
+    <i class="fas fa-edit"></i> Edit
+  </button>
+
+  <button class="btn btn-outline-danger btn-sm" (click)="deleteCustomer(c.customerId!)">
+    <i class="fas fa-trash"></i> Delete
+  </button>
+</td>
+
+
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="filteredCustomers.length === 0" class="empty-state">
+      <i class="fas fa-users"></i>
+      <h4>No customers found</h4>
+      <p>Try adjusting your filter or add a new customer.</p>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showModal">
+  <div class="customer-modal">
+
+    <div class="modal-header">
+      <h3><i class="fas fa-user-plus"></i> {{ isEdit ? 'Update Customer' : 'Add Customer' }}</h3>
+      <i class="fas fa-times close-icon" (click)="closeModal()"></i>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input class="form-control" type="text" [(ngModel)]="customer.name"/>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email Address</label>
+          <input class="form-control" type="email" [(ngModel)]="customer.email"/>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-phone"></i> Phone Number</label>
+          <input class="form-control" type="text" [(ngModel)]="customer.phoneNumber"/>
+        </div>
+
+        <div class="form-group full-row">
+          <label><i class="fas fa-map-marker-alt"></i> Address</label>
+          <textarea class="form-control" [(ngModel)]="customer.address"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create Customer' }}</button>
+    </div>
+
+  </div>
+</div>
+
+
+</div>
+ 

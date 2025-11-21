@@ -178,8 +178,7 @@
     <!-- Orders Tab -->
     
     <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders>
-    
-
+   
     <!-- Tasks Tab -->
     <div class="tab-content" *ngIf="isActive('tasks')">
       <div class="welcome-header">
@@ -194,13 +193,11 @@
     </div>
 
     <!-- Profile Tab -->
-    <div class="tab-content" *ngIf="isActive('profile')">
-      <div class="welcome-header">
-        <h2>My Profile</h2>
-      </div>
-      <div class="profile-content">
-        <p>Employee profile management will be implemented here...</p>
-      </div>
-    </div>
+    
+         <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
+
+     
   </div>
 </div>
+
+

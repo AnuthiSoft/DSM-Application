@@ -27,7 +27,7 @@ import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
-
+import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
 
 
 
@@ -58,7 +58,7 @@ const routes: Routes = [
            {path: 'employee-login', component: EmployeeLoginComponent},
             {path: 'employee-signup', component:EmployeeSignupComponent},
             {path:'add-to-cart',component:AddToCartComponent},
-   
+            { path: 'employee-profile', component:EmployeeProfileComponent},
       
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }

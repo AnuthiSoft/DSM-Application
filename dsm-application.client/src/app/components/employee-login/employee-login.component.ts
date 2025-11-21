@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-employee-login',
@@ -31,7 +32,16 @@ export class EmployeeLoginComponent {
             } else if (role === 'Distributor') {
               this.router.navigate(['/distributor-dashboard']);
             } else if (role === 'Employee') {
-              this.router.navigate(['/employee-dashboard']);
+              Swal.fire({
+                          icon: 'success',
+                          title: 'Login Successful',
+                          text: 'Welcome Employee',
+                          timer: 1000,
+                          showConfirmButton: false
+                        });
+                        setTimeout(() => {
+                          this.router.navigate(['/employee-dashboard']);
+                        }, 1000);
             } else {
               this.error = 'Unauthorized role';
             }

@@ -8,57 +8,40 @@
       </button>
     </div>
 
-<!-- 🔍 UNIFIED SEARCH SECTION -->
-<div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
-  
-  <!-- Search Box -->
-  <div class="search-box">
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Search products"
-      [(ngModel)]="searchTerm"
-      (input)="onSmartSearch()"
-    />
-  </div>
+    <!-- 🔍 UNIFIED SEARCH SECTION -->
+    <div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
 
-  
-  <!-- Category Filter -->
-  <select
-    class="form-select"
-    [(ngModel)]="categoryFilter"
-    (change)="onCategoryChange(categoryFilter)"
-    style="width: 180px;"
-  >
-    <option value="">All Categories</option>
-    <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-  </select>
-
-  <!-- Stock Filter -->
-  <select
-    class="form-select"
-    [(ngModel)]="stockFilter"
-    (change)="filterProducts()"
-    style="width: 160px;"
-  >
-    <option value="">All Stock</option>
-    <option value="inStock">In Stock</option>
-    <option value="lowStock">Low Stock</option>
-    <option value="outOfStock">Out of Stock</option>
-  </select>
-
-</div>
+      <!-- Search Box -->
+      <div class="search-box">
+        <input type="text" class="form-control" placeholder="     Search products" [(ngModel)]="searchTerm"
+          (input)="onSmartSearch()" />
+      </div>
 
 
-      
+      <!-- Category Filter -->
+      <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)"
+        style="width: 180px;">
+        <option value="">All Categories</option>
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+
+      <!-- Stock Filter -->
+      <select class="form-select" [(ngModel)]="stockFilter" (change)="filterProducts()" style="width: 160px;">
+        <option value="">All Stock</option>
+        <option value="inStock">In Stock</option>
+        <option value="lowStock">Low Stock</option>
+        <option value="outOfStock">Out of Stock</option>
+      </select>
+
+    </div>
+
+
+
 
     <!-- 🧾 PRODUCT GRID -->
     <div class="product-grid row g-4">
       <!-- Empty State -->
-      <div
-        *ngIf="filteredProducts.length === 0"
-        class="text-center py-5 border rounded bg-light"
-      >
+      <div *ngIf="filteredProducts.length === 0" class="text-center py-5 border rounded bg-light">
         <i class="fas fa-box-open fa-3x mb-3 text-secondary"></i>
         <h4>No products found</h4>
         <p>Try adjusting your search or filters.</p>
@@ -71,63 +54,58 @@
       <div *ngFor="let product of filteredProducts" class="col-md-4 col-lg-3">
         <div class="card h-100 shadow-sm product-card">
           <div class="product-image text-center p-3">
-            <img
-              *ngIf="product.imageUrl"
-              [src]="apiBaseUrl + product.imageUrl"
-              [alt]="product.productName"
-              class="img-fluid rounded"
-              style="max-height: 180px; object-fit: contain;"
-            />
+            <img *ngIf="product.imageUrl" [src]="apiBaseUrl + product.imageUrl" [alt]="product.productName"
+              class="img-fluid rounded" style="max-height: 180px; object-fit: contain;" />
           </div>
 
-          <div class="card-body d-flex flex-column justify-content-between">
-            <div>
-              <h5 class="product-title mb-1">{{ product.productName }}</h5>
-              <p class="text-muted mb-2">{{ product.category }}</p>
-              <h6 class="text-primary mb-2">{{ product.price | currency }}</h6>
+          <div class="product-info p-3">
 
-              <div class="product-meta small text-muted mb-2">
-                <span>Code: {{ product.productCode }}</span><br />
-                <span>Color: {{ product.color }}</span><br />
-                <span>Stock: {{ product.stock }} {{ product.unit }}</span><br />
-                <span>GST: {{ product.gst }}%</span>
-              </div>
+  <!-- Product Name & Price -->
+  <h5 class="product-title">{{ product.productName }}</h5>
+  <div class="product-price text-primary fw-bold">
+    {{ product.price | currency }}
+  </div>
 
-              <span
-                class="badge"
-                [ngClass]="getStockStatus(product.stock).class"
-              >
-                {{ getStockStatus(product.stock).text }}
-              </span>
-            </div>
+  <!-- Quick badges -->
+  <div class="d-flex gap-2 mb-2 flex-wrap">
+    <!-- <span class="badge bg-light text-dark border">{{ product.category }}</span> -->
+    <span class="badge bg-secondary text-light">{{ product.measure }}</span>
+    <span class="badge bg-info text-light">{{ product.brand || 'No Brand' }}</span>
+  </div>
 
-            <div class="product-actions mt-3 d-flex justify-content-between">
-              <button
-                class="btn btn-sm btn-outline-primary"
-                (click)="openModal(true, product)"
-              >
-                <i class="fas fa-edit me-1"></i>Edit
-              </button>
-              <button
-                class="btn btn-sm btn-outline-danger"
-                (click)="deleteProduct(product.productId!)"
-              >
-                <i class="fas fa-trash me-1"></i>Delete
-              </button>
-            </div>
+  <!-- Minimal Product Details -->
+  <div class="small text-muted">
+    <div><strong>Code:</strong> {{ product.productCode }}</div>
+    <div><strong>Color:</strong> {{ product.color }}</div>
+    <div><strong>Stock:</strong> {{ product.stock }} {{ product.measure }}</div>
+  </div>
+
+  <!-- Stock Status Badge -->
+  <div class="mt-2">
+    <span class="badge" [ngClass]="getStockStatus(product.stock).class">
+      {{ getStockStatus(product.stock).text }}
+    </span>
+  </div>
+
+</div>
+
+          <!-- Buttons -->
+          <div class="product-actions mt-3 d-flex justify-content-between">
+            <button class="btn btn-sm btn-outline-primary" (click)="openModal(true, product)">
+              <i class="fas fa-edit me-1"></i>Edit
+            </button>
+
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product.productId!)">
+              <i class="fas fa-trash me-1"></i>Delete
+            </button>
           </div>
+
         </div>
       </div>
     </div>
 
     <!-- 🪟 PRODUCT MODAL -->
-    <div
-      class="modal fade"
-      id="productModal"
-      tabindex="-1"
-      aria-hidden="true"
-      data-bs-backdrop="static"
-    >
+    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -193,41 +171,33 @@
                   <input type="text" class="form-control" formControlName="brand" />
                 </div>
                 <div class="col-md-3 mb-3">
-                  <label class="form-label">Unit</label>
-                  <input type="text" class="form-control" formControlName="unit" />
+                  <label class="form-label">Measure</label>
+                  <select class="form-select" formControlName="measure">
+                    <option value="">Select Measure</option>
+                    <option *ngFor="let m of measures" [value]="m">
+                      {{ m }}
+                    </option>
+                  </select>
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Product Image</label>
-                <input
-                  type="file"
-                  class="form-control"
-                  (change)="onFileSelected($event)"
-                  #fileInput
-                />
+                <input type="file" class="form-control" (change)="onFileSelected($event)" #fileInput />
                 <div *ngIf="previewUrl" class="mt-3 text-center">
-                  <img
-                    [src]="previewUrl"
-                    class="img-thumbnail"
-                    style="max-width: 200px; max-height: 200px;"
-                  />
+                  <img [src]="previewUrl" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea
-                  class="form-control"
-                  rows="3"
-                  formControlName="description"
-                ></textarea>
+                <textarea class="form-control" rows="3" formControlName="description"></textarea>
               </div>
             </form>
           </div>
 
           <div class="modal-footer">
-            
+
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Cancel
             </button>

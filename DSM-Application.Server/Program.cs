@@ -72,6 +72,14 @@ builder.Services.AddSingleton<TaskService>(); // aded this
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
 builder.Services.AddSingleton<EmailService>();
 
+builder.Services.AddScoped<FraudService>();
+builder.Services.AddScoped<ReviewService>();
+
+builder.Services.AddSingleton<ImageService>();
+
+builder.Services.AddSingleton<CategoryService>();
+
+
 builder.Services.AddSwaggerGen();
 
 

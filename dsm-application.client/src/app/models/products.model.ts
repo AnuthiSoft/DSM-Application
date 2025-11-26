@@ -10,7 +10,9 @@ export interface Product {
   productCode: string;
  category?: string;
   description: string;
-  unit: string;
+ measure
+ 
+ : string;
   price: number;
   costPrice: number;
   discount: number;

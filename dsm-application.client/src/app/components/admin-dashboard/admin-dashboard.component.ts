@@ -10,6 +10,16 @@ import * as bootstrap from 'bootstrap';
   styleUrl: './admin-dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
+    // ⭐ Required for tab switching
+  activeTab: string = 'dashboard';
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+
+  isActive(tab: string): boolean {
+    return this.activeTab === tab;
+  }
   distributors: Distributor[] = [];
   filteredDistributors: Distributor[] = [];
   selectedDistributor: Distributor | null = null;

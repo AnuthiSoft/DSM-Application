@@ -46,7 +46,7 @@ export class ProductsComponent {
   maxPriceFilter?: number;
 
   modalRef: any;
-
+measures: string[] = [];
   constructor(
     private productService: ProductService,
     private fb: FormBuilder
@@ -58,7 +58,7 @@ export class ProductsComponent {
       color:['', Validators.required],
       category: ['', Validators.required],
       description: [''],
-      unit: ['', Validators.required],
+       measure: ['', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],
       costPrice: [0, [Validators.required, Validators.min(0)]],
       discount: [0, [Validators.min(0)]],
@@ -78,6 +78,7 @@ export class ProductsComponent {
     if (distributorId) {
       this.loadProducts(distributorId);
       this.loadCategories(distributorId);
+       this.loadMeasures();
     }
   }
 
@@ -90,6 +91,12 @@ export class ProductsComponent {
       error: (err) => console.error('Error loading products:', err)
     });
   }
+  loadMeasures() {
+  this.productService.getMeasures().subscribe({
+    next: (data) => (this.measures = data),
+    error: (err) => console.error("Error loading measures:", err),
+  });
+}
 
   loadCategories(distributorId: string) {
     this.productService.getCategoriesByDistributor(distributorId).subscribe({

@@ -83,7 +83,7 @@ export class EmployeeDashboardComponent implements OnInit {
   localStorage.removeItem('employeeId');
   localStorage.removeItem('distributorId');
 
-  this.router.navigate(['/distributor-login']);
+  this.router.navigate(['/employee-login']);
 }
 
 }

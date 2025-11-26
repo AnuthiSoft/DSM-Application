@@ -33,6 +33,23 @@ namespace DistributorManagementSystem.Server.Models
 
         [BsonElement("ResetOtpExpiry")]
         public DateTime? ResetOtpExpiry { get; set; }
+        /// <summary>
+        /// Average rating score from approved reviews (1–5)
+        /// </summary>
+        public double AverageRating { get; set; } = 0;
+        public int ReviewCount { get; set; } = 0;
+
+        /// <summary>
+        /// Count of fraud reports approved by admin.
+        /// Used to auto-block repeat offenders.
+        /// </summary>
+        public int FraudCount { get; set; } = 0;
+
+        /// <summary>
+        /// True if admin has blocked this user.
+        /// </summary>
+        public bool IsBlocked { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 
     }

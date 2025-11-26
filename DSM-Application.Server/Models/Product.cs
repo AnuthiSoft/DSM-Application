@@ -40,8 +40,8 @@ namespace DSM_Application.Server.Models
         [BsonElement("Description")]
         public string Description { get; set; }
 
-        [BsonElement("Unit")]
-        public string Unit { get; set; } // e.g., pcs, kg, liter
+        [BsonElement("Measure")]
+        public string Measure { get; set; } // e.g., pcs, kg, liter
 
         [BsonElement("Price")]
         public decimal Price { get; set; } // Selling price / MRP

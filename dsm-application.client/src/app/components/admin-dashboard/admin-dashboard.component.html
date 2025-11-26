@@ -1,92 +1,127 @@
 <!-- Navigation Bar -->
 <div class="body">
-  <nav class="navbar navbar-expand-lg navbar-light">
-    <div class="container">
-      <a class="navbar-brand" href="#">
-        <i class="fas fa-building me-2"></i>BusinessPortal
-      </a>
-      <div class="navbar-nav ms-auto">
-        <a href="#" class="nav-link">Return to Home</a>
+  <!-- Sidebar Navigation -->
+  <div class="dashboard-sidebar">
+    <div class="sidebar-header">
+      <h3><i class="fas fa-building"></i> <span>BusinessPortal</span></h3>
+      <div class="admin-badge">
+        <i class="fas fa-shield-alt"></i> Admin
       </div>
     </div>
-  </nav>
-
-  <!-- Admin Dashboard -->
-  <div class="dashboard-container">
-    <div class="container">
-      <!-- Header -->
-      <div class="dashboard-card header-card">
-        <div class="d-flex justify-content-between align-items-center">
-          <h2 class="mb-0">
-            <i class="fas fa-users-cog me-2"></i>Admin Dashboard – Manage
-            Distributors
-          </h2>
-          <button class="btn btn-light" (click)="logout()">
-            <i class="fas fa-sign-out-alt me-1"></i> Logout
-          </button>
-        </div>
+    <div class="nav-items">
+      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')">
+        <i class="fas fa-th-large"></i>
+        <span>Dashboard</span>
       </div>
+      <div class="nav-item" [class.active]="isActive('distributors')" (click)="setActiveTab('distributors')">
+        <i class="fas fa-truck"></i>
+        <span>Distributors</span>
+      </div>
+      <div class="nav-item" [class.active]="isActive('products')" (click)="setActiveTab('products')">
+        <i class="fas fa-box"></i>
+        <span>Products</span>
+      </div>
+      <div class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Orders</span>
+      </div>
+      <div class="nav-item" [class.active]="isActive('settings')" (click)="setActiveTab('settings')">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </div>
+          <div class="nav-item" [class.active]="isActive('admin/reviews')" (click)="setActiveTab('admin/reviews')">
+    <i class="fas fa-star"></i>
+    <span>Reviews</span>
+</div>
+      <!-- ⭐ FRAUD REPORTS TAB -->
+      <div class="nav-item" [class.active]="isActive('fraud-reports')" (click)="setActiveTab('fraud-reports')">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Fraud Reports</span>
+      </div>
+ 
+      <div class="nav-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+  </div>
 
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <h2>
+          <i class="fas fa-users-cog me-2"></i>
+          <span *ngIf="activeTab === 'dashboard'">Dashboard Overview</span>
+          <span *ngIf="activeTab === 'distributors'">Manage Distributors</span>
+          <span *ngIf="activeTab === 'products'">Manage Products</span>
+          <span *ngIf="activeTab === 'orders'">Manage Orders</span>
+          <span *ngIf="activeTab === 'settings'">Settings</span>
+          <span *ngIf="activeTab === 'fraud-reports'">Fraud Reports</span>
+           <span *ngIf="activeTab === 'admin/reviews'">Reviews</span>
+        </h2>
+        <button class="btn btn-light" (click)="logout()">
+          <i class="fas fa-sign-out-alt me-1"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'dashboard'">
       <!-- Stats Overview -->
-      <div class="row">
+      <div class="row mt-3">
         <div class="col-md-3">
           <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-users"></i>
-            </div>
+            <div class="stats-icon"><i class="fas fa-users"></i></div>
             <div class="stats-number">{{ totalDistributors }}</div>
             <div class="stats-label">Total Distributors</div>
           </div>
         </div>
         <div class="col-md-3">
           <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-check-circle"></i>
-            </div>
+            <div class="stats-icon"><i class="fas fa-check-circle"></i></div>
             <div class="stats-number">{{ activeDistributors }}</div>
-            <div class="stats-label">Active Distributors</div>
+            <div class="stats-label">Active</div>
           </div>
         </div>
         <div class="col-md-3">
           <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-crown"></i>
-            </div>
+            <div class="stats-icon"><i class="fas fa-crown"></i></div>
             <div class="stats-number">{{ premiumDistributors }}</div>
-            <div class="stats-label">Premium Distributors</div>
+            <div class="stats-label">Premium</div>
           </div>
         </div>
         <div class="col-md-3">
           <div class="stats-card">
-            <div class="stats-icon">
-              <i class="fas fa-times-circle"></i>
-            </div>
+            <div class="stats-icon"><i class="fas fa-times-circle"></i></div>
             <div class="stats-number">{{ inactiveDistributors }}</div>
-            <div class="stats-label">Inactive Distributors</div>
+            <div class="stats-label">Inactive</div>
           </div>
         </div>
       </div>
 
+      <!-- Recent Activity Section -->
+      <div class="dashboard-card mt-4">
+        <h3>Recent Activity</h3>
+        <p>Your recent admin activity will appear here.</p>
+      </div>
+    </div>
+
+    <!-- Distributors Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'distributors'">
       <!-- Controls -->
-      <div class="dashboard-car">
+      <div class="dashboard-card">
         <div class="d-flex justify-content-between align-items-center">
           <button class="btn btn-add" (click)="openAdd()">
             <i class="fas fa-plus-circle me-1"></i> Add Distributor
           </button>
-          <input
-            type="text"
-            [(ngModel)]="searchText"
-            (input)="applyFilter()"
-            placeholder="Search by Name, Company, Email"
-            class="form-control search-box"
-          />
-          <!-- <input type="text" class="form-control search-box" [(ngModel)]="searchText" (input)="onSearchChange($event.target.value)"  placeholder="Search by Name, Company, Email"/> -->
-
+          <input type="text" [(ngModel)]="searchText" (input)="applyFilter()" 
+                 class="form-control search-box" placeholder="Search by Name, Company, Email" />
         </div>
       </div>
 
       <!-- Distributors Table -->
-
       <div class="dashboard-table">
         <div class="table-responsive">
           <table class="table table-striped align-middle">
@@ -105,92 +140,45 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                *ngFor="
-                  let d of searchText ? filteredDistributors : distributors
-                "
-              >
-                <!-- ID + Company -->
+              <tr *ngFor="let d of searchText ? filteredDistributors : distributors">
                 <td class="fw-semibold">{{ d.distributorId }}</td>
                 <td class="fw-semibold">{{ d.companyName }}</td>
                 <td>{{ d.name }}</td>
                 <td>{{ d.email }}</td>
                 <td>{{ d.phoneNumber }}</td>
                 <td>{{ d.gst }}</td>
-
-                <!-- Status Badge -->
                 <td>
-                  <span class="status-badge bg-success" *ngIf="d.isActive"
-                    >Active</span
-                  >
-                  <span class="status-badge bg-secondary" *ngIf="!d.isActive"
-                    >Inactive</span
-                  >
+                  <span class="status-badge bg-success" *ngIf="d.isActive">Active</span>
+                  <span class="status-badge bg-secondary" *ngIf="!d.isActive">Inactive</span>
                 </td>
-
-                <!-- Premium Indicator -->
                 <td>
                   <span *ngIf="d.isPremium" class="premium-indicator">
                     <i class="fas fa-crown fa-sm text-warning"></i> Premium
                   </span>
                   <span *ngIf="!d.isPremium" class="text-muted">Standard</span>
                 </td>
-
-                <!-- Categories -->
                 <td>
                   <div class="categories-list">
                     {{ d.categories?.join(", ") || "-" }}
                   </div>
                 </td>
-
-                <!-- Action Buttons -->
+                <!-- Actions -->
                 <td class="text-center action-buttons">
-                  <button
-                    class="btn-action btn-edit me-1"
-                    title="Edit"
-                    (click)="openEdit(d)"
-                  >
+                  <button class="btn-action btn-edit me-1" (click)="openEdit(d)">
                     <i class="fas fa-pen fa-xs"></i>
                   </button>
-
-                  <button
-                    class="btn-action btn-deactivate me-1"
-                    *ngIf="d.isActive"
-                    title="Deactivate"
-                    (click)="deactivate(d.distributorId)"
-                  >
+                  <button class="btn-action btn-deactivate me-1" *ngIf="d.isActive" (click)="deactivate(d.distributorId)">
                     <i class="fas fa-toggle-on fa-xs"></i>
                   </button>
-
-                  <button
-                    class="btn-action btn-activate me-1"
-                    *ngIf="!d.isActive"
-                    title="Activate"
-                    (click)="reactivate(d.distributorId)"
-                  >
+                  <button class="btn-action btn-activate me-1" *ngIf="!d.isActive" (click)="reactivate(d.distributorId)">
                     <i class="fas fa-toggle-off fa-xs"></i>
                   </button>
-
-                  <button
-                    class="btn-action btn-delete me-1"
-                    title="Delete"
-                    (click)="delete(d.distributorId)"
-                  >
+                  <button class="btn-action btn-delete me-1" (click)="delete(d.distributorId)">
                     <i class="fas fa-trash fa-xs"></i>
                   </button>
-
-                  <button
-                    class="btn-action btn-premium"
-                    title="Toggle Premium"
-                    (click)="togglePremium(d)"
-                  >
-                    <i
-                      class="fas fa-crown fa-xs"
-                      [ngClass]="{
-                        'text-warning': d.isPremium,
-                        'text-muted': !d.isPremium
-                      }"
-                    ></i>
+                  <button class="btn-action btn-premium" (click)="togglePremium(d)">
+                    <i class="fas fa-crown fa-xs" [ngClass]="{ 'text-warning': d.isPremium, 'text-muted': !d.isPremium }">
+                    </i>
                   </button>
                 </td>
               </tr>
@@ -199,204 +187,183 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Distributor Modal -->
-  <div
-    class="modal fade"
-    id="distributorModal"
-    tabindex="-1"
-    aria-labelledby="distributorModalLabel"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">
-            {{ isEdit ? "Edit Distributor" : "Add Distributor" }}
-          </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
-        </div>
-        <form
-          [formGroup]="distributorForm"
-          (ngSubmit)="saveDistributor()"
-          class="modal-content"
-          novalidate
-        >
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Company Name</label>
-                <input
-                  type="text"
-                  formControlName="companyName"
-                  class="form-control"
-                  [ngClass]="{
-                    'is-invalid':
-                      distributorForm.get('companyName')?.invalid &&
-                      distributorForm.get('companyName')?.touched
-                  }"
-                />
-                <div class="invalid-feedback">Company Name is required</div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Name</label>
-                <input
-                  type="text"
-                  formControlName="name"
-                  class="form-control"
-                  [ngClass]="{
-                    'is-invalid':
-                      distributorForm.get('name')?.invalid &&
-                      distributorForm.get('name')?.touched
-                  }"
-                />
-                <div class="invalid-feedback">Name is required</div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Email</label>
-                <input
-                  type="email"
-                  formControlName="email"
-                  class="form-control"
-                  [ngClass]="{
-                    'is-invalid':
-                      distributorForm.get('email')?.invalid &&
-                      distributorForm.get('email')?.touched
-                  }"
-                />
-                <div class="invalid-feedback">Valid Email is required</div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Phone</label>
-                <input
-                  type="text"
-                  formControlName="phoneNumber"
-                  class="form-control"
-                  [ngClass]="{
-                    'is-invalid':
-                      distributorForm.get('phoneNumber')?.invalid &&
-                      distributorForm.get('phoneNumber')?.touched
-                  }"
-                />
-                <div class="invalid-feedback">Phone is required</div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">GST</label>
-                <input
-                  type="text"
-                  formControlName="gst"
-                  class="form-control"
-                  [ngClass]="{
-                    'is-invalid':
-                      distributorForm.get('gst')?.invalid &&
-                      distributorForm.get('gst')?.touched
-                  }"
-                />
-                <div class="invalid-feedback">GST is required</div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Status</label>
-                <select formControlName="isActive" class="form-select">
-                  <option [ngValue]="true">Active</option>
-                  <option [ngValue]="false">Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Address</label>
-              <textarea
-                formControlName="address"
-                class="form-control"
-                rows="3"
-                [ngClass]="{
-                  'is-invalid':
-                    distributorForm.get('address')?.invalid &&
-                    distributorForm.get('address')?.touched
-                }"
-              ></textarea>
-              <div class="invalid-feedback">Address is required</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Categories</label>
-              <select
-                class="form-select categories-select"
-                formControlName="categories"
-                multiple
-              >
-                <option value="Electronics">Electronics</option>
-                <option value="Clothing & Apparel">Clothing & Apparel</option>
-                <option value="Food & Beverages">Food & Beverages</option>
-                <option value="Furniture & Home Decor">
-                  Furniture & Home Decor
-                </option>
-                <option value="Beauty & Personal Care">
-                  Beauty & Personal Care
-                </option>
-                <option value="Books & Stationery">Books & Stationery</option>
-                <option value="Sports & Fitness">Sports & Fitness</option>
-                <option value="Others">Others</option>
-              </select>
-              <div class="form-text">
-                Hold CTRL (or CMD on Mac) to select multiple
-              </div>
-            </div>
-
-            <div
-              class="mb-3 custom-category-input"
-              *ngIf="distributorForm.value.categories?.includes('Others')"
-            >
-              <input
-                type="text"
-                formControlName="customCategory"
-                placeholder="Enter custom category"
-                class="form-control"
-                *ngIf="distributorForm.value.categories.includes('Others')"
-              />
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              [disabled]="distributorForm.invalid"
-            >
-              {{ isEdit ? "Update" : "Save" }}
-            </button>
-          </div>
-        </form>
+    <!-- Other Tabs -->
+    <div class="tab-content" *ngIf="activeTab === 'products'">
+      <div class="dashboard-card">
+        <h3>Products Management</h3>
+        <p>Product management interface will be implemented here.</p>
       </div>
     </div>
-  </div>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+    <div class="tab-content" *ngIf="activeTab === 'orders'">
+      <div class="dashboard-card">
+        <h3>Orders Management</h3>
+        <p>Order management interface will be implemented here.</p>
+      </div>
     </div>
-  </footer>
-</div>
+
+    <div class="tab-content" *ngIf="activeTab === 'settings'">
+      <div class="dashboard-card">
+        <h3>Admin Settings</h3>
+        <p>Admin settings interface will be implemented here.</p>
+      </div>
+    </div>
+
+    <!-- Fraud Reports Tab -->
+    <app-admin-fraud-list *ngIf="activeTab === 'fraud-reports'"></app-admin-fraud-list>
+       <app-admin-review-list *ngIf="activeTab === 'admin/reviews'"></app-admin-review-list>
+
+    <!-- ⭐ ADD DISTRIBUTOR MODAL - ADD THIS RIGHT HERE -->
+    <div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="distributorModalLabel">
+              {{ isEdit ? 'Edit Distributor' : 'Add New Distributor' }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form [formGroup]="distributorForm" (ngSubmit)="saveDistributor()">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Company Name *</label>
+                    <input type="text" class="form-control" formControlName="companyName"
+                      [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
+                      Company name is required
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Contact Name *</label>
+                    <input type="text" class="form-control" formControlName="name"
+                      [class.is-invalid]="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
+                      Contact name is required
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-control" formControlName="email"
+                      [class.is-invalid]="distributorForm.get('email')?.invalid && distributorForm.get('email')?.touched">
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required'] && distributorForm.get('email')?.touched">
+                      Email is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email'] && distributorForm.get('email')?.touched">
+                      Please enter a valid email
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Phone Number *</label>
+                    <input type="text" class="form-control" formControlName="phoneNumber"
+                      [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
+                      Phone number is required
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">GST Number *</label>
+                    <input type="text" class="form-control" formControlName="gst"
+                      [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
+                      GST number is required
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Address *</label>
+                    <textarea class="form-control" formControlName="address" rows="2"
+                      [class.is-invalid]="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched"></textarea>
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
+                      Address is required
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Categories</label>
+                    <select class="form-select" multiple formControlName="categories">
+                      <option value="Electronics">Electronics</option>
+                      <option value="Clothing">Clothing</option>
+                      <option value="Food & Beverages">Food & Beverages</option>
+                      <option value="Home & Garden">Home & Garden</option>
+                      <option value="Automotive">Automotive</option>
+                      <option value="Health & Beauty">Health & Beauty</option>
+                      <option value="Sports">Sports</option>
+                      <option value="Others">Others</option>
+                    </select>
+                    <small class="form-text text-muted">Hold Ctrl to select multiple categories</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3" *ngIf="distributorForm.get('categories')?.value?.includes('Others')">
+                    <label class="form-label">Custom Category</label>
+                    <input type="text" class="form-control" formControlName="customCategory" placeholder="Enter custom category">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
+                      <label class="form-check-label" for="isActive">
+                        Active Distributor
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" formControlName="isPremium" id="isPremium">
+                      <label class="form-check-label" for="isPremium">
+                        Premium Distributor
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="saveDistributor()">
+              {{ isEdit ? 'Update' : 'Save' }} Distributor
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ⭐ END OF MODAL -->
+
+  </div> <!-- Closing tag for dashboard-main -->
+</div> <!-- Closing tag for body -->
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+  </div>
+</footer>

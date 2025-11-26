@@ -82,7 +82,7 @@ namespace DSM_Application.Server.Controllers
         //    return Ok(products);
         //}
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:length(24)}")]
         public async Task<IActionResult> GetById(string id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -130,7 +130,7 @@ namespace DSM_Application.Server.Controllers
                 ProductName = dto.ProductName,
                 ProductCode = dto.ProductCode,
                 Description = dto.Description,
-                Unit = dto.Unit,
+                Measure = dto.Measure,
                 Price = dto.Price,
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
@@ -200,7 +200,7 @@ namespace DSM_Application.Server.Controllers
             existing.ProductName = dto.ProductName;
             existing.ProductCode = dto.ProductCode;
             existing.Description = dto.Description;
-            existing.Unit = dto.Unit;
+            existing.Measure = dto.Measure;
             existing.Price = dto.Price;
             existing.CostPrice = dto.CostPrice;
             existing.Discount = dto.Discount;
@@ -231,6 +231,28 @@ namespace DSM_Application.Server.Controllers
 
             await _productService.DeleteAsync(id);
             return NoContent();
+        }
+        [AllowAnonymous]
+        [HttpGet("measures")]
+        public IActionResult GetMeasures()
+        {
+            var measures = new List<string>
+    {
+        "Piece (pcs)",
+        "Kilogram (kg)",
+        "Gram (g)",
+        "Litre (L)",
+        "Millilitre (ml)",
+        "Pack",
+        "Dozen (12 pcs)",
+        "Box",
+        "Bottle",
+        "Bag",
+        "Meter (m)",
+        "Centimeter (cm)"
+    };
+
+            return Ok(measures);
         }
 
 

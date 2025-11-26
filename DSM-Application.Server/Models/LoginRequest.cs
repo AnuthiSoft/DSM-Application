@@ -8,5 +8,10 @@ namespace DistributorManagementSystem.Server.Models
         public string? PhoneNumber { get; set; }    // optional
         [Required]
         public string Password { get; set; }
+
+
+
+
+
     }
 }

@@ -12,7 +12,8 @@ namespace DSM_Application.Server.Models.DTOs
 
         public string Category { get; set; } // <-- must match FormData key
         public string Description { get; set; }
-        public string Unit { get; set; }
+        public string Measure { get; set; }
+
         public decimal Price { get; set; }
         public decimal CostPrice { get; set; }
         public decimal Discount { get; set; }

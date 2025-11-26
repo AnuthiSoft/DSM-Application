@@ -104,7 +104,8 @@ namespace DistributorManagementSystem.Server.Services
         new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
         new Claim("UserId", user.Id ?? ""),
         new Claim("Role", user.Role ?? "User"),
-        new Claim(ClaimTypes.Role, user.Role ?? "User")
+        new Claim(ClaimTypes.Role, user.Role ?? "User"),
+          //new Claim("employeeId", user.EmployeeId ?? ""), // ✅ ADD THIS
     };
 
             // Distributor — always include the claim

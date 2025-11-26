@@ -1,0 +1,185 @@
+<div class="fraud-reports-container">
+  <!-- Header Card -->
+  <div class="dashboard-card header-card">
+  <div class="d-flex justify-content-between align-items-center">
+    <h2 class="mb-0">
+      <i class="fas fa-exclamation-triangle me-2"></i>Fraud Reports Management
+    </h2>
+
+    <div class="header-actions">
+      <!-- Refresh Button -->
+      <button class="btn btn-refresh me-2" (click)="loadPendingReports()">
+        <i class="fas fa-sync-alt me-1"></i> Refresh
+      </button>
+
+      <!-- NEW: View History Button -->
+      <button routerLink="/admin/fraud-history" class="btn btn-primary">
+        <i class="fas fa-history me-1"></i> View History
+      </button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Loading fraud reports...</span>
+    </div>
+  </div>
+
+  <!-- Pending Fraud Reports -->
+  <div class="dashboard-card" *ngIf="!loading && pendingFrauds.length > 0">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-clock me-2 text-warning"></i>
+        Pending Fraud Reports
+        <span class="badge bg-warning ms-2">{{ pendingFrauds.length }}</span>
+      </h3>
+    </div>
+    
+    <div class="table-container">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle fraud-table">
+          <thead class="table-header">
+            <tr>
+              <th>Report ID</th>
+              <th>Target ID</th>
+              <th>Target Type</th>
+              <th>Reason</th>
+              <th>Evidence</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of pendingFrauds" class="report-row">
+              <td class="fw-semibold text-primary">#{{ report.id }}</td>
+              <td class="fw-semibold">{{ report.targetId }}</td>
+              <td>
+                <span class="target-type-badge" [ngClass]="getTargetTypeClass(report.targetType)">
+                  {{ report.targetType }}
+                </span>
+              </td>
+              <td>
+                <div class="reason-text" [title]="report.reason">
+                  {{ report.reason | truncate:50 }}
+                </div>
+              </td>
+              <td>
+                <a *ngIf="report.evidenceUrl" 
+                   [href]="report.evidenceUrl" 
+                   target="_blank"
+                   class="evidence-link">
+                  <i class="fas fa-external-link-alt me-1"></i>
+                  View Evidence
+                </a>
+                <span *ngIf="!report.evidenceUrl" class="text-muted">No evidence</span>
+              </td>
+              <td class="text-center action-buttons">
+                <button class="btn-action btn-approve me-2" 
+                        (click)="approve(report.id)"
+                        title="Approve Report">
+                  <i class="fas fa-check-circle me-1"></i>
+                  Approve
+                </button>
+                <button class="btn-action btn-reject" 
+                        (click)="reject(report.id)"
+                        title="Reject Report">
+                  <i class="fas fa-times-circle me-1"></i>
+                  Reject
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State for Pending Reports -->
+  <div class="dashboard-card empty-state" *ngIf="!loading && pendingFrauds.length === 0">
+    <div class="empty-content">
+      <i class="fas fa-check-circle text-success"></i>
+      <h4>No Pending Reports</h4>
+      <p>All fraud reports have been reviewed and processed.</p>
+    </div>
+  </div>
+
+  <!-- Fraud Report History -->
+  <!-- <div class="dashboard-card history-section" *ngIf="!loading">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-history me-2 text-info"></i>
+        Fraud Report History
+        <span class="badge bg-secondary ms-2">{{ historyFrauds.length }}</span>
+      </h3>
+    </div> -->
+<!-- 
+    <div class="table-container" *ngIf="historyFrauds.length > 0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle history-table">
+          <thead class="table-header">
+            <tr>
+              <th>Report ID</th>
+              <th>Reporter ID</th>
+              <th>Target ID</th>
+              <th>Type</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Evidence</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let h of historyFrauds" class="history-row">
+              <td class="fw-semibold">#{{ h.id }}</td>
+              <td>
+                <span class="reporter-id">{{ h.reportedById }}</span>
+              </td>
+              <td class="fw-semibold">{{ h.targetId }}</td>
+              <td>
+                <span class="target-type-badge" [ngClass]="getTargetTypeClass(h.targetType)">
+                  {{ h.targetType }}
+                </span>
+              </td>
+              <td>
+                <div class="reason-text" [title]="h.reason">
+                  {{ h.reason | truncate:30 }}
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(h.status)">
+                  <i class="fas me-1" [ngClass]="getStatusIcon(h.status)"></i>
+                  {{ h.status }}
+                </span>
+              </td>
+              <td>
+                <a *ngIf="h.evidenceUrl" 
+                   [href]="h.evidenceUrl" 
+                   target="_blank"
+                   class="evidence-link">
+                  <i class="fas fa-external-link-alt me-1"></i>
+                  View
+                </a>
+                <span *ngIf="!h.evidenceUrl" class="text-muted">-</span>
+              </td>
+              <td>
+                <span class="text-muted small">{{ h.createdAt | date:'short' }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+
+    <!-- Empty State for History -->
+    <!-- <div class="empty-state" *ngIf="historyFrauds.length === 0">
+      <div class="empty-content">
+        <i class="fas fa-file-alt text-muted"></i>
+        <h4>No Report History</h4>
+        <p>No fraud reports have been processed yet.</p>
+      </div>
+    </div>
+  </div> -->
+<!-- </div> -->

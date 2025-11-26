@@ -36,7 +36,15 @@ import { EmployeeSignupComponent } from './components/employee-signup/employee-s
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
 
+import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
+import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 
+import { TruncatePipe } from './pipe/truncate.pipe';
+import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
+import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
+
+import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
+import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 
 
 
@@ -72,6 +80,19 @@ import { EmployeeProfileComponent } from './components/employee-profile/employee
       AddToCartComponent,
       EmployeeProfileComponent,
       
+      FraudReportComponent,
+  
+      AdminFraudListComponent,
+         
+          TruncatePipe,
+          ReviewSubmitComponent,
+          AdminReviewListComponent,
+       
+       
+                   FraudHistoryComponent,
+                   AdminReviewHistoryComponent,
+          
+      // AdminDistributorsComponent
    
 
 

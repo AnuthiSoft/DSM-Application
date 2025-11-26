@@ -8,8 +8,9 @@ namespace DSM_Application.Server.Models
             public string ProductId { get; set; }
             public string ProductName { get; set; }
             public decimal? Price { get; set; }  // ✅ Use decimal, replaces Price
-            public decimal? UnitPrice { get; set; }
-            public int Quantity { get; set; }
+        [BsonElement("unitPrice")]
+        public decimal UnitPrice { get; set; }
+        public int Quantity { get; set; }
 
             public decimal Subtotal { get; set; }
 

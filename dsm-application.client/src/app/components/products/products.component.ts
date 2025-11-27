@@ -25,6 +25,9 @@ export class ProductsComponent {
   filteredProducts: Product[] = [];
   categories: Category[] = [];
 
+  distributorId: string | null = null;
+
+
   // ==============================================
   // FORM & STATE
   // ==============================================
@@ -73,13 +76,14 @@ export class ProductsComponent {
   // ==============================================
   // INIT
   // ==============================================
-  ngOnInit(): void {
-    const distributorId = localStorage.getItem('DistributorId');
-    if (distributorId) {
-      this.loadProducts(distributorId);
-      this.loadCategories(distributorId);
-    }
+ ngOnInit(): void {
+  const distributorId = localStorage.getItem('DistributorId');
+  if (distributorId) {
+    this.distributorId = distributorId; // save globally
+    this.loadProducts(distributorId);
+    this.loadCategories(distributorId);
   }
+}
 
   loadProducts(distributorId: string) {
     this.productService.getProductsByDistributor(distributorId).subscribe({
@@ -101,46 +105,62 @@ export class ProductsComponent {
   // ==============================================
   // CRUD
   // ==============================================
-  submitForm() {
-   
-    if (this.productForm.invalid) return;
-
-    const product = this.productForm.value;
-    const formData = new FormData();
-
-   Object.keys(product).forEach(key => {
-  const value = product[key as keyof Product];
-  if (value !== null && value !== undefined) {
-    formData.append(key, value.toString());
+submitForm() {
+  if (!this.distributorId) {
+    console.error('DistributorId not set!');
+    return;
   }
-});
-    const distributorId = localStorage.getItem('DistributorId');
-    if (distributorId) formData.append('DistributorId', distributorId);
 
-    if (this.selectedFile) {
-      formData.append('Image', this.selectedFile, this.selectedFile.name);
-    }
+  const formData = new FormData();
 
-    if (this.isEdit && this.selectedProductId) {
-      this.productService.update(this.selectedProductId, formData).subscribe({
-        next: () => {
-          if (distributorId) this.loadProducts(distributorId);
-          this.closeModal();
-          this.resetForm();
-        },
-        error: (err) => console.error('Error updating product:', err)
-      });
-    } else {
-      this.productService.create(formData).subscribe({
-        next: () => {
-          if (distributorId) this.loadProducts(distributorId);
-          this.closeModal();
-          this.resetForm();
-        },
-        error: (err) => console.error('Error creating product:', err)
-      });
-    }
+  // Explicitly append all fields with exact backend DTO names
+  formData.append('ProductName', this.productForm.value.productName);
+  formData.append('ProductCode', this.productForm.value.productCode);
+  formData.append('Category', this.productForm.value.category);
+  formData.append('Unit', this.productForm.value.unit);
+  formData.append('Price', this.productForm.value.price ?? 0);
+  formData.append('CostPrice', this.productForm.value.costPrice ?? 0);
+  formData.append('Discount', this.productForm.value.discount ?? 0);
+  formData.append('GST', this.productForm.value.gst ?? 0);
+  formData.append('Stock', this.productForm.value.stock ?? 0);
+  formData.append('ReorderLevel', this.productForm.value.reorderLevel ?? 0);
+  formData.append('Brand', this.productForm.value.brand ?? '');
+  formData.append('Color', this.productForm.value.color ?? '');
+  formData.append('Description', this.productForm.value.description ?? '');
+  formData.append('DistributorId', this.distributorId);
+
+  // Append image if selected
+  if (this.selectedFile) {
+    formData.append('Image', this.selectedFile);
   }
+
+  // UPDATE PRODUCT
+  if (this.isEdit && this.selectedProductId) {
+    this.productService.update(this.selectedProductId, formData).subscribe({
+      next: () => {
+        this.loadProducts(this.distributorId!);
+        const modalEl = document.getElementById('productModal');
+        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        this.resetForm();
+      },
+      error: err => console.error('Update failed:', err)
+    });
+  } 
+  // CREATE NEW PRODUCT
+  else {
+    this.productService.create(formData).subscribe({
+      next: () => {
+        this.loadProducts(this.distributorId!);
+        const modalEl = document.getElementById('productModal');
+        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        this.resetForm();
+      },
+      error: err => console.error('Create failed:', err)
+    });
+  }
+  
+}
+
 
   editProduct(product: Product) {
     this.isEdit = true;
@@ -339,22 +359,49 @@ export class ProductsComponent {
   // ==============================================
   // MODAL HANDLING
   // ==============================================
-  openModal(isEdit = false, product?: Product) {
-    this.isEdit = isEdit;
+ openModal(isEdit: boolean, product?: Product) {
+  this.isEdit = isEdit;
 
-    if (isEdit && product) {
-      this.productForm.patchValue(product);
-      this.previewUrl = product.imageUrl ? this.apiBaseUrl + product.imageUrl : null;
-    } else {
-      this.resetForm();
-    }
+  const modalEl = document.getElementById('productModal');
+  if (!modalEl) return;
 
-    const modalEl = document.getElementById('productModal');
-    if (modalEl) {
-      this.modalRef = new bootstrap.Modal(modalEl);
-      this.modalRef.show();
-    }
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+  if (isEdit && product) {
+    this.selectedProductId = product.productId ?? null;
+
+    this.productForm.patchValue({
+      productName: product.productName,
+      productCode: product.productCode,
+      color: product.color,
+      category: product.category,
+      unit: product.unit,
+      price: product.price,
+      costPrice: product.costPrice,
+      discount: product.discount,
+      gst: product.gst,
+      stock: product.stock,
+      reorderLevel: product.reorderLevel,
+      brand: product.brand,
+      description: product.description
+    });
+
+    this.previewUrl = product.imageUrl
+      ? this.apiBaseUrl + product.imageUrl
+      : null;
+
+  } else {
+    this.resetForm();
+    this.previewUrl = null;
+    this.selectedProductId = null;
   }
+
+  // ALWAYS show modal
+  modal.show();
+}
+
+
+   
 
   closeModal() {
     if (this.modalRef) this.modalRef.hide();

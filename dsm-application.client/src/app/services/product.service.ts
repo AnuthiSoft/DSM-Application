@@ -31,9 +31,9 @@ export class ProductService {
     return this.api.post<Product>(this.endpoint, formData);
   }
 
-  update(id: string, formData: FormData): Observable<Product> {
-    return this.api.put<Product>(`${this.endpoint}/${id}`, formData);
-}
+  update(id: string, formData: FormData): Observable<void> {
+    return this.api.put<void>(`${this.endpoint}/${id}`, formData);
+  }
 
   delete(id: string): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);

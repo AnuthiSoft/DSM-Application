@@ -21,8 +21,12 @@ namespace DSM_Application.Server.Models.DTOs
         public int Stock { get; set; }
         public int ReorderLevel { get; set; }
         public string Brand { get; set; }
-        public IFormFile? Image { get; set; } // <-- File must be IFormFile
-        public string? ImageUrl { get; set; }
+        //public IFormFile? Image { get; set; } // <-- File must be IFormFile
+        //public string? ImageUrl { get; set; }
+        public List<IFormFile>? Images { get; set; }
+
+        // optional: generated after upload
+        public List<string>? ImageUrls { get; set; }
         [Required]
         public string DistributorId { get; set; }
 

@@ -25,7 +25,7 @@ export interface Product {
   createdBy?: string;
   updatedBy?: string;
   brand?: string;
-  imageUrl?: string;
+  imageUrls?: string;
     distributorId?: string;
     distributorName?: string; // Add this
 

@@ -12,8 +12,6 @@ namespace DSM_Application.Server.Models
         [BsonElement("Name")]
         public string Name { get; set; }
 
-        public decimal PendingBalance { get; set; } = 0;
-
         [BsonElement("Email")]
         public string Email { get; set; }
         [BsonElement("Role")]

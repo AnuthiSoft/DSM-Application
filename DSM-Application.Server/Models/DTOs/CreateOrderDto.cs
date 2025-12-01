@@ -8,14 +8,12 @@ namespace DSM_Application.Server.Models.DTOs
         public string DistributorId { get; set; }
         public List<OrderProductDto> Products { get; set; }
         public decimal SpecialDiscountPercent { get; set; }
-        public decimal PaidAmount { get; set; }
-
     }
 
     public class OrderProductDto
     {
         public string ProductId { get; set; }
-        //public string ProductName { get; set; }
+        public string ProductName { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
     }
@@ -68,10 +66,6 @@ namespace DSM_Application.Server.Models.DTOs
         public bool PaymentCollectedByEmployee { get; set; } = false;
         public decimal? CollectedAmount { get; set; } // amount collected physically by employee (if COD)
         public string PaymentMethod { get; set; } // "COD", "Online", etc.
-
-        public string PaymentStatus { get; set; }
-        public string PaymentOrderId { get; set; }
-
         public DateTime? CollectedOn { get; set; }
 
         public DateTime? DeliveredOn { get; set; }

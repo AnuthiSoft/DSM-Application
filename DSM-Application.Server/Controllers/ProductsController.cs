@@ -1,14 +1,12 @@
 ﻿using System.Data;
 using System.Drawing;
 using DistributorManagementSystem.Server.Models;
-using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
 using MongoDB.Driver;
 
 namespace DSM_Application.Server.Controllers
@@ -21,13 +19,10 @@ namespace DSM_Application.Server.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
-        private readonly MongoDbService _db;
 
-
-        public ProductsController(ProductService productService, MongoDbService db)
+        public ProductsController(ProductService productService)
         {
             _productService = productService;
-            _db = db;
         }
 
         //[Authorize(Roles = "Distributor")]
@@ -95,119 +90,13 @@ namespace DSM_Application.Server.Controllers
             return Ok(product);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
-        //{
-        //    if (string.IsNullOrEmpty(dto.DistributorId))
-        //        return BadRequest("DistributorId is missing from request");
-        //    // ✅ Validate category
-        //    var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
-        //    if (distributor == null)
-        //        return NotFound("Distributor not found");
-
-        //    if (string.IsNullOrWhiteSpace(dto.Category) ||
-        //        distributor.Categories == null ||
-        //        !distributor.Categories.Contains(dto.Category))
-        //    {
-        //        return BadRequest($"Category '{dto.Category}' is not available for this distributor.");
-        //    }
-
-        //    if (dto.Image != null)
-        //    {
-        //        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        //        if (!Directory.Exists(uploadsFolder))
-        //            Directory.CreateDirectory(uploadsFolder);
-
-        //        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Image.FileName);
-        //        var filePath = Path.Combine(uploadsFolder, fileName);
-
-        //        using (var stream = new FileStream(filePath, FileMode.Create))
-        //        {
-        //            await dto.Image.CopyToAsync(stream);
-        //        }
-
-        //        dto.ImageUrl = $"/uploads/{fileName}";
-        //    }
-
-        //    var product = new Product
-        //    {
-        //        ProductName = dto.ProductName,
-        //        ProductCode = dto.ProductCode,
-        //        Description = dto.Description,
-        //        Unit = dto.Unit,
-        //        Price = dto.Price,
-        //        CostPrice = dto.CostPrice,
-        //        Discount = dto.Discount,
-        //        GST = dto.GST,
-        //        Stock = dto.Stock,
-        //        ReorderLevel = dto.ReorderLevel,
-        //        Brand = dto.Brand,
-        //        ImageUrl = dto.ImageUrl,
-        //        DistributorId = dto.DistributorId,
-        //        DistributorName = distributor.Name,
-        //        //Name =distributor.Name,
-        //        Category = dto.Category // ✅ store selected category
-        //    };
-
-        //    var created = await _productService.CreateAsync(product);
-
-        //    return Ok(created);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
         {
-            if (string.IsNullOrEmpty(dto.DistributorId))
-                return BadRequest("DistributorId is missing from request");
-
             var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
             if (distributor == null)
                 return NotFound("Distributor not found");
 
-            // OLD distributor category validation (unchanged)
-            
-
-            // -----------------------------
-            // ⭐ NEW CATEGORY VALIDATION
-            // -----------------------------
-            if (string.IsNullOrWhiteSpace(dto.CategoryName) ||
-                string.IsNullOrWhiteSpace(dto.SubCategoryName) ||
-                string.IsNullOrWhiteSpace(dto.ItemType))
-            {
-                return BadRequest("CategoryName, SubCategoryName, and ItemType are required.");
-            }
-
-            // -----------------------------
-            // ⭐ FIND CATEGORY (nested lookup)
-            // -----------------------------
-            var mainCategory = await _db.Categories
-                .Find(c => c.Name == dto.CategoryName && c.IsApproved == true)
-                .FirstOrDefaultAsync();
-
-            if (mainCategory == null)
-                return BadRequest("Main category not found or not approved.");
-
-            var subCategory = mainCategory.SubCategories
-               .FirstOrDefault(sc => sc.Name == dto.SubCategoryName);
-
-
-            if (subCategory == null)
-                return BadRequest("Subcategory not found or not approved.");
-
-            var itemType = subCategory.ItemTypes
-                .FirstOrDefault(it => it.Name == dto.ItemType);
-
-
-            if (itemType == null)
-                return BadRequest("Item type not found or not approved.");
-
-            // Auto GST
-            var autoGst = itemType.GstPercent;
-
-            // -----------------------------
-            // IMAGE UPLOAD (unchanged)
-            // -----------------------------
-            if (dto.Image != null)
             var imageUrls = new List<string>();
 
             if (dto.Images != null && dto.Images.Any())
@@ -228,9 +117,6 @@ namespace DSM_Application.Server.Controllers
                 }
             }
 
-            // -----------------------------
-            // CREATE PRODUCT (merged)
-            // -----------------------------
             var product = new Product
             {
                 ProductName = dto.ProductName,
@@ -240,25 +126,13 @@ namespace DSM_Application.Server.Controllers
                 Price = dto.Price,
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
-
-                GST = autoGst,
+                GST = dto.GST,
                 Stock = dto.Stock,
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
-
                 DistributorId = dto.DistributorId,
                 DistributorName = distributor.Name,
-
-                // OLD FIELD STILL SAVED
                 Category = dto.Category,
-
-                // NEW FIELDS
-                CategoryName = dto.CategoryName,
-                SubCategoryName = dto.SubCategoryName,
-                ItemType = dto.ItemType,
-                GstPercent = autoGst,
-                 IsActive = true,        // ✅ must be true when creating
-                IsDeleted = false ,      // ✅ must be false when creating
                 Color = dto.Color,
 
                 // MULTIPLE IMAGES
@@ -269,6 +143,7 @@ namespace DSM_Application.Server.Controllers
             };
 
             var created = await _productService.CreateAsync(product);
+
             return Ok(created);
         }
 
@@ -292,14 +167,6 @@ namespace DSM_Application.Server.Controllers
         //    //Name =distributor.Name,
         //    Category = dto.Category // ✅ store selected category
         //};
-
-
-
-
-
-
-
-
 
 
         [HttpPut("{id}")]

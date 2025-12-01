@@ -728,6 +728,39 @@ namespace DSM_Application.Server.Controllers
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
         }
-       
+        [HttpGet("{customerId}")]
+        public async Task<IActionResult> GetCustomerById(string customerId)
+        {
+            var customer = await _db.Customers
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            return Ok(customer);
+        }
+        [Authorize(Roles = "Customer")]
+        [HttpGet("balance")]
+        public async Task<IActionResult> GetPendingBalance()
+        {
+            var customerId = User.FindFirst("CustomerId")?.Value;
+
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized("CustomerId missing from token");
+
+            var customer = await _db.Customers
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            return Ok(new
+            {
+                pendingBalance = customer.PendingBalance
+            });
+        }
+
     }
 }

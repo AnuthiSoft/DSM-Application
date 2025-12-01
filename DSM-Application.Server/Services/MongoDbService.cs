@@ -70,6 +70,7 @@
 
 using DistributorManagementSystem.Server.Models;
 using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.Payments;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -77,12 +78,15 @@ namespace DistributorManagementSystem.Server.Services
 {
     public class MongoDbService
     {
-        private readonly IMongoDatabase _db;
-
+        //private readonly IMongoDatabase _db;
+        public IMongoDatabase _db { get; }
         public MongoDbService(IOptions<MongoDbSettings> options)
         {
             var client = new MongoClient(options.Value.ConnectionString);
             _db = client.GetDatabase(options.Value.DatabaseName);
+
+            // ✅ Create unique index for AadhaarNumber in Distributors collection
+           
         }
 
         public IMongoCollection<User> Users => _db.GetCollection<User>("Users");
@@ -99,6 +103,19 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<FraudReport> FraudReports => _db.GetCollection<FraudReport>("fraudreports");
         public IMongoCollection<DistributorCategoryMap> DistributorCategoryMaps => _db.GetCollection<DistributorCategoryMap>("DistributorCategoryMap");
         public IMongoCollection<Category> Categories => _db.GetCollection<Category>("Categories");
+
+
+        public IMongoCollection<Payment> Payments => _db.GetCollection<Payment>("Payments");
+
+        // 🔥 NEW COLLECTION (ADDED WITHOUT TOUCHING OLD CODE)
+        public IMongoCollection<Category> Categories =>
+            _db.GetCollection<Category>("Categories");
+
+        public IMongoCollection<CategoryRequest> CategoryRequests => _db.GetCollection<CategoryRequest>("CategoryRequests");
+
+        public IMongoCollection<GstMaster> GstMaster =>
+     _db.GetCollection<GstMaster>("GstMaster");
+
 
     }
 

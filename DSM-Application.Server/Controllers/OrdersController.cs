@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -22,10 +25,13 @@ namespace DSM_Application.Server.Controllers
         private readonly IMongoCollection<Product> _products;
 
         private readonly IMongoCollection<Order> _orders;
+        private readonly IMongoCollection<Customer> _customers;
 
         private readonly DiscountService _discountService;
+        private readonly IYearlyLoyaltyService _yearlyLoyaltyService;
+        
 
-        public OrdersController(MongoDbService mongo, DiscountService discountService)
+        public OrdersController(MongoDbService mongo, DiscountService discountService, IYearlyLoyaltyService yearlyLoyaltyService)
 
         {
 
@@ -34,9 +40,11 @@ namespace DSM_Application.Server.Controllers
             _products = _mongo.Products;   // ✅ use properties from MongoDbService
 
             _orders = _mongo.Orders;       // ✅ use properties from MongoDbService
+            _customers = mongo.Customers;
 
             _discountService = discountService;
-
+            _yearlyLoyaltyService = yearlyLoyaltyService;
+            
         }
 
 
@@ -70,102 +78,173 @@ namespace DSM_Application.Server.Controllers
 
 
 
-
-
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
                 return BadRequest("No products provided");
 
-            decimal totalSubtotal = 0;
+            // 1️⃣ Get yearly loyalty discount
+            decimal yearlyDiscountPercent = await _yearlyLoyaltyService.GetYearlyDiscountPercentAsync(dto.CustomerId);
+
+
+            // 2️⃣ Totals
+            decimal totalSubtotal = 0;       // before discount and GST
             decimal totalDiscountAmount = 0;
-            decimal totalFinalAmount = 0;
+            decimal totalGstAmount = 0;      // ⭐ total GST for all products
+            decimal totalFinalWithGst = 0;   // ⭐ final after discount + GST
 
             var orderProducts = new List<OrderProduct>();
 
             foreach (var p in dto.Products)
             {
-                var product = await _products.Find(x => x.ProductId == p.ProductId).FirstOrDefaultAsync();
+                // 3️⃣ Get Product from DB
+                var product = await _products.Find(x => x.ProductCode == p.ProductId).FirstOrDefaultAsync();
+
                 if (product == null)
                     return NotFound($"Product not found: {p.ProductId}");
 
                 decimal unitPrice = product.Price;
-                decimal subtotal = unitPrice * p.Quantity;
+                decimal lineSubtotal = unitPrice * p.Quantity;
 
-                var calc = _discountService.Calculate(p.Quantity, subtotal, dto.SpecialDiscountPercent);
+                // 4️⃣ Apply your discount logic
+                var calc = _discountService.Calculate(
+                    p.Quantity,
+                    lineSubtotal,
+                    dto.SpecialDiscountPercent,
+                    yearlyDiscountPercent
+                );
 
+                // 5️⃣ GST from Product (your DB already has GST based on category)
+                decimal gstPercent = product.GST;                      // ⭐ THIS IS THE KEY
+                decimal taxableValue = calc.finalPrice;                // after discount
+                decimal gstAmount = taxableValue * (gstPercent / 100m);
+                decimal finalWithGst = taxableValue + gstAmount;
+
+                // 6️⃣ Save product breakdown
                 orderProducts.Add(new OrderProduct
                 {
                     ProductId = p.ProductId,
                     ProductName = product.ProductName,
                     Price = unitPrice,
                     Quantity = p.Quantity,
+
+                    // Discounts
                     QuantityDiscountPercent = calc.qtyPct,
                     PriceDiscountPercent = calc.pricePct,
                     SpecialDiscountPercent = dto.SpecialDiscountPercent,
+                    YearlyDiscountPercent = calc.yearlyPct,
                     TotalDiscountPercent = calc.totalPercent,
                     DiscountAmount = calc.discountAmount,
-                    FinalPrice = calc.finalPrice
+                    FinalPrice = calc.finalPrice,
+
+                    // GST
+                    GstPercent = gstPercent,
+                    GstAmount = gstAmount,
+                    FinalPriceWithGst = finalWithGst
                 });
 
-                totalSubtotal += subtotal;
+                // 7️⃣ Add to totals
+                totalSubtotal += lineSubtotal;
                 totalDiscountAmount += calc.discountAmount;
-                totalFinalAmount += calc.finalPrice;
+                totalGstAmount += gstAmount;
+                totalFinalWithGst += finalWithGst;
             }
 
+            // 8️⃣ Get customer and old pending balance
+            var customer = await _customers.Find(c => c.CustomerId == dto.CustomerId).FirstOrDefaultAsync();
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            decimal previousBalance = customer.PendingBalance;
+
+            // 9️⃣ Total for this invoice + previous unpaid balance
+            decimal invoiceTotal = totalFinalWithGst;           // ✔ includes discount + GST
+            decimal payableAmount = invoiceTotal + previousBalance;
+
+            // 🔟 Partial payment
+            decimal paid = dto.PaidAmount;
+            decimal remaining = payableAmount - paid;
+            if (remaining < 0)
+                remaining = 0;
+
+            // 1️⃣1️⃣ Mock razorpay order
+            string razorpayOrderId = "order_" + Guid.NewGuid().ToString("N");
+
+            // 1️⃣2️⃣ Create Order object
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
                 Products = orderProducts,
-                Subtotal = totalSubtotal,
+
+                Subtotal = totalSubtotal,      // before GST
                 TotalDiscount = totalDiscountAmount,
-                TotalAmount = totalFinalAmount,
+                TotalGst = totalGstAmount,     // ⭐
+                TotalAmount = invoiceTotal,    // ⭐ invoice WITH GST
+
+                PreviousBalance = previousBalance,
+                PaidAmount = paid,
+                RemainingAmount = remaining,
+
                 OrderDate = DateTime.UtcNow,
-                Status = "Pending"
+                Status = "Pending",
+                PaymentOrderId = razorpayOrderId,
+                PaymentStatus = "Pending"
             };
 
             await _orders.InsertOneAsync(order);
-            return Ok(new { message = "Order placed successfully", orderId = order.Id });
+
+            // 1️⃣3️⃣ Update customer's running pending balance
+            var update = Builders<Customer>.Update.Set(x => x.PendingBalance, remaining);
+            await _customers.UpdateOneAsync(c => c.CustomerId == dto.CustomerId, update);
+
+            // 1️⃣4️⃣ Return breakdown
+            return Ok(new
+            {
+                message = "Order created successfully",
+                orderId = order.Id,
+                razorpayOrderId = razorpayOrderId,
+
+                subtotal = totalSubtotal,
+                totalDiscount = totalDiscountAmount,
+                totalGst = totalGstAmount,
+                invoiceTotal = invoiceTotal,          // only this invoice
+                previousBalance = previousBalance,
+                totalPayable = payableAmount,         // invoice + old balance
+                paid = paid,
+                remaining = remaining
+            });
         }
 
 
 
 
         [Authorize(Roles = "Customer")]
-        [HttpGet("customer/{customerId}")]
-        public async Task<IActionResult> GetCustomerOrders(string customerId)
+        [HttpGet("customer/orders")]
+        public async Task<IActionResult> GetCustomerOrders()
         {
-            // ✅ Read CustomerId from JWT token
-            var customerIdFromToken = User.FindFirst("CustomerId")?.Value;
+            // Read CustomerId from JWT token
+            var customerId = User.FindFirst("CustomerId")?.Value;
 
-            if (string.IsNullOrEmpty(customerIdFromToken))
+            if (string.IsNullOrEmpty(customerId))
                 return Unauthorized("CustomerId missing from token");
-
-            // Ensure the customerId matches the logged-in user's customerId
-            if (customerId != customerIdFromToken)
-                return Forbid("Not authorized to view other customers' orders");
 
             var orders = await _mongo.Orders
                 .Find(o => o.CustomerId == customerId)
                 .SortByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            // ✅ Map orders to DTO including discount fields
             var result = orders.Select(o => new DistributorOrderDto
             {
                 Id = o.Id,
                 CustomerId = o.CustomerId,
-
                 Products = o.Products,
 
-                // ✅ Discount totals
                 Subtotal = o.Subtotal,
                 TotalDiscount = o.TotalDiscount,
                 TotalAmount = o.TotalAmount,
 
-                // ✅ Discount breakdown per item (use first item)
                 SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                 QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
                 PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
@@ -174,13 +253,41 @@ namespace DSM_Application.Server.Controllers
                 OrderDate = o.OrderDate,
                 Status = o.Status,
                 EmployeeId = o.EmployeeId,
-                Name = o.Name
+                Name = o.Name,
+                PaymentStatus = o.PaymentStatus,
+                PaymentOrderId = o.PaymentOrderId
+
             }).ToList();
 
             return Ok(result);
         }
 
 
+        [Authorize(Roles = "Customer")]
+        [HttpPost("{orderId}/mark-paid")]
+        public async Task<IActionResult> MarkOrderPaid(string orderId)
+        {
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized("CustomerId missing from token");
+
+            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+            if (order == null) return NotFound("Order not found");
+
+            if (order.CustomerId != customerId)
+                return Forbid("Not authorized to modify this order");
+
+            if (order.PaymentStatus == "Paid")
+                return BadRequest("Payment already marked as paid");
+
+            var update = Builders<Order>.Update
+                .Set(o => o.PaymentStatus, "Paid")
+                .Set(o => o.Status, "Confirmed");  // optional
+
+            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+
+            return Ok(new { message = "Payment marked as PAID", orderId });
+        }
 
 
 
@@ -678,6 +785,8 @@ namespace DSM_Application.Server.Controllers
             });
 
         }
+        
     }
+
 }
 

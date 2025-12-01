@@ -1,4 +1,4 @@
-﻿using DistributorManagementSystem.Server.Models;
+using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Services;
@@ -216,6 +216,7 @@ namespace DistributorManagementSystem.Server.Controllers
                     Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId));
             }
 
+            // Issue tokens
             var token = _jwt.GenerateToken(user);
             var refreshToken = _jwt.GenerateRefreshToken();
 
@@ -225,6 +226,7 @@ namespace DistributorManagementSystem.Server.Controllers
                 Token = refreshToken,
                 ExpiryDate = DateTime.UtcNow.AddDays(7)
             });
+
 
             return Ok(new
             {
@@ -265,6 +267,8 @@ namespace DistributorManagementSystem.Server.Controllers
                 return BadRequest("Password already created, please login.");
 
             user.PasswordHash = ComputeHash(request.Password);
+
+
             user.IsRegistered = true;
 
             await _db.Users.UpdateOneAsync(
@@ -322,6 +326,9 @@ namespace DistributorManagementSystem.Server.Controllers
                 return NotFound("User not found");
 
             user.PasswordHash = ComputeHash(request.NewPassword);
+
+
+
             user.IsRegistered = true;
 
             await _db.Users.UpdateOneAsync(

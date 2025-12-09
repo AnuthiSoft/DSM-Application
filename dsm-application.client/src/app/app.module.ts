@@ -34,7 +34,17 @@ import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
+import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
 
+import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
+import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
+
+import { TruncatePipe } from './pipe/truncate.pipe';
+import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
+import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
+
+import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
+import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 
 
 
@@ -68,6 +78,21 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
       EmployeeLoginComponent,
       EmployeeSignupComponent,
       AddToCartComponent,
+      EmployeeProfileComponent,
+      
+      FraudReportComponent,
+  
+      AdminFraudListComponent,
+         
+          TruncatePipe,
+          ReviewSubmitComponent,
+          AdminReviewListComponent,
+       
+       
+                   FraudHistoryComponent,
+                   AdminReviewHistoryComponent,
+          
+      // AdminDistributorsComponent
    
 
 
@@ -75,8 +100,8 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
   imports: [
     BrowserModule, HttpClientModule,
     AppRoutingModule, FormsModule, ReactiveFormsModule,  BrowserAnimationsModule, ToastrModule.forRoot({
-      timeOut: 3000,
-      positionClass: 'toast-bottom-right',
+      timeOut: 2000,
+      positionClass: 'toast-center-center',
       preventDuplicates: true,
     }),
   ],

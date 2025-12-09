@@ -42,5 +42,7 @@ namespace DSM_Application.Server.Models
         public string Pincode { get; set; }
         public string Country { get; set; }
 
+        public int FraudCount { get; set; } = 0;
+        public bool IsActive { get; set; } = true;
     }
 }

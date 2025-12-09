@@ -68,9 +68,10 @@ EmployeeId?: string;
   deliveryRemarks?: string;
 }
 export interface Employee {
-  employeeId: string;
+  id?: string; 
+  employeeId?: string;
   name: string;
   email: string;
   isActive: boolean;
-  distributorId: string;
+  distributorId?: string;
 }

@@ -132,11 +132,27 @@ export class DistributorOrdersComponent implements OnInit{
       }
     });
   }
-
-  subtotal(o: DistributorOrder) {
-    return o.products.reduce((s, p) => s + (p.price * p.quantity), 0);
+  totalAmount(o: any): number {
+  if (!o || !o.products || o.products.length === 0) {
+    return o?.totalAmount ?? 0;
   }
-    // ✅ Added function to fix your template error
+
+  const subtotal = o.products.reduce((sum: number, p: any) => {
+    const price = Number(p.price ?? p.unitPrice ?? 0);
+    const qty = Number(p.quantity ?? p.qty ?? 1);
+    return sum + price * qty;
+  }, 0);
+
+  // ✅ Safe fallback discount handling
+  const discount = Number((o.discount ?? o.totalDiscount ?? 0) || 0);
+
+  return Math.max(subtotal - discount, 0);
+}
+
+   
+
+  
+  // ✅ Added function to fix your template error
   getStatusClass(status: string): string {
     switch (status) {
       case 'Pending':

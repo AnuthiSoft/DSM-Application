@@ -1,71 +1,67 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DSM_Application.Server.Models
 {
     [BsonIgnoreExtraElements]
     public class Product
     {
-        [BsonId] // MongoDB will auto-generate this
+        [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string? ProductId { get; set; }  // Unique Product ID
+        public string? ProductId { get; set; }
+
+        // ✅ KEEP ONLY THIS - final correct image list property
+        [BsonElement("ImageUrls")]
+        public List<string> ImageUrls { get; set; } = new List<string>();
 
         [BsonElement("ProductName")]
         public string ProductName { get; set; }
+
         [BsonElement("DistributorId")]
         [Required]
-        public string DistributorId { get; set; } // Logged-in distributor ID
-                                                  //[BsonElement("Name")]
-                                                  //public string Name { get; set; }
-                                                  // ✅ Add this property
+        public string DistributorId { get; set; }
+
         public string DistributorName { get; set; } = string.Empty;
 
-
-
         [BsonElement("ProductCode")]
-        public string ProductCode { get; set; } // SKU or unique code
+        public string ProductCode { get; set; }
+
         [BsonElement("CategoryId")]
         public string? CategoryId { get; set; }
-        [BsonElement("Category" +
-            "" +
-            "" +
-            "" +
-            "")]
-        public string Category { get; set; } // store name for quick display
 
-
+        [BsonElement("Category")]
+        public string Category { get; set; }
 
         [BsonElement("Description")]
         public string Description { get; set; }
 
-        [BsonElement("Unit")]
-        public string Unit { get; set; } // e.g., pcs, kg, liter
+        [BsonElement("Measure")]
+        public string Measure { get; set; } // e.g., pcs, kg, liter
 
         [BsonElement("Price")]
-        public decimal Price { get; set; } // Selling price / MRP
+        public decimal Price { get; set; }
 
         [BsonElement("CostPrice")]
-        public decimal CostPrice { get; set; } // Purchase price for distributor
+        public decimal CostPrice { get; set; }
 
         [BsonElement("Discount")]
-        public decimal? Discount { get; set; } // Optional default discount
+        public decimal? Discount { get; set; }
 
         [BsonElement("GST")]
-        public decimal GST { get; set; } // Tax rate percentage
+        public decimal GST { get; set; }
 
         [BsonElement("Stock")]
-        public int Stock { get; set; } // Current quantity in stock
+        public int Stock { get; set; }
 
         [BsonElement("Color")]
-        public string Color { get; set; } //color property
+        public string Color { get; set; }
 
         [BsonElement("ReorderLevel")]
-        public int ReorderLevel { get; set; } // Minimum stock level
+        public int ReorderLevel { get; set; }
 
         [BsonElement("IsActive")]
-        public bool IsActive { get; set; } = true; // Active or discontinued
+        public bool IsActive { get; set; } = true;
 
         [BsonElement("CreatedDate")]
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -79,14 +75,10 @@ namespace DSM_Application.Server.Models
         [BsonElement("UpdatedBy")]
         public string? UpdatedBy { get; set; }
 
-        // Optional fields
         [BsonElement("Brand")]
         public string Brand { get; set; }
 
-        [BsonElement("ImageUrl")]
-        public string ImageUrl { get; set; }
-
-        // ✅ Added Real-Time Product Standard Qualities
+        // ⭐ Optional fields
         [BsonElement("QualityGrade")]
         public string? QualityGrade { get; set; }
 
@@ -105,15 +97,10 @@ namespace DSM_Application.Server.Models
         [BsonElement("Certification")]
         public string? Certification { get; set; }
 
-        
-
         [BsonElement("SizeOrWeight")]
         public string? SizeOrWeight { get; set; }
 
         [BsonElement("IsDeleted")]
         public bool IsDeleted { get; set; } = false;
-
     }
-
 }
-

@@ -41,6 +41,15 @@ export class AuthService {
 
   return this.api.post(`auth/signup`, payload);
 }
+employeeSignup(identifier: string, password: string): Observable<any> {
+  const payload = {
+    Email: identifier.includes('@') ? identifier : null,
+    PhoneNumber: !identifier.includes('@') ? identifier : null,
+    Password: password
+  };
+
+  return this.api.post<any>('auth/employee-signup', payload);
+}
 
   logout(): void {
     localStorage.removeItem('token');

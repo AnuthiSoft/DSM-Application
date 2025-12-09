@@ -14,9 +14,88 @@ export class DistributorDashboardComponent {
     private auth: AuthService,private distributorService: DistributorService
   ) {}
   activeTab: string = 'dashboard'; // default tab
+  isMobileMenuOpen = false;
+isDarkTheme = false;
+openSubmenus: string[] = [];
+
     // pendingRequests: any[] = [];
   distributorId: string = '';
+submenuState: { [key: string]: boolean } = {
+  inventory: false,
+  orders: false,
+  sales: false,
+  retailers: false,
+  payments: false,
+  settings: false
+};
+
+// toggleSubmenu(menu: string) {
+//   this.submenuState[menu] = !this.submenuState[menu];
+// }
+
+
+isSubmenuOpen(menu: string): boolean {
+  return this.openSubmenus.includes(menu);
+}
+// Add these methods to your component
+// toggleMobileMenu() {
+//   this.isMobileMenuOpen = !this.isMobileMenuOpen;
+// }
+
+// closeMobileMenu() {
+//   if (this.isMobileMenuOpen) {
+//     this.isMobileMenuOpen = false;
+//   }
+// }
+// Update these methods in your component
+toggleSubmenu(menu: string) {
+  // Check if the clicked menu is already open
+  const isCurrentlyOpen = this.isSubmenuOpen(menu);
   
+  // Close all submenus first
+  this.closeAllSubmenus();
+  
+  // If the clicked menu wasn't already open, open it
+  if (!isCurrentlyOpen) {
+    this.openSubmenus.push(menu);
+  }
+}
+
+
+// isSubmenuOpen(menu: string): boolean {
+//   return this.openSubmenus.includes(menu);
+// }
+closeAllSubmenus() {
+  this.openSubmenus = [];
+}
+
+// Update the setActiveTab method to close submenus when switching tabs
+setActiveTab(tab: string) {
+  this.activeTab = tab;
+  // Don't close submenus here to allow navigation within the same section
+}
+
+// Update the toggleMobileMenu method
+
+toggleMobileMenu() {
+  this.isMobileMenuOpen = !this.isMobileMenuOpen;
+}
+// Update the closeMobileMenu method
+closeMobileMenu() {
+  if (this.isMobileMenuOpen) {
+    this.isMobileMenuOpen = false;
+  }
+}
+toggleTheme() {
+  this.isDarkTheme = !this.isDarkTheme;
+  // You can add logic to apply the theme to the document
+  if (this.isDarkTheme) {
+    document.body.setAttribute('data-theme', 'dark');
+  } else {
+    document.body.removeAttribute('data-theme');
+  }
+}
+currentDate: Date = new Date();
   // acceptedCustomers: ConnectionRequestDto[] = [];
   // loading = false;
 
@@ -62,9 +141,9 @@ export class DistributorDashboardComponent {
 //     });
 //   }
   // Switch tab
-  setActiveTab(tab: string): void {
-    this.activeTab = tab;
-  }
+  // setActiveTab(tab: string): void {
+  //   this.activeTab = tab;
+  // }
 
   // Check if a tab is active
   isActive(tab: string): boolean {

@@ -51,7 +51,9 @@ export class CustomerService {
   getRole(): string | null {
     return localStorage.getItem('role');
   }
-
+getCustomerId(): string {
+  return localStorage.getItem('customerId') || '';
+}
   // ---------------------- MY CUSTOMERS ----------------------
   getMyCustomers(): Observable<Customer[]> {
     const token = localStorage.getItem('token');

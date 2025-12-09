@@ -1,0 +1,96 @@
+<div class="admin-review-container">
+  <!-- Header Card -->
+  <div class="dashboard-card header-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">
+        <i class="fas fa-star-half-alt me-2"></i>Pending Reviews Management
+      </h2>
+      <div class="header-actions">
+        <button class="btn btn-refresh" (click)="loadPendingReviews()">
+          <i class="fas fa-sync-alt me-1"></i> Refresh
+        </button>
+        <button routerLink="/admin/review-history" class="btn btn-primary">
+  <i class="fas fa-history me-1"></i> View History
+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Reviews Section -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-clock me-2 text-warning"></i>
+        Pending Reviews
+        <span class="badge bg-warning ms-2">{{ pending.length }}</span>
+      </h3>
+    </div>
+
+    <div class="table-container" *ngIf="pending.length > 0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle admin-reviews-table">
+          <thead class="table-header">
+            <tr>
+              <th>Title</th>
+              <th>Reviewer ID</th>
+              <th>Target</th>
+              <th>Rating</th>
+              <th>Description</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of pending" class="review-row">
+              <td class="fw-semibold">{{ r.title || 'No Title' }}</td>
+              <td>
+                <span class="reviewer-id">{{ r.reviewerId }}</span>
+              </td>
+              <td>
+                <div class="target-info">
+                  <span class="target-id">{{ r.targetId }}</span>
+                  <span class="target-type-badge" [ngClass]="getTargetTypeClass(r.targetType)">
+                    {{ r.targetType }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="rating-display">
+                  <div class="rating-stars">
+                    <span *ngFor="let star of getStars(r.rating)">
+                      <i class="fas" [class.fa-star]="star <= r.rating" [class.fa-star-o]="star > r.rating"></i>
+                    </span>
+                  </div>
+                  <span class="rating-value">{{ r.rating }}/5</span>
+                </div>
+              </td>
+              <td>
+                <div class="description-text" [title]="r.description">
+                  {{ r.description | truncate:30 }}
+                </div>
+              </td>
+              <td class="text-center action-buttons">
+                <button class="btn-action btn-approve me-2" (click)="approve(r.id)" title="Approve Review">
+                  <i class="fas fa-check-circle me-1"></i>
+                  Approve
+                </button>
+                <button class="btn-action btn-reject" (click)="reject(r.id)" title="Reject Review">
+                  <i class="fas fa-times-circle me-1"></i>
+                  Reject
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="pending.length === 0">
+      <div class="empty-content">
+        <i class="fas fa-check-circle text-success"></i>
+        <h4>No Pending Reviews</h4>
+        <p>All reviews have been processed and approved.</p>
+      </div>
+    </div>
+  </div>
+</div>

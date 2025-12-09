@@ -82,7 +82,7 @@ namespace DSM_Application.Server.Controllers
         //    return Ok(products);
         //}
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:length(24)}")]
         public async Task<IActionResult> GetById(string id)
         {
             var product = await _productService.GetByIdAsync(id);
@@ -93,44 +93,36 @@ namespace DSM_Application.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
         {
-            if (string.IsNullOrEmpty(dto.DistributorId))
-                return BadRequest("DistributorId is missing from request");
-            // ✅ Validate category
             var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
             if (distributor == null)
                 return NotFound("Distributor not found");
 
-            if (string.IsNullOrWhiteSpace(dto.Category) ||
-                distributor.Categories == null ||
-                !distributor.Categories.Contains(dto.Category))
-            {
-                return BadRequest($"Category '{dto.Category}' is not available for this distributor.");
-            }
+            var imageUrls = new List<string>();
 
-            if (dto.Image != null)
+            if (dto.Images != null && dto.Images.Any())
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(dto.Image.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                foreach (var file in dto.Images)
                 {
-                    await dto.Image.CopyToAsync(stream);
-                }
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
 
-                dto.ImageUrl = $"/uploads/{fileName}";
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await file.CopyToAsync(stream);
+
+                    imageUrls.Add("/uploads/" + fileName);
+                }
             }
 
             var product = new Product
             {
-                Color = dto.Color,
                 ProductName = dto.ProductName,
                 ProductCode = dto.ProductCode,
                 Description = dto.Description,
-                Unit = dto.Unit,
+                Measure = dto.Measure,
                 Price = dto.Price,
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
@@ -138,69 +130,83 @@ namespace DSM_Application.Server.Controllers
                 Stock = dto.Stock,
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
-                ImageUrl = dto.ImageUrl,
                 DistributorId = dto.DistributorId,
                 DistributorName = distributor.Name,
                 Category = dto.Category,
-                IsActive = true,        // ✅ must be true when creating
-                IsDeleted = false ,      // ✅ must be false when creating
-                Color = dto.Color
+                Color = dto.Color,
+
+                // MULTIPLE IMAGES
+                ImageUrls = imageUrls,
+
+                IsActive = true,
+                IsDeleted = false
             };
 
             var created = await _productService.CreateAsync(product);
 
             return Ok(created);
-
-            //var product = new Product
-            //{
-            //    ProductName = dto.ProductName,
-            //    ProductCode = dto.ProductCode,
-            //    Description = dto.Description,
-            //    Unit = dto.Unit,
-            //    Price = dto.Price,
-            //    CostPrice = dto.CostPrice,
-            //    Discount = dto.Discount,
-            //    GST = dto.GST,
-            //    Stock = dto.Stock,
-            //    ReorderLevel = dto.ReorderLevel,
-            //    Brand = dto.Brand,
-            //    ImageUrl = dto.ImageUrl,
-            //      DistributorId = dto.DistributorId ,
-            //    DistributorName = distributor.Name,
-            //    //Name =distributor.Name,
-            //    Category = dto.Category // ✅ store selected category
-            //};
-
         }
+
+
+        //var product = new Product
+        //{
+        //    ProductName = dto.ProductName,
+        //    ProductCode = dto.ProductCode,
+        //    Description = dto.Description,
+        //    Unit = dto.Unit,
+        //    Price = dto.Price,
+        //    CostPrice = dto.CostPrice,
+        //    Discount = dto.Discount,
+        //    GST = dto.GST,
+        //    Stock = dto.Stock,
+        //    ReorderLevel = dto.ReorderLevel,
+        //    Brand = dto.Brand,
+        //    ImageUrl = dto.ImageUrl,
+        //      DistributorId = dto.DistributorId ,
+        //    DistributorName = distributor.Name,
+        //    //Name =distributor.Name,
+        //    Category = dto.Category // ✅ store selected category
+        //};
+
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromForm] ProductCreateDto dto)
         {
             var existing = await _productService.GetByIdAsync(id);
             if (existing == null) return NotFound();
 
-            if (dto.Image != null)
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            Directory.CreateDirectory(uploadsFolder);
+
+            // ⭐ 1. If user uploaded new images → replace
+            if (dto.Images != null && dto.Images.Any())
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+                var newUrls = new List<string>();
 
-                var fileName = Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
-                var filePath = Path.Combine
-                    (uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                foreach (var file in dto.Images)
                 {
-                    await dto.Image.CopyToAsync(stream);
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await file.CopyToAsync(stream);
+
+                    newUrls.Add("/uploads/" + fileName);
                 }
 
-                existing.ImageUrl = $"/uploads/{fileName}";
+                existing.ImageUrls = newUrls;
+            }
+            else
+            {
+                // ⭐ 2. KEEP OLD IMAGES when user does not upload new ones
+                existing.ImageUrls = existing.ImageUrls ?? new List<string>();
             }
 
-            // Update fields
+            // ⭐ 3. Update fields
             existing.ProductName = dto.ProductName;
             existing.ProductCode = dto.ProductCode;
             existing.Description = dto.Description;
-            existing.Unit = dto.Unit;
+            existing.Measure = dto.Measure;
             existing.Price = dto.Price;
             existing.CostPrice = dto.CostPrice;
             existing.Discount = dto.Discount;
@@ -208,13 +214,17 @@ namespace DSM_Application.Server.Controllers
             existing.Stock = dto.Stock;
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
-            existing.Category = dto.Category; // ✅ update category
+            existing.Category = dto.Category;
             existing.Color = dto.Color;
+            existing.UpdatedDate = DateTime.UtcNow;
 
             await _productService.UpdateAsync(id, existing);
 
-            return NoContent();
+            // ⭐ 4. Return updated product with imageUrls
+            return Ok(existing);
         }
+
+
         [AllowAnonymous]
         [HttpGet("distributor/{distributorId}/categories")]
         public async Task<IActionResult> GetCategoriesByDistributor(string distributorId)
@@ -231,6 +241,28 @@ namespace DSM_Application.Server.Controllers
 
             await _productService.DeleteAsync(id);
             return NoContent();
+        }
+        [AllowAnonymous]
+        [HttpGet("measures")]
+        public IActionResult GetMeasures()
+        {
+            var measures = new List<string>
+    {
+        "Piece (pcs)",
+        "Kilogram (kg)",
+        "Gram (g)",
+        "Litre (L)",
+        "Millilitre (ml)",
+        "Pack",
+        "Dozen (12 pcs)",
+        "Box",
+        "Bottle",
+        "Bag",
+        "Meter (m)",
+        "Centimeter (cm)"
+    };
+
+            return Ok(measures);
         }
 
 
@@ -301,6 +333,7 @@ namespace DSM_Application.Server.Controllers
         //    var products = await _productService.SearchByQualityAsync(distributorId, qualityGrade, originCountry, certification);
         //    return Ok(products);
         //}
+        
 
 
     }

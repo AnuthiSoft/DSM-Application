@@ -1,7 +1,8 @@
-
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+
+import { environment } from '../../environments/environment';
 export interface Employee {
   employeeId: string;
   distributorId: string;
@@ -12,49 +13,137 @@ export interface Employee {
   role: string;
   isActive: boolean;
 }
-
-@Injectable({
-  providedIn: 'root',
-})
-export class EmployeeService {
-  getOrderEmployees(distributorId: string) {
-    throw new Error('Method not implemented.');
-  }
-  constructor(private api: ApiService) {}
-
-  getEmployees(distributorId: string): Observable<Employee[]> {
-    // ✅ no baseUrl, no http, just endpoint
-    return this.api.get<Employee[]>(`employees/${distributorId}`);
-  }
  
 
+@Injectable({
+  providedIn: 'root'
+})
+export class EmployeeService {
 
-  addEmployee(distributorId: string, emp: Employee): Observable<Employee> {
-    return this.api.post<Employee>(`employees/${distributorId}`, emp);
+  private apiUrl = environment.apiUrl;   // ✅ ADD THIS
+
+
+  private readonly baseUrl = `${environment.apiUrl}/employees`;
+
+  constructor(private http: HttpClient) {}
+
+  getEmployees(distributorId: string): Observable<Employee[]> {
+    return this.http.get<Employee[]>(`${this.baseUrl}/${distributorId}`);
   }
 
-  updateEmployee(
-    distributorId: string,
-    employeeId: string,
-    emp: Employee
-  ): Observable<Employee> {
-    return this.api.put<Employee>(
-      `employees/${distributorId}/${employeeId}`,
-      emp
-    );
+  addEmployee(distributorId: string, employee: Employee): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${distributorId}`, employee);
   }
 
-  deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
-    return this.api.delete<any>(`employees/${distributorId}/${employeeId}`);
+  updateEmployee(distributorId: string, employeeId: string, employee: Employee): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${distributorId}/${employeeId}`, employee);
   }
 
-  toggleActive(
-    distributorId: string,
-    employeeId: string
-  ): Observable<Employee> {
-    return this.api.patch<Employee>(
-      `employees/toggle/${distributorId}/${employeeId}`,
+  // deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
+  //   return this.http.delete(`${this.baseUrl}/${distributorId}/${employeeId}`);
+  // }
+
+//   deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
+//   return this.http.delete(`${this.baseUrl}/api/employees/${distributorId}/${employeeId}`);
+// }
+deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
+  return this.http.delete(`${this.baseUrl}/${distributorId}/${employeeId}`);
+}
+
+
+  toggleActive(distributorId: string, employeeId: string): Observable<Employee> {
+    return this.http.patch<Employee>(
+      `${this.baseUrl}/${distributorId}/${employeeId}/toggle`,
       {}
     );
   }
+
+//  getMyProfile() {
+//   return this.http.get(`${environment.apiUrl}/employees/my-profile`);
+// }
+
+// getMyProfile(): Observable<any> {
+//   return this.http.get(`${this.apiUrl}/employee/my-profile`);
+// }
+
+
+// updateMyProfile(profile: any): Observable<any> {
+//   return this.http.put(`${this.apiUrl}/employee/my-profile`, profile);
+// }
+
+
+// // updateMyProfile(profile: any) {
+// //   const token = localStorage.getItem('token'); 
+
+// //   return this.http.put(
+// //     `${environment.apiUrl}/employees/my-profile`,
+// //     profile,
+// //     {
+// //       headers: {
+// //         Authorization: `Bearer ${token}`
+// //       }
+// //     }
+// //   );
+// // }
+
+
+// uploadProfileImage(file: File) {
+//   const formData = new FormData();
+//   formData.append('file', file);
+
+//   return this.http.post(
+//     `${this.apiUrl}/employees/my-profile/upload-image`,
+//     formData
+//   );
+// }
+
+
+// getProfileImage(): Observable<Blob> {
+//   return this.http.get(
+//     `${this.apiUrl}/employees/my-profile/image`,
+//     { responseType: 'blob' }
+//   );
+// }
+
+
+// }
+  
+getMyProfile(): Observable<any> {
+  return this.http.get(`${this.apiUrl}/employees/my-profile`);
+}
+
+updateMyProfile(profile: any): Observable<any> {
+  return this.http.put(`${this.apiUrl}/employees/my-profile`, profile);
+}
+
+uploadProfileImage(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = localStorage.getItem("token");
+
+  return this.http.post(
+    `${this.apiUrl}/employees/my-profile/upload-image`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+}
+
+getProfileImage() {
+  const token = localStorage.getItem("token");
+
+  return this.http.get(
+    `${this.apiUrl}/employees/my-profile/image`,
+    {
+      responseType: "blob",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+}
 }

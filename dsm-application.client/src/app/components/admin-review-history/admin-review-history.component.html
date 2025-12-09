@@ -1,0 +1,100 @@
+<div class="admin-review-history-container">
+  <!-- Header Card -->
+  <div class="dashboard-card header-card">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">
+        <i class="fas fa-history me-2"></i>Review History
+      </h2>
+      <div class="header-actions">
+        <button routerLink="/admin/reviews" class="btn btn-back">
+          <i class="fas fa-arrow-left me-1"></i> Back to Reviews
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review History Card -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-list-alt me-2 text-info"></i>
+        All Reviews
+        <span class="badge bg-secondary ms-2">{{ reviews?.length || 0 }}</span>
+      </h3>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <span>Loading review history...</span>
+      </div>
+    </div>
+
+    <!-- Reviews Table -->
+    <div class="table-container" *ngIf="!loading && reviews && reviews.length > 0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle review-history-table">
+          <thead class="table-header">
+            <tr>
+              <th>Reviewer ID</th>
+              <th>Target</th>
+              <th>Rating</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of reviews" class="review-history-row">
+              <td>
+                <span class="reviewer-id">{{ r.reviewerId }}</span>
+              </td>
+              <td>
+                <div class="target-info">
+                  <span class="target-id">{{ r.targetId }}</span>
+                  <span class="target-type-badge" [ngClass]="getTargetTypeClass(r.targetType)">
+                    {{ r.targetType }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="rating-display">
+                  <div class="rating-stars">
+                    <span *ngFor="let star of getStars(r.rating)">
+                      <i class="fas" [class.fa-star]="star <= r.rating" [class.fa-star-o]="star > r.rating"></i>
+                    </span>
+                  </div>
+                  <span class="rating-value">{{ r.rating }}/5</span>
+                </div>
+              </td>
+              <td>
+                <div class="review-title" [title]="r.title">
+                  {{ r.title || 'No Title' }}
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(r.status)">
+                  <i class="fas me-1" [ngClass]="getStatusIcon(r.status)"></i>
+                  {{ r.status }}
+                </span>
+              </td>
+              <td>
+                <span class="date-text">{{ r.createdAt | date:'medium' }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && (!reviews || reviews.length === 0)">
+      <div class="empty-content">
+        <i class="fas fa-file-alt text-muted"></i>
+        <h4>No Review History</h4>
+        <p>No reviews have been submitted yet.</p>
+      </div>
+    </div>
+  </div>
+</div>

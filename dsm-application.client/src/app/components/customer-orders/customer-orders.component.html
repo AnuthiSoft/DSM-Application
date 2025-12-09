@@ -91,26 +91,32 @@
 
         <div class="order-body">
           <div class="order-details">
+
             <div class="detail-item">
               <span class="detail-label">Order ID:</span>
               <span class="detail-value">{{ order.id }}</span>
             </div>
+
             <div class="detail-item">
               <span class="detail-label">Date:</span>
               <span class="detail-value">{{ order.orderDate | date:'fullDate' }}</span>
             </div>
+
             <div class="detail-item">
               <span class="detail-label">Status:</span>
-              <span class="detail-value status-text" [class]="order.status?.toLowerCase()">
+              <span class="detail-value status-text" [class]="order.status.toLowerCase()">
                 {{ order.status }}
               </span>
             </div>
+
             <div class="detail-item">
               <span class="detail-label">Total Amount:</span>
               <span class="detail-value amount">{{ order.totalAmount | currency:'USD':'symbol' }}</span>
             </div>
+
           </div>
 
+          <!-- Items -->
           <div class="order-items">
             <h5><i class="fas fa-boxes"></i> Order Items</h5>
             <div class="items-list">
@@ -119,6 +125,7 @@
                   <span class="item-name">{{ item.productName }}</span>
                   <span class="item-quantity">x{{ item.quantity }}</span>
                 </div>
+
                 <span class="item-price" *ngIf="item.price">
                   {{ item.price * item.quantity | currency:'USD':'symbol' }}
                 </span>
@@ -127,17 +134,50 @@
           </div>
         </div>
 
+        <!-- Footer Buttons ✅ FIXED -->
         <div class="order-footer">
-          <button class="btn btn-outline-secondary btn-sm" *ngIf="order.status === 'Pending'" (click)="cancelOrder(order.id)">
-            <i class="fas fa-times"></i>
-            Cancel Order
+
+          <!-- View Details -->
+          <button class="btn btn-primary btn-sm" (click)="viewOrderDetails(order.id)">
+            <i class="fas fa-eye"></i> View Details
           </button>
-          <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'" (click)="reorder(order.id)">
-            <i class="fas fa-redo"></i>
-            Reorder
+
+          <!-- Cancel -->
+          <button class="btn btn-outline-secondary btn-sm"
+                  *ngIf="order.status === 'Pending'"
+                  (click)="cancelOrder(order.id)">
+            <i class="fas fa-times"></i> Cancel Order
+          </button>
+
+          <!-- Reorder -->
+          <button class="btn btn-outline-success btn-sm"
+                  *ngIf="order.status === 'Delivered'"
+                  (click)="reorder(order.id)">
+            <i class="fas fa-redo"></i> Reorder
           </button>
         </div>
+
       </div>
     </div>
+
+    <!-- ✅ Order Summary (after clicking View Details) -->
+    <div *ngIf="selectedOrder" class="selected-order-summary card p-4 mt-4 shadow">
+
+      <h3 class="mb-3">Order Summary</h3>
+      <hr>
+
+      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+      <p><strong>Total Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
+      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
+
+      <hr>
+
+      <p><strong>Special Discount (%):</strong> {{ selectedOrder.specialDiscountPercent }}</p>
+      <p><strong>Quantity Discount (%):</strong> {{ selectedOrder.quantityDiscountPercent }}</p>
+      <p><strong>Price Discount (%):</strong> {{ selectedOrder.priceDiscountPercent }}</p>
+      <p><strong>Total Discount (%):</strong> {{ selectedOrder.totalDiscountPercent }}</p>
+
+    </div>
+
   </div>
 </div>

@@ -27,38 +27,64 @@ import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
+import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
+
+import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
+import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
+
+import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
+import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
+import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
+
+
 
 
 
 
 
 const routes: Routes = [
-    { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
-     { path: 'customer/register', component: CustomerRegisterComponent },
+  { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
+  { path: 'customer/register', component: CustomerRegisterComponent },
   { path: 'customer/login', component: CustomerLoginComponent },
   { path: 'distributor/create-customer', component: CreateCustomerDistributorComponent },
-   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
+  { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
   { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
   { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
-   {path: 'customer-dashboard', component: CustomerDashboardComponent },
-   {path: 'main-page', component: MainPageComponent},
-   {path: 'distributor-login', component: DistributorLoginComponent},
-   {path: 'distributor-signup', component: DistributorSignupComponent},
+  { path: 'customer-dashboard', component: CustomerDashboardComponent },
+  { path: 'main-page', component: MainPageComponent },
+  { path: 'distributor-login', component: DistributorLoginComponent },
+  { path: 'distributor-signup', component: DistributorSignupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-    { path: 'employees', component: EmployeesComponent },
-    { path: 'set-password', component: SetPasswordComponent },
-      { path: 'profile', component: ProfileComponent },
-       { path: 'products/:distributorId', component:ProductsByDistComponent },
-        { path: 'orders', component: OrderHistoryComponent },
-        { path: 'customerOrder', component:CustomerOrdersComponent},
-        { path: 'employee-orders', component: EmployeeOrdersComponent },
-          { path: 'cust-dash', component: CustDashboardComponent },
-          { path: 'connectionrequests', component:DistributorConnectionRequestsComponent },
-          { path: 'test', component:TestComponent },
-           {path: 'employee-login', component: EmployeeLoginComponent},
-            {path: 'employee-signup', component:EmployeeSignupComponent},
+  { path: 'employees', component: EmployeesComponent },
+  { path: 'set-password', component: SetPasswordComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'products/:distributorId', component: ProductsByDistComponent },
+  { path: 'orders', component: OrderHistoryComponent },
+  { path: 'customerOrder', component: CustomerOrdersComponent },
+  { path: 'employee-orders', component: EmployeeOrdersComponent },
+  { path: 'cust-dash', component: CustDashboardComponent },
+  { path: 'connectionrequests', component: DistributorConnectionRequestsComponent },
+  { path: 'test', component: TestComponent },
+  { path: 'employee-login', component: EmployeeLoginComponent },
+  { path: 'employee-signup', component: EmployeeSignupComponent },
+
+    { path: 'admin-fruad-list', component: AdminFraudListComponent},
+
+
+  {
+    path: 'report-fraud/:targetType/:targetId',
+    component: FraudReportComponent
+  },
+  { path: 'review/:targetType/:targetId', component: ReviewSubmitComponent },
+  { path: 'admin/reviews', component: AdminReviewListComponent },
+{
+    path: 'admin/fraud-history',
+    component: FraudHistoryComponent
+  },
+  { path: 'admin/review-history', component: AdminReviewHistoryComponent },
+
             {path:'add-to-cart',component:AddToCartComponent},
-   
+            { path: 'employee-profile', component:EmployeeProfileComponent},
       
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }

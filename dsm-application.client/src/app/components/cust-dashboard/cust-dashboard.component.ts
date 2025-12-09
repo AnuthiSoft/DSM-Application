@@ -18,6 +18,8 @@ interface Distributor {
   categories?: string[];
   createdDate?: string;
    canConnect?: boolean;
+   averageRating: number;
+  reviewCount: number;
 }
 
 // interface Product {
@@ -77,6 +79,9 @@ export class CustDashboardComponent {
   distributors: Distributor[] = [];
   loading = true;
   dashboardType: 'global' | 'local' = 'global';
+  getStars(rating: number): number[] {
+  return [1, 2, 3, 4, 5];
+}
 
 
   constructor(private http: HttpClient) {}

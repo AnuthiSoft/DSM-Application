@@ -1,0 +1,64 @@
+<div class="dashboard-card">
+  <div class="card-header d-flex justify-content-between">
+    <h3>
+      <i class="fas fa-history me-2 text-info"></i>
+      Fraud Report History
+    </h3>
+
+    <button routerLink="/admin-fruad-list" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Back
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="text-center p-4">
+    <i class="fas fa-spinner fa-spin"></i> Loading history...
+  </div>
+
+  <div *ngIf="!loading && historyFrauds.length > 0" class="table-responsive mt-3">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Report ID</th>
+          <th>Reporter ID</th>
+          <th>Target ID</th>
+          <th>Type</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Evidence</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of historyFrauds">
+          <td class="fw-semibold">#{{ h.id }}</td>
+          <td>{{ h.reportedById }}</td>
+          <td>{{ h.targetId }}</td>
+          <td>{{ h.targetType }}</td>
+          <td>{{ h.reason }}</td>
+
+          <td>
+            <span [ngClass]="getStatusClass(h.status)">
+              <i class="fas" [ngClass]="getStatusIcon(h.status)"></i>
+              {{ h.status }}
+            </span>
+          </td>
+
+          <td>
+            <a *ngIf="h.evidenceUrl" target="_blank" [href]="h.evidenceUrl">
+              View
+            </a>
+            <span *ngIf="!h.evidenceUrl">-</span>
+          </td>
+
+          <td>{{ h.createdAt | date: 'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && historyFrauds.length === 0" class="text-center p-4">
+    <i class="fas fa-file-alt text-muted"></i>
+    <h4>No Report History</h4>
+  </div>
+</div>
+

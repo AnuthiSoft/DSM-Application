@@ -4,13 +4,21 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class Employee
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
+
+        
+[BsonElement("EmployeeId")]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string? EmployeeId { get; set; }
 
         [BsonElement("DistributorId")]
+        [BsonRepresentation(BsonType.ObjectId)]
+
         public string DistributorId { get; set; } = string.Empty;
 
         [BsonElement("Email")]

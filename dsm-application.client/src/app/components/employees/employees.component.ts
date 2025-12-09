@@ -18,7 +18,7 @@ export class EmployeesComponent {
   selectedEmployee: Employee | null = null;
   isEdit = false;
   loading = false;
-
+ 
   // filters
   searchTerm = '';
   roleFilter = '';
@@ -30,11 +30,11 @@ export class EmployeesComponent {
     private auth: AuthService,
     private fb: FormBuilder, private toastr: ToastrService
   ) {}
-
+ 
   ngOnInit(): void {
     this.distributorId = this.auth.getDistributorId();
     this.employeeId = this.auth.getEmployeeId();
-
+ 
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -43,16 +43,16 @@ export class EmployeesComponent {
       designation: ['', Validators.required],
       isActive: [true],
     });
-
+ 
     this.loadEmployees();
   }
-
+ 
   // ✅ Load all employees
   loadEmployees() {
     this.loading = true;
     this.employeeService.getEmployees(this.distributorId).subscribe({
       next: (data) => {
-        
+       
         this.employees = data;
         this.filteredEmployees = [...this.employees];
         this.loading = false;
@@ -63,17 +63,17 @@ export class EmployeesComponent {
       }
     });
   }
-
+ 
   // ✅ Add / Update employee
 onSubmit() {
   if (this.employeeForm.invalid) return;
-
+ 
   const emp: Employee = {
     ...this.employeeForm.value,
     distributorId: this.distributorId,
     isRegistered: false
   };
-
+ 
   if (this.isEdit && this.selectedEmployee?.employeeId) {
     this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
       next: (res: any) => {
@@ -102,7 +102,7 @@ onSubmit() {
     });
   }
 }
-
+ 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
      this.isEdit = true;
@@ -110,15 +110,33 @@ onSubmit() {
   this.showModal = true; // ✅ this opens the modal automatically
    this.selectedEmployee = emp; // ✅ Add this line
   }
+ 
+  // // ✅ Delete employee
+  // deleteEmployee(emp: Employee) {
+  //   if (!confirm(`Delete ${emp.name}?`)) return;
+  //   this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
+  //     next: () => this.loadEmployees()
+  //   });
+  // }
 
-  // ✅ Delete employee
   deleteEmployee(emp: Employee) {
-    if (!confirm(`Delete ${emp.name}?`)) return;
-    this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
-      next: () => this.loadEmployees()
-    });
+  if (!confirm(`Delete ${emp.name}?`)) return;
+
+  const id = emp.employeeId; // <– use MongoDB id
+
+  if (!id) {
+    this.toastr.error("Employee ID missing!");
+    return;
   }
 
+  this.employeeService.deleteEmployee(this.distributorId, id).subscribe({
+    next: () => this.loadEmployees(),
+    error: (err) => console.error("Delete error:", err)
+  });
+}
+
+
+ 
   // ✅ Toggle active/inactive
   toggleActive(emp: Employee) {
     this.employeeService.toggleActive(this.distributorId, emp.employeeId!).subscribe({
@@ -127,25 +145,25 @@ onSubmit() {
       }
     });
   }
-
+ 
   // ✅ Search + Filter employees
   applyFilters() {
     this.filteredEmployees = this.employees.filter(emp => {
       const matchesSearch =
         emp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(this.searchTerm.toLowerCase());
-
+ 
       const matchesRole = !this.roleFilter || emp.designation === this.roleFilter;
-
+ 
       const matchesStatus =
         !this.statusFilter ||
         (this.statusFilter === 'active' && emp.isActive) ||
         (this.statusFilter === 'inactive' && !emp.isActive);
-
+ 
       return matchesSearch && matchesRole && matchesStatus;
     });
   }
-
+ 
   // ✅ Reset form after submit/edit
   resetForm() {
     this.isEdit = false;
@@ -164,8 +182,10 @@ onSubmit() {
   this.employeeForm.reset();
   this.showModal = true;
 }
-
+ 
 closeEmployeeModal(): void {
   this.showModal = false;
 }
 }
+ 
+ 

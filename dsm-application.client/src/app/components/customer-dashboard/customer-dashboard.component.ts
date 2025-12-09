@@ -6,8 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
 import { FormsModule } from '@angular/forms';
-
-
+import Swal from 'sweetalert2';
+ 
 interface Distributor {
   distributorId: string;
   companyName: string;
@@ -98,8 +98,15 @@ productsLoading: boolean = true;
 
 
     if (!this.customerId) {
-      console.error('No customerId found in localStorage');
+      Swal.fire({
+        icon: 'error',
+        title: 'No Customer ID',
+        text: 'Customer ID not found in localStorage'
+      });
 
+
+      // console.error('No customerId found in localStorage');
+ 
       return;
     }
 
@@ -131,12 +138,27 @@ productsLoading: boolean = true;
         console.log('Loaded products:', this.products);
       },
       error: (err) => {
-        console.error('Error loading dashboard', err);
+        // console.error('Error loading dashboard', err);
         this.loading = false;
-      },
-    });
-}
+        Swal.fire({
+            icon: 'error',
+            title: 'Failed to Load Dashboard',
+            text: err.error || 'An unexpected error occurred'
+          });
+        }
+      });
+  }
   connectDistributor(distributor: Distributor) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Send connection request to ${distributor.companyName}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, send request',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
     const body = {
       customerId: this.customerId,
       distributorId: distributor.distributorId
@@ -145,25 +167,29 @@ productsLoading: boolean = true;
     this.http.post('http://localhost:5164/api/customers/connect-distributor', body)
       .subscribe({
         next: (res: any) => {
-          alert(res);
-
+          // alert(res);
+          Swal.fire({
+              icon: 'success',
+              title: 'Request Sent',
+              text: res
+            });
           this.loadDashboard();
         },
         error: (err) => {
-          console.error('Error connecting distributor', err);
-          alert(err.error || 'Failed to send connection request');
-        }
-      });
+        //   console.error('Error connecting distributor', err);
+        //   alert(err.error || 'Failed to send connection request');
+        
+       Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: err.error || 'Failed to send request'
+            });
+          }
+        });
+    });
   }
   viewProducts(distributorId: string) {
     this.router.navigate(['/products', distributorId]);
-  }
-
-
- 
-
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
   }
 
   onAddToCart(product: Product) {
@@ -172,17 +198,40 @@ productsLoading: boolean = true;
   }
 
   logout() {
-    localStorage.clear();
-    this.router.navigate(['/customer/login']);
+    Swal.fire({
+      title: 'Logout?',
+      text: 'Are you sure you want to log out?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, logout',
+      cancelButtonText: 'Cancel'
+    }).then(result => {
+      if (result.isConfirmed) {
+        localStorage.clear();
+        this.router.navigate(['/customer/login']);
+      }
+    });
+  }
+    
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
   }
  
-
   isActive(tab: string): boolean {
     return this.activeTab === tab;
   }
+
   addToCart(product: any) {
-  console.log('Add to cart:', product);
+  // console.log('Add to cart:', product);
   // Call your cart service here
-}
+  Swal.fire({
+      icon: 'success',
+      title: 'Added to Cart',
+      text: `${product.productName} added successfully!`
+    });
+  }
 
 }
+
+
+

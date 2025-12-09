@@ -78,19 +78,12 @@ export class EmployeeDashboardComponent implements OnInit {
   }
     // ✅ Proper logout functionality
   logout(): void {
-    const confirmed = confirm('Are you sure you want to logout?');
-    if (confirmed) {
-      localStorage.removeItem('token');         // remove JWT
-      localStorage.removeItem('employeeName');  // remove employee info
-      localStorage.removeItem('employeeId');
-      localStorage.removeItem('distributorId'); // optional if stored
+  localStorage.removeItem('token');
+  localStorage.removeItem('employeeName');
+  localStorage.removeItem('employeeId');
+  localStorage.removeItem('distributorId');
 
-      // Redirect to login
-      this.router.navigate(['/distributor-login']).then(() => {
-        alert('You have been logged out successfully!');
-      });
-    }
-  }
-
+  this.router.navigate(['/employee-login']);
+}
 
 }

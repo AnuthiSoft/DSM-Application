@@ -90,3 +90,17 @@
   --step-inactive: #444;
 
 }
+
+.big-alert-box {
+  height: 200px !important;       /* Increase height */
+  max-height: 200px !important;   /* Prevent shrinking */
+  width: 600px !important;        /* Matches Swal width */
+  padding: 25px !important;
+  border-radius: 20px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+

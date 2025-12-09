@@ -491,19 +491,18 @@
             </div>
           </div>
           
-        </form>
-      </div>
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
-          <i class="fas fa-times"></i>
-          Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" (click)="onSubmit()">
-          <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
-          {{ isEdit ? 'Update Employee' : 'Save Employee' }}
-        </button>
-      </div>
+        <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
+        <i class="fas fa-times"></i> Cancel
+    </button>
+
+    <button type="submit" class="btn btn-primary">
+        <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
+        {{ isEdit ? 'Update Employee' : 'Save Employee' }}
+    </button>
+</div>
+</form>
+</div>
     </div>
   </div>
 </div>

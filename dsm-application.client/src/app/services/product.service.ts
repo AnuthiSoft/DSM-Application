@@ -38,6 +38,9 @@ export class ProductService {
   delete(id: string): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
+  getMeasures(): Observable<string[]> {
+  return this.api.get<string[]>(`${this.endpoint}/measures`);
+}
 
   // -------------------- Distributor --------------------
   getCategoriesByDistributor(distributorId: string): Observable<string[]> {

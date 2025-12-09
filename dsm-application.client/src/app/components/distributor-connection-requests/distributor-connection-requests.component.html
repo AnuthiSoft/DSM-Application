@@ -142,6 +142,15 @@
                 <i class="fas fa-unlink"></i>
                 Disconnect
               </button>
+                <button class="btn btn-danger btn-sm mt-1"
+          [routerLink]="[
+             '/report-fraud',
+             'customer',
+             c.customerId
+          ]">
+    <i class="fas fa-flag"></i>
+    Report Fraud
+  </button>
             </td>
           </tr>
         </tbody>

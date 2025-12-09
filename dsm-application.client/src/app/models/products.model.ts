@@ -10,7 +10,9 @@ export interface Product {
   productCode: string;
  category?: string;
   description: string;
-  unit: string;
+ measure
+ 
+ : string;
   price: number;
   costPrice: number;
   discount: number;
@@ -23,7 +25,7 @@ export interface Product {
   createdBy?: string;
   updatedBy?: string;
   brand?: string;
-  imageUrl?: string;
+  imageUrls?: string;
     distributorId?: string;
     distributorName?: string; // Add this
 

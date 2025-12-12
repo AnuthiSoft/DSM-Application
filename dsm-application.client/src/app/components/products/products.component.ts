@@ -139,50 +139,65 @@ onSubCategoryChange(event: Event) {
   // ==============================================
   // CRUD
   // ==============================================
-  submitForm() {
-   
-    if (this.productForm.invalid) return;
- 
-    const product = this.productForm.value;
-    const formData = new FormData();
- 
-   Object.keys(product).forEach(key => {
-  const value = product[key as keyof Product];
-  if (value !== null && value !== undefined) {
-    formData.append(key, value.toString());
+submitForm() {
+  if (!this.distributorId) {
+    console.error('DistributorId not set!');
+    return;
   }
-});
-    const distributorId = localStorage.getItem('DistributorId');
-    if (distributorId) formData.append('DistributorId', distributorId);
- 
-    if (this.selectedFiles.length > 0) {
-  for (let file of this.selectedFiles) {
-    formData.append("Images", file);  // MUST MATCH C# DTO PROPERTY NAME
-  }
+
+  const formData = new FormData();
+
+  // Explicitly append all fields with exact backend DTO names
+  formData.append('ProductName', this.productForm.value.productName);
+  formData.append('ProductCode', this.productForm.value.productCode);
+  formData.append('Category', this.productForm.value.category);
+  formData.append('Measure', this.productForm.value.measure);
+  formData.append('Price', this.productForm.value.price ?? 0);
+  formData.append('CostPrice', this.productForm.value.costPrice ?? 0);
+  formData.append('Discount', this.productForm.value.discount ?? 0);
+  formData.append('GST', this.productForm.value.gst ?? 0);
+  formData.append('Stock', this.productForm.value.stock ?? 0);
+  formData.append('ReorderLevel', this.productForm.value.reorderLevel ?? 0);
+  formData.append('Brand', this.productForm.value.brand ?? '');
+  formData.append('Color', this.productForm.value.color ?? '');
+  formData.append('Description', this.productForm.value.description ?? '');
+  formData.append('DistributorId', this.distributorId);
+
+  // Append image if selected
+  if (this.selectedFiles && this.selectedFiles.length > 0) {
+  this.selectedFiles.forEach(file => {
+    formData.append('Images', file);   // Must MATCH backend parameter name
+  });
 }
 
- 
-    if (this.isEdit && this.selectedProductId) {
-      this.productService.update(this.selectedProductId, formData).subscribe({
-        next: () => {
-          if (distributorId) this.loadProducts(distributorId);
-          this.closeModal();
-          this.resetForm();
-        },
-        error: (err) => console.error('Error updating product:', err)
-      });
-    } else {
-      this.productService.create(formData).subscribe({
-        next: () => {
-          if (distributorId) this.loadProducts(distributorId);
-          this.closeModal();
-          this.resetForm();
-        },
-        error: (err) => console.error('Error creating product:', err)
-      });
-    }
+  // UPDATE PRODUCT
+  if (this.isEdit && this.selectedProductId) {
+    this.productService.update(this.selectedProductId, formData).subscribe({
+      next: () => {
+        this.loadProducts(this.distributorId!);
+        const modalEl = document.getElementById('productModal');
+        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        this.resetForm();
+      },
+      error: err => console.error('Update failed:', err)
+    });
+  } 
+  // CREATE NEW PRODUCT
+  else {
+    this.productService.create(formData).subscribe({
+      next: () => {
+        this.loadProducts(this.distributorId!);
+        const modalEl = document.getElementById('productModal');
+        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        this.resetForm();
+      },
+      error: err => console.error('Create failed:', err)
+    });
   }
- 
+  
+}
+
+
   editProduct(product: Product) {
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
@@ -383,30 +398,50 @@ onSubCategoryChange(event: Event) {
   // ==============================================
   // MODAL HANDLING
   // ==============================================
-  openModal(isEdit = false, product?: Product) {
-    this.isEdit = isEdit;
- 
-    if (isEdit && product) {
-       this.selectedProduct = product;
-       
-      this.productForm.patchValue(product);
-      this.previewUrl = product.imageUrls ? this.apiBaseUrl + product.imageUrls : null;
-        this.previewUrls = [];  
-    } else {
-       this.selectedProduct = null; 
-      this.resetForm();
-       if (isEdit && product) {
-    this.productForm.patchValue(product);
+ openModal(isEdit: boolean, product?: Product) {
+  this.isEdit = isEdit;
+
+  const modalEl = document.getElementById('productModal');
+  if (!modalEl) return;
+
+  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+  if (isEdit && product) {
+    this.selectedProductId = product.productId ?? null;
+
+    this.productForm.patchValue({
+      productName: product.productName,
+      productCode: product.productCode,
+      color: product.color,
+      category: product.category,
+      Measure: product.measure,
+      price: product.price,
+      costPrice: product.costPrice,
+      discount: product.discount,
+      gst: product.gst,
+      stock: product.stock,
+      reorderLevel: product.reorderLevel,
+      brand: product.brand,
+      description: product.description
+    });
+
+    this.previewUrl = product.imageUrls
+      ? this.apiBaseUrl + product.imageUrls
+      : null;
+
+  } else {
+    this.resetForm();
+    this.previewUrl = null;
+    this.selectedProductId = null;
   }
-    }
- 
-    const modalEl = document.getElementById('productModal');
-    if (modalEl) {
-      this.modalRef = new bootstrap.Modal(modalEl);
-      this.modalRef.show();
-    }
-  }
- 
+
+  // ALWAYS show modal
+  modal.show();
+}
+
+
+   
+
   closeModal() {
     if (this.modalRef) this.modalRef.hide();
   }

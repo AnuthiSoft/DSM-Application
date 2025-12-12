@@ -1,66 +1,234 @@
-<div class="products-section">  
-  <h2>Cart Products</h2>
 
-  <!-- Cart Section -->
-  <div class="cart-section" *ngIf="cart.length > 0">
-    <div class="cart-header">
-      <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
-      <span class="cart-count">{{ cart.length }} item(s)</span>
+
+<div class="page-wrapper">
+<div class="order-container">
+
+  <h2>New Order Request</h2>
+
+  <!-- Ordered Date -->
+  <div class="form-group">
+  <label>Ordered Date *</label>
+  <input type="date" [(ngModel)]="orderedDate" (change)="updateExpectedDate()" />
+</div>
+
+  <!-- Retailer -->
+
+
+
+  <div class="form-group">
+  <label>Retailer *</label>
+
+  <div class="customer-box">
+
+    <!-- Visible Selected Customer -->
+    <div class="customer-display" (click)="toggleCustomerDropdown()">
+      {{ customerDisplay || customerName }}
+      <span class="arrow">▼</span>
     </div>
 
-    <div class="cart-table">
-      <div class="cart-header-row">
-        <div class="cart-col product-col">Product</div>
-        <div class="cart-col distributor-col">Distributor</div>
-        <div class="cart-col quantity-col">Quantity</div>
-        <div class="cart-col price-col">Price</div>
-        <div class="cart-col subtotal-col">Subtotal</div>
-        <div class="cart-col action-col">Action</div>
+    <!-- DROPDOWN (Appears Inside Same Box at Bottom) -->
+    <div class="customer-dropdown" *ngIf="showCustomerDropdown">
+      <small>ID: {{ customerId}}</small><br>
+        <small>Email: {{ customerEmail }}</small><br>
+
+      <div 
+        class="customer-item"
+       *ngFor="let c of customers"
+
+        (click)="selectCustomer(c)"
+        
+      >
+        <strong>{{ c.customerName }}</strong><br>
+        <small>ID: {{ c.customerId }}</small><br>
+        <small>Email: {{ c.email }}</small><br>
+        <small>Phone: {{ c.phoneNumber }}</small>
       </div>
 
-      <div class="cart-item" *ngFor="let item of cart">
-        <div class="cart-col product-col">
-          <strong>{{ item.product.productName }}</strong>
-          <small>Code: {{ item.product.productCode }}</small>
-          <strong>{{ item.product.color }}</strong>
-        </div>
-
-        <div class="cart-col distributor-col">{{ item.product.distributorName }}</div>
-
-        <div class="cart-col quantity-col">
-          <span class="quantity-badge">{{ item.quantity }}</span>
-        </div>
-
-        <div class="cart-col price-col">₹{{ item.product.price }}</div>
-
-        <div class="cart-col subtotal-col">
-          ₹{{ item.product.price * item.quantity }}
-        </div>
-
-        <div class="cart-col action-col">
-          <button class="btn btn-danger btn-sm remove-btn"
-                  (click)="removeFromCart(item.product.productId)">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
     </div>
 
-    <div class="cart-footer">
-      <div class="total-section">
-        <span class="total-label">Total Amount:</span>
-        <span class="total-amount">₹{{ getTotal() }}</span>
-      </div>
-
-      <button class="btn btn-success place-order-btn" (click)="placeOrder()">
-        <i class="fas fa-shopping-bag"></i> Place Order
-      </button>
-    </div>
   </div>
 </div>
 
 
-<!-- 🛒 Add to Cart Popup Modal -->
+
+  <!-- <div class="form-group">
+  <label>Customer *</label> -->
+
+  <!-- CLICKABLE INPUT -->
+
+
+
+
+
+  <!-- <div class="dropdown-container">
+
+    <input 
+      type="text"
+      class="dropdown-input"
+      [value]="customerDisplay || customerName"
+      (click)="toggleCustomerDropdown()"
+      readonly
+    />
+
+    <button class="dropdown-arrow" (click)="toggleCustomerDropdown()">
+      ▼
+    </button> -->
+
+    <!-- CUSTOMER DROPDOWN LIST -->
+
+
+
+    
+    <!-- <div class="dropdown-list" *ngIf="showCustomerDropdown">
+
+      <div 
+        class="dropdown-item"
+        *ngFor="let c of customers"
+        (click)="selectCustomer(c)"
+      >
+        <strong>{{ c.customerName }}</strong><br>
+        <small>ID: {{ c.customerId }}</small><br>
+        <small>Email: {{ c.email }}</small><br>
+        <small>Phone: {{ c.phoneNumber }}</small>
+      </div>
+
+    </div>
+
+  </div>
+</div> -->
+
+  <!-- <div class="form-group">
+  <label>CustomerName*</label>
+  <button class="form-group" input type="text" >{{ customerName}}</button>
+   <button class="dropdown-arrow" (click)="toggleProductDropdown(customerId)">
+      ▼
+    </button> 
+
+</div> -->
+
+<!-- <span class="form-group" input type="text" >{{ customerName}}</span>
+
+    <button class="dropdown-arrow" (click)="toggleProductDropdown(item.product.productId)">
+      ▼
+    </button> -->
+
+
+
+  <!-- Expected Delivery Date -->
+   <div class="form-group">
+  <label>Expected Delivery Date *</label>
+  <input type="date" [(ngModel)]="expectedDate" readonly />
+</div> 
+
+  <!-- Products Section -->
+  <h3>Products *</h3>
+
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th>Quantity</th>
+
+      </tr>
+    </thead>
+
+     <tbody>
+    <tr *ngFor="let item of orderProducts">
+     <td class="product-cell">
+  
+  <div class="product-box">
+    <span class="product-name">{{ item.product.productName }}</span>
+
+    <button class="dropdown-arrow" (click)="openProductModal(item.product)">
+      ▼
+    </button>
+
+    <button class="remove-btn" (click)="removeFromOrder(item.product.productId)">
+      ✖
+    </button>
+  </div>
+
+  <!-- DROPDOWN UNDER PRODUCT BOX -->
+  <div class="product-dropdown" 
+       *ngIf="expandedProduct[item.product.productId]">
+       
+    <div class="drop-img" >
+    <img
+  [src]="getImageUrl(item.product.imageUrl)"
+  (error)="onImgError($event)"
+  [alt]="item.product.productName"
+/>
+
+ 
+      <div class="drop-info">
+        <p><strong>Price: ₹{{ item.product.price }}</strong></p>
+        <p>Stock: {{ item.product.stock }}</p>
+      </div>
+    </div>
+
+  </div>
+
+</td>
+
+<!-- FULL-SCREEN POPUP OVERLAY -->
+<div class="product-modal-overlay" *ngIf="modalProduct">
+  <div class="product-modal">
+
+    <button class="modal-close" (click)="closeProductModal()">✖</button>
+
+    <img
+  [src]="getImageUrl(modalProduct.imageUrls)"
+  (error)="onImgError($event)"
+  [alt]="modalProduct.productName"
+/>
+
+    <h3>{{ modalProduct.productName }}</h3>
+
+    <p><strong>Price:</strong> ₹{{ modalProduct.price }}</p>
+    <p><strong>Stock:</strong> {{ modalProduct.stock }}</p>
+    <p><strong>Brand:</strong> {{ modalProduct.brand }}</p>
+    <p><strong>Category:</strong> {{ modalProduct.category }}</p>
+    <p><strong>Distributor:</strong>{{modalProduct.distributorName}}</p>
+    <p><strong>Expected Delivery:</strong>
+  {{ computeDeliveryDate(modalProduct!, orderedDate) }}
+</p>
+
+  </div>
+</div>
+
+
+      <td class="quantity-cell">
+
+
+  <input type="number"
+         [(ngModel)]="item.quantity"
+         min="1" />
+</td>
+ 
+
+    </tr>
+  </tbody>
+  </table>
+
+<a class="add-row" (click)="goToProducts()">+ Add New</a>
+
+
+
+
+
+  <!-- Buttons -->
+  <div class="actions">
+    <button class="submit-btn"   (click)="placeOrder()">Submit</button>
+    <button class="reset-btn" (click)="resetOrder()">Reset</button>
+  </div>
+
+</div>
+
+
+
+
+<!-- 
+ 🛒 Add to Cart Popup Modal 
 <div class="popup-overlay" *ngIf="showPopup && selectedProduct">
   <div class="popup-content">
     <h3>Add to Cart</h3>
@@ -71,27 +239,20 @@
       <p>Available Stock: {{ selectedProduct.stock }}</p>
 
       <div class="quantity-control">
-        <button (click)="decreaseQty()" 
-                [disabled]="selectedQuantity <= 1">-</button>
+        <button (click)="selectedQuantity = selectedQuantity > 1 ? selectedQuantity - 1 : 1">-</button>
+  <span>{{ selectedQuantity }}</span>
+  <button (click)="selectedQuantity = selectedQuantity < selectedProduct.stock ? selectedQuantity + 1 : selectedProduct.stock">+</button>
+</div>
 
-        <span>{{ selectedQuantity }}</span>
-
-        <button (click)="increaseQty()" 
-                [disabled]="selectedQuantity >= selectedProduct.stock">
-          +
-        </button>
-      </div>
     </div>
+    
 
     <div class="popup-actions">
       <button class="btn btn-success" (click)="confirmAddToCart()">Add</button>
       <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
     </div>
   </div>
-</div>
+</div> -->
 
-<!-- If cart is EMPTY -->
-<div class="empty-cart" *ngIf="cart.length === 0">
-  <img src="https://cdn-icons-png.flaticon.com/512/4555/4555971.png" alt="Empty Cart" class="empty-cart-img">
-  <h3>Your Cart is Empty</h3>
+
 </div>

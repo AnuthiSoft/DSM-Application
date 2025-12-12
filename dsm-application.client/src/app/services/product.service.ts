@@ -2,12 +2,16 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { Product } from '../models/products.model';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 export interface Category {
   category: string;
   name: string;
   description?: string;
   distributorId: string;
+
+ 
 }
 
 @Injectable({
@@ -15,13 +19,19 @@ export interface Category {
 })
 export class ProductService {
   private readonly endpoint = 'products';
+private baseUrl = environment.apiUrl + '/products';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService,private http: HttpClient) {}
 
   // -------------------- CRUD --------------------
   getAll(): Observable<Product[]> {
     return this.api.get<Product[]>(this.endpoint);
   }
+
+
+  // Load ALL products (no distributor needed)
+ 
+
 
   getById(id: string): Observable<Product> {
     return this.api.get<Product>(`${this.endpoint}/${id}`);
@@ -35,6 +45,8 @@ export class ProductService {
     return this.api.put<void>(`${this.endpoint}/${id}`, formData);
   }
 
+
+  
   delete(id: string): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
   }

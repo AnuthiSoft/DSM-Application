@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { CustomerLoginRequest } from '../../models/customer.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-set-password',
@@ -15,7 +16,7 @@ export class SetPasswordComponent {
   isProcessing = false;
 
 
-  constructor(private customerService: CustomerService) {}
+  constructor(private customerService: CustomerService, private router: Router) {}
 
   setPassword() {
   if (!this.isFormValid()) return;
@@ -32,6 +33,12 @@ export class SetPasswordComponent {
       this.identifier = '';
       this.password = '';
       this.isProcessing = false;
+      
+       setTimeout(() => {
+          this.router.navigate(['/customer/login']);
+        }, 0);   // show message for 1.5 sec
+  
+
     },
     error: (err) => {
       this.error = err.error?.message || 'Failed to set password';

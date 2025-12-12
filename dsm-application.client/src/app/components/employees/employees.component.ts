@@ -23,6 +23,7 @@ export class EmployeesComponent {
   searchTerm = '';
   roleFilter = '';
   statusFilter = '';
+  email = '';
   showModal = false;
 // isEdit = false;
   constructor(
@@ -102,7 +103,20 @@ onSubmit() {
     });
   }
 }
- 
+
+
+
+restrictPhoneInput(event: any) {
+  const input = event.target.value;
+
+  // Allow unlimited characters for email,
+  // but restrict pure numbers to max 10 digits.
+  if (/^[0-9]+$/.test(input)) {
+    event.target.value = input.substring(0, 10);
+    this.email = event.target.value;
+  }
+}
+
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
      this.isEdit = true;

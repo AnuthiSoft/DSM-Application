@@ -1,6 +1,7 @@
 export interface Customer {
-  isActive: any;
   customerId?: string;
+  customerName?: string;
+  isActive: any;
   name: string;
   email: string;
   phoneNumber: string;

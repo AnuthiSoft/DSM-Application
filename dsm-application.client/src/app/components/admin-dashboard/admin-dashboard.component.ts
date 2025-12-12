@@ -26,6 +26,7 @@ export class AdminDashboardComponent implements OnInit {
   distributorForm!: FormGroup;
   isEdit = false;
   message = '';
+  email ='';
   searchText = '';
   role: string | null = null;
   customCategory: string = "";
@@ -56,13 +57,27 @@ export class AdminDashboardComponent implements OnInit {
   }
 
 
+
+
+
+  restrictPhoneInput(event: any) {
+  const input = event.target.value;
+
+  // Allow unlimited characters for email,
+  // but restrict pure numbers to max 10 digits.
+  if (/^[0-9]+$/.test(input)) {
+    event.target.value = input.substring(0, 10);
+    this.email = event.target.value;
+  }
+}
+
   initForm(): void {
     this.distributorForm = this.fb.group({
       distributorId: [''],
       companyName: ['', Validators.required],
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
+      phoneNumber: ['', Validators.required, Validators.pattern(/^[0-9]{10}$/) ],
       gst: ['', Validators.required],
       address: ['', Validators.required],
        isPremium: [''],
@@ -71,6 +86,8 @@ export class AdminDashboardComponent implements OnInit {
        customCategory: [''] // ✅ new form control
     });
   }
+
+
 
   loadDistributors(): void {
     this.adminService.getDistributors().subscribe({

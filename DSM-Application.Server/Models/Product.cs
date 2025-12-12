@@ -102,5 +102,9 @@ namespace DSM_Application.Server.Models
 
         [BsonElement("IsDeleted")]
         public bool IsDeleted { get; set; } = false;
+
+        // inside Product class
+        public int? LeadTimeDays { get; set; } = 1; // nullable, default 1
+
     }
 }

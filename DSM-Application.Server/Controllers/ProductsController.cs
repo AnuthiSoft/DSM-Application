@@ -27,8 +27,8 @@ namespace DSM_Application.Server.Controllers
             _categoryService = categoryService;
         }
 
-        //[Authorize(Roles = "Distributor")]
-        //[HttpGet]
+        [Authorize(Roles = "Distributor")]
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             // ✅ Extract distributor ID from token
@@ -218,6 +218,7 @@ namespace DSM_Application.Server.Controllers
             existing.Stock = dto.Stock;
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
+            existing.Category = dto.Category;
             existing.Category = dto.Category;
             existing.Color = dto.Color;
             existing.UpdatedDate = DateTime.UtcNow;

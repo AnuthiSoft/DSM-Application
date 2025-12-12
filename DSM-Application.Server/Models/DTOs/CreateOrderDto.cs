@@ -9,6 +9,9 @@ namespace DSM_Application.Server.Models.DTOs
         public string DistributorId { get; set; }
         public List<OrderProductInputDto> Products { get; set; }
         public decimal SpecialDiscountPercent { get; set; }
+        public DateTime? ExpectedDelivery { get; set; }
+
+
     }
 
     public class OrderProductDto
@@ -17,6 +20,7 @@ namespace DSM_Application.Server.Models.DTOs
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
+        
     }
 
     public class OrderProductInputDto
@@ -65,10 +69,15 @@ namespace DSM_Application.Server.Models.DTOs
         public decimal QuantityDiscountPercent { get; set; }
         public decimal PriceDiscountPercent { get; set; }
         public decimal TotalDiscountPercent { get; set; }
-
-        // ⭐ ADD THESE TWO NEW FIELDS
         public DateTime? OrderedDate { get; set; }
         public DateTime? ExpectedDeliveryDate { get; set; }
+
+        public string DistributorId { get; set; }
+
+
+        //// ⭐ ADD THESE TWO NEW FIELDS
+        //public DateTime? OrderedDate { get; set; }
+        //public DateTime? ExpectedDeliveryDate { get; set; }
 
         //public DateTime OrderDate { get; set; }
         public string Status { get; set; }
@@ -81,5 +90,11 @@ namespace DSM_Application.Server.Models.DTOs
         public DateTime? CollectedOn { get; set; }
 
         public DateTime? DeliveredOn { get; set; }
+
+      
+
+        // ⭐ REQUIRED for per-product delivery date
+        //public DateTime? DeliveryEta { get; set; }
+        //}
     }
 }

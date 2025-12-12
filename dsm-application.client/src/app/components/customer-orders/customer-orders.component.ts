@@ -27,21 +27,40 @@ export class CustomerOrdersComponent {
     this.loadOrders();
   }
 
-  loadOrders(): void {
-    if (!this.customerId) return;
-    this.loading = true;
+loadOrders(): void {
+  if (!this.customerId) return;
+  this.loading = true;
 
-    this.orderService.getOrdersByCustomer(this.customerId).subscribe({
-      next: (data) => {
-        this.orders = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load customer orders', err);
-        this.loading = false;
-      }
-    });
-  }
+  this.orderService.getOrdersByCustomer(this.customerId).subscribe({
+    next: (data) => {
+     this.orders = data.map(order => ({
+  ...order,
+  expectedDeliveryDate: this.computeExpectedDelivery(order.orderedDate, order.distributorId)
+}));
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error("Failed to load orders", err);
+      this.loading = false;
+    }
+  });
+}
+
+computeExpectedDelivery(orderDate: any, distributorId: string): string {
+  if (!orderDate || !distributorId) return "";
+
+  const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+
+  // Convert Date OR string to Date object
+  const date = new Date(orderDate);
+
+  date.setDate(date.getDate() + leadTime);
+
+  return date.toISOString().split("T")[0];
+}
+
+
+
   //   // Navigate to order details page
   // viewOrderDetails(orderId: string): void {
   //   this.router.navigate(['/orders', orderId]);

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 import { CustomerService } from '../../services/customer.service';
 import { Router } from '@angular/router';
@@ -78,6 +78,10 @@ export class CustDashboardComponent {
    customerId: string = '';
   distributors: Distributor[] = [];
   loading = true;
+
+  
+
+  @Output() viewProductsClicked = new EventEmitter<string>();
   dashboardType: 'global' | 'local' = 'global';
   getStars(rating: number): number[] {
   return [1, 2, 3, 4, 5];
@@ -90,6 +94,13 @@ export class CustDashboardComponent {
     this.customerId = localStorage.getItem('customerId') || '';
     this.loadDistributors();
   }
+
+
+openProducts(distributorId: string) {
+  this.viewProductsClicked.emit(distributorId);
+}
+
+
 loadDistributors() {
   this.loading = true;
   this.http

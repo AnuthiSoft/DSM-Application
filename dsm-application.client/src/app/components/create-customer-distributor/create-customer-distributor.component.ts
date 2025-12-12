@@ -103,6 +103,8 @@ selectedEmployeeId = '';
   isEdit = false;
   message = '';
 
+  email = '';
+
   constructor(private customerService: CustomerService) {}
 
   ngOnInit(): void {
@@ -215,6 +217,18 @@ savePermanentEmployee() {
   }
 
   /* ----------------------------- CREATE ------------------------------ */
+
+  restrictPhoneInput(event: any) {
+  const input = event.target.value;
+
+  // Allow unlimited characters for email,
+  // but restrict pure numbers to max 10 digits.
+  if (/^[0-9]+$/.test(input)) {
+    event.target.value = input.substring(0, 10);
+    this.email = event.target.value;
+  }
+}
+
 
   createCustomer() {
     this.customerService.createByDistributor(this.customer).subscribe({

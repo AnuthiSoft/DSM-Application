@@ -82,17 +82,17 @@
         
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-          <div class="stat-value">{{orderStats?.assigned || 0}}</div>
+          <div class="stat-value">{{orderStats.assigned || 0}}</div>
           <div class="stat-label">Assigned Orders</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-          <div class="stat-value">{{orderStats?.completed || 0}}</div>
+          <div class="stat-value">{{orderStats.completed || 0}}</div>
           <div class="stat-label">Completed</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-clock"></i></div>
-          <div class="stat-value">{{orderStats?.pending || 0}}</div>
+          <div class="stat-value">{{orderStats.pending || 0}}</div>
           <div class="stat-label">Pending</div>
         </div>
         <div class="stat-card">
@@ -167,7 +167,7 @@
                 <strong>Order #{{ order.id }}</strong>
                 <span class="order-date">{{ order.orderDate | date:'short' }}</span>
               </div>
-              <div class="order-status" [class]="order.status?.toLowerCase()">
+              <div class="order-status" [class]="order.status.toLowerCase()">
                 {{ order.status }}
               </div>
             </div>
@@ -192,7 +192,7 @@
                 <span class="task-title">{{ task.title }}</span>
                 <span class="task-time">{{ task.dueTime }}</span>
               </div>
-              <div class="task-priority" [class]="task.priority?.toLowerCase()">
+              <div class="task-priority" [class]="task.priority.toLowerCase()">
                 {{ task.priority }}
               </div>
             </div>

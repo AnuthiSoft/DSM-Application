@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
 })
 export class CustomerLoginComponent {
  request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
-
+ email = '';
   message = '';
    showPassword = false; 
 
@@ -25,12 +25,29 @@ export class CustomerLoginComponent {
     private ngZone: NgZone
   ) {}
 
+
+
+
+  restrictPhoneInput(event: any) {
+  const input = event.target.value;
+
+  // Allow unlimited characters for email,
+  // but restrict pure numbers to max 10 digits.
+  if (/^[0-9]+$/.test(input)) {
+    event.target.value = input.substring(0, 10);
+    this.email = event.target.value;
+  }
+}
+
+
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+
+  
+
   login() {
-     // Determine if input is a phone number (all digits)
   const identifier = this.request.email?.trim();
   if (!identifier) {
     this.message = "Please enter email or phone number";
@@ -38,30 +55,45 @@ export class CustomerLoginComponent {
   }
 
   if (/^\d+$/.test(identifier)) {
-    // all digits → phone
     this.request.phoneNumber = identifier;
     this.request.email = '';
   } else {
-    // otherwise → email
     this.request.email = identifier;
     this.request.phoneNumber = '';
   }
 
-    this.customerService.login(this.request).subscribe({
-      next: (res: any) => {
-        // ✅ Clear any old data
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('customerId');
+  this.customerService.login(this.request).subscribe({
+    next: (res: any) => {
+      // Clear old data
 
-        // ✅ Save new auth data
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('role', res.role);
-       
-          localStorage.setItem('customerId', res.customerId);
       
+     // Clear old data
+   // Remove only auth-related old data — NOT the cart!
+localStorage.removeItem("token");
+localStorage.removeItem("role");
 
-        this.message = "✅ Login successful!";
+
+
+    // Save new data
+    localStorage.setItem("token", res.token);
+    localStorage.setItem("role", res.role);
+    localStorage.setItem("customerId", res.customerId);
+    localStorage.setItem("customerName", res.name);
+    localStorage.setItem("customerEmail", res.email);
+    localStorage.setItem("customerPhoneNumber", res.phoneNumber);
+
+
+
+      // ⭐ SAVE DISTRIBUTOR ID HERE
+
+     // const role = this.auth.getRole();
+if (res.distributorId) {
+  localStorage.setItem("distributorId", res.distributorId);
+}
+
+      localStorage.setItem('EmployeeId', res.employeeId);
+      localStorage.setItem('employeeId', res.employeeId);
+      this.message = "✅ Login successful!";
 
         // ✅ Navigate to dashboard only for customers
         if (res.role === 'Customer') {

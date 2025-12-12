@@ -52,10 +52,14 @@ export interface DistributorOrder {
 export interface Order {
   id: string;
   customerId: string;
+  customerName:string;
   distributorId: string;
 EmployeeId?: string;
  Name?: string;
   assignedOn?: Date;
+ orderedDate: string;
+expectedDeliveryDate: string;
+
   status: string;
   totalAmount: number;
   orderDate: Date;
@@ -66,6 +70,12 @@ EmployeeId?: string;
   paymentMethod?: string;
   collectedOn?: Date;
   deliveryRemarks?: string;
+
+ 
+
+  // ➕ Add this field
+ // deliveryEta?: string;
+
 }
 export interface Employee {
   

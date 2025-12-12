@@ -9,6 +9,11 @@ import { ConnectionRequestDto, DistributorService } from '../../services/distrib
 })
 export class DistributorDashboardComponent {
 
+  orderedDate: string = '';
+  expectedDate: string = '';
+  expectedDays: number = 1; // default
+  leadTime:number = 1;
+
   constructor(
     
     private auth: AuthService,private distributorService: DistributorService
@@ -100,10 +105,47 @@ currentDate: Date = new Date();
   // loading = false;
 
  ngOnInit(): void {
-    this.distributorId = localStorage.getItem('distributorId') || '';
+  //   this.distributorId = localStorage.getItem('distributorId') || '';
+
+  //   const saved = localStorage.getItem("expectedDays");
+  // this.expectedDays = saved ? Number(saved) : 1;
     // this.loadRequests();
       // this.loadAcceptedCustomers();
+
+ // this.distributorId = localStorage.getItem('distributorId') || '';
+
+  // Load lead time specific to this distributor
+  //this.expectedDays = Number(localStorage.getItem(`leadTime_${this.distributorId}`)) || 1;
+
+
+this.distributorId = localStorage.getItem('distributorId') || '';
+
+  // Load only ONCE when component is created
+  const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
+  this.expectedDays = stored ? Number(stored) : 1;
+      
   }
+
+
+  
+saveLeadTime() {
+  localStorage.setItem(`leadTime_${this.distributorId}`, this.leadTime.toString());
+  alert("Delivery lead time saved!");
+}
+
+saveExpectedDayss() {
+  localStorage.setItem(`leadTime_${this.distributorId}`, this.expectedDays.toString());
+  alert("Expected delivery days saved!");
+}
+
+
+
+
+
+//   saveExpectedDays() {
+//   localStorage.setItem("expectedDays", this.expectedDays.toString());
+//   console.log("Expected Days saved:", this.expectedDays);
+// }
 
 //   loadRequests() {
 //     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
@@ -154,4 +196,17 @@ currentDate: Date = new Date();
     this.auth.logout();
     window.location.href = "/distributor-login";
   }
+
+
+  onExpectedDate() {
+    if (!this.orderedDate) return;
+    const date = new Date(this.orderedDate);
+    date.setDate(date.getDate() + 1);
+    this.expectedDate = date.toISOString().split('T')[0];
+  }
+
+  onOrderedDate() {
+  console.log("Ordered Date button clicked");
+  }
+
 }

@@ -14,6 +14,8 @@ export interface Product {
  
  : string;
   price: number;
+  OrderedDate:Date;
+  ExpectedDeliveryDate:Date;
   costPrice: number;
   discount: number;
   gst: number;
@@ -25,7 +27,7 @@ export interface Product {
   createdBy?: string;
   updatedBy?: string;
   brand?: string;
-  imageUrls?: string;
+  imageUrls: string[]; 
     distributorId?: string;
     distributorName?: string; // Add this
 

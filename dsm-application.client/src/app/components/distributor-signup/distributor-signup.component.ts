@@ -67,7 +67,7 @@ export class DistributorSignupComponent {
     next: (res: any) => {
       this.message = res?.message || "Signup successful";
       this.error = "";
-      setTimeout(() => this.router.navigate(['/distributor-login']), 1500);
+      setTimeout(() => this.router.navigate(['/distributor-login']), 0);
     },
     error: (err) => {
       this.error = err.error?.message || 'Signup failed';

@@ -85,14 +85,27 @@ namespace DSM_Application.Server.Controllers
 
             var orderProducts = new List<OrderProduct>();
 
+            int leadTime = 1; // fallback default
+            bool leadTimeCaptured = false;
+
             foreach (var p in dto.Products)
             {
                 var product = await _products.Find(x => x.ProductId == p.ProductId).FirstOrDefaultAsync();
                 if (product == null)
                     return NotFound($"Product not found: {p.ProductId}");
 
+
+                // Capture lead time from product (only once)
+                if (!leadTimeCaptured)
+                {
+                    leadTime = product.LeadTimeDays ?? 1;
+                    leadTimeCaptured = true;
+                }
+
                 decimal unitPrice = product.Price;
                 decimal subtotal = unitPrice * p.Quantity;
+
+
 
                 var calc = _discountService.Calculate(p.Quantity, subtotal, dto.SpecialDiscountPercent);
 
@@ -100,6 +113,7 @@ namespace DSM_Application.Server.Controllers
                 {
                     ProductId = p.ProductId,
                     ProductName = product.ProductName,
+                    DistributorId = product.DistributorId,
                     Price = unitPrice,
                     Quantity = p.Quantity,
                     QuantityDiscountPercent = calc.qtyPct,
@@ -148,14 +162,26 @@ namespace DSM_Application.Server.Controllers
             // BUILD ORDER OBJECT
             // -----------------------------------------------------
 
+            var now = DateTime.UtcNow;
+
+            // If frontend provided expected delivery, prefer it. Otherwise compute from leadTime
+            DateTime expectedDelivery;
+            if (dto.ExpectedDelivery.HasValue)
+            {
+                expectedDelivery = dto.ExpectedDelivery.Value;
+            }
+            else
+            {
+                expectedDelivery = now.AddDays(leadTime);
+            }
+
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
-
-                // 🆕 NEW FIELDS (Correct syntax)
                 OrderedDate = DateTime.UtcNow,
-                ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
+               // ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
+                ExpectedDeliveryDate = expectedDelivery,   // ✅ CORRECT
 
                 Products = orderProducts,
                 Subtotal = totalSubtotal,
@@ -204,6 +230,10 @@ namespace DSM_Application.Server.Controllers
                 CustomerId = o.CustomerId,
 
                 Products = o.Products,
+                OrderedDate = o.OrderedDate,
+                ExpectedDeliveryDate = o.ExpectedDeliveryDate,
+                DistributorId = o.DistributorId,
+
 
                 // ✅ Discount totals
                 Subtotal = o.Subtotal,
@@ -216,7 +246,6 @@ namespace DSM_Application.Server.Controllers
                 PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
                 TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
 
-                OrderedDate = o.OrderedDate,
                 Status = o.Status,
                 EmployeeId = o.EmployeeId,
                 Name = o.Name
@@ -403,6 +432,8 @@ namespace DSM_Application.Server.Controllers
             {
                 Id = order.Id,
                 CustomerId = order.CustomerId,
+                DistributorId = order.DistributorId,
+
                 CustomerName = customer?.Name,
                 CustomerEmail = customer?.Email,
                 CustomerPhone = customer?.PhoneNumber,
@@ -421,6 +452,8 @@ namespace DSM_Application.Server.Controllers
                 TotalDiscountPercent = order.Products.First().TotalDiscountPercent,
 
                 OrderedDate = order.OrderedDate,
+                ExpectedDeliveryDate = order.ExpectedDeliveryDate,
+
                 Status = order.Status,
                 EmployeeId = order.EmployeeId,
                 Name = order.Name,

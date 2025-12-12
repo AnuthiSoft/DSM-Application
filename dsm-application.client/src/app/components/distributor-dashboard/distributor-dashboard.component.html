@@ -166,6 +166,12 @@
              (click)="setActiveTab('connection-requests'); closeMobileMenu()">
           <span>Connection Requests</span>
         </div>
+
+         <div class="submenu-item" [class.active]="isActive('settings')" 
+             (click)="setActiveTab('settings'); closeMobileMenu()">
+          <span>Dsitributor Settings</span>
+        </div>
+
         <div class="submenu-item" [class.active]="isActive('test-page')" 
              (click)="setActiveTab('test-page'); closeMobileMenu()">
           <span>Test Page</span>
@@ -174,6 +180,7 @@
              (click)="setActiveTab('reports'); closeMobileMenu()">
           <span>Reports</span>
         </div>
+       
         <div class="submenu-item logout-item" (click)="logout(); closeMobileMenu()">
           <span>Logout</span>
         </div>
@@ -236,6 +243,41 @@
         </div>
       </div>
     </div>
+
+
+
+    <!-- Settings Tab -->
+<!-- Settings Tab -->
+<div class="settings-tab active" *ngIf="isActive('settings')"  >
+
+  <h2 class="page-title">Distributor Settings</h2>
+
+  <div class="settings-wrapper">
+
+    <div class="settings-card">
+
+      <h3 class="section-title">Delivery Settings</h3>
+
+      <div class="form-group">
+        <label>Expected Delivery Days *</label>
+        <input
+  type="number"
+  [(ngModel)]="expectedDays"
+  min="1"
+/>
+
+      </div>
+
+     <button class="save-btn" (click)="saveExpectedDayss()">
+  Save
+</button>
+
+    </div>
+
+  </div>
+</div>
+
+
 
     <!-- Subpage Components -->
     <!-- Inventory -->

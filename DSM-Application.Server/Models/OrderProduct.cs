@@ -12,7 +12,9 @@ namespace DSM_Application.Server.Models
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
 
-            public decimal Subtotal { get; set; }
+        public string DistributorId { get; set; }
+
+        public decimal Subtotal { get; set; }
 
             public decimal SpecialDiscountPercent { get; set; }
             public decimal QuantityDiscountPercent { get; set; }

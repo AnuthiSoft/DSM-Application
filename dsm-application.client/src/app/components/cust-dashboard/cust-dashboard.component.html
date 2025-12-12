@@ -125,6 +125,17 @@
   <i class="fas fa-star"></i> Review
 </button>
 
+
+<button class="btn-view-products mt-2"
+        *ngIf="d.status === 'Accepted' || !d.canConnect"
+        (click)="openProducts(d.distributorId)">
+  <i class="fas fa-box"></i> View Products
+</button>
+
+
+
+
+
         </div>
       </div>
     </div>

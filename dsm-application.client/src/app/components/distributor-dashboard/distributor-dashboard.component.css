@@ -263,151 +263,96 @@ html, body {
             display: none;
         }
 
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Charts Grid */
-    .charts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-        .chart-card {
-            min-height: 300px;
-        }
-
-        .chart-container {
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(0, 0, 0, 0.03);
-            border-radius: 8px;
-        }
-
-        /* Mobile Menu Toggle */
-   .mobile-menu-toggle {
-  display: none;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  z-index: 1100;
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px;
-}
-
-        /* Mobile Overlay */
-     
-.mobile-overlay {
-  display: none;
-}
-.mobile-overlay.active {
+.tab-content.active {
   display: block;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 999;
 }
-        /* Mobile Menu Toggle */
-.mobile-menu-toggle {
-  display: none;
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  /* z-index: 1100; */
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 12px;
+
+
+/* PAGE TITLE */
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-color);
+}
+
+/* Left aligned wrapper like profile page */
+.settings-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* CLEAN FORM — NO background, no border */
+.settings-card {
+  padding: 10px 0;
+  width: 450px;
+}
+
+/* Section title */
+.section-title {
   font-size: 1.2rem;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-   z-index: 3000 !important;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: var(--text-color);
 }
 
-/* Mobile Overlay */
-.mobile-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  /* z-index: 999; */
-   z-index: 1500 !important;
+/* Form styling (simple & clean) */
+.settings-card .form-group {
+  margin-bottom: 18px;
 }
 
-.mobile-overlay.active {
+.settings-card .form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
   display: block;
-}
-/* FIX: Full page dark theme background */
-html, body {
-  background-color: var(--bg-color) !important;
+  color: var(--text-color);
 }
 
-.body {
-  background-color: var(--bg-color) !important;
+.settings-card .form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;        /* ⭐ no background */
+  font-size: 15px;
+  color: var(--text-color);
 }
 
-.dashboard-main {
-  background-color: var(--bg-color) !important;
-  min-height: 100vh;
+.settings-card .form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 4px rgba(52,152,219,0.3);
 }
-@media (max-width: 1024px) {
-  .dashboard-sidebar {
-    width: 200px;
-  }
-  .dashboard-main {
-    margin-left: 200px;
-  }
+
+/* Small boxed Save button */
+.settings-card .save-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 6px 14px;     /* small button */
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: auto;           /* not full width */
+  display: inline-block; /* keeps it small */
+  margin-top: 8px;
+  transition: 0.2s ease;
 }
+
+.settings-card .save-btn:hover {
+  background: #2777c7;
+}
+
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
-
-  .mobile-menu-toggle {
-    display: block;
-     z-index: 3000 !important;
-  }
-
-  .dashboard-sidebar {
-    width: 250px;
-    transform: translateX(-100%);
-     z-index: 2000 !important;
-  }
-
-  .dashboard-sidebar.mobile-open {
-    transform: translateX(0);
-  }
-
-  .dashboard-main {
-    margin-left: 0;
-    padding: 80px 20px 20px;
-  }
-
-  /* Grid auto wrap */
-  .stats-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-
-  .charts-grid {
-    grid-template-columns: 1fr;
+  .settings-card {
+    width: 100%;
   }
 }
-@media (max-width: 480px) {
-  .dashboard-main {
-    padding: 90px 15px 20px;
-  }
 
-  .stat-card {
-    text-align: center;
-  }
-}
 
 /* Responsive Design */
 @media (max-width: 992px) {

@@ -10,7 +10,7 @@
 }
 
 .welcome-header h2 {
-  color: #2c3e50;
+color: var(--text-color);
   margin: 0;
 }
 
@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  color: #7f8c8d;
+ color: var(--text-color);
   font-size: 1.1rem;
 }
 
@@ -31,18 +31,18 @@
 .no-orders {
   text-align: center;
   padding: 60px 20px;
-  color: #7f8c8d;
+ color: var(--border-color);
 }
 
 .no-orders i {
   font-size: 4rem;
   margin-bottom: 20px;
-  color: #bdc3c7;
+ color: var(--border-color);
 }
 
 .no-orders h3 {
   margin: 0 0 15px;
-  color: #2c3e50;
+  color: var(--border-color);
   font-size: 1.5rem;
 }
 
@@ -60,10 +60,11 @@
 }
 
 .stat-card {
-  background: white;
+ background: var(--card-bg);
+  box-shadow: var(--shadow);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -71,7 +72,7 @@
 }
 
 .stat-icon {
-  background-color: #3498db;
+ background-color: var(--primary-color);
   color: white;
   width: 50px;
   height: 50px;
@@ -86,12 +87,13 @@
 .stat-value {
   font-size: 2rem;
   font-weight: bold;
-  color: #2c3e50;
+  color: var(--text-color);
   margin-bottom: 5px;
 }
 
 .stat-label {
-  color: #7f8c8d;
+ color: var(--text-color);
+  opacity: 0.7;
   font-size: 0.9rem;
 }
 
@@ -102,12 +104,13 @@
   gap: 20px;
 }
 
+
 .order-card {
-  background: white;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--primary-color);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  border-left: 4px solid #3498db;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
@@ -122,17 +125,21 @@
   align-items: flex-start;
   margin-bottom: 15px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #ecf0f1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-items{
+   color: var(--text-color);
 }
 
 .order-title h4 {
   margin: 0 0 5px;
-  color: #2c3e50;
+   color: var(--text-color);
   font-size: 1.2rem;
 }
 
 .order-date {
-  color: #7f8c8d;
+   color: var(--text-color);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -197,17 +204,18 @@
 }
 
 .detail-label {
-  color: #7f8c8d;
+  color: var(--text-color);
+  opacity: 0.7;
   font-weight: 500;
 }
 
 .detail-value {
-  color: #2c3e50;
+   color: var(--text-color);
   font-weight: 500;
 }
 
 .detail-value.amount {
-  color: #e74c3c;
+  color: var(--accent-color);
   font-weight: bold;
   font-size: 1.1rem;
 }
@@ -230,7 +238,7 @@
 
 .order-items h5 {
   margin: 0 0 10px;
-  color: #2c3e50;
+ color: var(--text-color);
   display: flex;
   align-items: center;
 }
@@ -251,9 +259,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  background: #f8f9fa;
+   background: var(--section-bg-light);
+  border-left: 3px solid var(--primary-color);
   border-radius: 4px;
-  border-left: 3px solid #3498db;
 }
 
 .item-info {
@@ -263,24 +271,24 @@
 
 .item-name {
   font-weight: 500;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 .item-quantity {
   font-size: 0.8rem;
-  color: #7f8c8d;
+   color: var(--text-color);
 }
 
 .item-price {
   font-weight: bold;
-  color: #e74c3c;
+  color: var(--accent-color);
 }
 
 .order-footer {
   display: flex;
   gap: 10px;
   padding-top: 15px;
-  border-top: 1px solid #ecf0f1;
+  border-top: 1px solid var(--border-color);
 }
 
 /* Buttons */
@@ -303,8 +311,8 @@
 }
 
 .btn-primary {
-  background-color: #3498db;
-  color: white;
+ background-color: var(--primary-color);
+  color: var(--white-bg);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -314,8 +322,8 @@
 
 .btn-outline-primary {
   background-color: transparent;
-  color: #3498db;
-  border: 1px solid #3498db;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
 }
 
 .btn-outline-primary:hover {
@@ -326,8 +334,8 @@
 
 .btn-outline-secondary {
   background-color: transparent;
-  color: #7f8c8d;
-  border: 1px solid #bdc3c7;
+   color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 
 .btn-outline-secondary:hover {

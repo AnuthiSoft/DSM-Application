@@ -66,6 +66,13 @@ getCustomerId(): string {
     return this.api.put(`customers/update-customer/${customerId}`, customer);
   }
 
+
+  getCustomerById(customerId: string) {
+  return this.http.get<any>(`http://localhost:5164/api/customers/get-customer/${customerId}`);
+}
+
+
+
   deleteCustomer(customerId: string): Observable<any> {
     return this.api.delete(`customers/delete-customer/${customerId}`);
   }
@@ -78,6 +85,10 @@ getCustomerId(): string {
     const headers = { Authorization: `Bearer ${token}` };
     return this.api.get<CustomerProfileDto>(`customers/profile`, { headers });
   }
+
+
+
+  
 
   /** UPDATE PROFILE (PUT /customers/profile) */
   updateProfile(data: CustomerProfileDto): Observable<any> {

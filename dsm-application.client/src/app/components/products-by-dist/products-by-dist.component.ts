@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {  ProductService } from '../../services/product.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Product } from '../../models/products.model';
 import { environment } from '../../../environments/environment.prod';
@@ -44,6 +44,9 @@ export class ProductsByDistComponent implements OnInit {
 
   filterProducts: Product[] = [];
 
+  distributorFilter: string = '';
+distributors: string[] = [];
+
   
  
   @Output() addToCartClicked = new EventEmitter<Product>();
@@ -55,7 +58,8 @@ export class ProductsByDistComponent implements OnInit {
      private route: ActivatedRoute,
       private productService: ProductService,
       private fb: FormBuilder,
-      private orderService: OrderService
+      private orderService: OrderService,
+      private router: Router
     ) {
       // Build product form
       this.productForm = this.fb.group({
@@ -72,10 +76,17 @@ export class ProductsByDistComponent implements OnInit {
         stock: [0, [Validators.min(0)]],
         reorderLevel: [0, [Validators.min(0)]],
         brand: [''],
-        imageUrl: [''],
+        imageUrls: [''],
       });
     }
   ngOnInit(): void {
+
+  
+
+this.extractDistributors();
+
+
+    this.customerId = localStorage.getItem('CustomerId') || '';
 
   // ✅ Load existing cart from localStorage
   const savedCart = localStorage.getItem('cart');
@@ -93,7 +104,38 @@ export class ProductsByDistComponent implements OnInit {
     this.distributorId = this.route.snapshot.paramMap.get('distributorId')!;
     this.loadProducts();
   }
+
+  
 }
+
+
+extractDistributors() {
+  this.distributors = Array.from(
+    new Set(
+      this.products
+        .map(p => p.distributorName)
+        .filter(d => !!d) as string[]      // 👈 force cast
+    )
+  );
+}
+
+
+
+onDistributorChange(distributor: string) {
+  
+  this.distributorFilter = distributor;
+
+  if (!distributor || distributor.trim() === '') {
+    this.filterProducts = [...this.products];
+    return;
+  }
+
+  // Filter locally
+  this.filterProducts = this.products.filter(
+    p => p.distributorName?.toLowerCase() === distributor.toLowerCase()
+  );
+}
+
 
 
   // call this when you want to fetch products 
@@ -103,6 +145,19 @@ export class ProductsByDistComponent implements OnInit {
 
     this.productService.getProductsByDistributor(this.distributorId).subscribe({
       next: (data: Product[]) => {
+
+
+        // 🔥 Normalize imageUrls so template never breaks
+      data = data.map(p => ({
+        ...p,
+        imageUrls: Array.isArray(p.imageUrls)
+          ? p.imageUrls
+          : p.imageUrls
+          ? [p.imageUrls]  // convert string → array
+          : []             // no images
+      }));
+
+
         this.products = data;
         this.filterProducts = data;
         this.extractCategories();
@@ -116,21 +171,70 @@ export class ProductsByDistComponent implements OnInit {
   }
 
 
-   openAddToCart(product: Product) {
-    this.addToCartClicked.emit(product);this.selectedProduct = product; this.selectedQuantity = 1;
+ getImageUrl(imageUrls: string[] | string | null | undefined): string {
+  if (!imageUrls) return 'assets/no-image.png';
+
+  if (typeof imageUrls === 'string') {
+    return this.apiBaseUrl + imageUrls;
   }
 
+  if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+    return this.apiBaseUrl + imageUrls[0];
+  }
+
+  return 'assets/no-image.png';
+}
 
 
 
+  openAddToCart(product: Product) {
+  this.addToCartClicked.emit(product);
 
-  // 🛒 When user clicks Add to Cart
-   openAddToCartPopup(product: Product) { this.selectedProduct = product; this.selectedQuantity = 1; this.showPopup = true; } 
-   // ➕ Increase quantity 
-   increaseQty() { if (this.selectedProduct && this.selectedQuantity < (this.selectedProduct.stock || 1)) this.selectedQuantity++; } 
-   // ➖ Decrease quantity
-    decreaseQty() { if (this.selectedQuantity > 1) this.selectedQuantity--; }
 
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+  // Check if product exists
+  const existing = cart.find((c: any) => c.product.productId === product.productId);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ product, quantity: 1 });
+  }
+
+  // Save updated cart
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+   localStorage.setItem("selectedProduct", JSON.stringify(product));
+
+  // Navigate to Add-to-Cart page
+ this.router.navigate(['/customer/add-to-cart']);
+}
+
+
+AddtoCart(product: Product) {
+
+  // Load existing cart
+  let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+  // Check if product exists
+  const existing = cart.find((c: any) => c.product.productId === product.productId);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ product, quantity: 1 });
+  }
+
+  // Save updated cart
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+  // Navigate to Add-to-Cart page
+   this.router.navigate(['/customer/add-to-cart']);
+}
+
+
+  
   extractCategories() {
   this.categories = Array.from(
     new Set(
@@ -299,6 +403,8 @@ export class ProductsByDistComponent implements OnInit {
   // }
     // ✅ Confirm add to cart
   confirmAddToCart() {
+
+    
   if (!this.selectedProduct) return;
 
   const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
@@ -311,7 +417,7 @@ export class ProductsByDistComponent implements OnInit {
       quantity: this.selectedQuantity
     });
   }
-
+console.log("Add to cart clicked");
   // ✅ save updated cart
   localStorage.setItem('cart', JSON.stringify(this.cart));
 

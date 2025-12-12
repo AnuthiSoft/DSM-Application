@@ -1,5 +1,6 @@
 
 <div class="body">
+  
   <!-- Sidebar Navigation -->
   <div class="dashboard-sidebar">
     <div class="sidebar-header">
@@ -54,6 +55,7 @@
 
   <!-- Main Content -->
   <div class="dashboard-main">
+    
     <!-- Dashboard Tab -->
     <div class="tab-content active" *ngIf="isActive('dashboard')">
       <div class="welcome-header">
@@ -109,23 +111,62 @@
       </div> 
 
    
-      <app-cust-dashboard *ngIf="activeTab === 'distributors'"></app-cust-dashboard>
+     <app-cust-dashboard
+  *ngIf="activeTab === 'distributors'"
+  (viewProductsClicked)="openProductsForDistributor($event)">
+</app-cust-dashboard>
+
+
+<div *ngIf="activeTab === 'products'">
+
+ <div *ngIf="activeTab === 'products'" class="products-wrapper">
+
+  <ng-container *ngIf="products.length > 0; else noProductsYet">
+    <app-products-by-dist
+      [products]="products"
+      [distributorId]="distributorId"
+      [customerId]="customerId"
+      (addToCartClicked)="onAddToCart($event)">
+    </app-products-by-dist>
+  </ng-container>
+
+  <ng-template #noProductsYet>
+    <div class="empty-products">
+      <h3>No products to display</h3>
+      <p>Please select products from the Distributors tab.</p>
+    </div>
+  </ng-template>
+
+</div>
+
+</div>
 
       
+
+
+<!-- 
 <app-products-by-dist
   *ngIf="activeTab === 'products'"
   [products]="products"
+  [distributorId]="distributorId"
+  [customerId]="customerId"
   (addToCartClicked)="onAddToCart($event)">
-</app-products-by-dist>
+  
+</app-products-by-dist> -->
+
 
 <!-- Add-to-Cart Tab -->
 <app-add-to-cart
   *ngIf="activeTab === 'cart'"
-  [customerId]="customerId"
- [distributorId]="distributorId"
-
+  [distributorId]="distributorId"
+  [products]="products"
+  (goToProductsClicked)="switchToProducts()"
   [selectedProduct]="selectedCartProduct">
 </app-add-to-cart>
+
+
+
+
     <!-- Orders Tab -->
     
       <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>

@@ -1,13 +1,16 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
-import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
- 
+import { OrderService } from '../../services/order.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
+
+
+
 interface Distributor {
   distributorId: string;
   companyName: string;
@@ -75,6 +78,15 @@ export class CustomerDashboardComponent {
   distributorId: string = '';
   products: Product[] = [];
 
+  expectedDays: number = 1;
+
+orderedDate: string = '';
+  expectedDate: string = '';
+   productForm: FormGroup;
+  @Input() selectedProduct: Product | null = null;
+@Output() cartUpdated = new EventEmitter<any[]>();
+cart: any[] = [];
+
   activeTab: string = 'dashboard';
   currentDate: Date = new Date();
 orderStats: { total: number } = { total: 0 };
@@ -89,12 +101,36 @@ productsLoading: boolean = true;
   selectedCartProduct: Product | null = null;
   customerId = localStorage.getItem('customerId') ?? '';
 
-  constructor(private customerService: CustomerService, private router: Router, private http: HttpClient, private productservice: ProductService) { }
+  constructor(private customerService: CustomerService,  private route: ActivatedRoute,
+      private fb: FormBuilder,
+      private productService: ProductService,
+      private orderService: OrderService,
+   private router: Router, private http: HttpClient, private productservice: ProductService)  {
+      this.productForm = this.fb.group({
+        productName: [''],
+        productCode: [''],
+        color: [''],
+        category: [''],
+        description: [''],
+        unit: [''],
+        price: [0],
+        costPrice: [0],
+        discount: [0],
+        gst: [0],
+        stock: [0],
+        reorderLevel: [0],
+        brand: [''],
+        imageUrls: [''],
+        distributorName:['']
+      });
+    }
 
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
     this.customerId = localStorage.getItem('customerId') || '';
     this.distributorId = localStorage.getItem('distributorId') || '';
+
+
 
 
     if (!this.customerId) {
@@ -116,7 +152,30 @@ productsLoading: boolean = true;
 
 
   }
+
+
+
+ getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
+  if (!orderDate || !distributorId) return '';
+
+  const lead = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+
+  const date = new Date(orderDate);
+  date.setDate(date.getDate() + lead);
+
+  return date.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
+
  loadDashboard() {
+
+  
+
+
+    this.recentOrders = this.recentOrders.map(o => ({
+  ...o,
+  distributorId: o.distributorId || this.distributorId
+}));
   this.loading = true;
   this.http
     .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
@@ -125,17 +184,10 @@ productsLoading: boolean = true;
         this.dashboardData = data;
         this.loading = false;
 
-        // ✅ If non-global customer, load products directly
-        if (!data.isGlobal && data.products) {
-          this.products = data.products;
-        }
+       // ❌ DO NOT load products automatically
+// Products should load ONLY after clicking View Products
+this.products = [];
 
-        // ✅ If global customer, gather products from each distributor
-        else if (data.isGlobal && data.distributors?.length) {
-          this.products = data.distributors.flatMap(d => d.products || []);
-        }
-
-        console.log('Loaded products:', this.products);
       },
       error: (err) => {
         // console.error('Error loading dashboard', err);
@@ -147,7 +199,24 @@ productsLoading: boolean = true;
           });
         }
       });
+
+
+    
+
+
   }
+
+
+
+
+//   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
+//   const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+
+//   const date = new Date(orderDate);
+//   date.setDate(date.getDate() + leadTime);
+
+//   return date.toDateString();  // or format as you like
+// }
   connectDistributor(distributor: Distributor) {
     Swal.fire({
       title: 'Are you sure?',
@@ -188,14 +257,52 @@ productsLoading: boolean = true;
         });
     });
   }
-  viewProducts(distributorId: string) {
-    this.router.navigate(['/products', distributorId]);
-  }
+  viewProducts(distributor: any) {
+
+    
+  localStorage.setItem("distributorId", distributor.distributorId);
+  this.router.navigate(['/products', distributor.distributorId]);
+}
+
+
+openProductsForDistributor(distributorId: string) {
+
+  this.distributorId = distributorId;   // store selected distributor
+
+   localStorage.setItem("distributorId", distributorId);
+
+  // 🔥 Filter products belonging ONLY to this distributor
+  this.products = this.dashboardData.distributors
+    .find(d => d.distributor.distributorId === distributorId)
+    ?.products || [];
+
+  this.activeTab = 'products'; // switch tab
+}
+
+
+
+
+ 
+
+  // setActiveTab(tab: string) {
+  //   this.activeTab = tab;
+  // }
 
   onAddToCart(product: Product) {
     this.selectedCartProduct = product;   // store selected product
     this.activeTab = 'cart';              // switch to Add-to-Cart tab
   }
+  goToProducts(product: Product) {
+    this.selectedCartProduct = product;   // store selected product
+    this.activeTab = 'cart';              // switch to Add-to-Cart tab
+  }
+
+
+  updateCart(newCart: any[]) {
+  this.cart = [...newCart];
+  localStorage.setItem('cart', JSON.stringify(this.cart));
+}
+
 
   logout() {
     Swal.fire({
@@ -207,12 +314,16 @@ productsLoading: boolean = true;
       cancelButtonText: 'Cancel'
     }).then(result => {
       if (result.isConfirmed) {
-        localStorage.clear();
-        this.router.navigate(['/customer/login']);
+            this.router.navigate(['/customer/login']);
       }
     });
   }
-    
+ 
+
+  switchToProducts() {
+  this.activeTab = 'products';
+}
+   
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
@@ -230,8 +341,4 @@ productsLoading: boolean = true;
       text: `${product.productName} added successfully!`
     });
   }
-
 }
-
-
-

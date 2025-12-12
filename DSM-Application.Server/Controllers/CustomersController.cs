@@ -1,4 +1,7 @@
-﻿using DistributorManagementSystem.Server.Models;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
@@ -7,9 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -513,6 +514,8 @@ namespace DSM_Application.Server.Controllers
                     TotalDiscountPercent = first?.TotalDiscountPercent ?? 0,
 
                     OrderedDate = o.OrderedDate,
+                    
+                    ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     Status = o.Status,
                     EmployeeId = o.EmployeeId,
                     Name = o.Name,
@@ -734,6 +737,31 @@ namespace DSM_Application.Server.Controllers
                 imageUrl
             });
         }
+
+
+        [HttpGet("get-customer/{customerId}")]
+        public async Task<IActionResult> GetCustomerById(string customerId)
+        {
+            var customer = await _customersCollection
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            return Ok(new
+            {
+                
+                role = customer.Role,
+                customerId = customer.CustomerId,
+                name = customer.Name,
+                email = customer.Email,
+                phoneNumber = customer.PhoneNumber
+            });
+        }
+
+
+
 
         [HttpGet("connected/{customerId}")]
         public async Task<IActionResult> GetConnectedDistributors(string customerId)

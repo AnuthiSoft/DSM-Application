@@ -45,14 +45,22 @@
             Phone Number
           </label>
           <input 
-            type="text" 
-            class="form-control"
-            placeholder="Enter your phone number" 
-            [(ngModel)]="request.phoneNumber" 
-            name="phoneNumber" 
-          />
-          <div class="form-hint">Optional - for order updates and support</div>
-        </div>
+  type="text" 
+  class="form-control"
+  placeholder="Enter your phone number" 
+  [(ngModel)]="request.phoneNumber" 
+  name="phoneNumber"
+  maxlength="10"
+  (input)="allowOnlyNumbers($event)"
+/>
+
+          <div class="form-hint">Must be a 10-digit mobile number</div>
+
+  <!-- ❌ Error message for wrong phone number -->
+  <p *ngIf="request.phoneNumber && !isPhoneValid()" class="text-danger">
+    Phone number must be exactly 10 digits.
+  </p>
+</div>
 
         <div class="form-group">
           <label class="form-label">

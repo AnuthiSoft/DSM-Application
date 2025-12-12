@@ -122,23 +122,25 @@
   text-align: center;
 }
 
-.order-status.assigned, .order-status.shipped {
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
+.order-status.assigned,
+.order-status.shipped {
+  background: var(--warning-color);
+  color: var(--white-bg);
+  border: 1px solid var(--warning-color);
 }
 
 .order-status.delivered {
-  background-color: #d1f7e4;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: var(--success-color);
+  color: var(--white-bg);
+  border: 1px solid var(--success-color);
 }
 
 .order-status.pending {
-  background-color: #cce7ff;
-  color: #004085;
-  border: 1px solid #b3d7ff;
+  background: var(--primary-color);
+  color: var(--white-bg);
+  border: 1px solid var(--primary-color);
 }
+
 
 .deliver-btn {
   display: flex;
@@ -278,9 +280,96 @@
 }
 
 .product-total {
-  color: #27ae60;
-  font-weight: 600;
+  color: var(--success-color);
 }
+
+
+
+/* ================================
+   🌙 DARK THEME — TABLE FIX
+================================ */
+
+/* Table Base */
+.table {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Header */
+.table thead {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+}
+
+.table thead th {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Body Rows */
+.table tbody tr {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+  transition: 0.2s ease;
+}
+
+/* Hover Effect */
+.table tbody tr:hover {
+  background: var(--hover-color) !important;
+}
+
+/* Table Cells */
+.table td, 
+.table th {
+  border-color: var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* Bordered Table Override */
+.table-bordered {
+  border-color: var(--border-color) !important;
+}
+
+.table-bordered > :not(caption) > * {
+  border-width: 1px !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Small Table Padding Fix */
+.table-sm td, 
+.table-sm th {
+  padding: 6px 8px !important;
+}
+
+
+
+/* ================================
+   🌙 DARK THEME — TABLE BODY CELLS
+================================ */
+
+/* All table body rows */
+.table tbody tr {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Hover effect */
+.table tbody tr:hover {
+  background: var(--hover-color) !important;
+}
+
+/* All table body cells */
+.table tbody td {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+
 
 /* Order Summary */
 .order-summary {
@@ -302,6 +391,7 @@
   margin-top: 8px;
   padding-top: 12px;
   font-size: 1.1rem;
+  
 }
 
 .summary-label {
@@ -315,7 +405,7 @@
 }
 
 .summary-item.total .summary-value {
-  color: #27ae60;
+   color: var(--success-color);
   font-size: 1.2rem;
 }
 
@@ -381,26 +471,26 @@
 }
 
 .btn-outline-secondary {
-  background-color: transparent;
-  color: #7f8c8d;
-  border: 1px solid #bdc3c7;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  background: transparent;
 }
 
 .btn-outline-secondary:hover {
-  background-color: #bdc3c7;
-  color: white;
+  background: var(--hover-color);
+  color: var(--primary-color);
   transform: translateY(-1px);
 }
 
 .btn-outline-warning {
   background-color: transparent;
-  color: #f39c12;
-  border: 1px solid #f39c12;
+   color: var(--warning-color);
+  border: 1px solid var(--warning-color);
 }
 
 .btn-outline-warning:hover {
-  background-color: #f39c12;
-  color: white;
+ background: var(--warning-color);
+  color: var(--white-bg);
   transform: translateY(-1px);
 }
 
@@ -507,7 +597,7 @@
 
 .delivery-confirmation i {
   font-size: 3rem;
-  color: #27ae60;
+  color: var(--success-color);
   margin-bottom: 15px;
 }
 
@@ -602,6 +692,115 @@ textarea.form-control {
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
 }
+
+
+
+/* ================================
+   🌙 DARK THEME FIX FOR DELIVERY PAGE
+================================ */
+
+/* Card Background */
+.card {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+/* Card Header */
+.card-header {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+/* Card Body */
+.card-body {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+/* Links inside card */
+.card-body a {
+  color: var(--primary-color) !important;
+}
+
+/* Status text (instead of text-success hardcode) */
+.text-success {
+  color: var(--success-color) !important;
+}
+
+/* Table Styling */
+.table {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.table thead {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+}
+
+.table-bordered > :not(caption) > * {
+  border-color: var(--border-color) !important;
+}
+
+.table tbody tr:hover {
+  background: var(--hover-color) !important;
+}
+
+/* Alerts (loading & empty states) */
+.alert-info,
+.alert-warning {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Modal */
+.modal-content {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-color) !important;
+}
+
+.form-select,
+.form-control {
+  background: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 4px var(--primary-color) !important;
+}
+
+/* Buttons */
+.btn-secondary {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color) !important;
+}
+
+.btn-success {
+  background: var(--success-color) !important;
+}
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -65,14 +65,18 @@
 
       <!-- Avatar Section -->
       <div class="profile-header">
-        <div class="profile-avatar" (click)="triggerFileInput()">
+        <div class="profile-avatar" >
           <img *ngIf="previewImage" [src]="previewImage" class="avatar-img" />
           <i *ngIf="!previewImage" class="fas fa-user avatar-placeholder"></i>
-          <input type="file"
-             #fileInput
-             accept="image/*"
-             (change)="onFileSelected($event)"
-             style="display: none;" />
+         <!-- ✏️ Instagram-style corner edit button -->
+  <div class="edit-icon" (click)="triggerFileInput()">
+    <i class="fas fa-pencil-alt"></i>
+  </div>
+  <input type="file"
+         #fileInput
+         accept="image/*"
+         (change)="onFileSelected($event)"
+         style="display:none;">
         </div>
 
         <!-- ⭐ Profile Info (Name, Email, Role) -->

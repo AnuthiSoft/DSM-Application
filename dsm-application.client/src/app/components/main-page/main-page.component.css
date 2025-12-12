@@ -192,3 +192,50 @@
             font-size: 0.85rem;
             color: var(--light-color);
         }
+
+        /* Make sure navbar NEVER hides dropdown */
+.navbar {
+    overflow: visible !important;
+}
+
+/* Position dropdown properly and make it visible */
+.navbar .dropdown-menu {
+    display: block;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.25s ease-in-out;
+    z-index: 9999 !important;
+}
+
+/* Show dropdown on hover (desktop) */
+.navbar .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Special fix for CONTACT dropdown so it stays inside screen */
+#contactDropdown + .dropdown-menu {
+    right: 0 !important;
+    left: auto !important;
+    width: 280px !important;   /* Adjust width so it fits perfectly */
+}
+
+/* General dropdown styling */
+.nav-dropdown-menu {
+    width: 300px !important;
+    min-width: 300px !important;
+    max-width: 300px !important;
+}
+
+/* Mobile view fix */
+@media (max-width: 991px) {
+    .navbar .dropdown-menu {
+        position: static !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        display: block !important;
+    }
+}

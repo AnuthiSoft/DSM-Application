@@ -27,6 +27,10 @@
             <!-- Body -->
             <div class="login-body">
               <form (ngSubmit)="onLogin()">
+                <div *ngIf="error" class="alert alert-danger mt-2">
+  {{ error }}
+</div>
+
                 <div class="mb-3">
                  <label for="email" class="form-label">Email or Phone Number</label>
 <input
@@ -37,6 +41,7 @@
   id="email"
   placeholder="Enter your email or phone number"
   required
+  (input)="restrictPhoneInput($event)" 
 />
                 </div>
                 <div class="mb-3">

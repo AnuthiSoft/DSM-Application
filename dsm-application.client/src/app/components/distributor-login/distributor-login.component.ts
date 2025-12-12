@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
+
 
 
 @Component({
@@ -21,52 +21,49 @@ export class DistributorLoginComponent {
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
+  
+restrictPhoneInput(event: any) {
+  const input = event.target.value;
 
-  onLogin(): void {
-    this.auth.login(this.email, this.password).subscribe({
-      next: (res: any) => {
-        const role = this.auth.getRole();
-        localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId
-        localStorage.setItem('EmployeeId', res.employeeId);
-        localStorage.setItem('employeeId', res.employeeId); // ✅ store employeeId
-
-
-
-        if (role === 'Admin') {
-          this.router.navigate(['/admin-dashboard']);
-        } else if (role === 'Distributor') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Successful',
-            text: 'Welcome Distributor',
-            timer: 1000,
-            showConfirmButton: false
-          });
-          setTimeout(() => {
-            this.router.navigate(['/distributor-dashboard']);
-          }, 1000);
-        }
-
-        else if (role === 'Employee') {
-          Swal.fire({
-            icon: 'success',
-            title: 'Login Successful',
-            text: 'Welcome Employee',
-            timer: 1500,
-            showConfirmButton: false
-          });
-          setTimeout(() => {
-            this.router.navigate(['/employee-dashboard']);
-          }, 1000);
-        } 
-        
-        else {
-          this.error = 'Unauthorized role';
-        }
-      },
-      error: err => this.error = err.error || 'Login failed'
-    });
+  // If the input is only numbers → limit to max 10 digits
+  if (/^[0-9]+$/.test(input)) {
+    event.target.value = input.substring(0, 10);
+    this.email = event.target.value;
   }
+}
+
+
+
+    onLogin(): void {
+  this.auth.login(this.email, this.password).subscribe({
+    next: (res: any) => {
+      const role = this.auth.getRole();
+const distributorId = this.auth.getDistributorId();
+localStorage.setItem('distributorId', distributorId);
+      localStorage.setItem('EmployeeId', res.employeeId);
+      localStorage.setItem('employeeId', res.employeeId);
+
+      if (role === 'Admin') {
+        this.router.navigate(['/admin-dashboard']);
+      } else if (role === 'Distributor') {
+        this.router.navigate(['/distributor-dashboard']);
+      } else if (role === 'Employee') {
+        this.router.navigate(['/employee-dashboard']);
+      } else {
+        this.error = 'Unauthorized role';
+      }
+    },
+    error: err => {
+      if (err.status === 401 && err.error === 'Distributor Inactive') {
+        this.error = 'Your distributor account is inactive. Please contact admin.';
+      } 
+      else {
+        this.error = err.error || 'Login failed';
+      }
+    }
+  });
+}
+
 }
 
 

@@ -98,9 +98,15 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Date:</span>
-              <span class="detail-value">{{ order.orderDate | date:'fullDate' }}</span>
-            </div>
+  <span class="detail-label">Expected Delivery:</span>
+<span class="detail-value">{{ order.expectedDeliveryDate | date:'mediumDate' }}</span>
+</div>
+<!-- <div class="detail-item">
+  <span class="detail-label">Order Date:</span>
+  <span class="detail-value">
+    {{ order.orderedDate | date:'medium' }}
+  </span>
+</div> -->
 
             <div class="detail-item">
               <span class="detail-label">Status:</span>

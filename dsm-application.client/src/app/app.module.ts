@@ -45,6 +45,18 @@ import { AdminReviewListComponent } from './components/admin-review-list/admin-r
 
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
+import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
+import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
+import { PaymentSummaryComponent } from './components/payment-summary/payment-summary.component';
+import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
+import { CustomerPaymentStatusComponent } from './components/customer-payment-status/customer-payment-status.component';
+import { PaymentReportComponent } from './components/payment-report/payment-report.component';
+import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
+import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
+
+
+
+
 
 
 
@@ -91,6 +103,16 @@ import { AdminReviewHistoryComponent } from './components/admin-review-history/a
        
                    FraudHistoryComponent,
                    AdminReviewHistoryComponent,
+                   CashCollectionComponent,
+                   CashSummaryComponent,
+                   PaymentSummaryComponent,
+                   CollectorReportsComponent,
+                   CustomerPaymentStatusComponent,
+                   PaymentReportComponent,
+                   PendingPaymentsComponent,
+                   PendingHandoversComponent,
+                 
+                
           
       // AdminDistributorsComponent
    

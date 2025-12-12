@@ -1,0 +1,495 @@
+/* Cash Summary Styles - Matching Dashboard Theme */
+.section-header {
+  margin: 20px 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header h4 i {
+  color: var(--primary-color);
+}
+
+/* Summary Controls */
+.summary-controls {
+  margin-bottom: 30px;
+}
+
+.summary-controls .form-group {
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.summary-controls label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-controls label i {
+  color: var(--primary-color);
+  width: 16px;
+}
+
+.date-input-container {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.date-input-container i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-color);
+  z-index: 1;
+}
+
+.date-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  transition: all 0.3s;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.load-btn {
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.load-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+/* Summary Totals */
+.summary-totals-card {
+  background: var(--hover-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.total-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s;
+}
+
+.total-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.total-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.cash-icon {
+  background: rgba(52, 152, 219, 0.1);
+  color: var(--primary-color);
+}
+
+.online-icon {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success-color);
+}
+
+.scanner-icon {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--warning-color);
+}
+
+.total-icon {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8e44ad;
+}
+
+.total-content {
+  flex: 1;
+}
+
+.total-label {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.total-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.total-value.highlight {
+  color: var(--accent-color);
+}
+
+.transactions-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.count-badge {
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Transactions Table */
+.transactions-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table thead {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+}
+
+.transactions-table th {
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.transactions-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-row:hover {
+  background-color: var(--hover-color);
+}
+
+.transaction-row:last-child td {
+  border-bottom: none;
+}
+
+/* Table Cell Styles */
+.order-id {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(52, 152, 219, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.customer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.customer-phone {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.amount-badge {
+  background: var(--success-color);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+.date-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.date {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.time {
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+.payment-mode-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-mode-badge.cash {
+  background: rgba(52, 152, 219, 0.1);
+  color: var(--primary-color);
+}
+
+.payment-mode-badge.online {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success-color);
+}
+
+.payment-mode-badge.upi {
+  background: rgba(142, 68, 173, 0.1);
+  color: #8e44ad;
+}
+
+.payment-mode-badge.scanner {
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--warning-color);
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-badge.success {
+  background: rgba(22, 163, 74, 0.1);
+  color: var(--success-color);
+}
+
+/* No Payments Message */
+.no-payments-message {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--hover-color);
+  border-radius: 8px;
+  border: 2px dashed var(--border-color);
+  margin: 20px 0;
+}
+
+.message-content i {
+  font-size: 3rem;
+  color: var(--border-color);
+  margin-bottom: 15px;
+}
+
+.message-content h4 {
+  margin: 10px 0;
+  color: var(--text-color);
+}
+
+.message-content p {
+  color: var(--text-color);
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Quick Actions */
+.quick-actions-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.quick-action-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-color);
+}
+
+.quick-action-btn:hover {
+  background: var(--hover-color);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.quick-action-btn i {
+  font-size: 1.8rem;
+  color: var(--primary-color);
+}
+
+.quick-action-btn span {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .summary-controls .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .date-input-container {
+    min-width: 100%;
+  }
+  
+  .totals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .transactions-table {
+    font-size: 0.85rem;
+  }
+  
+  .transactions-table th,
+  .transactions-table td {
+    padding: 10px 8px;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .totals-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .total-card {
+    padding: 15px;
+  }
+  
+  .total-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .total-value {
+    font-size: 1.2rem;
+  }
+  
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .amount-badge,
+  .payment-mode-badge,
+  .status-badge {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}

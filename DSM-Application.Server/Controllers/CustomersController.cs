@@ -21,12 +21,15 @@ namespace DSM_Application.Server.Controllers
         private readonly JwtService _jwt;
         private readonly ProductService _productService;
         private readonly IMongoCollection<Customer> _customersCollection;
+        private readonly TemporaryAssignmentService _tempService;
 
-        public CustomersController(MongoDbService db, JwtService jwt, ProductService productService)
+
+        public CustomersController(MongoDbService db, JwtService jwt, ProductService productService, TemporaryAssignmentService tempService)
         {
             _db = db;
             _jwt = jwt;
             _productService = productService;
+            _tempService = tempService;
             _customersCollection = db.Customers;
         }
 
@@ -175,19 +178,54 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("my-customers")]
         public async Task<IActionResult> GetCustomersByDistributor()
         {
-            // Get distributor ID from JWT claims
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (distributorId == null)
-                return Unauthorized("Distributor ID not found in token");
+                return Unauthorized("Distributor ID not found");
 
-            // Fetch customers added by this distributor
+            // 1) Load customers created by distributor
             var customers = await _db.Customers
                 .Find(c => c.AddedByDistributorId == distributorId)
                 .ToListAsync();
 
-            return Ok(customers);
-        }
+            var customerIds = customers.Select(c => c.CustomerId).ToList();
 
+            // 2) Load connections for these customers
+            var connections = await _db.Connections
+                .Find(c => customerIds.Contains(c.CustomerId) && c.DistributorId == distributorId)
+                .ToListAsync();
+
+            // 3) Load employees
+            var employeeIds = connections
+                .Where(c => !string.IsNullOrEmpty(c.PermanentEmployeeId))
+                .Select(c => c.PermanentEmployeeId)
+                .ToList();
+
+            var employees = await _db.Employees
+                .Find(e => employeeIds.Contains(e.EmployeeId))
+                .ToListAsync();
+
+            // 4) Attach Permanent Employee Name
+            var result = customers.Select(c =>
+            {
+                var conn = connections.FirstOrDefault(x => x.CustomerId == c.CustomerId);
+                var emp = employees.FirstOrDefault(e => e.EmployeeId == conn?.PermanentEmployeeId);
+
+                return new
+                {
+                    c.CustomerId,
+                    c.Name,
+                    c.Email,
+                    c.PhoneNumber,
+                    c.Address,
+                    c.IsRegistered,
+                    c.IsActive,
+                    PermanentEmployeeId = emp?.EmployeeId,
+                    PermanentEmployeeName = emp?.Name ?? "Not Assigned"
+                };
+            });
+
+            return Ok(result);
+        }
         [HttpPut("update-customer/{customerId}")]
         public async Task<IActionResult> UpdateCustomer(string customerId, [FromBody] Customer updatedCustomer)
         {
@@ -474,7 +512,7 @@ namespace DSM_Application.Server.Controllers
                     PriceDiscountPercent = first?.PriceDiscountPercent ?? 0,
                     TotalDiscountPercent = first?.TotalDiscountPercent ?? 0,
 
-                    OrderDate = o.OrderDate,
+                    OrderedDate = o.OrderedDate,
                     Status = o.Status,
                     EmployeeId = o.EmployeeId,
                     Name = o.Name,
@@ -697,8 +735,6 @@ namespace DSM_Application.Server.Controllers
             });
         }
 
-
-
         [HttpGet("connected/{customerId}")]
         public async Task<IActionResult> GetConnectedDistributors(string customerId)
         {
@@ -728,6 +764,14 @@ namespace DSM_Application.Server.Controllers
             var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
         }
-       
+
+        //[HttpPost("assign-temp")]
+        //public async Task<IActionResult> AssignTemp([FromBody] AssignTempDto dto)
+        //{
+        //    await _tempService.AssignTodayAsync(dto.CustomerId, dto.TemporaryEmployeeId, dto.Date);
+        //    return Ok(new { success = true });
+        //}
+
+
     }
 }

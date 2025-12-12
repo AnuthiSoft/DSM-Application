@@ -212,13 +212,30 @@
               </div>
 
               <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Category</label>
-                  <select class="form-select" formControlName="category">
-                    <option value="">Select Category</option>
-                    <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-                  </select>
-                </div>
+                 <!-- ⭐ MAIN CATEGORY DROPDOWN -->
+  <div class="col-md-6 mb-3">
+    <label class="form-label">Main Category</label>
+   <select class="form-select"
+        formControlName="mainCategory"
+       (change)="onMainCategoryChange($event)">
+  <option value="">Select Main Category</option>
+  <option *ngFor="let mc of mainCategories" [value]="mc.categoryId">
+    {{ mc.name }}
+  </option>
+</select>
+  </div>
+   <div class="col-md-6 mb-3">
+    <label class="form-label">Subcategory</label>
+    <select class="form-select"
+        formControlName="subcategory"
+       (change)="onSubCategoryChange($event)">
+  <option value="">Select Subcategory</option>
+  <option *ngFor="let sc of subCategories" [value]="sc.categoryId">
+    {{ sc.name }}
+  </option>
+</select>
+  </div>
+                
                 <div class="col-md-3 mb-3">
                   <label class="form-label">Brand</label>
                   <input type="text" class="form-control" formControlName="brand" />

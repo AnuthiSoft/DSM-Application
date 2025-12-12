@@ -12,6 +12,8 @@ export interface Customer {
    role: 'Customer';
     company?: string;              // ✅ Add this
   registrationDate?: Date;       // ✅ Add this
+  permanentEmployeeId?: string;      // 🔵 ADD THIS
+  permanentEmployeeName?: string;    // 🔵 ADD THIS
 }
 
 export interface CustomerRegisterRequest {
@@ -60,6 +62,15 @@ export interface CustomerProfileDto {
 
   createdDate?: string;
   updatedDate?: string;
+}
+export interface CustomerEmployeeStatus {
+  permanentEmployeeId: string | null;
+  permanentEmployeeAvailable: boolean;
+
+  temporaryEmployeeId: string | null;
+  temporaryEmployeeAvailable: boolean;
+
+  isTemporaryActiveToday: boolean;
 }
 
 

@@ -35,6 +35,15 @@ import { AdminReviewListComponent } from './components/admin-review-list/admin-r
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
+import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
+import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
+import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
+import { PaymentSummaryComponent } from './components/payment-summary/payment-summary.component';
+import { CustomerPaymentStatusComponent } from './components/customer-payment-status/customer-payment-status.component';
+import { PaymentReportComponent } from './components/payment-report/payment-report.component';
+import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
+import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
+
 
 
 
@@ -85,7 +94,17 @@ const routes: Routes = [
 
             {path:'add-to-cart',component:AddToCartComponent},
             { path: 'employee-profile', component:EmployeeProfileComponent},
-      
+             { path: 'cash-collection', component:CashCollectionComponent},
+              { path: 'cash-summary', component:CashSummaryComponent},
+              { path: 'collector-reports', component:CollectorReportsComponent},
+              { path: ' payment-summary', component:PaymentSummaryComponent},
+              { path: ' customer-payment-status', component:CustomerPaymentStatusComponent},
+
+ { path: 'payment-report', component:PaymentReportComponent},
+ { path: 'pending-payments', component: PendingPaymentsComponent },
+ { path: 'pending-handovers', component: PendingHandoversComponent },
+
+
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

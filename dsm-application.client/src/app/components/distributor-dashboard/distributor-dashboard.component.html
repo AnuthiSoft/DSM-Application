@@ -120,12 +120,25 @@
      *ngIf="isSubmenuOpen('payments')">
         <div class="submenu-item" [class.active]="isActive('payment-status')" 
              (click)="setActiveTab('payment-status'); closeMobileMenu()">
-          <span>Payment Status</span>
+          <span>Payment Reports</span>
         </div>
+            <div class="submenu-item" [class.active]="isActive('pending-handovers')" 
+             (click)="setActiveTab('pending-handovers'); closeMobileMenu()">
+          <span>Pending Handovers</span>
+        </div>
+     <!-- <div class="submenu-item" [class.active]="isActive('payment-summary')" 
+             (click)="setActiveTab('payment-summary'); closeMobileMenu()">
+          <span>Payment Summary</span>
+        </div> -->
+        <div class="submenu-item" [class.active]="isActive('customer-status')" 
+     (click)="setActiveTab('customer-status')">
+  <span>Customer Payment Status</span>
+</div>
         <div class="submenu-item" [class.active]="isActive('payment-notes')" 
              (click)="setActiveTab('payment-notes'); closeMobileMenu()">
           <span>Payment Notes</span>
         </div>
+
       </div>
 
       <!-- Settings -->
@@ -248,8 +261,12 @@
       <app-create-customer-distributor *ngIf="isActive('create-customer')"></app-create-customer-distributor>
 
     <!-- Payments -->
-    <!-- <app-payment-status *ngIf="isActive('payment-status')"></app-payment-status> -->
+    <app-payment-report *ngIf="isActive('payment-status')"></app-payment-report>
     <!-- <app-payment-notes *ngIf="isActive('payment-notes')"></app-payment-notes> -->
+        <app-pending-handovers *ngIf="isActive('pending-handovers')"></app-pending-handovers>
+         <app-customer-payment-status *ngIf="isActive('customer-status')"></app-customer-payment-status>
+        <!-- <app-payment-summary *ngIf="isActive('payment-summary')"></app-payment-summary> -->
+        
 
     <!-- Settings -->
     <!-- <app-company-config *ngIf="isActive('company-config')"></app-company-config> -->

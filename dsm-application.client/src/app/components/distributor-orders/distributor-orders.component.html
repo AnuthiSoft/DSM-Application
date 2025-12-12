@@ -132,25 +132,40 @@
             <td class="employee-name">{{ o.name || 'Not assigned' }}</td>
 
             <td class="order-actions">
-              <div class="action-buttons">
-                <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm action-btn"
-                        (click)="confirmOrder(o)">
-                  <i class="fas fa-check"></i> Confirm
-                </button>
-                <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm action-btn"
-                        (click)="rejectOrder(o)">
-                  <i class="fas fa-times"></i> Reject
-                </button>
-                <button *ngIf="o.status === 'Confirmed'" class="btn btn-primary btn-sm action-btn"
-                        (click)="openAssignModal(o)">
-                  <i class="fas fa-truck"></i> Assign & Ship
-                </button>
-                <button *ngIf="o.status === 'Shipped'" class="btn btn-success btn-sm action-btn"
-                        (click)="markDelivered(o)">
-                  <i class="fas fa-box"></i> Mark Delivered
-                </button>
-              </div>
-            </td>
+  <div class="action-buttons">
+
+    <!-- Pending -->
+    <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm"
+            (click)="confirmOrder(o)">
+      <i class="fas fa-check"></i> Confirm
+    </button>
+
+    <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm"
+            (click)="rejectOrder(o)">
+      <i class="fas fa-times"></i> Reject
+    </button>
+
+    <!-- Confirmed → Assign & Ship -->
+   <button
+  *ngIf="o.status === 'Confirmed'"
+  class="btn btn-primary btn-sm"
+  (click)="openAssignModal(o)">
+  <i class="fas fa-truck"></i> Check & Assign
+</button>
+
+
+    <!-- Shipped → Distributor cannot do anything -->
+    <span *ngIf="o.status === 'Shipped'" class="badge bg-info">
+      Delivery in progress
+    </span>
+
+    <!-- Delivered → Distributor sees final status -->
+    <span *ngIf="o.status === 'Delivered'" class="badge bg-success">
+      Delivered
+    </span>
+
+  </div>
+</td>
 
             <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
               <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
@@ -170,54 +185,110 @@
       <p>There are no orders matching the current filter.</p>
     </div>
   </div>
+  
 </div>
+ 
 
 <!-- ✅ Assign Modal -->
+<!-- Assign Modal -->
 <div *ngIf="selectedOrder" class="modal-overlay">
   <div class="modal-backdrop" (click)="closeAssignModal()"></div>
+ 
 
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3><i class="fas fa-user-tie"></i> Assign Order to Employee</h3>
+      <h3><i class="fas fa-user-tie"></i> Assign Order</h3>
       <button class="modal-close" (click)="closeAssignModal()">
         <i class="fas fa-times"></i>
       </button>
     </div>
 
     <div class="modal-body">
+        <!-- EMPLOYEE AVAILABILITY SECTION -->
+<div class="availability-box mt-3">
+
+  <h5 class="fw-bold">Employee Availability</h5>
+
+  <!-- Permanent Availability -->
+  <p>
+    <strong>Permanent Employee:</strong>
+    <span *ngIf="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
+      <span [style.color]="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ? 'green' : 'red'">
+        {{ employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ?
+        'Available Today' : 'Not Available Today' }}
+      </span>
+      <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
+       style="color:red">
+  Reason: {{ employeeAvailability[selectedOrder.customerId]?.permanentReason }}
+</small>
+    </span>
+    <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
+      <span style="color: gray;">Not Assigned</span>
+    </span>
+  </p>
+
+  <!-- Temporary Availability -->
+  <p>
+    <strong>Temporary Employee (Today):</strong>
+    <span *ngIf="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
+      <span [style.color]="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ? 'green' : 'red'">
+        {{ employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ?
+        'Available Today' : 'Not Available Today' }}
+      </span>
+       <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
+       style="color:red">
+  (Reason: {{ employeeAvailability[selectedOrder.customerId]?.temporaryReason }})
+
+</small>
+   
+    </span>
+    <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
+      <span style="color: gray;">No temporary employee assigned today</span>
+    </span>
+  </p>
+
+</div>
+
+      <!-- ORDER INFO -->
       <div class="order-info">
         <h4>Order #{{ selectedOrder.id }}</h4>
         <p><strong>Customer:</strong> {{ selectedOrder.customerName }}</p>
-
-        <!-- ✅ Fixed to show correct total amount -->
         <p><strong>Total Amount:</strong> {{ totalAmount(selectedOrder) | currency:'INR' }}</p>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">
-          <i class="fas fa-users"></i> Select Employee
+      <!-- ACTIVE EMPLOYEE -->
+      <div class="alert alert-info mt-3">
+        <strong>Active Employee for Today:</strong><br>
+        {{ activeEmployeeName }}
+      </div>
+
+      <!-- TEMPORARY EMPLOYEE DROPDOWN -->
+      <div class="form-group mt-3" *ngIf="showTempDropdown">
+        <label class="form-label fw-bold">
+          <i class="fas fa-user-clock"></i> Assign Temporary Employee (ONLY for today)
         </label>
-        <select *ngIf="employees.length > 0" [(ngModel)]="employeeId" class="form-select">
-          <option value="">-- Select Employee --</option>
+
+        <select class="form-select" [(ngModel)]="tempEmployeeId">
+          <option value="">-- Select Temp Employee --</option>
           <option *ngFor="let e of employees" [value]="e.employeeId">
-            {{ e.name }} (ID: {{ e.employeeId }})
+            {{ e.name }}
           </option>
         </select>
-
-        <div *ngIf="!employees || employees.length === 0" class="no-employees">
-          <i class="fas fa-exclamation-triangle"></i>
-          <p>No employees available for assignment.</p>
-        </div>
       </div>
+
     </div>
 
     <div class="modal-footer">
       <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
-        <i class="fas fa-times"></i> Cancel
+        Cancel
       </button>
-      <button class="btn btn-primary" (click)="assignAndShip()" [disabled]="!employeeId">
-        <i class="fas fa-paper-plane"></i> Assign & Ship
-      </button>
+     <button class="btn btn-primary"
+       [disabled]="false"
+        (click)="assignAndShip()">
+  Assign & Ship
+</button>
     </div>
   </div>
+
+
 </div>

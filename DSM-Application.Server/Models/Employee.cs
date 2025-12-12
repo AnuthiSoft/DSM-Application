@@ -11,15 +11,10 @@ namespace DSM_Application.Server.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
 
-        
-[BsonElement("EmployeeId")]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string? EmployeeId { get; set; }
 
-        [BsonElement("DistributorId")]
-        [BsonRepresentation(BsonType.ObjectId)]
-
-        public string DistributorId { get; set; } = string.Empty;
+        public string DistributorId { get; set; }
+        //public string DistributorId { get; set; } = string.Empty;
 
         [BsonElement("Email")]
         public string Email { get; set; } = string.Empty;

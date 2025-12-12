@@ -1,0 +1,81 @@
+<div class="container">
+
+  <h2>Pending Handovers</h2>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <table *ngIf="!loading && handovers.length > 0" class="handover-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Total Amount</th>
+        <th>Cashier</th>
+        <!-- <th>Remarks</th> -->
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let h of handovers">
+        <td>{{ h.handoverDate | date:'short' }}</td>
+        <td>₹{{ h.totalAmountSubmitted }}</td>
+        <td>{{ h.cashierId }}</td>
+        <!-- <td>{{ h.notes || '—' }}</td> -->
+
+        <td>
+          <button class="btn-approve" (click)="approve(h)">Approve</button>
+          <button class="btn-reject" (click)="reject(h)">Reject</button>
+          <button class="btn-details" (click)="viewDetails(h)">Details</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && handovers.length === 0">
+    <p>No pending handovers.</p>
+  </div>
+
+</div>
+<!-- ================== DETAILS MODAL ================== -->
+<div class="modal-backdrop" *ngIf="showModal"></div>
+
+<div class="details-modal" *ngIf="showModal">
+  <div class="modal-content">
+
+    <h3>Handover Details</h3>
+
+    <p><strong>Date:</strong> {{ selectedDetails?.date }}</p>
+    <p><strong>Cashier:</strong> {{ selectedDetails?.cashierId }}</p>
+    <p><strong>Total Amount:</strong> ₹{{ selectedDetails?.totalAmount }}</p>
+
+    <h4>Breakdown</h4>
+    <ul>
+      <li>Cash: ₹{{ selectedDetails?.cashAmount }}</li>
+      <li>UPI: ₹{{ selectedDetails?.upiAmount}}</li>
+      <li>Scanner: ₹{{ selectedDetails?.scannerAmount }}</li>
+    </ul>
+
+    <h4>Payments</h4>
+    <table class="payment-table">
+      <thead>
+        <tr>
+          <th>Mode</th>
+          <th>Amount</th>
+          <th>Order</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of selectedDetails?.payments">
+          <td>{{ p.paymentMode }}</td>
+          <td>₹{{ p.amountPaidToday }}</td>
+          <td>{{ p.orderId }}</td>
+          <td>{{ p.paymentDate | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="close-btn" (click)="showModal = false">Close</button>
+
+  </div>
+</div>

@@ -1,0 +1,241 @@
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3><i class="fas fa-hand-holding-usd"></i> Handover Cash to Distributor</h3>
+  </div>
+  <div class="filter-section">
+  <label><i class="fas fa-calendar-alt"></i> Select Date</label>
+  <input type="date"
+         class="form-input date-input"
+         [(ngModel)]="form.date"
+         [max]="todayDate"
+         (change)="onDateChange()">
+              <button class="btn btn-warning"
+        style="width: 100%; margin: 10px 0;"
+        (click)="goToPendingPayments()">
+    <i class="fas fa-list"></i> Show All Pending Payments
+</button>
+</div>
+
+  <!-- Pending Payments Section -->
+  <div class="section-header">
+    <h4><i class="fas fa-clipboard-list"></i> Select Payments to Hand Over</h4>
+    <div *ngIf="unhandedPayments.length > 0" class="selection-info">
+      <span class="selection-count">{{ selectedPayments.length }}</span> selected
+    </div>
+  </div>
+
+  <div *ngIf="unhandedPayments.length > 0; else noPayments" class="payments-table-container">
+    <table class="payments-table">
+      <thead>
+        <tr>
+          <th class="select-column">
+            <div class="select-all">
+              <input type="checkbox" 
+                     id="selectAll"
+                     [checked]="isAllSelected()"
+                     (change)="toggleSelectAll($any($event.target).checked)">
+              <label for="selectAll">Select All</label>
+            </div>
+          </th>
+          <th>Payment ID</th>
+          <th>Amount Paid</th>
+          <th>Customer</th>
+          <th>Date & Time</th>
+          <th>Payment Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of unhandedPayments" 
+            class="payment-row"
+            [class.selected]="isSelected(p)">
+          <td class="select-cell">
+            <div class="checkbox-container">
+              <input type="checkbox"
+                     class="payment-checkbox"
+                     [checked]="isSelected(p)"
+                     (change)="togglePaymentSelection(p, $any($event.target).checked)">
+              <label class="checkbox-label"></label>
+            </div>
+          </td>
+          <td>
+            <span class="payment-id">#{{ p.paymentId }}</span>
+          </td>
+          <td>
+            <span class="amount-badge">₹{{ p.amountPaidToday | number:'1.2-2' }}</span>
+          </td>
+          <td>
+            <div class="customer-info">
+              <div class="customer-name">{{ p.customerName }}</div>
+              <div *ngIf="p.customerPhone" class="customer-phone">
+                <i class="fas fa-phone"></i> {{ p.customerPhone }}
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="date-time">
+              <div class="date">{{ p.paymentDate | date:'dd/MM/yyyy' }}</div>
+              <div class="time">{{ p.paymentDate | date:'hh:mm a' }}</div>
+            </div>
+          </td>
+          <td>
+         <span class="payment-mode-badge"
+      [ngClass]="{
+        'cash': p.paymentMode === 'cash',
+        'online': p.paymentMode === 'online',
+        'upi': p.paymentMode === 'upi',
+        'scanner': p.paymentMode === 'scanner'
+      }">
+              <i [class]="getPaymentModeIcon(p.paymentMode)"></i>
+              {{ p.paymentMode }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noPayments>
+    <div class="no-payments-message">
+      <div class="message-content">
+        <i class="fas fa-check-circle"></i>
+        <h4>All Payments Handed Over</h4>
+        <p>No pending payments to hand over to distributor.</p>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Handover Summary -->
+  <div *ngIf="selectedPayments.length > 0" class="handover-summary-section">
+    <div class="section-header">
+      <h4><i class="fas fa-file-invoice-dollar"></i> Handover Summary</h4>
+    </div>
+
+    <div class="summary-grid">
+      <!-- Cash Breakdown -->
+      <div class="summary-card breakdown-card">
+        <div class="summary-card-header">
+          <h5><i class="fas fa-money-bills"></i> Payment Breakdown</h5>
+        </div>
+        <div class="breakdown-list">
+          <div class="breakdown-item" *ngFor="let payment of selectedPayments">
+            <div class="breakdown-info">
+              <span class="payment-id">#{{ payment.paymentId }}</span>
+              <span class="customer-name">{{ payment.customerName }}</span>
+            </div>
+            <div class="breakdown-amount">
+              ₹{{ payment.amountPaidToday | number:'1.2-2' }}
+              <span class="payment-mode">{{ payment.paymentMode }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Handover Form -->
+      <div class="summary-card form-card">
+        <div class="summary-card-header">
+          <h5><i class="fas fa-file-export"></i> Handover Details</h5>
+        </div>
+        
+        <div class="handover-form">
+          <div class="form-group">
+            <label><i class="fas fa-money-bill-wave"></i> Cash Amount Submitted</label>
+            <div class="amount-input-container">
+              <span class="currency-symbol">₹</span>
+              <input type="number" 
+                     class="form-input amount-input"
+                     [(ngModel)]="form.cashAmountSubmitted"
+                     readonly
+                     placeholder="Auto-calculated">
+            </div>
+            <div class="form-hint">Total cash payments from selected items</div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-calculator"></i> Total Amount to Handover</label>
+            <div class="amount-input-container">
+              <span class="currency-symbol">₹</span>
+              <input type="number" 
+                     class="form-input amount-input total-amount"
+                     [(ngModel)]="form.totalAmountSubmitted"
+                     readonly
+                     placeholder="Auto-calculated">
+            </div>
+            <div class="form-hint">Sum of all selected payments</div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-calendar-alt"></i> Handover Date</label>
+            <div class="date-input-container">
+              <i class="fas fa-calendar"></i>
+             <input type="date"
+       class="form-input date-input"
+       [(ngModel)]="form.date"
+       [max]="todayDate"
+       (change)="onDateChange()">
+            </div>
+          </div>
+
+          <!-- Distributor Selection -->
+          <div class="form-group">
+            <label><i class="fas fa-user-tie"></i> Select Distributor</label>
+            <select class="form-select" [(ngModel)]="selectedDistributorId">
+              <option value="" disabled selected>Select a distributor</option>
+              <option *ngFor="let distributor of distributors" [value]="distributor.id">
+                {{ distributor.name }} ({{ distributor.code }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
+            <textarea class="form-textarea"
+                      [(ngModel)]="form.notes"
+                      placeholder="Add any notes or remarks..."
+                      rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-outline-secondary" (click)="clearSelection()">
+            <i class="fas fa-times"></i> Clear Selection
+          </button>
+          <button class="btn btn-primary handover-btn" 
+                  (click)="submit()"
+                  [disabled]="!canSubmit()">
+            <i class="fas fa-paper-plane"></i> Submit Handover
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="summary-stats">
+      <div class="stat-item">
+        <span class="stat-label">Total Payments</span>
+        <span class="stat-value">{{ selectedPayments.length }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Cash Payments</span>
+        <span class="stat-value">{{ getCashPaymentCount() }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Online Payments</span>
+        <span class="stat-value">{{ getOnlinePaymentCount() }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Total Amount</span>
+        <span class="stat-value highlight">₹{{ form.totalAmountSubmitted | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Selection Message -->
+  <div *ngIf="unhandedPayments.length > 0 && selectedPayments.length === 0" class="selection-prompt">
+    <div class="prompt-content">
+      <i class="fas fa-mouse-pointer"></i>
+      <h4>Select Payments to Hand Over</h4>
+      <p>Check the boxes next to payments you want to include in the handover</p>
+    </div>
+  </div>
+</div>

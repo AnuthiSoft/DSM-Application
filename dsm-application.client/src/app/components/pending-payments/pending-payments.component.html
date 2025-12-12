@@ -1,0 +1,76 @@
+<div class="dashboard-card">
+  <div class="card-header">
+    <h2 class="title">
+      <i class="fas fa-clock"></i> Pending Payments (Not Handed Over)
+    </h2>
+    
+    <div class="filter-controls" *ngIf="pendingPayments?.length">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" 
+               placeholder="Search payments..." 
+               [(ngModel)]="searchTerm"
+               (input)="filterPayments()"
+               class="search-input">
+      </div>
+      <div class="total-count">
+        <span class="count-badge">{{ filteredPayments?.length || pendingPayments?.length }}</span> payments found
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container" *ngIf="pendingPayments?.length; else noPayments">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="payment-id-col">Payment ID</th>
+          <th class="customer-col">Customer</th>
+          <th class="amount-col">Amount</th>
+          <th class="mode-col">Payment Mode</th>
+          <th class="date-col">Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let p of (filteredPayments || pendingPayments)" class="table-row">
+          <td class="payment-id">
+            <div class="payment-id-wrapper">
+              <i class="fas fa-hashtag"></i>
+              <span>{{ p.paymentId }}</span>
+            </div>
+          </td>
+          <td class="customer-name">
+            <div class="customer-info">
+              <span class="name">{{ p.customerName }}</span>
+            </div>
+          </td>
+          <td class="payment-amount">
+            <span class="amount-value">₹{{ p.amountPaidToday | number:'1.2-2' }}</span>
+          </td>
+          <td class="payment-mode">
+            <span class="payment-mode-badge" [ngClass]="getPaymentModeClass(p.paymentMode)">
+              <i [class]="getPaymentModeIcon(p.paymentMode)"></i>
+              {{ p.paymentMode || 'N/A' }}
+            </span>
+          </td>
+          <td class="payment-date">
+            <div class="date-wrapper">
+              <div class="date">{{ p.paymentDate | date:'dd/MM/yyyy' }}</div>
+              <div class="time">{{ p.paymentDate | date:'hh:mm a' }}</div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #noPayments>
+    <div class="no-data-message">
+      <div class="message-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3>No Pending Payments</h3>
+      <p>All payments have been handed over to the distributor.</p>
+    </div>
+  </ng-template>
+</div>

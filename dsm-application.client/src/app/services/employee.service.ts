@@ -146,4 +146,19 @@ getProfileImage() {
     }
   );
 }
+  markAvailability(payload: {
+    employeeId: string;
+    date: string;
+    isAvailable: boolean;
+    reason?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/distributor/employee/mark-availability`, payload);
+  }
+
+  getAvailability(employeeId: string, date: string): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/distributor/employee/availability?employeeId=${employeeId}&date=${date}`
+    );
+  }
+
 }

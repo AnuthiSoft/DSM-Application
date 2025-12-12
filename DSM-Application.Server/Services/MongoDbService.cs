@@ -1,77 +1,8 @@
-﻿//using DistributorManagementSystem.Server.Models;
-//using DSM_Application.Server.Models;
-//using Microsoft.Extensions.Options;
-//using MongoDB.Driver;
-//using System.Diagnostics.Metrics;
-
-//namespace DistributorManagementSystem.Server.Services
-//{
-//    public class MongoDbService
-//    {
-//        public IMongoDatabase Database { get; }
-
-
-//        public MongoDbService(IOptions<MongoDbSettings> options)
-//        {
-//            var client = new MongoClient(options.Value.ConnectionString);
-//            _db = client.GetDatabase(options.Value.DatabaseName);
-//        }
-
-//        public IMongoCollection<User> Users => _db.GetCollection<User>("Users");
-//        public IMongoCollection<Distributor> Distributors => _db.GetCollection<Distributor>("Distributors");
-//        public IMongoCollection<Product> Products => _db.GetCollection<Product>("Products");
-//        public IMongoCollection<Customer> Customers => _db.GetCollection<Customer>("Customers");
-//        public IMongoCollection<Employee> Employees => _db.GetCollection<Employee>("Employees");
-//        //public IMongoCollection<Counter> Counters => _db.GetCollection<Counter>("Counters");
-//        public IMongoCollection<Order> Orders => _db.GetCollection<Order>("Orders");
-//        // ✅ Add this for connections
-//        public IMongoCollection<CustomerDistributorConnection> Connections =>
-//            _db.GetCollection<CustomerDistributorConnection>("Connections");
-//        public IMongoCollection<RefreshToken> RefreshTokens =>
-//    _db.GetCollection<RefreshToken>("RefreshTokens");
-//    }
-
-//    public class MongoDbSettings
-//    {
-//        public string ConnectionString { get; set; } = string.Empty;
-//        public string DatabaseName { get; set; } = string.Empty;
-//    }
-//}
-
-//namespace DistributorManagementSystem.Server.Services
-//{
-//    public class MongoDbService
-//    {
-//        public IMongoDatabase Database { get; }
-
-//        public MongoDbService(IOptions<MongoDbSettings> options)
-//        {
-//            var client = new MongoClient(options.Value.ConnectionString);
-//            Database = client.GetDatabase(options.Value.DatabaseName);
-//        }
-
-//        public IMongoCollection<User> Users => Database.GetCollection<User>("Users");
-//        public IMongoCollection<Distributor> Distributors => Database.GetCollection<Distributor>("Distributors");
-//        public IMongoCollection<Product> Products => Database.GetCollection<Product>("Products");
-//        public IMongoCollection<Customer> Customers => Database.GetCollection<Customer>("Customers");
-//        public IMongoCollection<Employee> Employees => Database.GetCollection<Employee>("Employees");
-//        public IMongoCollection<Order> Orders => Database.GetCollection<Order>("Orders");
-//        public IMongoCollection<CustomerDistributorConnection> Connections => Database.GetCollection<CustomerDistributorConnection>("Connections");
-//        public IMongoCollection<RefreshToken> RefreshTokens => Database.GetCollection<RefreshToken>("RefreshTokens");
-//    }
-
-//    public class MongoDbSettings
-//    {
-//        public string ConnectionString { get; set; } = string.Empty;
-//        public string DatabaseName { get; set; } = string.Empty;
-//    }
-//}
-
-
-using DistributorManagementSystem.Server.Models;
+﻿using DistributorManagementSystem.Server.Models;
 using DSM_Application.Server.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using YourApp.Models;
 
 namespace DistributorManagementSystem.Server.Services
 {
@@ -85,8 +16,12 @@ namespace DistributorManagementSystem.Server.Services
             _db = client.GetDatabase(options.Value.DatabaseName);
         }
 
+        // ⭐⭐ VERY IMPORTANT: expose database ⭐⭐
+        public IMongoDatabase Database => _db;
+
         public IMongoCollection<User> Users => _db.GetCollection<User>("Users");
         public IMongoCollection<Distributor> Distributors => _db.GetCollection<Distributor>("Distributors");
+
         public IMongoCollection<Product> Products => _db.GetCollection<Product>("Products");
         public IMongoCollection<Customer> Customers => _db.GetCollection<Customer>("Customers");
         public IMongoCollection<Employee> Employees => _db.GetCollection<Employee>("Employees");
@@ -99,6 +34,19 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<FraudReport> FraudReports => _db.GetCollection<FraudReport>("fraudreports");
         public IMongoCollection<DistributorCategoryMap> DistributorCategoryMaps => _db.GetCollection<DistributorCategoryMap>("DistributorCategoryMap");
         public IMongoCollection<Category> Categories => _db.GetCollection<Category>("Categories");
+
+        public IMongoCollection<TemporaryAssignment> TemporaryAssignments =>
+    _db.GetCollection<TemporaryAssignment>("temporaryAssignments");
+        public IMongoCollection<EmployeeAvailability> EmployeeAvailability =>
+    _db.GetCollection<EmployeeAvailability>("EmployeeAvailability");
+
+        public IMongoCollection<PaymentCollectionHistory> PaymentHistory =>
+    _db.GetCollection<PaymentCollectionHistory>("PaymentCollectionHistory");
+        public IMongoCollection<HSN> HsnCodes => _db.GetCollection<HSN>("HsnCodes");
+
+
+
+
 
     }
 

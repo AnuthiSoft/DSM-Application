@@ -75,11 +75,51 @@ namespace DSM_Application.Server.Controllers
         // ============================================================
         // GET EMPLOYEES OF DISTRIBUTOR
         // ============================================================
-        [HttpGet("{distributorId:length(24)}")]
+        // using MongoDB.Bson; // ensure at top of the file
+
+        // using MongoDB.Bson; // ensure at top of the file
+        [HttpGet("{distributorId}")]
         public async Task<IActionResult> GetEmployees(string distributorId)
         {
-            var employees = await _service.GetEmployeesAsync(distributorId);
-            return Ok(employees);
+            Console.WriteLine($"Incoming distributorId: '{distributorId}'");
+
+            // 1) String match (most common)
+            var employees = await _db.Employees
+                .Find(e => e.DistributorId == distributorId)
+                .ToListAsync();
+
+            Console.WriteLine($"String match found: {employees.Count}");
+
+            if (employees.Count > 0)
+                return Ok(employees);
+
+            // 2) Fallback: ObjectId match
+            try
+            {
+                var objId = new ObjectId(distributorId);
+
+                var filter = Builders<DSM_Application.Server.Models.Employee>
+                    .Filter.Eq("DistributorId", objId);
+
+                employees = await _db.Employees.Find(filter).ToListAsync();
+
+                Console.WriteLine($"ObjectId match found: {employees.Count}");
+
+                if (employees.Count > 0)
+                    return Ok(employees);
+            }
+            catch (FormatException)
+            {
+                Console.WriteLine("DistributorId is not a valid ObjectId. Skipping ObjectId lookup.");
+            }
+
+            // Debug total count (to detect wrong DB/collection)
+            long total = await _db.Employees
+                .CountDocumentsAsync(Builders<DSM_Application.Server.Models.Employee>.Filter.Empty);
+
+            Console.WriteLine($"Total employees stored: {total}");
+
+            return Ok(new List<object>());
         }
 
         // ============================================================
@@ -87,9 +127,49 @@ namespace DSM_Application.Server.Controllers
         // ============================================================
         [HttpPost("{distributorId}")]
         public async Task<IActionResult> Add(string distributorId, [FromBody] Employee emp)
-        {
-            // Employee duplicates allowed → no duplicate checks here
+    {
+            // ✅ Step 1: Validate Designation (NEW CODE ADDED)
+            var allowedDesignations = new List<string>
+                {
+                    "Delivery Boy",
+                    "Cash Collector",
+                    "Manager",
+                 
+                    "Sales Representative"
+                };
 
+            if (!allowedDesignations.Contains(emp.Designation))
+            {
+                return BadRequest("Invalid designation. Allowed: Delivery Boy, Cash Collector, Manager, Sales Representative");
+            }
+
+            // ✅ Check if email or phone already exists in Employees
+            var existingEmp = await _db.Employees
+                .Find(e => e.Email == emp.Email || e.PhoneNumber == emp.PhoneNumber)
+                .FirstOrDefaultAsync();
+
+            if (existingEmp != null)
+            {
+                if (existingEmp.Email == emp.Email)
+                    return BadRequest("An employee with this email already exists.");
+                if (existingEmp.PhoneNumber == emp.PhoneNumber)
+                    return BadRequest("An employee with this phone number already exists.");
+            }
+
+            // ✅ Check in Users collection as well to prevent cross-role duplicates
+            var existingUser = await _db.Users
+                .Find(u => u.Email == emp.Email || u.PhoneNumber == emp.PhoneNumber)
+                .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                if (existingUser.Email == emp.Email)
+                    return BadRequest("This email is already used by another user.");
+                if (existingUser.PhoneNumber == emp.PhoneNumber)
+                    return BadRequest("This phone number is already used by another user.");
+            }
+
+            // ✅ Ensure EmployeeId exists
             if (string.IsNullOrEmpty(emp.EmployeeId))
                 emp.EmployeeId = ObjectId.GenerateNewId().ToString();
 
@@ -123,13 +203,54 @@ namespace DSM_Application.Server.Controllers
             });
         }
 
-        // ============================================================
-        // UPDATE EMPLOYEE (NO DUPLICATE CHECK REQUIRED)
-        // ============================================================
+        // ✅ Update employee
         [HttpPut("{distributorId}/{employeeId}")]
         public async Task<IActionResult> Update(string distributorId, string employeeId, [FromBody] Employee emp)
-        {
-            // Update Employee record
+     {
+
+            // ✅ Step 1: Validate Designation (NEW CODE ADDED)
+            var allowedDesignations = new List<string>
+                {
+                    "Delivery Boy",
+                    "Cash Collector",
+                    "Manager",
+                    
+                    "Sales Representative"
+                };
+
+            if (!allowedDesignations.Contains(emp.Designation))
+            {
+                return BadRequest("Invalid designation. Allowed: Delivery Boy, Cash Collector, Manager,  Sales Representative");
+            }
+
+            // ✅ Check if email or phone is already used by another employee (excluding current employee)
+            var existingEmp = await _db.Employees
+                .Find(e => (e.Email == emp.Email || e.PhoneNumber == emp.PhoneNumber) && e.EmployeeId != employeeId)
+                .FirstOrDefaultAsync();
+
+            if (existingEmp != null)
+            {
+                if (existingEmp.Email == emp.Email)
+                    return BadRequest("An employee with this email already exists.");
+                if (existingEmp.PhoneNumber == emp.PhoneNumber)
+                    return BadRequest("An employee with this phone number already exists.");
+            }
+
+            // ✅ Check in Users collection as well
+            var existingUser = await _db.Users
+                .Find(u => (u.Email == emp.Email || u.PhoneNumber == emp.PhoneNumber)
+                          && u.DistributorId == distributorId
+                          && u.EmployeeId != employeeId)
+                .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                if (existingUser.Email == emp.Email)
+                    return BadRequest("This email is already used by another user.");
+                if (existingUser.PhoneNumber == emp.PhoneNumber)
+                    return BadRequest("This phone number is already used by another user.");
+            }
+
             var updated = await _service.UpdateEmployeeAsync(distributorId, employeeId, emp);
             if (updated == null) return NotFound("Employee not found");
 
@@ -238,14 +359,14 @@ namespace DSM_Application.Server.Controllers
             {
                 update = update.Set(o => o.DeliveredOn, DateTime.UtcNow);
 
-                if (dto.PaymentCollected)
-                {
-                    update = update
-                        .Set(o => o.PaymentCollectedByEmployee, true)
-                        .Set(o => o.CollectedAmount, dto.CollectedAmount ?? order.TotalAmount)
-                        .Set(o => o.PaymentMethod, dto.PaymentMethod ?? "COD")
-                        .Set(o => o.CollectedOn, DateTime.UtcNow);
-                }
+                //if (dto.PaymentCollected)
+                //{
+                //    updates = updates
+                //        .Set(o => o.PaymentCollectedByEmployee, true)
+                //        .Set(o => o.CollectedAmount, dto.CollectedAmount ?? order.TotalAmount)
+                //        .Set(o => o.PaymentMethod, dto.PaymentMethod ?? "COD")
+                //        .Set(o => o.CollectedOn, DateTime.UtcNow);
+                //}
             }
 
             await _db.Orders.UpdateOneAsync(o => o.Id == orderId, update);

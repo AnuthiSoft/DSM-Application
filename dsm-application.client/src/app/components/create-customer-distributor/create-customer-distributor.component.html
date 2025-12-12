@@ -58,6 +58,7 @@
           <th>Phone</th>
           <th>Address</th>
           <th>Status</th>
+          <th>Permanent Employee</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -83,6 +84,14 @@
               {{ c.isRegistered ? 'Registered' : 'Not Registered' }}
             </span>
           </td>
+          <td>
+  {{ c.permanentEmployeeName || 'Not Assigned' }}
+
+  <button class="btn btn-outline-success btn-sm ms-2"
+          (click)="openAssignModal(c.customerId!)">
+    <i class="fas fa-user-check"></i> Assign
+  </button>
+</td>
 
           <td class="table-actions">
   <button class="btn btn-outline-primary btn-sm" (click)="editCustomer(c)">
@@ -143,6 +152,34 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
       <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create Customer' }}</button>
+    </div>
+
+  </div>
+
+
+</div>
+<!-- Permanent Employee Modal -->
+ <div class="modal-backdrop" *ngIf="showAssignModal">
+  <div class="customer-modal">
+
+    <div class="modal-header">
+      <h3><i class="fas fa-user-tie"></i> Assign Permanent Employee</h3>
+      <i class="fas fa-times close-icon" (click)="closeAssignModal()"></i>
+    </div>
+
+    <div class="modal-body">
+      <label>Select Employee</label>
+      <select class="form-control" [(ngModel)]="selectedEmployeeId">
+        <option value="">-- Select Employee --</option>
+        <option *ngFor="let emp of employees" [value]="emp.employeeId">
+          {{ emp.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAssignModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="savePermanentEmployee()">Save</button>
     </div>
 
   </div>

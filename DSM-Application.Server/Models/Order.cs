@@ -26,6 +26,11 @@ namespace DSM_Application.Server.Models
         public DateTime? AssignedOn { get; set; }
 
         public bool PaymentCollectedByEmployee { get; set; } = false;
+
+        // 🆕 NEW FIELDS FOR CASH COLLECTOR WORKFLOW
+        public bool IsPaymentCollected { get; set; } = false;
+        public string? PaymentCollectedBy { get; set; }
+
         public decimal? CollectedAmount { get; set; } // ✅ changed double? → decimal?
         public string PaymentMethod { get; set; }
         public DateTime? CollectedOn { get; set; }
@@ -33,5 +38,25 @@ namespace DSM_Application.Server.Models
         public DateTime? DeliveredOn { get; set; }
         public string DeliveryRemarks { get; set; }
         public string Status { get; set; } = "Pending";
+
+        public string AssignedEmployeeId { get; set; }   // REQUIRED
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;  // REQUIRED
+        public string CustomerName { get; set; }
+
+
+        // 🟦 🆕 ADD ONLY NEW FIELDS FOR "NEW ORDER REQUEST FORM"
+        // ----------------------------------------------
+
+        // NEW FIELD → Required for your "Ordered Date" in UI
+        public DateTime OrderedDate { get; set; }
+
+        // NEW FIELD → Retailer dropdown
+        //public string RetailerId { get; set; }
+
+        // NEW FIELD → Expected Delivery Date
+        public DateTime ExpectedDeliveryDate { get; set; }
+
+       
+
     }
 }

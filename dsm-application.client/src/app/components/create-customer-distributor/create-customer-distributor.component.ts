@@ -91,7 +91,11 @@ customer: Customer = {
   isRegistered: false,
   isActive: true          // ✅ ADD THIS
 };
+employees: any[] = [];
 
+showAssignModal = false;
+selectedCustomerId = '';
+selectedEmployeeId = '';
 
   searchTerm = '';
   statusFilter = '';
@@ -103,6 +107,7 @@ customer: Customer = {
 
   ngOnInit(): void {
     this.loadCustomers();
+    this.loadEmployees();
   }
 
   loadCustomers() {
@@ -118,6 +123,15 @@ customer: Customer = {
       }
     });
   }
+  loadEmployees() {
+  const distId = localStorage.getItem('distributorId')!;
+
+  this.customerService.getEmployees(distId).subscribe((res: any[]) => {
+    this.employees = res
+      .filter(e => e.isActive)                           // only active
+      .filter(e => e.designation === "Delivery Boy");    // only delivery boys
+  });
+}
 
   applyFilters() {
     this.filteredCustomers = this.customers.filter(c => {
@@ -134,6 +148,40 @@ customer: Customer = {
       return matchesSearch && matchesStatus;
     });
   }
+  openAssignModal(customerId: string) {
+  this.selectedCustomerId = customerId;
+  this.selectedEmployeeId = '';
+  this.showAssignModal = true;
+}
+
+closeAssignModal() {
+  this.showAssignModal = false;
+  this.selectedEmployeeId = '';
+}
+savePermanentEmployee() {
+  if (!this.selectedEmployeeId) {
+    alert("Select an employee");
+    return;
+  }
+
+  const distributorId = localStorage.getItem('distributorId')!;
+
+  this.customerService.assignPermanentEmployee(
+    distributorId,
+    this.selectedCustomerId,
+    this.selectedEmployeeId
+  ).subscribe({
+    next: () => {
+      alert("Permanent employee assigned successfully");
+      this.closeAssignModal();
+      this.loadCustomers();
+    },
+    error: (err) => {
+      alert("Failed to assign permanent employee");
+    }
+  });
+}
+
 
   /* ----------------------------- Modal ------------------------------ */
 
@@ -213,5 +261,6 @@ customer: Customer = {
       }
     });
   }
+  
 }
 

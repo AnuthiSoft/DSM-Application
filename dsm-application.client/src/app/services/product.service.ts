@@ -77,4 +77,16 @@ export class ProductService {
       params: { distributorId, color }
     });
   }
+  getMainCategories() {
+  return this.api.get<any[]>('categories/main');
+}
+
+getSubCategories(parentId: string) {
+  return this.api.get<any[]>(`categories/sub/${parentId}`);
+}
+
+getSubCategoryGst(subId: string) {
+  return this.api.get<number>(`categories/subcategory/${subId}/gst`);
+}
+
 }

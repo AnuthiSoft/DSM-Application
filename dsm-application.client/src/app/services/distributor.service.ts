@@ -11,6 +11,17 @@ export interface ConnectionRequestDto {
   status: string;
   connectedOn: string; // or Date
 }
+export interface CustomerEmployeeStatus {
+  permanentEmployeeId: string | null;
+  permanentEmployeeAvailable: boolean;
+  permanentReason: string | null;
+
+  temporaryEmployeeId: string | null;
+  temporaryEmployeeAvailable: boolean;
+  temporaryReason: string | null;
+
+  isTemporaryActiveToday: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -36,5 +47,40 @@ export class DistributorService {
  respondConnection(connectionId: string, accept: boolean): Observable<any> {
   return this.api.post(`distributor/respond-connection`, { ConnectionId: connectionId, Accept: accept });
 }
+  // Assign permanent employee
+  assignPermanentEmployee(distributorId: string, customerId: string, employeeId: string) {
+    return this.api.put(
+      `distributor/assign-permanent-employee?distributorId=${distributorId}&customerId=${customerId}&employeeId=${employeeId}`,
+      {}
+    );
+  }
+//  assignTempToday(distributorId: string, customerId: string, tempEmpId: string) {
+//     const body = {
+//       distributorId: distributorId,
+//       customerId: customerId,
+//       temporaryEmployeeId: tempEmpId
+//     };
+
+//     return this.api.post(`distributor/assign-temp-today`, body);
+//   }
+ assignTempToday(distributorId: string, customerId: string, tempEmpId: string) {
+  return this.api.post(`distributor/assign-temp-today`, {
+    distributorId,
+    customerId,
+    temporaryEmployeeId: tempEmpId
+  });
+}
+
+  getCustomerEmployeeStatus(distributorId: string, customerId: string) {
+    return this.api.get<CustomerEmployeeStatus>(
+      `distributor/customer-employee-status?distributorId=${distributorId}&customerId=${customerId}`
+    );
+  }
+
+
+  // For dashboard mapping
+  getCustomersWithEmployee(distributorId: string) {
+    return this.api.get(`distributor/customers-with-employee?distributorId=${distributorId}`);
+  }
 
 }

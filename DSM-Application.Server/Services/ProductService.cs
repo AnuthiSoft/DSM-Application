@@ -12,12 +12,13 @@ namespace DSM_Application.Server.Services
     {
         private readonly IMongoCollection<Product> _products;
         private readonly IMongoCollection<Distributor> _distributors;
+        private readonly CategoryService _categoryService;
 
-
-        public ProductService(MongoDbService db)
+        public ProductService(MongoDbService db, CategoryService categoryService)
         {
             _products = db.Products;
             _distributors = db.Distributors;
+            _categoryService = categoryService;
         }
 
         public async Task<List<Product>> GetAllAsync(string distributorId)
@@ -58,6 +59,11 @@ namespace DSM_Application.Server.Services
         // Create product
         public async Task<Product> CreateAsync(Product product)
         {
+            // 🔍 Fetch GST from subcategory
+            var subCategory = await _categoryService.GetByIdAsync(product.Category);
+
+            if (subCategory != null)
+                product.GST = subCategory.GST; // 💥 APPLY SUBCATEGORY GST
             product.CreatedDate = DateTime.UtcNow;
             product.UpdatedDate = DateTime.UtcNow;
             await _products.InsertOneAsync(product);
@@ -67,6 +73,11 @@ namespace DSM_Application.Server.Services
         // Update product
         public async Task UpdateAsync(string id, Product product)
         {
+            // If category changed, refresh GST
+            var subCategory = await _categoryService.GetByIdAsync(product.Category);
+
+            if (subCategory != null)
+                product.GST = subCategory.GST;
             product.UpdatedDate = DateTime.UtcNow;
             await _products.ReplaceOneAsync(p => p.ProductId == id, product);
         }

@@ -19,7 +19,17 @@ builder.Services.Configure<MongoDbSettings>(
 
 
 builder.Services.AddSingleton<MongoDbService>();
-builder.Services.AddSingleton<DiscountService>();
+
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var mongoService = sp.GetRequiredService<MongoDbService>();
+    return mongoService.Database;
+});
+
+builder.Services.AddScoped<TemporaryEmployeeHistoryService>();
+
+builder.Services.AddScoped<DiscountService>();
+builder.Services.AddScoped<HsnService>();
 
 // JWT
 builder.Services.AddSingleton<JwtService>();
@@ -66,18 +76,24 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());// me added
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton<ProductService>();
+builder.Services.AddScoped<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
 builder.Services.AddSingleton<TaskService>(); // aded this
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
-builder.Services.AddSingleton<EmailService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<TemporaryAssignmentService>();
+//builder.Services.AddSingleton<OrderService>();     // Add this
+//builder.Services.AddSingleton<RetailerService>();  // Add this
+builder.Services.AddScoped<PaymentService>();
+
+
 
 builder.Services.AddScoped<FraudService>();
 builder.Services.AddScoped<ReviewService>();
 
-builder.Services.AddSingleton<ImageService>();
+builder.Services.AddScoped<ImageService>();
 
-builder.Services.AddSingleton<CategoryService>();
+builder.Services.AddScoped<CategoryService>();
 
 
 builder.Services.AddSwaggerGen();

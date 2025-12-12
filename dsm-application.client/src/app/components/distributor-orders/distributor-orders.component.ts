@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DistributorOrder, Employee } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import {   EmployeeService } from '../../services/employee.service';
+import { DistributorService } from '../../services/distributor.service';
 
 @Component({
   selector: 'app-distributor-orders',
@@ -19,16 +20,33 @@ export class DistributorOrdersComponent implements OnInit{
   statusFilter = 'All';
   statuses = ['All', 'Pending', 'Confirmed', 'Shipped', 'Delivered', 'Rejected'];
   showAssignModal = false;
-
+assignMode: 'temp' | 'perm' = 'temp';
+activeEmployeeId: string = '';
+activeEmployeeName = '';
+tempEmployeeId = '';
+showTempDropdown = false;
 
   // For assignment modal
   // selectedOrder: DistributorOrder | null = null;
   employeeId = '';
   selectedOrder: any;
 
+employeeAvailability: {
+  [customerId: string]: {
+    permanentEmployeeId: string | null,
+    permanentEmployeeAvailable: boolean,
+    permanentReason: string | null,
+
+    temporaryEmployeeId: string | null,
+    temporaryEmployeeAvailable: boolean,
+    temporaryReason: string | null,
+
+    isTemporaryActiveToday: boolean
+  }
+} = {}
   constructor(
     private orderService: OrderService,
-    private employeeService: EmployeeService, private cd: ChangeDetectorRef
+    private employeeService: EmployeeService, private distService :DistributorService,private cd: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -37,15 +55,34 @@ export class DistributorOrdersComponent implements OnInit{
   }
 
   loadOrders(): void {
-    if (!this.distributorId) return;
-    this.loading = true;
-    const status = this.statusFilter === 'All' ? undefined : this.statusFilter;
-    this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
-      next: (data) => { this.orders = data; this.loading = false; },
-      error: (err) => { console.error(err); this.loading = false; alert('Failed to load orders'); }
-    });
-  }
+  if (!this.distributorId) return;
 
+  this.loading = true;
+  const status = this.statusFilter === 'All' ? undefined : this.statusFilter;
+
+  this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
+    next: (data) => { 
+      this.orders = data; 
+      this.loading = false;
+
+      // 🔥 Load availability for each customer on list load
+      this.orders.forEach(o => {
+        this.loadAvailabilityForCustomer(o.customerId);
+      });
+    },
+    error: (err) => {
+      console.error(err); 
+      this.loading = false; 
+      alert('Failed to load orders'); 
+    }
+  });
+}
+loadAvailabilityForCustomer(customerId: string) {
+  this.distService.getCustomerEmployeeStatus(this.distributorId, customerId)
+    .subscribe(status => {
+      this.employeeAvailability[customerId] = status;
+    });
+}
   loadEmployees() {
     if (!this.distributorId) {
       console.error('DistributorId not found in localStorage!');
@@ -56,7 +93,17 @@ export class DistributorOrdersComponent implements OnInit{
       next: (res) => {
         console.log('✅ Employees loaded:', res);
         // filter only active employees
-        this.employees = res.filter(e => e.isActive);
+        this.employees = res
+  .map((e: any) => ({
+    ...e,
+    employeeId: e.employeeId || e.id || e._id
+  }))
+  .filter(e =>
+    e.isActive === true &&
+    e.designation === 'Delivery Boy' &&     // 👈 Only Delivery Boys
+    e.distributorId === this.distributorId  // 👈 Must belong to this distributor
+  );
+      this.filteredEmployees = this.employees;
       },
       error: (err) => console.error('❌ Failed to load employees:', err)
     });
@@ -81,38 +128,112 @@ export class DistributorOrdersComponent implements OnInit{
 //   }
 // }
 // ✅ Fixed: accepts full order object
- openAssignModal(order: DistributorOrder) {
+openAssignModal(order: DistributorOrder) {
   this.selectedOrder = order;
-  this.filteredEmployees = this.employees.filter(e => e.isActive);
-    this.cd.detectChanges();  // forces Angular to refresh the template
+
+  // LOAD employees for dropdown
+  this.filteredEmployees = this.employees;
+
+  // 🔥 Load availability from backend
+  this.distService.getCustomerEmployeeStatus(
+    this.distributorId,
+    order.customerId
+  ).subscribe(status => {
+
+    // Save availability in object for UI
+    this.employeeAvailability[order.customerId] = status;
+
+    // Decide active employee
+    this.activeEmployeeId =
+      status.temporaryEmployeeId ||
+      status.permanentEmployeeId ||
+      '';
+
+    const emp = this.employees.find(e => e.employeeId === this.activeEmployeeId);
+    this.activeEmployeeName = emp ? emp.name : "No employee assigned";
+
+    // Show temp dropdown ONLY if permanent employee exists AND NOT AVAILABLE
+    this.showTempDropdown =
+      !!status.permanentEmployeeId &&
+      status.permanentEmployeeAvailable === false;
+
+  });
 }
- closeAssignModal() {
+closeAssignModal() {
   this.selectedOrder = null;
-  this.employeeId = '';
+  this.tempEmployeeId = '';
 }
 
   assignAndShip() {
-    if (!this.selectedOrder || !this.employeeId) {
-      alert('Please select an employee to assign the order.');
-      return;
-    }
+  if (!this.selectedOrder) return;
 
-   this.orderService.assignOrder(this.selectedOrder.id, {
-  employeeId: this.employeeId,
-  employeeName: this.filteredEmployees.find(e => e.employeeId === this.employeeId)?.name,
-   note: 'Assigned by distributor' // ✅ Added note
-}).subscribe({
-  next: () => {
-    alert('Order assigned and shipped successfully!');
-    this.closeAssignModal();
-    this.loadOrders();
-  },
-  error: (err) => {
-    console.error('Error assigning order:', err);
-    alert('Failed to assign order.');
+  const customerId = this.selectedOrder.customerId;
+  const availability = this.employeeAvailability[customerId];
+
+  // ⭐ CASE 1: Permanent Employee Available → AUTO ASSIGN + AUTO SHIP
+  if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
+
+    const empId = availability.permanentEmployeeId;
+    const emp = this.employees.find(e => e.employeeId === empId);
+
+    this.orderService.assignOrder(this.selectedOrder.id, {
+      employeeId: empId,
+      employeeName: emp?.name || '',
+      note: "Auto assignment to permanent employee"
+    }).subscribe(() => {
+
+      // ⭐ SHIP AUTOMATICALLY
+      this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
+
+        alert("Order auto-assigned to permanent employee & shipped.");
+        this.closeAssignModal();
+        this.loadOrders();
+
+      });
+
+    });
+
+    return;
   }
-});
+
+  // ⭐ CASE 2: Permanent NOT available → TEMP chosen
+  if (this.tempEmployeeId) {
+
+    this.distService.assignTempToday(
+      this.distributorId,
+      customerId,
+      this.tempEmployeeId
+    ).subscribe(() => {
+
+      // Assign to selected temp employee
+      this.finalOrderAssign(this.tempEmployeeId);
+
+    });
+
+    return;
   }
+
+  alert("Temporary employee not selected");
+}
+finalOrderAssign(employeeId: string) {
+
+  const emp = this.employees.find(e => e.employeeId === employeeId);
+
+  this.orderService.assignOrder(this.selectedOrder.id, {
+    employeeId: employeeId,
+    employeeName: emp?.name || '',
+    note: "Assigned manually"
+  }).subscribe(() => {
+
+    this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
+      alert("Order assigned & shipped successfully");
+      this.closeAssignModal();
+      this.loadOrders();
+    });
+
+  });
+}
+
 
 
   markDelivered(order: DistributorOrder) {
@@ -149,7 +270,52 @@ export class DistributorOrdersComponent implements OnInit{
   return Math.max(subtotal - discount, 0);
 }
 
-   
+   assignTempToCustomer() {
+  if (!this.selectedOrder || !this.employeeId) {
+    alert('Please select an employee.');
+    return;
+  }
+
+  const distributorId = this.distributorId;
+  const customerId = this.selectedOrder.customerId;
+
+  this.distService.assignTempToday(distributorId, customerId, this.employeeId)
+    .subscribe({
+      next: () => {
+        alert('Temporary employee assigned for today.');
+        this.closeAssignModal();
+        this.loadOrders();
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err?.error?.message || 'Failed to assign temporary employee');
+      }
+    });
+}
+selectedEmployeeId = '';
+
+savePermanentEmployee() {
+  if (!this.selectedOrder || !this.selectedEmployeeId) {
+    alert("Select an employee");
+    return;
+  }
+
+  this.distService.assignPermanentEmployee(
+    this.distributorId,
+    this.selectedOrder.customerId,
+    this.selectedEmployeeId
+  ).subscribe({
+    next: () => {
+      alert("Permanent employee assigned successfully!");
+      this.loadOrders();
+    },
+    error: (err) => {
+      console.error(err);
+      alert("Failed to assign permanent employee");
+    }
+  });
+}
+
 
   
   // ✅ Added function to fix your template error

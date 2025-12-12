@@ -112,8 +112,8 @@ namespace DistributorManagementSystem.Server.Services
             if (user.Role == "Distributor")
                 claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
 
-            // Employee — only include if exists
-            if (user.Role == "Employee" && !string.IsNullOrWhiteSpace(user.EmployeeId))
+            // ✅ Include EmployeeId if this is an Employee
+            if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
                 claims.Add(new Claim("EmployeeId", user.EmployeeId));
 
             return BuildToken(claims);

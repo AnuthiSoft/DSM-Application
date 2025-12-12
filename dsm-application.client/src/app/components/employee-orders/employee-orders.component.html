@@ -10,11 +10,12 @@
         <strong>Order #{{ o.id }}</strong> — 
         <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
       </div>
-      <button *ngIf="o.status === 'Assigned' && !o.paymentCollectedByEmployee"
-        class="btn btn-success btn-sm"
-        (click)="openPaymentModal(o)">
-        Mark Delivered & Collect Payment
-      </button>
+      <button *ngIf="o.status === 'Shipped'"
+        class="btn btn-primary btn-sm"
+        (click)="markDelivered(o)">
+  ✓ Mark Delivered
+</button>
+
     </div>
     <div class="card-body">
       <p><strong>Customer:</strong> {{ o.customerName }}</p>

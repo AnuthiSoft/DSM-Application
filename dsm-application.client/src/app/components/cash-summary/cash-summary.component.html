@@ -1,0 +1,173 @@
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3><i class="fas fa-file-alt"></i> My Daily Summary</h3>
+  </div>
+
+  <!-- Date Selection -->
+  <div class="section-header">
+    <h4><i class="fas fa-calendar-alt"></i> Select Date</h4>
+  </div>
+
+  <div class="summary-controls">
+    <div class="form-group">
+      <label><i class="fas fa-calendar-day"></i> Select Date</label>
+      <div class="date-input-container">
+        <i class="fas fa-calendar"></i>
+        <input type="date" 
+               class="form-input date-input"
+               [(ngModel)]="date"
+               (change)="onDateChange()">
+      </div>
+      <button class="btn btn-primary load-btn" (click)="load()">
+        <i class="fas fa-sync-alt"></i> Load Summary
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Totals -->
+  <div *ngIf="summary" class="summary-totals-card">
+    <div class="section-header">
+      <h4><i class="fas fa-chart-pie"></i> Daily Totals</h4>
+    </div>
+    
+    <div class="totals-grid">
+      <div class="total-card">
+        <div class="total-icon cash-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Cash</div>
+          <div class="total-value">₹{{ summary.totalCash | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon online-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Online</div>
+          <div class="total-value">₹{{ summary.totalOnline | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon scanner-icon">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Scanner</div>
+          <div class="total-value">₹{{ summary.totalScanner | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon total-icon">
+          <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Collected</div>
+          <div class="total-value highlight">₹{{ summary.totalCollected | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Transactions -->
+  <div class="transactions-section">
+    <div class="section-header">
+      <h4><i class="fas fa-list-alt"></i> Payment Transactions</h4>
+      <div *ngIf="payments.length > 0" class="transactions-count">
+        <span class="count-badge">{{ payments.length }}</span> transactions
+      </div>
+    </div>
+
+    <div *ngIf="payments.length > 0; else noPayments" class="transactions-table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Amount</th>
+            <th>Date & Time</th>
+            <th>Payment Mode</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of payments" class="transaction-row">
+            <td>
+              <span class="order-id">#{{ row.orderId }}</span>
+            </td>
+            <td>
+              <div class="customer-info">
+                <div class="customer-name">{{ row.customerName }}</div>
+                <div *ngIf="row.customerPhone" class="customer-phone">
+                  <i class="fas fa-phone"></i> {{ row.customerPhone }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="amount-badge">₹{{ row.amountPaidToday | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <div class="date-time">
+                <div class="date">{{ row.paymentDate | date:'dd/MM/yyyy' }}</div>
+                <div class="time">{{ row.paymentDate | date:'hh:mm a' }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="payment-mode-badge" [class]="row.paymentMode">
+                <i [class]="getPaymentModeIcon(row.paymentMode)"></i>
+                {{ row.paymentMode | titlecase }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge success">
+                <i class="fas fa-check-circle"></i> Collected
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noPayments>
+      <div class="no-payments-message">
+        <div class="message-content">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <h4>No Transactions Found</h4>
+          <p>No payment records found for {{ date | date:'fullDate' }}</p>
+          <button class="btn btn-outline-primary" (click)="loadYesterday()">
+            <i class="fas fa-history"></i> Check Yesterday's Summary
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="payments.length > 0" class="quick-actions-section">
+    <div class="section-header">
+      <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+    </div>
+    <div class="quick-actions-grid">
+      <button class="quick-action-btn" (click)="exportToExcel()">
+        <i class="fas fa-file-excel"></i>
+        <span>Export to Excel</span>
+      </button>
+      <button class="quick-action-btn" (click)="printSummary()">
+        <i class="fas fa-print"></i>
+        <span>Print Summary</span>
+      </button>
+      <button class="quick-action-btn" (click)="shareSummary()">
+        <i class="fas fa-share-alt"></i>
+        <span>Share Report</span>
+      </button>
+      <button class="quick-action-btn" (click)="downloadPDF()">
+        <i class="fas fa-file-pdf"></i>
+        <span>Download PDF</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,10 +3,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DistributorManagementSystem.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class Distributor
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
+         [BsonRepresentation(BsonType.ObjectId)]
         public string? DistributorId { get; set; } = string.Empty;
         [BsonElement("CompanyName")]
         public string CompanyName { get; set; } = string.Empty;

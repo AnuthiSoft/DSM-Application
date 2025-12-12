@@ -10,6 +10,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System.Security.Claims;
+using YourApp.Models;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -72,7 +73,7 @@ namespace DSM_Application.Server.Controllers
 
 
 
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
@@ -114,21 +115,65 @@ namespace DSM_Application.Server.Controllers
                 totalFinalAmount += calc.finalPrice;
             }
 
+            // -----------------------------------------------------
+            // ⭐ NEW EMPLOYEE ASSIGNMENT LOGIC
+            // -----------------------------------------------------
+
+            // Fetch permanent employee from connection table     
+            var connection = await _mongo.Connections
+                .Find(c => c.CustomerId == dto.CustomerId &&
+                           c.DistributorId == dto.DistributorId)
+                .FirstOrDefaultAsync();
+
+            // Check temporary assignment for today
+            var todayTemp = await _mongo.TemporaryAssignments
+                .Find(x => x.CustomerId == dto.CustomerId &&
+                           x.DistributorId == dto.DistributorId &&
+                           x.AssignedDate == DateTime.UtcNow.Date)
+                .FirstOrDefaultAsync();
+
+            // Decide final employee:
+            // If temp exists today → use him
+            // Else → fallback to permanent employee
+            //var assignedEmployeeId = todayTemp?.TemporaryEmployeeId ?? connection?.PermanentEmployeeId;
+
+            // Safety check
+            // No employee assigned yet -> allow order creation
+            string? assignedEmployeeId = todayTemp?.TemporaryEmployeeId ?? connection?.PermanentEmployeeId;
+
+            // Do NOT block order creation
+
+
+            // -----------------------------------------------------
+            // BUILD ORDER OBJECT
+            // -----------------------------------------------------
+
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
+
+                // 🆕 NEW FIELDS (Correct syntax)
+                OrderedDate = DateTime.UtcNow,
+                ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
+
                 Products = orderProducts,
                 Subtotal = totalSubtotal,
                 TotalDiscount = totalDiscountAmount,
                 TotalAmount = totalFinalAmount,
+
                 OrderDate = DateTime.UtcNow,
-                Status = "Pending"
+                Status = "Pending",
+
+                EmployeeId = assignedEmployeeId
             };
 
+
             await _orders.InsertOneAsync(order);
+
             return Ok(new { message = "Order placed successfully", orderId = order.Id });
         }
+
 
 
 
@@ -171,7 +216,7 @@ namespace DSM_Application.Server.Controllers
                 PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
                 TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
 
-                OrderDate = o.OrderDate,
+                OrderedDate = o.OrderedDate,
                 Status = o.Status,
                 EmployeeId = o.EmployeeId,
                 Name = o.Name
@@ -246,7 +291,8 @@ namespace DSM_Application.Server.Controllers
                     QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
                     PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
                     TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
-                    OrderDate = o.OrderDate,
+                    OrderedDate = o.OrderedDate,
+                    ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     Status = o.Status,
                     EmployeeId = employee?.EmployeeId,
                     Name = employee?.Name,
@@ -276,16 +322,47 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetOrdersByEmployee(string employeeId)
         {
+            if (string.IsNullOrEmpty(employeeId))
+                return BadRequest("EmployeeId required");
+
             var orders = await _mongo.Orders
-                .AsQueryable()
-                .Where(o => o.EmployeeId == employeeId)
+                .Find(o => o.EmployeeId == employeeId)
+                .SortByDescending(o => o.AssignedOn)
                 .ToListAsync();
 
-            // If you need product details, query Products collection separately
-            // and join manually or embed products in Orders.
+            var result = new List<object>();
+            foreach (var order in orders)
+            {
+                var customer = await _mongo.Customers.Find(c => c.CustomerId == order.CustomerId).FirstOrDefaultAsync();
 
-            return Ok(orders);
+                result.Add(new
+                {
+                    id = order.Id,
+                    customerId = order.CustomerId,
+                    customerName = customer?.Name,
+                    customerPhone = customer?.PhoneNumber,
+                    customerEmail = customer?.Email,
+                    customerAddress = customer?.Address,
+                    products = order.Products.Select(p => new {
+                        productId = p.ProductId,
+                        productName = p.ProductName,
+                        price = p.Price,
+                        quantity = p.Quantity
+                    }),
+                    subtotal = order.Subtotal,
+                    totalAmount = order.TotalAmount,
+                    status = order.Status,
+                    paymentCollectedByEmployee = order.PaymentCollectedByEmployee,
+                    collectedAmount = order.CollectedAmount,
+                    paymentMethod = order.PaymentMethod,
+                    collectedOn = order.CollectedOn,
+                    orderDate = order.OrderDate
+                });
+            }
+
+            return Ok(result);
         }
+
         //[HttpGet("{orderId}")]
         //public async Task<IActionResult> GetOrder(string orderId)
         //{
@@ -343,7 +420,7 @@ namespace DSM_Application.Server.Controllers
                 PriceDiscountPercent = order.Products.First().PriceDiscountPercent,
                 TotalDiscountPercent = order.Products.First().TotalDiscountPercent,
 
-                OrderDate = order.OrderDate,
+                OrderedDate = order.OrderedDate,
                 Status = order.Status,
                 EmployeeId = order.EmployeeId,
                 Name = order.Name,
@@ -382,7 +459,7 @@ namespace DSM_Application.Server.Controllers
             if (order == null) return NotFound("Order not found");
 
             // ensure distributor owns this order
-            if (order.DistributorId != distributorIdFromToken) return Forbid("Not authorized for this order");
+            if (order.DistributorId != distributorIdFromToken) return Unauthorized("Not authorized for this order");
 
             // Example state transitions you might want to enforce:
             // Pending -> Confirmed -> Shipped -> Delivered
@@ -419,44 +496,27 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Order status updated", status = to });
         }
-        [Authorize(Roles = "Distributor")]
         [HttpPut("{orderId}/assign")]
-        public async Task<IActionResult> AssignOrderToEmployee(string orderId, [FromBody] AssignOrderDto dto)
+        public async Task<IActionResult> AssignOrder(string orderId, [FromBody] AssignOrderDto dto)
         {
-            if (dto == null || string.IsNullOrEmpty(dto.EmployeeId))
-                return BadRequest("EmployeeId required");
-
-            var distributorIdFromToken = User.FindFirst("DistributorId")?.Value;
-            if (string.IsNullOrEmpty(distributorIdFromToken))
-                return Unauthorized("DistributorId missing from token");
-
-            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+            var order = await _orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order == null) return NotFound("Order not found");
 
-            if (order.DistributorId != distributorIdFromToken)
-                return Forbid("Not authorized to modify this order");
+            if (string.IsNullOrEmpty(dto.EmployeeId))
+                return BadRequest("EmployeeId is required");
 
-            if (order.Status != "Confirmed" && order.Status != "Pending")
-                return BadRequest($"Order cannot be assigned in state '{order.Status}'");
+            order.EmployeeId = dto.EmployeeId;
+            order.Name = dto.EmployeeName;
+            order.AssignedOn = DateTime.UtcNow;
 
-            var emp = await _mongo.Employees.Find(e => e.EmployeeId == dto.EmployeeId && e.DistributorId == distributorIdFromToken).FirstOrDefaultAsync();
-            if (emp == null) return BadRequest("Employee not found for this distributor");
-            order.EmployeeId = emp.EmployeeId;  // This ensures it matches the login system ID
-            order.Name = emp.Name;
+            // 🔥 Update order status here
+            order.Status = "Shipped";
 
-            // ✅ Save EmployeeId and EmployeeName consistently
-            var update = Builders<Order>.Update
-               .Set(o => o.EmployeeId, dto.EmployeeId)
-        .Set(o => o.Name, dto.EmployeeName)
-                .Set(o => o.AssignedOn, DateTime.UtcNow)
-                .Set(o => o.Status, "Assigned");
+            await _orders.ReplaceOneAsync(o => o.Id == orderId, order);
 
-            if (!string.IsNullOrEmpty(dto.Note))
-                update = update.Set(o => o.DeliveryRemarks, dto.Note);
-            await _mongo.Orders.UpdateOneAsync(o => o.Id == order.Id, update);
-
-            return Ok(new { message = "Order assigned to employee", orderId, assignedTo = dto.EmployeeId });
+            return Ok(new { message = "Order assigned & shipped" });
         }
+
         [HttpGet("{distributorId}/employees")]
         public async Task<IActionResult> GetEmployees(string distributorId)
         {
@@ -469,70 +529,98 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(employees);
         }
-        [HttpGet("by-employee/{employeeId}")]
-        public async Task<IActionResult> GetOrdersByEmployeeId(string employeeId)
-        {
-            if (string.IsNullOrEmpty(employeeId))
-                return BadRequest("EmployeeId required");
+        //[HttpGet("by-employee/{employeeId}")]
+        //public async Task<IActionResult> GetOrdersByEmployeeId(string EmployeeId)
+        //{
+        //    if (string.IsNullOrEmpty(EmployeeId))
+        //        return BadRequest("EmployeeId required");
 
-            var objectId = new ObjectId(employeeId);
-            var orders = await _mongo.Orders
-                .Find(o => o.EmployeeId == objectId.ToString())
-                .SortByDescending(o => o.AssignedOn)
-                .ToListAsync();
+        //    var objectId = new ObjectId(EmployeeId);
+        //    var orders = await _mongo.Orders
+        //        .Find(o => o.EmployeeId == objectId.ToString())
+        //        .SortByDescending(o => o.AssignedOn)
+        //        .ToListAsync();
 
-            var result = new List<object>();
+        //    var result = new List<object>();
 
-            foreach (var order in orders)
-            {
-                var customer = await _mongo.Customers
-                    .Find(c => c.CustomerId == order.CustomerId)
-                    .FirstOrDefaultAsync();
+        //    foreach (var order in orders)
+        //    {
+        //        var customer = await _mongo.Customers
+        //            .Find(c => c.CustomerId == order.CustomerId)
+        //            .FirstOrDefaultAsync();
 
-                result.Add(new
-                {
-                    order.Id,
-                    order.Status,
-                    order.TotalAmount,
-                    order.OrderDate,
-                    order.Products,
-                    customerName = customer?.Name,
-                    customerPhone = customer?.PhoneNumber,
-                    customerEmail = customer?.Email,
-                    customerAddress = customer?.Address
-                });
-            }
+        //        result.Add(new
+        //        {
+        //            order.Id,
+        //            order.Status,
+        //            order.TotalAmount,
+        //            order.OrderDate,
+        //            order.Products,
+        //            customerName = customer?.Name,
+        //            customerPhone = customer?.PhoneNumber,
+        //            customerEmail = customer?.Email,
+        //            customerAddress = customer?.Address
+        //        });
+        //    }
 
-            return Ok(result);
-        }
-        //[Authorize(Roles = "Employee")]
-        [HttpPut("{orderId}/collect-payment")]
-        public async Task<IActionResult> CollectPayment(string orderId, [FromBody] CollectPaymentDto dto)
-        {
-            var employeeId = User.FindFirst("EmployeeId")?.Value;
-            if (string.IsNullOrEmpty(employeeId))
-                return Unauthorized("EmployeeId missing from token");
+        //    return Ok(result);
+        //}
 
-            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (order == null) return NotFound("Order not found");
+        //[AllowAnonymous]
+        //[HttpPost("collect-payment/{orderId}")]
+        //public async Task<IActionResult> CollectPayment(string orderId, [FromBody] PaymentCollectionDto dto)
+        //{
+        //    var employee = await _mongo.Employees
+        //        .Find(e => e.EmployeeId == dto.EmployeeId)
+        //        .FirstOrDefaultAsync();
 
-            if (order.EmployeeId != employeeId)
-                return Forbid("You are not assigned to this order");
+        //    if (employee == null)
+        //        return NotFound("Employee not found.");
 
-            if (order.PaymentCollectedByEmployee)
-                return BadRequest("Payment already collected for this order");
+        //    // ❌ Delivery employee CANNOT collect payment
+        //    if (employee.Designation == "Delivery")
+        //        return BadRequest("Delivery employees cannot collect payment.");
 
-            var update = Builders<Order>.Update
-                .Set(o => o.PaymentCollectedByEmployee, true)
-                .Set(o => o.CollectedAmount, dto.CollectedAmount)
-                .Set(o => o.PaymentMethod, dto.PaymentMethod)
-                .Set(o => o.CollectedOn, DateTime.UtcNow)
-                .Set(o => o.Status, "Delivered");
+        //    // ✔ Only Cash Collector can collect payment
+        //    if (employee.Designation != "Cash Collector")
+        //        return BadRequest("Only Cash Collector can collect payment.");
 
-            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+        //    var order = await _mongo.Orders
+        //        .Find(o => o.Id == orderId)
+        //        .FirstOrDefaultAsync();
 
-            return Ok(new { message = "Payment collected and order marked as delivered" });
-        }
+        //    if (order == null)
+        //        return NotFound("Order not found.");
+
+        //    var update = Builders<Order>.Update
+        //        .Set(o => o.IsPaymentCollected, true)
+        //        .Set(o => o.PaymentCollectedBy, employee.EmployeeId)
+        //        .Set(o => o.CollectedAmount, dto.Amount)
+        //        .Set(o => o.CollectedOn, DateTime.UtcNow)
+        //        .Set(o => o.Status, "Delivered"); // optional
+
+        //    await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+
+        //    // 📌 Add payment to history collection
+        //    var history = new PaymentCollectionHistory
+        //    {
+        //        Id = ObjectId.GenerateNewId().ToString(),
+        //        OrderId = orderId,
+        //        CustomerId = order.CustomerId,
+        //        DistributorId = order.DistributorId,
+        //        CollectedByEmployeeId = employee.EmployeeId,
+        //        CollectedByName = employee.Name,
+        //        Amount = dto.Amount,
+        //        PaymentMethod = dto.PaymentMethod,
+        //        CollectedOn = DateTime.UtcNow
+        //    };
+
+        //    await _mongo.PaymentHistory.InsertOneAsync(history);
+
+
+        //    return Ok("Payment collected by Cash Collector.");
+        //}
+
         // DTOs inside controller for convenience (you can move these to separate files)
         //[Authorize(Roles = "Employee")]
         [HttpPut("{orderId}/employee-status")]
@@ -542,7 +630,7 @@ namespace DSM_Application.Server.Controllers
             if (string.IsNullOrEmpty(requestedStatus))
                 return BadRequest("Status required");
 
-            var employeeId = User.FindFirst("EmployeeId")?.Value ?? User.FindFirstValue("EmployeeId");
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
             if (string.IsNullOrEmpty(employeeId))
                 return Unauthorized("EmployeeId missing from token");
 
@@ -550,29 +638,29 @@ namespace DSM_Application.Server.Controllers
             if (order == null) return NotFound("Order not found");
 
             if (order.EmployeeId != employeeId)
-                return Forbid("Not authorized to modify this order");
+                return Unauthorized("Not authorized to modify this order");
 
             if (order.Status != "Assigned" && order.Status != "Shipped")
                 return BadRequest($"Cannot change status from '{order.Status}'");
 
+            // 🔥 FIXED — Delivery boy should only update delivery, NOT payment
             var update = Builders<Order>.Update
                 .Set(o => o.Status, requestedStatus)
                 .Set(o => o.DeliveredOn, DateTime.UtcNow)
-                .Set(o => o.PaymentMethod, body.PaymentMethod)
-                .Set(o => o.CollectedAmount, body.CollectedAmount)
-                .Set(o => o.PaymentCollectedByEmployee, true)
-                .Set(o => o.CollectedOn, DateTime.UtcNow);
+                .Set(o => o.PaymentCollectedByEmployee, false)   // 💥 Force NO PAYMENT
+                .Unset(o => o.PaymentMethod)                     // 💥 Remove payment if any
+                .Unset(o => o.CollectedAmount)
+                .Unset(o => o.CollectedOn);
 
             await _mongo.Orders.UpdateOneAsync(o => o.Id == order.Id, update);
 
             return Ok(new
             {
-                message = "Order delivered and payment recorded",
-                status = requestedStatus,
-                payment = body.PaymentMethod,
-                amount = body.CollectedAmount
+                message = "Order delivered successfully",
+                status = requestedStatus
             });
         }
+
         [Authorize(Roles = "Customer")]
         [HttpPut("{orderId}/cancel")]
         public async Task<IActionResult> CancelOrder(string orderId)
@@ -597,6 +685,7 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Order canceled successfully", orderId });
         }
+
         [Authorize(Roles = "Customer")]
         [HttpPost("{orderId}/reorder")]
         public async Task<IActionResult> Reorder(string orderId)
@@ -659,10 +748,6 @@ namespace DSM_Application.Server.Controllers
                 Status = "Pending"
             };
 
-
-
-
-
             await _mongo.Orders.InsertOneAsync(newOrder);
 
             //return Ok(new { message = "Order placed successfully", orderId = newOrder.Id });
@@ -678,6 +763,97 @@ namespace DSM_Application.Server.Controllers
             });
 
         }
+        [HttpGet("delivered-for-cashier/{distributorId}")]
+        public async Task<IActionResult> GetDeliveredOrdersForCashier(string distributorId)
+        {
+            var orders = await _mongo.Orders
+                .Find(o => o.DistributorId == distributorId && o.Status == "Delivered")
+                .ToListAsync();
+
+            var result = new List<object>();
+
+            foreach (var order in orders)
+            {
+                // get customer
+                var customer = await _mongo.Customers
+                    .Find(c => c.CustomerId == order.CustomerId)
+                    .FirstOrDefaultAsync();
+
+                // get ALL payments for this order
+                var payments = await _mongo.PaymentHistory
+                    .Find(p => p.OrderId == order.Id)
+                    .SortBy(p => p.PaymentDate)
+                    .ToListAsync();
+
+                decimal total = order.TotalAmount;
+                decimal paidSoFar = payments.Sum(p => p.AmountPaidToday);
+                decimal pending = total - paidSoFar;
+                if (pending < 0) pending = 0;
+
+                result.Add(new
+                {
+                    orderId = order.Id,
+                    customerId = order.CustomerId,
+                    customerName = customer?.Name,
+                    customerPhone = customer?.PhoneNumber,
+                    totalAmount = total,
+                    pendingAmount = pending   // <-- corrected balance
+                });
+            }
+
+            return Ok(result);
+        }
+
+     
+
+
+        [HttpGet("distributor-payment-summary/{distributorId}")]
+        public async Task<IActionResult> GetDistributorPaymentSummary(string distributorId)
+        {
+            var history = await _mongo.PaymentHistory
+                .Find(h => h.DistributorId == distributorId)
+                .ToListAsync();
+
+            var summary = history
+                .GroupBy(h => h.CashierId)
+                .Select(g => new
+                {
+                    CashierId = g.Key,
+                    TotalCollected = g.Sum(x => x.AmountPaidToday),
+                    PaymentsCount = g.Count(),
+                    LastPaymentDate = g.Max(x => x.PaymentDate)
+                });
+
+            return Ok(summary);
+        }
+
+
+        [HttpGet("payment-report")]
+        public async Task<IActionResult> GetPaymentReport(
+    [FromQuery] string distributorId,
+    [FromQuery] DateTime? fromDate,
+    [FromQuery] DateTime? toDate)
+        {
+            var filter = Builders<PaymentCollectionHistory>.Filter.Eq(h => h.DistributorId, distributorId);
+
+            if (fromDate.HasValue)
+                filter &= Builders<PaymentCollectionHistory>.Filter.Gte(h => h.PaymentDate, fromDate.Value);
+
+            if (toDate.HasValue)
+                filter &= Builders<PaymentCollectionHistory>.Filter.Lte(h => h.PaymentDate, toDate.Value);
+
+
+
+            var history = await _mongo.PaymentHistory
+                .Find(filter)
+                .SortByDescending(h => h.PaymentDate)
+                .ToListAsync();
+
+            return Ok(history);
+        }
+      
+
+
     }
 }
 

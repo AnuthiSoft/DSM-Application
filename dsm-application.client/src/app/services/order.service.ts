@@ -13,7 +13,7 @@ export class OrderService {
 
   placeOrder(payload: any): Observable<any> {
     // assumes ApiService posts to /api/<endpoint>
-    return this.api.post<any>(this.endpoint, payload);
+    return this.api.post<any>(`${this.endpoint}/create`, payload);
   }
 
  getOrdersByCustomer(customerId: string) {
@@ -45,7 +45,7 @@ export class OrderService {
   // ✅ NEW: Fetch orders assigned to employee
 getOrdersByEmployee(employeeId: string) {
   // console.log('Employee ID used for fetching orders:', this.currentUser.id);
-    return this.api.get<DistributorOrder[]>(`${this.endpoint}/by-employee/${employeeId}`);
+    return this.api.get<DistributorOrder[]>(`${this.endpoint}/employee/${employeeId}`);
 }
   // Employee - mark order delivered or failed
 updateEmployeeOrderStatus(orderId: string, payload: any) {

@@ -11,7 +11,7 @@ using MongoDB.Driver;
 
 namespace DSM_Application.Server.Controllers
 {
-    [Authorize(Roles = "Distributor")]
+    //[Authorize(Roles = "Distributor")]
     //[AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
@@ -19,10 +19,12 @@ namespace DSM_Application.Server.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
+        private readonly CategoryService _categoryService;
 
-        public ProductsController(ProductService productService)
+        public ProductsController(ProductService productService, CategoryService categoryService)
         {
             _productService = productService;
+            _categoryService = categoryService;
         }
 
         //[Authorize(Roles = "Distributor")]
@@ -116,7 +118,8 @@ namespace DSM_Application.Server.Controllers
                     imageUrls.Add("/uploads/" + fileName);
                 }
             }
-
+            var subCategory = await _categoryService.GetByIdAsync(dto.Category);
+            decimal gst = subCategory?.GST ?? 0;
             var product = new Product
             {
                 ProductName = dto.ProductName,
@@ -126,7 +129,7 @@ namespace DSM_Application.Server.Controllers
                 Price = dto.Price,
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
-                GST = dto.GST,
+                GST = gst,
                 Stock = dto.Stock,
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
@@ -201,7 +204,8 @@ namespace DSM_Application.Server.Controllers
                 // ⭐ 2. KEEP OLD IMAGES when user does not upload new ones
                 existing.ImageUrls = existing.ImageUrls ?? new List<string>();
             }
-
+            var subCategory = await _categoryService.GetByIdAsync(dto.Category);
+            existing.GST = subCategory?.GST ?? existing.GST;
             // ⭐ 3. Update fields
             existing.ProductName = dto.ProductName;
             existing.ProductCode = dto.ProductCode;
@@ -210,7 +214,7 @@ namespace DSM_Application.Server.Controllers
             existing.Price = dto.Price;
             existing.CostPrice = dto.CostPrice;
             existing.Discount = dto.Discount;
-            existing.GST = dto.GST;
+            existing.GST = existing.GST;
             existing.Stock = dto.Stock;
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;

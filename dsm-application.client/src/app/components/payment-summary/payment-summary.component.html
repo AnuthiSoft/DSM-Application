@@ -1,0 +1,293 @@
+<div class="dashboard-card">
+  <!-- <div class="card-header">
+    <h3><i class="fas fa-chart-bar"></i> Distributor Summary</h3>
+  </div> -->
+
+  <!-- Date Selection -->
+  <div class="section-header">
+    <h4><i class="fas fa-calendar-alt"></i> Choose Date</h4>
+  </div>
+
+  <div class="summary-controls">
+    <div class="form-group">
+      <label><i class="fas fa-calendar-day"></i> Select Date</label>
+      <div class="date-input-container">
+        <i class="fas fa-calendar"></i>
+        <input type="date" 
+               class="form-input date-input"
+               [(ngModel)]="date"
+               (change)="onDateChange()">
+      </div>
+      <button class="btn btn-primary load-btn" (click)="load()">
+        <i class="fas fa-sync-alt"></i> Load Summary
+      </button>
+    </div>
+  </div>
+
+  <!-- Summary Totals -->
+  <div *ngIf="summary" class="summary-totals-card">
+    <div class="section-header">
+      <h4><i class="fas fa-chart-pie"></i> Daily Totals</h4>
+    </div>
+    
+    <div class="totals-grid">
+      <div class="total-card">
+        <div class="total-icon cash-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Cash</div>
+          <div class="total-value">₹{{ summary.totalCash | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon online-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Online</div>
+          <div class="total-value">₹{{ summary.totalOnline | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon scanner-icon">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Scanner</div>
+          <div class="total-value">₹{{ summary.totalScanner | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="total-card">
+        <div class="total-icon total-icon">
+          <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="total-content">
+          <div class="total-label">Total Collected</div>
+          <div class="total-value highlight">
+            ₹{{ (summary.totalCash + summary.totalOnline + summary.totalScanner) | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-header">
+  <h4><i class="fas fa-handshake"></i> Pending Handovers</h4>
+</div>
+
+<div *ngIf="pendingHandovers.length > 0; else noHandovers" class="handover-table-container">
+  <table class="transactions-table">
+    <thead>
+      <tr>
+        <th>Handover ID</th>
+        <th>Total Amount</th>
+        <th>Cashier</th>
+        <th>Date</th>
+        <!-- <th>Payments</th> -->
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let h of pendingHandovers">
+        <td>#{{ h.handoverId }}</td>
+        <td>₹{{ h.totalAmountSubmitted }}</td>
+        <td>{{ h.cashierId }}</td>
+        <td>{{ h.handoverDate | date:'dd/MM/yyyy' }}</td>
+        <!-- <td>{{ h.paymentIds.length }} payments</td> -->
+
+        <td>
+          <button class="btn btn-success btn-sm" (click)="approve(h.handoverId)">
+            <i class="fas fa-check"></i> Accept
+          </button>
+
+          <button class="btn btn-danger btn-sm" (click)="openRejectModal(h.handoverId)">
+            <i class="fas fa-times"></i> Reject
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<ng-template #noHandovers>
+  <div class="no-payments-message">
+    <h4>No Pending Handovers</h4>
+  </div>
+</ng-template>
+
+
+    <!-- Collection Breakdown -->
+    <div class="breakdown-chart">
+      <div class="breakdown-header">
+        <h5><i class="fas fa-chart-pie"></i> Collection Breakdown</h5>
+      </div>
+      <div class="breakdown-bars">
+        <div class="breakdown-bar-item">
+          <div class="bar-label">Cash</div>
+          <div class="bar-container">
+            <div class="bar-fill cash-fill" [style.width.%]="getCashPercentage()"></div>
+            <div class="bar-percentage">{{ getCashPercentage() }}%</div>
+          </div>
+          <div class="bar-amount">₹{{ summary.totalCash | number:'1.2-2' }}</div>
+        </div>
+        
+        <div class="breakdown-bar-item">
+          <div class="bar-label">Online</div>
+          <div class="bar-container">
+            <div class="bar-fill online-fill" [style.width.%]="getOnlinePercentage()"></div>
+            <div class="bar-percentage">{{ getOnlinePercentage() }}%</div>
+          </div>
+          <div class="bar-amount">₹{{ summary.totalOnline | number:'1.2-2' }}</div>
+        </div>
+        
+        <div class="breakdown-bar-item">
+          <div class="bar-label">Scanner</div>
+          <div class="bar-container">
+            <div class="bar-fill scanner-fill" [style.width.%]="getScannerPercentage()"></div>
+            <div class="bar-percentage">{{ getScannerPercentage() }}%</div>
+          </div>
+          <div class="bar-amount">₹{{ summary.totalScanner | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Transactions -->
+  <div class="transactions-section">
+    <div class="section-header">
+      <h4><i class="fas fa-list-alt"></i> Payment Transactions</h4>
+      <div *ngIf="summary?.payments?.length" class="transactions-count">
+        <span class="count-badge">{{ summary.payments.length }}</span> transactions
+      </div>
+    </div>
+
+    <div *ngIf="summary?.payments?.length; else noPayments" class="transactions-table-container">
+      <table class="transactions-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Order ID</th>
+            <th>Total Amount</th>
+            <th>Paid Today</th>
+            <th>Pending</th>
+            <th>Mode</th>
+            <th>Cashier</th>
+            <th>Handed Over</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of summary.payments" class="transaction-row">
+            <td>
+              <div class="customer-info">
+                <div class="customer-name">{{ p.customerName }}</div>
+                <div *ngIf="p.customerPhone" class="customer-phone">
+                  <i class="fas fa-phone"></i> {{ p.customerPhone }}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="order-id">#{{ p.orderId }}</span>
+            </td>
+            <td>
+              <span class="total-amount">₹{{ p.orderTotalAmount | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="paid-amount">₹{{ p.amountPaidToday | number:'1.2-2' }}</span>
+            </td>
+            <td>
+              <span class="pending-amount" [class.fully-paid]="p.pendingAmount === 0">
+                {{ p.pendingAmount === 0 ? 'Paid' : '₹' + (p.pendingAmount | number:'1.2-2') }}
+              </span>
+            </td>
+            <td>
+            <span class="payment-mode-badge"
+      [ngClass]="{
+        'cash': p.paymentMode === 'cash',
+        'online': p.paymentMode === 'online',
+        'upi': p.paymentMode === 'upi',
+        'scanner': p.paymentMode === 'scanner'
+      }">
+                <i [class]="getPaymentModeIcon(p.paymentMode)"></i>
+                {{ p.paymentMode }}
+              </span>
+            </td>
+            <td>
+              <span class="cashier-badge">
+                <i class="fas fa-user-tie"></i>
+                {{ p.cashierId }}
+              </span>
+            </td>
+            <td>
+              <span class="handover-status" [class]="p.isHandedOver ? 'handed-over' : 'pending-handover'">
+                <i [class]="p.isHandedOver ? 'fas fa-check-circle' : 'fas fa-clock'"></i>
+                {{ p.isHandedOver ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td>
+              <div class="date-time">
+                <div class="date">{{ p.paymentDate | date:'dd/MM/yyyy' }}</div>
+                <div class="time">{{ p.paymentDate | date:'hh:mm a' }}</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noPayments>
+      <div class="no-payments-message">
+        <div class="message-content">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <h4>No Transactions Found</h4>
+          <p *ngIf="summary">No payment records found for {{ date | date:'fullDate' }}</p>
+          <p *ngIf="!summary">Select a date and load summary to view transactions</p>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="summary?.payments?.length" class="quick-actions-section">
+    <div class="section-header">
+      <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+    </div>
+    <div class="quick-actions-grid">
+      <button class="quick-action-btn" (click)="exportToExcel()">
+        <i class="fas fa-file-excel"></i>
+        <span>Export to Excel</span>
+      </button>
+      <button class="quick-action-btn" (click)="printSummary()">
+        <i class="fas fa-print"></i>
+        <span>Print Summary</span>
+      </button>
+      <button class="quick-action-btn" (click)="downloadPDF()">
+        <i class="fas fa-file-pdf"></i>
+        <span>Download PDF</span>
+      </button>
+      <button class="quick-action-btn" (click)="viewAnalytics()">
+        <i class="fas fa-chart-line"></i>
+        <span>View Analytics</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal" *ngIf="showRejectModal">
+  <div class="modal-content">
+    <h4>Reject Handover</h4>
+
+    <textarea class="form-textarea"
+              [(ngModel)]="rejectReason"
+              placeholder="Enter reason..."
+              rows="3">
+    </textarea>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="showRejectModal = false">Cancel</button>
+      <button class="btn btn-danger" (click)="submitReject()">Submit</button>
+    </div>
+  </div>
+</div>

@@ -68,10 +68,13 @@ EmployeeId?: string;
   deliveryRemarks?: string;
 }
 export interface Employee {
-  id?: string; 
-  employeeId?: string;
+  
+    id?: string;           // <-- Backend usually sends this
+  _id?: string;          // <-- MongoDB style ID (sometimes)
+  employeeId?: string;   // <-- Use this in UI
   name: string;
   email: string;
   isActive: boolean;
   distributorId?: string;
+   designation?: string;   // <-- Add this line
 }

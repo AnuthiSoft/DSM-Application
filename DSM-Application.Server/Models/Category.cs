@@ -6,8 +6,8 @@ namespace DSM_Application.Server.Models
     public class CategoryAttribute
     {
         public string AttributeName { get; set; } = string.Empty;
-        public string AttributeType { get; set; } = "text"; // text, number, dropdown, boolean, date
-        public List<string>? Options { get; set; } = null; // for dropdowns
+        public string AttributeType { get; set; } = "text";
+        public List<string>? Options { get; set; } = null;
         public bool IsRequired { get; set; } = false;
     }
 
@@ -25,13 +25,16 @@ namespace DSM_Application.Server.Models
 
         public string Name { get; set; } = string.Empty;
 
-        [BsonRepresentation(BsonType.ObjectId)]
+        //[BsonRepresentation(BsonType.ObjectId)]
         public string? ParentId { get; set; } = null;
 
         public string? IconUrl { get; set; }
         public string? BannerUrl { get; set; }
 
-        // Primary GST
+        // NEW FIELD ↓↓↓
+        public string? HsnCode { get; set; }
+
+        // GST pulled automatically from HSN (or manually stored)
         public decimal GST { get; set; } = 0m;
 
         public List<CategoryAttribute> Attributes { get; set; } = new();
@@ -44,6 +47,5 @@ namespace DSM_Application.Server.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
     }
 }

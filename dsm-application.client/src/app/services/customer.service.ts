@@ -98,4 +98,31 @@ getCustomerId(): string {
   });
 }
 
+ // ================= PERMANENT EMPLOYEE ASSIGN =================
+  assignPermanentEmployee(distributorId: string, customerId: string, employeeId: string) {
+    const token = localStorage.getItem('token');
+
+    return this.api.put(
+      `distributor/assign-permanent-employee?distributorId=${distributorId}&customerId=${customerId}&employeeId=${employeeId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
+
+  // ================= GET EMPLOYEES FOR DROPDOWN =================
+  getEmployees(distributorId: string): Observable<any[]> {
+    const token = localStorage.getItem('token');
+
+    return this.api.get<any[]>(
+      `orders/${distributorId}/employees`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
+
 }
+
+

@@ -93,4 +93,20 @@ export class EmployeeOrdersComponent implements OnInit {
       }
     });
   }
+  markDelivered(order: DistributorOrder) {
+  this.orderService.updateEmployeeOrderStatus(order.id, {
+    status: "Delivered"
+  }).subscribe({
+    next: () => {
+      alert("Order marked as Delivered!");
+      this.loadOrders();
+    },
+    error: (err) => {
+      console.error(err);
+      alert("Failed to update order status.");
+    }
+  });
+}
+
+  
 }

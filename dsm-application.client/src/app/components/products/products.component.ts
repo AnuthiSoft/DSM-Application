@@ -25,6 +25,9 @@ export class ProductsComponent {
   filteredProducts: Product[] = [];
   categories: Category[] = [];
   distributorId:string | null = null;
+  mainCategories: any[] = [];
+subCategories: any[] = [];
+
  
   // ==============================================
   // FORM & STATE
@@ -56,22 +59,26 @@ measures: string[] = [];
     private fb: FormBuilder
   ) {
     // Build product form
-    this.productForm = this.fb.group({
-      productName: ['', Validators.required],
-      productCode: ['', Validators.required],
-      color:['', Validators.required],
-      category: ['', Validators.required],
-      description: [''],
-       measure: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0)]],
-      costPrice: [0, [Validators.required, Validators.min(0)]],
-      discount: [0, [Validators.min(0)]],
-      gst: [0, [Validators.min(0)]],
-      stock: [0, [Validators.min(0)]],
-      reorderLevel: [0, [Validators.min(0)]],
-      brand: [''],
-      imageUrls: [''],
-    });
+   this.productForm = this.fb.group({
+  productName: ['', Validators.required],
+  productCode: ['', Validators.required],
+  color: ['', Validators.required],
+
+  mainCategory: ['', Validators.required],   // ⭐ NEW FIELD
+  category: ['', Validators.required],       // ⭐ SUBCATEGORY
+
+  description: [''],
+  measure: ['', Validators.required],
+  price: [0, [Validators.required, Validators.min(0)]],
+  costPrice: [0, [Validators.required, Validators.min(0)]],
+  discount: [0, [Validators.min(0)]],
+  gst: [0, [Validators.min(0)]],
+  stock: [0, [Validators.min(0)]],
+  reorderLevel: [0, [Validators.min(0)]],
+  brand: [''],
+  imageUrls: [''],
+});
+
   }
  
   // ==============================================
@@ -84,9 +91,28 @@ measures: string[] = [];
       this.loadProducts(distributorId);
       this.loadCategories(distributorId);
        this.loadMeasures();
+        this.loadMainCategories();
     }
   }
- 
+  loadMainCategories() {
+  this.productService.getMainCategories().subscribe(res => this.mainCategories = res);
+}
+onMainCategoryChange(event: Event) {
+  const select = event.target as HTMLSelectElement;
+  const value = select.value;
+  this.productForm.patchValue({ mainCategory: value });
+  this.productService.getSubCategories(value).subscribe(res => this.subCategories = res);
+}
+onSubCategoryChange(event: Event) {
+  const select = event.target as HTMLSelectElement;
+  const value = select.value;
+
+  this.productForm.patchValue({ category: value });
+
+  this.productService.getSubCategoryGst(value).subscribe(gst => {
+    this.productForm.patchValue({ gst });
+  });
+}
   loadProducts(distributorId: string) {
     this.productService.getProductsByDistributor(distributorId).subscribe({
       next: (data) => {

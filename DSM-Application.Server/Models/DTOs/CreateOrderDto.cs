@@ -4,9 +4,10 @@ namespace DSM_Application.Server.Models.DTOs
 {
     public class OrderCreateDto
     {
+        
         public string CustomerId { get; set; }
         public string DistributorId { get; set; }
-        public List<OrderProductDto> Products { get; set; }
+        public List<OrderProductInputDto> Products { get; set; }
         public decimal SpecialDiscountPercent { get; set; }
     }
 
@@ -17,12 +18,19 @@ namespace DSM_Application.Server.Models.DTOs
         public decimal Price { get; set; }
         public int Quantity { get; set; }
     }
+
+    public class OrderProductInputDto
+    {
+        public string ProductId { get; set; }
+        public int Quantity { get; set; }
+    }
+
     public class AssignOrderDto
     {
-        [JsonPropertyName("employeeId")]
+        
         public string EmployeeId { get; set; }
-        [JsonPropertyName("employeeName")]
-        public string EmployeeName { get; set; } // optional but convenient
+
+        public string EmployeeName { get; set; }   // REQUIRED
         public string Note { get; set; } // optional
     }
 
@@ -58,7 +66,11 @@ namespace DSM_Application.Server.Models.DTOs
         public decimal PriceDiscountPercent { get; set; }
         public decimal TotalDiscountPercent { get; set; }
 
-        public DateTime OrderDate { get; set; }
+        // ⭐ ADD THESE TWO NEW FIELDS
+        public DateTime? OrderedDate { get; set; }
+        public DateTime? ExpectedDeliveryDate { get; set; }
+
+        //public DateTime OrderDate { get; set; }
         public string Status { get; set; }
         // ✅ Add these fields
         public string? EmployeeId { get; set; }

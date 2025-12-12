@@ -1,0 +1,264 @@
+/* ===========================================================
+   GLOBAL THEME VARIABLES
+   =========================================================== */
+:root {
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --text-color: #1f2937;
+  --hover-color: #f3f4f6;
+  --primary-color: #3b82f6;
+  --success-color: #16a34a;
+}
+
+/* DARK MODE */
+[data-theme="dark"] {
+  --card-bg: #1f1f1f;
+  --border-color: #2e2e2e;
+  --text-color: #e5e5e5;
+  --hover-color: #2b2b2b;
+  --primary-color: #60a5fa;
+  --success-color: #22c55e;
+}
+
+/* ===========================================================
+   CARD WRAPPER
+   =========================================================== */
+.dashboard-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
+}
+
+/* ===========================================================
+   HEADER + SEARCH
+   =========================================================== */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title i {
+  color: var(--primary-color);
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-input {
+  padding: 8px 12px 8px 35px;
+  width: 250px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  transition: 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+}
+
+.search-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+.search-box i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  opacity: 0.6;
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.count-badge {
+  background: var(--primary-color);
+  color: #fff;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+/* ===========================================================
+   TABLE CORE
+   =========================================================== */
+.table-container {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: var(--hover-color);
+}
+
+.table th,
+.table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.table tbody tr:hover {
+  background: var(--hover-color);
+}
+
+/* Remove faded look */
+.table td,
+.date,
+.time,
+.name {
+  opacity: 1 !important;
+}
+
+/* ===========================================================
+   PAYMENT MODE BADGES
+   =========================================================== */
+.payment-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  background: var(--hover-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  transition: 0.2s;
+}
+
+.payment-mode-badge.cash i { color: #16a34a; }
+.payment-mode-badge.online i { color: #7c3aed; }
+.payment-mode-badge.scanner i { color: #a855f7; }
+.payment-mode-badge.upi i { color: #2563eb; }
+.payment-mode-badge.card i { color: #0891b2; }
+
+/* ===========================================================
+   DATE + TIME
+   =========================================================== */
+.date-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.date {
+  font-weight: 600;
+}
+
+.time {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* ===========================================================
+   NO DATA MESSAGE
+   =========================================================== */
+.no-data-message {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-color);
+}
+
+.message-icon {
+  font-size: 3rem;
+  color: var(--success-color);
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+/* ===========================================================
+   RESPONSIVE
+   =========================================================== */
+@media (max-width: 768px) {
+  .search-input { width: 100%; }
+  .filter-controls { flex-direction: column; gap: 10px; }
+  .table th, .table td { padding: 10px 8px; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-card { padding: 16px; }
+  .title { font-size: 1.2rem; }
+  .table { min-width: 650px; }
+}
+/* ===========================================================
+   🔥 FINAL DARK MODE FIX — FORCE FULL TEXT VISIBILITY
+   =========================================================== */
+
+[data-theme="dark"] table td,
+[data-theme="dark"] table th,
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table-row td,
+[data-theme="dark"] .table-row th {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .payment-id-wrapper span,
+[data-theme="dark"] .customer-info .name,
+[data-theme="dark"] .amount-value,
+[data-theme="dark"] .date,
+[data-theme="dark"] .time {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .table-row:hover {
+  background-color: #2f2f2f !important;
+}
+
+/* Fix Header */
+[data-theme="dark"] thead tr th {
+  color: #e5e5e5 !important;
+  opacity: 1 !important;
+}
+
+/* Fix table borders */
+[data-theme="dark"] .table,
+[data-theme="dark"] .table td,
+[data-theme="dark"] .table th {
+  border-color: #3a3a3a !important;
+}

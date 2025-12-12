@@ -1,0 +1,189 @@
+<div class="dashboard-card">
+  <!-- <div class="card-header">
+    <h3><i class="fas fa-info-circle"></i> Customer Payment Status</h3>
+  </div> -->
+
+  <!-- Search Form -->
+  <div class="search-section">
+    <!-- <div class="section-header">
+      <h4><i class="fas fa-search"></i> Search Criteria</h4>
+    </div> -->
+
+    <div class="search-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label><i class="fas fa-receipt"></i> Order ID</label>
+          <input type="text" 
+                 class="form-input"
+                 [(ngModel)]="orderId"
+                 placeholder="Enter Order ID"
+                 (keyup.enter)="check()">
+        </div>
+
+        <!-- <div class="form-group">
+          <label><i class="fas fa-calendar"></i> Date</label>
+          <div class="date-input-container">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="date" 
+                   class="form-input date-input"
+                   [(ngModel)]="date"
+                   (change)="onDateChange()">
+          </div>
+        </div> -->
+
+        <div class="form-group action-group">
+          <button class="btn btn-primary search-btn" (click)="check()">
+            <i class="fas fa-search"></i> Check Status
+          </button>
+          <button class="btn btn-outline-secondary" (click)="clearSearch()">
+            <i class="fas fa-times"></i> Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div *ngIf="status" class="status-summary-section">
+    <div class="section-header">
+      <h4><i class="fas fa-file-invoice-dollar"></i> Order Summary</h4>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon">
+          <i class="fas fa-hashtag"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Order ID</div>
+          <div class="summary-value order-id">#{{ status.orderId }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-icon total-icon">
+          <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Total Amount</div>
+          <div class="summary-value total-amount">₹{{ status.totalAmount | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-icon paid-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Total Paid </div>
+          <div class="summary-value paid-amount">₹{{ status.totalPaid | number:'1.2-2' }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-icon pending-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="summary-content">
+          <div class="summary-label">Pending Amount</div>
+          <div class="summary-value pending-amount">₹{{ status.pendingAmount | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="payment-progress">
+      <div class="progress-label">
+        <span>Payment Progress</span>
+        <span class="progress-percentage">{{ getPaymentPercentage() }}%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" [style.width.%]="getPaymentPercentage()"></div>
+      </div>
+      <div class="progress-stats">
+        <span>Paid: ₹{{ status.totalPaid | number:'1.2-2' }}</span>
+        <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment History -->
+ <div *ngIf="status?.payments?.length" class="payment-history-section">
+  <div class="section-header">
+    <h4><i class="fas fa-history"></i> Complete Payment History</h4>
+  </div>
+
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>Payment ID</th>
+        <th>Amount</th>
+        <th>Pending</th>
+        <th>Mode</th>
+        <th>Cashier</th>
+        <th>Date</th>
+        <th>Handed Over</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of status.payments">
+  <td>#{{ row.paymentId }}</td>
+  <td>₹{{ row.amountPaidToday }}</td>
+  <td>₹{{ row.pendingAmount}}</td>
+
+  <td>
+    <i [class]="getPaymentModeIcon(row.paymentMode)"></i>
+    {{ row.paymentMode }}
+  </td>
+
+  <td>{{ row.cashierId }}</td>
+
+  <td>{{ row.paymentDate | date:'dd/MM/yyyy hh:mm a' }}</td>
+
+  <td>
+    <span [class]="row.isHandedOver ? 'handed-over' : 'pending-handover'">
+      {{ row.isHandedOver ? 'Handed Over' : 'Pending' }}
+    </span>
+  </td>
+</tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+  <!-- No Results Message -->
+  <div *ngIf="status && status.payments?.length === 0" class="no-results-message">
+    <div class="message-content">
+      <i class="fas fa-file-invoice"></i>
+      <h4>No Payment History Found</h4>
+      <p>No payment records found for Order #{{ status.orderId }}</p>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="status" class="quick-actions-section">
+    <div class="section-header">
+      <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+    </div>
+    <div class="quick-actions-grid">
+      <button class="quick-action-btn" (click)="printStatus()">
+        <i class="fas fa-print"></i>
+        <span>Print Status</span>
+      </button>
+      <button class="quick-action-btn" (click)="downloadReport()">
+        <i class="fas fa-download"></i>
+        <span>Download Report</span>
+      </button>
+      <button class="quick-action-btn" (click)="shareStatus()">
+        <i class="fas fa-share-alt"></i>
+        <span>Share Status</span>
+      </button>
+      <button class="quick-action-btn" (click)="viewCustomerDetails()">
+        <i class="fas fa-user"></i>
+        <span>View Customer</span>
+      </button>
+    </div>
+  </div>
+</div>

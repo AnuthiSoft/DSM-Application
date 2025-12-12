@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DistributorOrder } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { Router } from '@angular/router';
+import { EmployeeService } from '../../services/employee.service';
 
 interface Task {
   title: string;
@@ -14,7 +15,8 @@ interface Task {
   styleUrl: './employee-dashboard.component.css'
 })
 export class EmployeeDashboardComponent implements OnInit {
-    
+    availabilityStatus: 'available' | 'not-available' | 'unknown' = 'unknown';
+availabilityReason: string = '';
  
     activeTab: string = 'dashboard';
   employeeName: string = '';
@@ -22,6 +24,8 @@ export class EmployeeDashboardComponent implements OnInit {
   orderStats = { assigned: 0, completed: 0, pending: 0 };
   performanceRating: number = 4.5;
   recentOrders: DistributorOrder[] = [];
+  showReasonInput = false;
+reasonText = "";
 
   // ✅ Fix: Define as Task[]
   todayTasks: Task[] = [
@@ -29,13 +33,16 @@ export class EmployeeDashboardComponent implements OnInit {
     { title: 'Confirm customer payments', dueTime: '01:00 PM', priority: 'Medium' },
     { title: 'Update delivery routes', dueTime: '04:30 PM', priority: 'Low' }
   ];
+employeeRole = '';
 
-  constructor(private orderService: OrderService, private router: Router) {}
+  constructor(private orderService: OrderService, private router: Router, private employeeService: EmployeeService,) {}
 
   ngOnInit(): void {
     this.employeeName = localStorage.getItem('employeeName') || 'Employee';
     this.employeeId = localStorage.getItem('employeeId') || '';
+  this.employeeRole = (localStorage.getItem('employeeDesignation') || '').toLowerCase();
     this.loadDashboardData();
+     this.loadAvailability();
   }
 
   setActiveTab(tab: string): void {
@@ -50,6 +57,40 @@ export class EmployeeDashboardComponent implements OnInit {
   //   localStorage.clear();
   //   this.router.navigate(['/login']);
   // }
+loadAvailability() {
+  if (!this.employeeId) return;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  this.employeeService.getAvailability(this.employeeId, today).subscribe({
+    next: (res) => {
+      this.availabilityStatus = res.isAvailable ? 'available' : 'not-available';
+      this.availabilityReason = res.reason || '';
+    },
+    error: () => {
+      this.availabilityStatus = 'unknown';
+    }
+  });
+}
+markAvailability(isAvailable: boolean) {
+  const today = new Date().toISOString().split('T')[0];
+
+  if (isAvailable) {
+    // Directly mark available
+    this.employeeService.markAvailability({
+      employeeId: this.employeeId,
+      date: today,
+      isAvailable: true,
+      reason: ''
+    }).subscribe(() => {
+      alert('Availability updated!');
+      this.loadAvailability();
+    });
+  } else {
+    // Show input popup for reason
+    this.showReasonInput = true;
+  }
+}
 
   loadDashboardData(): void {
     if (!this.employeeId) return;
@@ -84,6 +125,31 @@ export class EmployeeDashboardComponent implements OnInit {
   localStorage.removeItem('distributorId');
 
   this.router.navigate(['/employee-login']);
+}
+submitReason() {
+  if (!this.reasonText.trim()) {
+    alert("Please enter a valid reason.");
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  this.employeeService.markAvailability({
+    employeeId: this.employeeId,
+    date: today,
+    isAvailable: false,
+    reason: this.reasonText
+  }).subscribe(() => {
+    alert("Availability updated!");
+    this.showReasonInput = false;
+    this.reasonText = "";
+    this.loadAvailability();
+  });
+}
+
+cancelReason() {
+  this.showReasonInput = false;
+  this.reasonText = "";
 }
 
 }

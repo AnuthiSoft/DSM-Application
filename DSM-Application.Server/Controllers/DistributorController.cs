@@ -4,6 +4,7 @@ using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text.Json.Serialization;
 
@@ -16,13 +17,43 @@ namespace DSM_Application.Server.Controllers
         private readonly IMongoCollection<CustomerDistributorConnection> _connections;
         private readonly IMongoCollection<Customer> _customers;
         private readonly EmailService _emailService;
+        private readonly TemporaryAssignmentService _tempService;
+        private readonly TemporaryEmployeeHistoryService _tempHistoryService;
+        private readonly IMongoCollection<EmployeeAvailability> _availability;
 
-        public DistributorController(MongoDbService mongoService, EmailService emailService)
+
+
+
+        public DistributorController(MongoDbService mongoService, EmailService emailService, TemporaryAssignmentService tempService, TemporaryEmployeeHistoryService tempHistoryService)
         {
             _connections = mongoService.Connections;
             _customers = mongoService.Customers;
+            _availability = mongoService.Database.GetCollection<EmployeeAvailability>("EmployeeAvailability");
             _emailService = emailService;
+            _tempService = tempService;
+            _tempHistoryService = tempHistoryService;   // ADD THIS
+            
+
+
         }
+        private async Task<bool> IsEmployeeAvailable(string employeeId)
+        {
+            if (string.IsNullOrEmpty(employeeId)) return true;
+
+            // Convert UTC -> IST
+            var ist = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"));
+
+            var today = ist.Date;
+
+            var rec = await _availability
+                .Find(a => a.EmployeeId == employeeId && a.Date == today)
+                .FirstOrDefaultAsync();
+
+            return rec == null ? true : rec.IsAvailable;
+        }
+
+
 
         [HttpGet("connection-requests")]
         public async Task<IActionResult> GetPendingRequests([FromQuery] string distributorId)
@@ -137,6 +168,268 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = "Customer disconnected successfully" });
         }
 
+        // ============================
+        //  TEMPORARY EMPLOYEE (TODAY)
+        // ============================
+        [HttpPost("assign-temp-today")]
+        public async Task<IActionResult> AssignTemporaryToday([FromBody] AssignTempDto dto)
+        {
+            if (dto == null ||
+                string.IsNullOrEmpty(dto.DistributorId) ||
+                string.IsNullOrEmpty(dto.CustomerId) ||
+                string.IsNullOrEmpty(dto.TemporaryEmployeeId))
+            {
+                return BadRequest(new { message = "distributorId, customerId, temporaryEmployeeId required" });
+            }
+
+            await _tempService.AssignTodayAsync(dto.DistributorId, dto.CustomerId, dto.TemporaryEmployeeId);
+            await _tempHistoryService.AddRecordAsync(dto.CustomerId, dto.TemporaryEmployeeId);
+
+            return Ok(new { message = "Temporary employee assigned for today." });
+        }
+
+
+
+
+        // ============================
+        //  CHECK EMPLOYEE ACTIVE TODAY
+        // ============================
+        [HttpGet("customer-employee-status")]
+        public async Task<IActionResult> GetEmployeeStatus(
+         [FromQuery] string distributorId,
+         [FromQuery] string customerId)
+        {
+            // 1️⃣ Try to find connection
+            var connection = await _connections
+                .Find(x => x.CustomerId == customerId && x.DistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            // 2️⃣ If not found but customer added by distributor → auto-connect
+            if (connection == null)
+            {
+                var customer = await _customers
+                    .Find(x => x.CustomerId == customerId)
+                    .FirstOrDefaultAsync();
+
+                if (customer != null && customer.AddedByDistributorId == distributorId)
+                {
+                    connection = new CustomerDistributorConnection
+                    {
+                        DistributorId = distributorId,
+                        CustomerId = customerId,
+                        Status = ConnectionStatus.Accepted,
+                        ConnectedOn = DateTime.UtcNow
+                    };
+
+                    await _connections.InsertOneAsync(connection);
+                }
+                else
+                {
+                    return NotFound("Customer not connected to this distributor");
+                }
+            }
+
+            // 3️⃣ Temporary employee assignment for today
+            var todayTemp = await _tempService.GetTodayAsync(distributorId, customerId);
+
+            // Get permanent employee availability record
+            // Convert to IST first
+            var istToday = TimeZoneInfo.ConvertTimeFromUtc(
+                DateTime.UtcNow,
+                TimeZoneInfo.FindSystemTimeZoneById("India Standard Time")
+            ).Date;
+
+            // Permanent employee availability
+            EmployeeAvailability permanentAvailability = null;
+            if (!string.IsNullOrEmpty(connection.PermanentEmployeeId))
+            {
+                permanentAvailability = await _availability
+                    .Find(a => a.EmployeeId == connection.PermanentEmployeeId &&
+                               a.Date == istToday)
+                    .FirstOrDefaultAsync();
+            }
+
+            // Temporary employee availability
+            EmployeeAvailability tempAvailability = null;
+            if (!string.IsNullOrEmpty(todayTemp?.TemporaryEmployeeId))
+            {
+                tempAvailability = await _availability
+                    .Find(a => a.EmployeeId == todayTemp.TemporaryEmployeeId &&
+                               a.Date == istToday)
+                    .FirstOrDefaultAsync();
+            }
+
+            return Ok(new
+            {
+                // Permanent Employee Status + Reason
+                PermanentEmployeeId = connection?.PermanentEmployeeId,
+                PermanentEmployeeAvailable = permanentAvailability?.IsAvailable ?? true,
+                PermanentReason = permanentAvailability?.Reason,
+
+                // Temporary Employee Status + Reason
+                TemporaryEmployeeId = todayTemp?.TemporaryEmployeeId,
+                TemporaryEmployeeAvailable = tempAvailability?.IsAvailable ?? true,
+                TemporaryReason = tempAvailability?.Reason,
+
+                IsTemporaryActiveToday = todayTemp != null
+            });
+        }
+
+
+
+        // ============================
+        //  VIEW CUSTOMERS + EMPLOYEES
+        // ============================
+        [HttpGet("customers-with-employee")]
+        public async Task<IActionResult> GetCustomersWithEmployee([FromQuery] string distributorId)
+        {
+            var connections = await _connections
+                .Find(x => x.DistributorId == distributorId).ToListAsync();
+
+            var today = DateTime.UtcNow.Date;
+
+            var result = new List<object>();
+
+            foreach (var c in connections)
+            {
+                var todayTemp = await _tempService.GetTodayAsync(distributorId, c.CustomerId);
+
+                result.Add(new
+                {
+                    CustomerId = c.CustomerId,
+                    PermanentEmployeeId = c.PermanentEmployeeId,
+                    TemporaryEmployeeId = todayTemp?.TemporaryEmployeeId
+                });
+            }
+
+            return Ok(result);
+        }
+
+
+
+
+        // ============================
+        //  PERMANENT EMPLOYEE ASSIGN
+        // ============================
+        [HttpPut("assign-permanent-employee")]
+        public async Task<IActionResult> AssignPermanentEmployee(
+            [FromQuery] string distributorId,
+            [FromQuery] string customerId,
+            [FromQuery] string employeeId)
+        {
+            // 1️⃣ Find connection record
+            var connection = await _connections
+                .Find(x => x.CustomerId == customerId && x.DistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            // 2️⃣ If connection does NOT exist → check if customer was added by distributor
+            if (connection == null)
+            {
+                var customer = await _customers
+                    .Find(x => x.CustomerId == customerId)
+                    .FirstOrDefaultAsync();
+
+                if (customer != null && customer.AddedByDistributorId == distributorId)
+                {
+                    // Auto-create connection for distributor-added customers
+                    connection = new CustomerDistributorConnection
+                    {
+                        //Id = ObjectId.GenerateNewId().ToString(),  // ✔ Correct format for Mongo
+                        DistributorId = distributorId,
+                        CustomerId = customerId,
+                        Status = ConnectionStatus.Accepted,
+                        ConnectedOn = DateTime.UtcNow
+                    };
+
+                    await _connections.InsertOneAsync(connection);
+                }
+                else
+                {
+                    return NotFound("Customer is not connected to this distributor");
+                }
+            }
+
+            // 3️⃣ Assign permanent employee
+            connection.PermanentEmployeeId = employeeId;
+
+            var result = await _connections.ReplaceOneAsync(x => x.Id == connection.Id, connection);
+            if (result.ModifiedCount == 0)
+            {
+                return BadRequest("Failed to update permanent employee. (Mongo did not modify document)");
+            }
+
+            return Ok("Permanent employee assigned successfully.");
+        }
+
+
+
+
+
+        // ============================
+        //  VIEW TEMP HISTORY
+        // ============================
+        [HttpGet("temp-employee-history")]
+        public async Task<IActionResult> GetTempHistory([FromQuery] string customerId)
+        {
+            var history = await _tempHistoryService.GetHistoryAsync(customerId);
+            return Ok(history);
+        }
+
+
+
+          
+
+        [HttpPost("employee/mark-availability")]
+        public async Task<IActionResult> MarkEmployeeAvailability([FromBody] EmployeeAvailability dto)
+        {
+            if (dto == null || string.IsNullOrEmpty(dto.EmployeeId))
+                return BadRequest("EmployeeId and date required.");
+
+            dto.Date = dto.Date.Date;
+
+            var existing = await _availability
+                .Find(x => x.EmployeeId == dto.EmployeeId && x.Date == dto.Date)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                existing.IsAvailable = dto.IsAvailable;
+                existing.Reason = dto.Reason;
+                await _availability.ReplaceOneAsync(x => x.Id == existing.Id, existing);
+            }
+            else
+            {
+                await _availability.InsertOneAsync(dto);
+            }
+
+            return Ok(new { message = "Employee availability updated" });
+        }
+
+
+
+        [HttpGet("employee/availability")]
+        public async Task<IActionResult> GetEmployeeAvailability(
+    [FromQuery] string employeeId,
+    [FromQuery] DateTime? date)
+        {
+            if (string.IsNullOrEmpty(employeeId))
+                return BadRequest("employeeId is required.");
+
+            var d = (date ?? DateTime.UtcNow).Date;
+
+            var rec = await _availability
+                .Find(x => x.EmployeeId == employeeId && x.Date == d)
+                .FirstOrDefaultAsync();
+
+            return Ok(new
+            {
+                employeeId,
+                date = d,
+                isAvailable = rec == null ? true : rec.IsAvailable,
+                reason = rec?.Reason
+            });
+        }
+
         public class RespondRequest
         {
             //[JsonPropertyName("connectionId")]
@@ -151,4 +444,5 @@ namespace DSM_Application.Server.Controllers
             public string ConnectionId { get; set; }
         }
     }
+
 }

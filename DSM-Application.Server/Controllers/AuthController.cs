@@ -53,6 +53,7 @@ namespace DistributorManagementSystem.Server.Controllers
             if (user.PasswordHash != ComputeHash(request.Password))
                 return Unauthorized("Invalid password");
 
+            // Assign employeeId if missing
             if (string.IsNullOrEmpty(user.EmployeeId))
             {
                 user.EmployeeId = ObjectId.GenerateNewId().ToString();
@@ -60,6 +61,11 @@ namespace DistributorManagementSystem.Server.Controllers
                     u => u.Id == user.Id,
                     Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
             }
+
+            // ⭐ Get employee record (name, designation)
+            var employee = await _db.Employees
+                .Find(e => e.EmployeeId == user.EmployeeId)
+                .FirstOrDefaultAsync();
 
             var token = _jwt.GenerateToken(user);
             var refreshToken = _jwt.GenerateRefreshToken();
@@ -75,11 +81,16 @@ namespace DistributorManagementSystem.Server.Controllers
             {
                 token,
                 refreshToken,
-                user.Role,
-                user.EmployeeId,
-                user.DistributorId
+                role = user.Role,
+                employeeId = user.EmployeeId,
+                distributorId = user.DistributorId,
+
+                // ⭐ Return employee details safely
+                designation = employee?.Designation,
+                name = employee?.Name
             });
         }
+
         [HttpPost("employee-signup")]
         public async Task<IActionResult> EmployeeSignup([FromBody] LoginRequest request)
         {

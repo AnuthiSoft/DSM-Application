@@ -68,5 +68,26 @@ namespace DSM_Application.Server.Controllers
             var ids = await _categoryService.GetCategoriesForDistributorAsync(distributorId);
             return Ok(ids);
         }
+        [HttpGet("subcategory/{id}/gst")]
+        public async Task<IActionResult> GetGstFromSubcategory(string id)
+        {
+            var cat = await _categoryService.GetByIdAsync(id);
+            if (cat == null) return NotFound("Subcategory not found");
+
+            return Ok(cat.GST);
+        }
+        [HttpGet("main")]
+        public async Task<IActionResult> GetMainCategories()
+        {
+            var cats = await _categoryService.GetMainCategoriesAsync();
+            return Ok(cats);
+        }
+        [HttpGet("sub/{parentId}")]
+        public async Task<IActionResult> GetSubCategories(string parentId)
+        {
+            var cats = await _categoryService.GetSubCategoriesAsync(parentId);
+            return Ok(cats);
+        }
+
     }
 }

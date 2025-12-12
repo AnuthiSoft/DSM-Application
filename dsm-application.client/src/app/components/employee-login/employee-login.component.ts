@@ -27,6 +27,7 @@ export class EmployeeLoginComponent {
                localStorage.setItem('distributorId', res.distributorId); // ✅ Save distributorId
                localStorage.setItem('EmployeeId', res.employeeId);
                   localStorage.setItem('employeeId', res.employeeId); // ✅ store employeeId
+                      localStorage.setItem('employeeDesignation', res.designation); // ⭐ THIS WAS MISSING
             if (role === 'Admin') {
               this.router.navigate(['/admin-dashboard']);
             } else if (role === 'Distributor') {

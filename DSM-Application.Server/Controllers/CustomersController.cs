@@ -780,6 +780,42 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(distributors);
         }
+
+
+        //[Authorize(Roles = "Distributor")]
+        [HttpGet("all-for-distributor")]
+        public async Task<IActionResult> GetAllCustomersForDistributor()
+        {
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (distributorId == null)
+                return Unauthorized("Distributor ID missing");
+
+            // 1️⃣ Customers created by this distributor
+            var createdCustomers = await _db.Customers
+                .Find(c => c.AddedByDistributorId == distributorId)
+                .ToListAsync();
+
+            // 2️⃣ Customers connected via Accepted connection
+            var acceptedConnections = await _db.Connections
+                .Find(c => c.DistributorId == distributorId && c.Status == ConnectionStatus.Accepted)
+                .ToListAsync();
+
+            var connectedCustomerIds = acceptedConnections.Select(c => c.CustomerId).ToList();
+
+            var connectedCustomers = await _db.Customers
+                .Find(c => connectedCustomerIds.Contains(c.CustomerId))
+                .ToListAsync();
+
+            // 3️⃣ Merge both lists (avoid duplicates)
+            var combined = createdCustomers
+                .Concat(connectedCustomers)
+                .GroupBy(c => c.CustomerId)
+                .Select(g => g.First())
+                .ToList();
+
+            return Ok(combined);
+        }
+ 
         public class ConnectRequest
         {
             public string CustomerId { get; set; }

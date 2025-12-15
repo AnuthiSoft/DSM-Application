@@ -44,6 +44,11 @@ import { PaymentReportComponent } from './components/payment-report/payment-repo
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
 
+import { CustomersListComponent } from './components/customers-list/customers-list.component';
+
+
+
+
 
 
 
@@ -104,6 +109,9 @@ const routes: Routes = [
  { path: 'pending-payments', component: PendingPaymentsComponent },
  { path: 'pending-handovers', component: PendingHandoversComponent },
 
+
+            { path: 'customers', component: CustomersListComponent },
+            
 
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }

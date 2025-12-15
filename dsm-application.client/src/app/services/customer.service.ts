@@ -109,6 +109,15 @@ getCustomerId(): string {
   });
 }
 
+
+
+getAllCustomersForDistributor(): Observable<Customer[]> {
+  const token = localStorage.getItem('token');
+  const headers = { Authorization: `Bearer ${token}` };
+
+  return this.api.get<Customer[]>(`customers/all-for-distributor`, { headers });
+}
+
  // ================= PERMANENT EMPLOYEE ASSIGN =================
   assignPermanentEmployee(distributorId: string, customerId: string, employeeId: string) {
     const token = localStorage.getItem('token');

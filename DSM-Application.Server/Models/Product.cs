@@ -43,7 +43,7 @@ namespace DSM_Application.Server.Models
         public decimal Price { get; set; }
 
         [BsonElement("CostPrice")]
-        public decimal CostPrice { get; set; }
+        public decimal? CostPrice { get; set; }
 
         [BsonElement("Discount")]
         public decimal? Discount { get; set; }

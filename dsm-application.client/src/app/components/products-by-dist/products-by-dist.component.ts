@@ -17,6 +17,16 @@ import { FormsModule } from '@angular/forms';
 })
 export class ProductsByDistComponent implements OnInit {
       apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+      // ⭐ FIX IMAGE PATH FOR CUSTOMER SIDE
+  getFullImageUrl(img: string) {
+    if (!img) return "assets/no-image.png";
+ 
+    if (img.startsWith("http://") || img.startsWith("https://")) {
+      return img;
+    }
+ 
+    return this.apiBaseUrl + img;
+  }
  @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];

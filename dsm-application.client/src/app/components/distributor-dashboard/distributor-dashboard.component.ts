@@ -1,23 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { ConnectionRequestDto, DistributorService } from '../../services/distributor.service';
+import { CustomerService } from '../../services/customer.service';
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-distributor-dashboard',
   templateUrl: './distributor-dashboard.component.html',
   styleUrl: './distributor-dashboard.component.css'
 })
-export class DistributorDashboardComponent {
+export class DistributorDashboardComponent  implements OnInit{
+
 
   orderedDate: string = '';
   expectedDate: string = '';
   expectedDays: number = 1; // default
   leadTime:number = 1;
+ 
 
-  constructor(
-    
-    private auth: AuthService,private distributorService: DistributorService
-  ) {}
+  retailerCount: number = 0;
   activeTab: string = 'dashboard'; // default tab
   isMobileMenuOpen = false;
 isDarkTheme = false;
@@ -25,6 +27,16 @@ openSubmenus: string[] = [];
 
     // pendingRequests: any[] = [];
   distributorId: string = '';
+  // ==============================
+  // 🚀 LIVE TRACKING VARIABLES
+  // ==============================
+  selectedEmployeeId: string = "";     // ⬅ added
+  employees: any[] = [];               // ⬅ added
+  polylinePath: any[] =[];
+
+  @ViewChild('trackingComp') trackingComp: any;
+
+
 submenuState: { [key: string]: boolean } = {
   inventory: false,
   orders: false,
@@ -34,10 +46,84 @@ submenuState: { [key: string]: boolean } = {
   settings: false
 };
 
+constructor(
+    
+    private auth: AuthService,private distributorService: DistributorService,private customerService: CustomerService,private http: HttpClient 
+  ) {}
+  
 // toggleSubmenu(menu: string) {
 //   this.submenuState[menu] = !this.submenuState[menu];
 // }
+ngOnInit() {
+    this.distributorId = localStorage.getItem('distributorId') || '';
+    // this.loadRequests();
+      // this.loadAcceptedCustomers();
+      // this.distributorId = localStorage.getItem('distributorId') || '';
 
+  // Load only ONCE when component is created
+  const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
+  this.expectedDays = stored ? Number(stored) : 1;
+       this.loadRetailerCount();
+        this.loadEmployees();              // ⬅ added
+  }
+  
+loadRetailerCount() {
+  this.customerService.getAllCustomersForDistributor().subscribe({
+    next: (res) => {
+      this.retailerCount = res.length;
+    },
+    error: (err) => {
+      console.error("Failed to load retailers", err);
+      this.retailerCount = 0;
+    }
+  });
+}
+
+// ==============================
+  // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
+  // ==============================
+  loadEmployees(){
+  this.http.get(`http://192.168.1.21:5164/api/Employees/by-distributor/${this.distributorId}`)
+    .subscribe((res:any)=>{
+      this.employees = res;
+      console.log("Loaded Employees:", res);
+    });
+}
+
+
+  // ==============================
+  // ▶ START TRIP
+  // ==============================
+  startTrip() {
+  if (!this.selectedEmployeeId) return alert("Select employee first!");
+
+  this.http.post(`http://192.168.1.21:5164/api/Delivery/start`,
+     { employeeId: this.selectedEmployeeId }
+  ).subscribe({
+      next: (res) => {
+        alert("Trip Started");
+      },
+      error: (err) => {
+        console.error(err);
+        alert("Failed to start trip");
+      }
+  });
+}
+
+
+
+  // ==============================
+  // ⏹ STOP TRIP
+  // ==============================
+  stopTrip(){
+    this.polylinePath = [];  // clear route instantly
+
+  if(!this.selectedEmployeeId) return alert("Select employee first!");
+
+  this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`,
+     { employeeId: this.selectedEmployeeId }
+  ).subscribe(()=> alert("Trip Ended"));
+}
 
 isSubmenuOpen(menu: string): boolean {
   return this.openSubmenus.includes(menu);
@@ -77,8 +163,10 @@ closeAllSubmenus() {
 // Update the setActiveTab method to close submenus when switching tabs
 setActiveTab(tab: string) {
   this.activeTab = tab;
-  // Don't close submenus here to allow navigation within the same section
+  // no special logic for live-tracking now
 }
+
+
 
 // Update the toggleMobileMenu method
 
@@ -104,27 +192,6 @@ currentDate: Date = new Date();
   // acceptedCustomers: ConnectionRequestDto[] = [];
   // loading = false;
 
- ngOnInit(): void {
-  //   this.distributorId = localStorage.getItem('distributorId') || '';
-
-  //   const saved = localStorage.getItem("expectedDays");
-  // this.expectedDays = saved ? Number(saved) : 1;
-    // this.loadRequests();
-      // this.loadAcceptedCustomers();
-
- // this.distributorId = localStorage.getItem('distributorId') || '';
-
-  // Load lead time specific to this distributor
-  //this.expectedDays = Number(localStorage.getItem(`leadTime_${this.distributorId}`)) || 1;
-
-
-this.distributorId = localStorage.getItem('distributorId') || '';
-
-  // Load only ONCE when component is created
-  const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
-  this.expectedDays = stored ? Number(stored) : 1;
-      
-  }
 
 
   
@@ -208,5 +275,19 @@ saveExpectedDayss() {
   onOrderedDate() {
   console.log("Ordered Date button clicked");
   }
+
+
+onEmployeeSelect() {
+  console.log("Employee changed → Clearing map polyline");
+
+  // Clear map route inside child component
+  if (this.trackingComp) {
+    this.trackingComp.clearPolyline();
+  }
+
+  // Also clear local route
+  this.polylinePath = [];
+}
+
 
 }

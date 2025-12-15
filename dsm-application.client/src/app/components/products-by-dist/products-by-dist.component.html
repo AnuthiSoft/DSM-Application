@@ -84,8 +84,8 @@
   <div *ngIf="!loading && filterProducts.length > 0" class="products-content">
     <div class="products-grid">
       <div class="product-card" *ngFor="let prod of filterProducts">
-        <div class="product-image">
-          <img
+        <!-- <div class="product-image"> -->
+          <!-- <img
             *ngIf="prod.imageUrls"
             [src]="apiBaseUrl + prod.imageUrls"
             [alt]="prod.productName"
@@ -93,7 +93,54 @@
           <div *ngIf="!prod.imageUrls" class="product-image-placeholder">
             <i class="fas fa-box"></i>
           </div>
-        </div>
+        </div> -->
+        
+        <div class="product-image">
+ 
+  <!-- Multiple Images → Slider -->
+  <div *ngIf="prod.imageUrls && prod.imageUrls.length > 1"
+     id="carousel{{prod.productId}}"
+     class="carousel slide"
+     data-bs-ride="false"
+     data-bs-interval="false">
+ 
+ 
+    <div class="carousel-inner">
+      <div *ngFor="let img of prod.imageUrls; let i = index"
+           class="carousel-item"
+           [class.active]="i === 0">
+        <img [src]="getFullImageUrl(img)" class="d-block w-100" />
+      </div>
+    </div>
+ 
+    <button class="carousel-control-prev"
+            type="button"
+            [attr.data-bs-target]="'#carousel'+prod.productId"
+            data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+ 
+    <button class="carousel-control-next"
+            type="button"
+            [attr.data-bs-target]="'#carousel'+prod.productId"
+            data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+ 
+  <!-- One Image -->
+  <img *ngIf="prod.imageUrls && prod.imageUrls.length === 1"
+       [src]="getFullImageUrl(prod.imageUrls[0])"
+       class="single-product-image" />
+ 
+  <!-- No Image -->
+  <div *ngIf="!prod.imageUrls || prod.imageUrls.length === 0" class="product-image-placeholder">
+    <i class="fas fa-box"></i>
+  </div>
+ 
+</div>
+ 
+ 
 
         <div class="product-body">
           <p>Distributor: {{ prod.distributorName }}</p>

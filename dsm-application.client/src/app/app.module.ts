@@ -57,6 +57,13 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
 
 
 
+import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
+import { CustomersListComponent } from './components/customers-list/customers-list.component';
+import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
+import { GoogleMapsModule } from '@angular/google-maps';
+
+
+
 
 
 
@@ -113,6 +120,15 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
                    PendingHandoversComponent,
                  
                 
+                   MainInventoryComponent,
+                   CustomersListComponent,
+                   EmployeeTrackingComponent,
+                  
+                   
+                   
+                   
+                   
+                
           
       // AdminDistributorsComponent
    
@@ -121,10 +137,11 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
   ],
   imports: [
     BrowserModule, HttpClientModule,
-    AppRoutingModule, FormsModule, ReactiveFormsModule,  BrowserAnimationsModule, ToastrModule.forRoot({
+    AppRoutingModule, FormsModule, ReactiveFormsModule,GoogleMapsModule,BrowserAnimationsModule, ToastrModule.forRoot({
       timeOut: 2000,
       positionClass: 'toast-center-center',
       preventDuplicates: true,
+
     }),
   ],
   providers: [{

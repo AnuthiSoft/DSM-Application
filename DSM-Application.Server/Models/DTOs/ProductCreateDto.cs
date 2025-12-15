@@ -15,7 +15,7 @@ namespace DSM_Application.Server.Models.DTOs
         public string Measure { get; set; }
 
         public decimal Price { get; set; }
-        public decimal CostPrice { get; set; }
+        public decimal? CostPrice { get; set; }
         public decimal Discount { get; set; }
         public decimal GST { get; set; }
         public int Stock { get; set; }
@@ -30,7 +30,7 @@ namespace DSM_Application.Server.Models.DTOs
         [Required]
         public string DistributorId { get; set; }
 
-        public string Color { get; set; }
+        public string? Color { get; set; }
         //[BsonElement("Name")]
         //public string Name { get; set; }
 

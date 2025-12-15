@@ -1,6 +1,6 @@
 export interface Product {
-  color: any;
-  Color: any;
+  color?: any;
+  // Color: any;
   productColor: any;
   colorFilter : any;       
   minPriceFilter?: number;
@@ -16,7 +16,7 @@ export interface Product {
   price: number;
   OrderedDate:Date;
   ExpectedDeliveryDate:Date;
-  costPrice: number;
+  costPrice?: number;
   discount: number;
   gst: number;
   stock: number;

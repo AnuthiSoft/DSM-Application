@@ -596,3 +596,82 @@ html, body {
                 min-height: 250px;
             }
         }
+
+        /* Main container */
+.live-tracking-container {
+    padding: 20px;
+}
+
+/* Title */
+.tracking-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Control Panel */
+.tracking-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Dropdown */
+.employee-select {
+    width: 250px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+/* Start Button */
+.btn-start {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-start:disabled {
+    background-color: #92d7a0;
+    cursor: not-allowed;
+}
+
+/* Stop Button */
+.btn-stop {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-stop:disabled {
+    background-color: #f3a6ad;
+    cursor: not-allowed;
+}
+
+/* Map card styling */
+.tracking-map-card {
+    margin-top: 15px;
+    background: #fff;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+}
+
+/* MAP WRAPPER TO FORCE HEIGHT */
+.map-wrapper {
+    width: 100%;
+    height: 600px; /* You can change to 70vh if you prefer */
+    border-radius: 8px;
+    overflow: hidden;
+}

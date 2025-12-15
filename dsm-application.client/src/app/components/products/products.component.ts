@@ -41,7 +41,7 @@ subCategories: any[] = [];
   previewUrls: string[] = [];
     selectedProduct: any = null;  
     selectedFiles: File[] = [];
-
+ 
   // ==============================================
   // FILTERS
   // ==============================================
@@ -128,7 +128,7 @@ onSubCategoryChange(event: Event) {
     error: (err) => console.error("Error loading measures:", err),
   });
 }
-
+ 
   loadCategories(distributorId: string) {
     this.productService.getCategoriesByDistributor(distributorId).subscribe({
       next: (data) => this.categories = data as any[],
@@ -139,70 +139,59 @@ onSubCategoryChange(event: Event) {
   // ==============================================
   // CRUD
   // ==============================================
-submitForm() {
-  if (!this.distributorId) {
-    console.error('DistributorId not set!');
-    return;
+  submitForm() {
+   
+    if (this.productForm.invalid) return;
+ 
+    const product = this.productForm.value;
+    const formData = new FormData();
+ 
+   Object.keys(product).forEach(key => {
+  const value = product[key as keyof Product];
+  if (value !== null && value !== undefined) {
+    formData.append(key, value.toString());
   }
-
-  const formData = new FormData();
-
-  // Explicitly append all fields with exact backend DTO names
-  formData.append('ProductName', this.productForm.value.productName);
-  formData.append('ProductCode', this.productForm.value.productCode);
-  formData.append('Category', this.productForm.value.category);
-  formData.append('Measure', this.productForm.value.measure);
-  formData.append('Price', this.productForm.value.price ?? 0);
-  formData.append('CostPrice', this.productForm.value.costPrice ?? 0);
-  formData.append('Discount', this.productForm.value.discount ?? 0);
-  formData.append('GST', this.productForm.value.gst ?? 0);
-  formData.append('Stock', this.productForm.value.stock ?? 0);
-  formData.append('ReorderLevel', this.productForm.value.reorderLevel ?? 0);
-  formData.append('Brand', this.productForm.value.brand ?? '');
-  formData.append('Color', this.productForm.value.color ?? '');
-  formData.append('Description', this.productForm.value.description ?? '');
-  formData.append('DistributorId', this.distributorId);
-
-  // Append image if selected
-  if (this.selectedFiles && this.selectedFiles.length > 0) {
-  this.selectedFiles.forEach(file => {
-    formData.append('Images', file);   // Must MATCH backend parameter name
-  });
+});
+    const distributorId = localStorage.getItem('DistributorId');
+    if (distributorId) formData.append('DistributorId', distributorId);
+ 
+    if (this.selectedFiles.length > 0) {
+  for (let file of this.selectedFiles) {
+    formData.append("Images", file);  // MUST MATCH C# DTO PROPERTY NAME
+  }
 }
 
-  // UPDATE PRODUCT
-  if (this.isEdit && this.selectedProductId) {
-    this.productService.update(this.selectedProductId, formData).subscribe({
-      next: () => {
-        this.loadProducts(this.distributorId!);
-        const modalEl = document.getElementById('productModal');
-        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-        this.resetForm();
-      },
-      error: err => console.error('Update failed:', err)
-    });
-  } 
-  // CREATE NEW PRODUCT
-  else {
-    this.productService.create(formData).subscribe({
-      next: () => {
-        this.loadProducts(this.distributorId!);
-        const modalEl = document.getElementById('productModal');
-        if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-        this.resetForm();
-      },
-      error: err => console.error('Create failed:', err)
-    });
+ 
+    if (this.isEdit && this.selectedProductId) {
+      this.productService.update(this.selectedProductId, formData).subscribe({
+        next: () => {
+          if (distributorId) this.loadProducts(distributorId);
+          this.closeModal();
+          this.resetForm();
+        },
+        error: (err) => console.error('Error updating product:', err)
+      });
+    } else {
+      this.productService.create(formData).subscribe({
+        next: () => {
+          if (distributorId) this.loadProducts(distributorId);
+          this.closeModal();
+          this.resetForm();
+        },
+        error: (err) => console.error('Error creating product:', err)
+      });
+    }
   }
-  
-}
-
-
+ 
   editProduct(product: Product) {
     this.isEdit = true;
     this.selectedProductId = product.productId || null;
     this.productForm.patchValue(product);
-    this.previewUrl = product.imageUrls ? this.apiBaseUrl + product.imageUrls : null;
+   
+    this.previewUrl = product.imageUrls?.length
+  ? this.getFullImageUrl(product.imageUrls[0])
+  : null;
+ 
     this.openModal(true, product);
   }
  
@@ -227,19 +216,24 @@ submitForm() {
     if (this.fileInput) this.fileInput.nativeElement.value = '';
   }
  
-  onFileSelected(event: any) {
-  const files = event.target.files;
-  this.previewUrls = []; 
-    this.selectedFiles = [];
+ onFileSelected(event: any) {
+  const files: FileList = event.target.files;
+
+  this.selectedFiles = [];   // RESET
+  this.previewUrls = [];     // RESET
+
   if (files && files.length > 0) {
-    for (let file of files) {
-       this.selectedFiles.push(file);
+    const ordered: File[] = Array.from(files); // <-- keeps order EXACTLY
+
+    ordered.forEach(file => {
+      this.selectedFiles.push(file);
+
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.previewUrls.push(e.target.result);
       };
       reader.readAsDataURL(file);
-    }
+    });
   }
 }
  
@@ -398,55 +392,47 @@ submitForm() {
   // ==============================================
   // MODAL HANDLING
   // ==============================================
- openModal(isEdit: boolean, product?: Product) {
-  this.isEdit = isEdit;
-
-  const modalEl = document.getElementById('productModal');
-  if (!modalEl) return;
-
-  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
-  if (isEdit && product) {
-    this.selectedProductId = product.productId ?? null;
-
-    this.productForm.patchValue({
-      productName: product.productName,
-      productCode: product.productCode,
-      color: product.color,
-      category: product.category,
-      Measure: product.measure,
-      price: product.price,
-      costPrice: product.costPrice,
-      discount: product.discount,
-      gst: product.gst,
-      stock: product.stock,
-      reorderLevel: product.reorderLevel,
-      brand: product.brand,
-      description: product.description
-    });
-
-    this.previewUrl = product.imageUrls
-      ? this.apiBaseUrl + product.imageUrls
-      : null;
-
-  } else {
-    this.resetForm();
-    this.previewUrl = null;
-    this.selectedProductId = null;
+  openModal(isEdit = false, product?: Product) {
+    this.isEdit = isEdit;
+ 
+    if (isEdit && product) {
+       this.selectedProduct = product;
+       
+      this.productForm.patchValue(product);
+      this.previewUrl = product.imageUrls ? this.apiBaseUrl + product.imageUrls : null;
+        this.previewUrls = [];  
+    } else {
+       this.selectedProduct = null; 
+      this.resetForm();
+       if (isEdit && product) {
+    this.productForm.patchValue(product);
   }
-
-  // ALWAYS show modal
-  modal.show();
-}
-
-
-   
-
+    }
+ 
+    const modalEl = document.getElementById('productModal');
+    if (modalEl) {
+      this.modalRef = new bootstrap.Modal(modalEl);
+      this.modalRef.show();
+    }
+  }
+ 
   closeModal() {
     if (this.modalRef) this.modalRef.hide();
   }
-
-  
-
+ 
+  getFullImageUrl(img: string) {
+  if (!img) return 'assets/no-image.png';
+ 
+  // If image is already a full URL, return as is
+  if (img.startsWith('http://') || img.startsWith('https://')) {
+    return img;
+  }
+ 
+  // Otherwise append API base URL
+  return this.apiBaseUrl + img;
 }
+ 
+ 
+}
+ 
  

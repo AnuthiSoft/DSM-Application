@@ -33,15 +33,15 @@ namespace DSM_Application.Server.Models
         public string? AddedByDistributorId { get; set; } // null if global signup
         [BsonElement("ConnectedDistributors")]
         public List<string>? ConnectedDistributors { get; set; } // for global customers
-        public string ProfileImageUrl { get; set; }
+        public string? ProfileImageUrl { get; set; }
       
 
         // Address
-        public string Street { get; set; }
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Pincode { get; set; }
-        public string Country { get; set; }
+        public string? Street { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Pincode { get; set; }
+        public string? Country { get; set; }
 
         public int FraudCount { get; set; } = 0;
         public bool IsActive { get; set; } = true;

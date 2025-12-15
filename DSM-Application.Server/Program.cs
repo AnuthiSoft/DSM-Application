@@ -1,8 +1,9 @@
-using DistributorManagementSystem.Server.Models;
+﻿using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
@@ -13,9 +14,21 @@ using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
+// 👇 Add this line to allow access from other devices (mobile)
+builder.WebHost.UseUrls("http://0.0.0.0:5164", "http://localhost:5164");
 // MongoDB
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDb"));
+
+// Mongo Client + DB
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IConfiguration>()
+                     .GetSection("MongoDb")
+                     .Get<MongoDbSettings>();
+    return new MongoClient(settings.ConnectionString);
+});
+
 
 
 builder.Services.AddSingleton<MongoDbService>();
@@ -52,20 +65,42 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+
     options.AddPolicy("AllowAngular", policy =>
     {
         policy.WithOrigins(
             "https://dsm-application.web.app",
-   
-            "https://dsm-application.onrender.com" ,
-                "http://localhost:58555"
+            "https://dsm-application.onrender.com",
+            "http://localhost:58555"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials();
     });
-
 });
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAngular", policy =>
+//    {
+//        policy.WithOrigins(
+//            "https://dsm-application.web.app",
+
+//            "https://dsm-application.onrender.com" ,
+//                "http://localhost:58555"
+//        )
+//        .AllowAnyHeader()
+//        .AllowAnyMethod()
+//        .AllowCredentials();
+//    });
+
+//});
 
 
 // Add services to the container.
@@ -80,12 +115,12 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
 builder.Services.AddSingleton<TaskService>(); // aded this
 //builder.Services.Configure<EmployeeService>(builder.Configuration.GetSection("Email"));
-builder.Services.AddScoped<EmailService>();
+builder.Services.AddSingleton<EmailService>();
 builder.Services.AddScoped<TemporaryAssignmentService>();
 //builder.Services.AddSingleton<OrderService>();     // Add this
 //builder.Services.AddSingleton<RetailerService>();  // Add this
 builder.Services.AddScoped<PaymentService>();
-
+builder.Services.AddScoped<InventoryService>();
 
 
 builder.Services.AddScoped<FraudService>();
@@ -132,7 +167,9 @@ app.UseStaticFiles(new StaticFileOptions
 //    FileProvider = new PhysicalFileProvider(uploadsPath),
 //    RequestPath = "/uploads"
 //});
-app.UseCors("AllowAngular");
+//app.UseCors("AllowAngular");
+app.UseCors("AllowAll");   // 📌 allow mobile calls
+
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();

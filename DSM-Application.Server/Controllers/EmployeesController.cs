@@ -189,6 +189,7 @@ namespace DSM_Application.Server.Controllers
                 DistributorId = distributorId,
                 Username = emp.Name,
                 IsRegistered = false,
+
                 IsActive = true,
                 EmployeeId = emp.EmployeeId,
                 CreatedAt = DateTime.UtcNow
@@ -442,6 +443,20 @@ namespace DSM_Application.Server.Controllers
                 return NotFound("No image found");
 
             return File(user.ProfileImageData, user.ProfileImageType ?? "image/jpeg", user.ProfileImageName);
+        }
+
+        [HttpGet("by-distributor/{distributorId}")]
+        public async Task<IActionResult> GetEmployeesByDistributor(string distributorId)
+        {
+            var employees = await _service.GetEmployeesAsync(distributorId);
+
+            // SHOW ONLY DELIVERY BOY
+            var deliveryBoys = employees
+                .Where(e => e.Designation != null &&
+                            e.Designation.ToLower().Contains("delivery boy"))
+                .ToList();
+
+            return Ok(deliveryBoys);
         }
     }
 }

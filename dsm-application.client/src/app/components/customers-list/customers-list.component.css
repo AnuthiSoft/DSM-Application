@@ -1,0 +1,614 @@
+/* ================================
+   👥 CUSTOMERS MANAGEMENT OFFICIAL THEME
+=================================== */
+.container-fluid {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  margin: 20px;
+}
+
+h2 {
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+}
+
+h2::before {
+  content: "👥";
+  margin-right: 12px;
+  font-size: 1.5rem;
+}
+
+/* ================================
+   🔍 SEARCH BAR STYLING
+=================================== */
+.card.p-3.mb-3 {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 20px !important;
+}
+
+.card.p-3.mb-3 .form-control {
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.card.p-3.mb-3 .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  outline: none;
+}
+
+.card.p-3.mb-3 .form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ================================
+   📌 COUNT BADGE
+=================================== */
+.mb-2 .badge.bg-primary {
+  background: linear-gradient(135deg, var(--primary-color), #2980b9) !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  font-size: 0.9rem !important;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+/* ================================
+   📄 CUSTOMER TABLE STYLING
+=================================== */
+.card.p-3 {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.table {
+  margin-bottom: 0;
+  background: var(--card-bg);
+  color: var(--text-color);
+}
+
+.table-bordered {
+  border: 1px solid var(--border-color) !important;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Table Header */
+.table-dark {
+  background: linear-gradient(135deg, var(--secondary-color), #2c3e50) !important;
+  border-bottom: 2px solid var(--primary-color) !important;
+}
+
+.table-dark th {
+  background: transparent !important;
+  color: white !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 12px;
+  border: none !important;
+  position: relative;
+}
+
+.table-dark th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+/* Table Body */
+.table-hover tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.05) !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.table td {
+  padding: 14px 12px;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+/* ================================
+   ✅ STATUS BADGES
+=================================== */
+.badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.badge.bg-success {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+  color: #16a34a !important;
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.badge.bg-warning {
+  background-color: rgba(217, 119, 6, 0.1) !important;
+  color: #d97706 !important;
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+.text-dark {
+  color: #78350f !important;
+}
+
+/* ================================
+   ⚡ ACTION BUTTONS
+=================================== */
+.btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid;
+  min-width: 80px; /* Ensures same minimum width */
+  height: 36px; /* Fixed height for consistency */
+  box-sizing: border-box;
+}
+.btn-sm {
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+  min-width: 70px !important;
+  height: 32px !important;
+}
+
+.btn-outline-primary {
+  background: transparent;
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color);
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-color);
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
+}
+
+
+.btn-outline-danger {
+  background: transparent;
+  color: #dc3545 !important;
+  border-color: #dc3545;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+.btn-outline-danger:hover {
+  background: #dc3545;
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+/* Table Action Cell */
+.table td:last-child {
+  white-space: nowrap;
+}
+
+/* Ensure buttons in table cells have consistent spacing */
+.table td .btn {
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+/* Specific fix for action buttons in customer table */
+.table tbody tr td:last-child .btn {
+  min-width: 70px;
+  height: 32px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Make sure both buttons have exactly the same dimensions */
+.table tbody tr td:last-child .btn-outline-primary,
+.table tbody tr td:last-child .btn-outline-danger {
+  width: 70px !important;
+  height: 32px !important;
+  padding: 6px 12px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .table tbody tr td:last-child .btn-outline-primary,
+  .table tbody tr td:last-child .btn-outline-danger {
+    min-width: 65px;
+    height: 30px;
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .table td .btn-sm i {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .table tbody tr td:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .table tbody tr td:last-child .btn-outline-primary,
+  .table tbody tr td:last-child .btn-outline-danger {
+    width: 100% !important;
+    min-width: unset;
+    height: 30px;
+  }
+}
+
+/* ================================
+   🪟 MODAL STYLING
+=================================== */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.customer-modal {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  color: white !important;
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 12px 12px 0 0;
+  padding: 20px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  color: white !important;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-header h3 i {
+  color: white;
+}
+
+.close-icon {
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.close-icon:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 25px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-row {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-group label i {
+  color: var(--primary-color);
+  width: 16px;
+  text-align: center;
+}
+
+.form-control {
+  background: var(--card-bg);
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.form-control:focus {
+  background: var(--card-bg);
+  color: var(--text-color) !important;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  outline: none;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  border-top: 1px solid var(--border-color);
+  padding: 20px 25px;
+  border-radius: 0 0 12px 12px;
+  background: var(--hover-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-footer .btn {
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+  border-color: #545b62;
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+  border-color: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+
+/* ================================
+   📱 RESPONSIVE DESIGN
+=================================== */
+@media (max-width: 768px) {
+  .container-fluid {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .table-responsive {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  
+  .customer-modal {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    padding: 15px 20px;
+  }
+  
+  td .btn {
+    margin-bottom: 5px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container-fluid {
+    padding: 15px;
+    margin: 5px;
+  }
+  
+  h2 {
+    font-size: 1.3rem;
+  }
+  
+  .table {
+    font-size: 0.8rem;
+  }
+  
+  .table-dark th {
+    padding: 12px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .table td {
+    padding: 10px 8px;
+  }
+  
+  .btn {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+}
+
+/* ================================
+   🎭 DARK THEME ENHANCEMENTS
+=================================== */
+[data-theme="dark"] .card {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.1) !important;
+}
+
+[data-theme="dark"] .table-dark {
+  background: linear-gradient(135deg, #2c3e50, #34495e) !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  background: var(--hover-color);
+}
+
+/* ================================
+   ✨ ADDITIONAL ENHANCEMENTS
+=================================== */
+/* Empty state */
+.table tbody:empty::after {
+  content: "No customers found";
+  display: table-row;
+}
+
+.table tbody:empty::after td {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 40px;
+}
+
+/* Column specific styling */
+.table td:first-child {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.table td:nth-child(2) {
+  color: var(--text-color);
+}
+
+.table td:nth-child(3) {
+  color: var(--text-color);
+  font-family: 'Courier New', monospace;
+}
+
+.table td:nth-child(4) {
+  color: var(--text-muted);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Loading state */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}

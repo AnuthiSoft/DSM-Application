@@ -98,5 +98,17 @@ getSubCategories(parentId: string) {
 getSubCategoryGst(subId: string) {
   return this.api.get<number>(`categories/subcategory/${subId}/gst`);
 }
+increaseStock(productId: string, quantity: number): Observable<any> {
+  return this.api.put(
+    `${this.endpoint}/${productId}/increase-stock`,
+    null,
+    {
+      params: { quantity }
+    }
+  );
+}
+
+
+
 
 }

@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Xml.Linq;
+using DSM_Application.Server.Models;
+
 
 namespace DSM_Application.Server.Services
 {
@@ -13,12 +15,15 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<Product> _products;
         private readonly IMongoCollection<Distributor> _distributors;
         private readonly CategoryService _categoryService;
+        private readonly IMongoCollection<InventoryItem> _inventory;
+
 
         public ProductService(MongoDbService db, CategoryService categoryService)
         {
             _products = db.Products;
             _distributors = db.Distributors;
             _categoryService = categoryService;
+           
         }
 
         public async Task<List<Product>> GetAllAsync(string distributorId)
@@ -57,18 +62,36 @@ namespace DSM_Application.Server.Services
         //}
 
         // Create product
+        //public async Task<Product> CreateAsync(Product product)
+        //{
+        //    // 🔍 Fetch GST from subcategory
+        //    var subCategory = await _categoryService.GetByIdAsync(product.Category);
+
+        //    if (subCategory != null)
+        //        product.GST = subCategory.GST; // 💥 APPLY SUBCATEGORY GST
+        //    product.CreatedDate = DateTime.UtcNow;
+        //    product.UpdatedDate = DateTime.UtcNow;
+        //    await _products.InsertOneAsync(product);
+        //    return product;
+        //}
+
+
         public async Task<Product> CreateAsync(Product product)
         {
-            // 🔍 Fetch GST from subcategory
-            var subCategory = await _categoryService.GetByIdAsync(product.Category);
-
-            if (subCategory != null)
-                product.GST = subCategory.GST; // 💥 APPLY SUBCATEGORY GST
-            product.CreatedDate = DateTime.UtcNow;
-            product.UpdatedDate = DateTime.UtcNow;
             await _products.InsertOneAsync(product);
+
+            // 🔥 CREATE INVENTORY ENTRY
+            await _inventory.InsertOneAsync(new InventoryItem
+            {
+                ProductId = product.ProductId,
+                DistributorId = product.DistributorId,
+                
+                UpdatedAt = DateTime.UtcNow
+            });
+
             return product;
         }
+
 
         // Update product
         public async Task UpdateAsync(string id, Product product)
@@ -284,6 +307,26 @@ namespace DSM_Application.Server.Services
 
         //    var filter = Builders<Product>.Filter.And(filters);
         //    return await _products.Find(filter).ToListAsync();
+
+
+
+        //public async Task<bool> IncreaseStockAsync(string productId, int quantity)
+        //{
+        //    if (quantity <= 0)
+        //        return false;
+
+        //    var filter = Builders<Product>.Filter.Eq(p => p.ProductId, productId);
+
+        //    var update = Builders<Product>.Update
+        //        .Inc(p => p.Stock, quantity)
+        //        .Set(p => p.UpdatedDate, DateTime.UtcNow);
+
+        //    var result = await _products.UpdateOneAsync(filter, update);
+
+        //    return result.ModifiedCount > 0;
+        //}
+
+
     }
 }
 

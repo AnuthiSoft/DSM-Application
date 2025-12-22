@@ -29,16 +29,21 @@
         <i class="fas fa-cog"></i>
         <span>Settings</span>
       </div>
-          <div class="nav-item" [class.active]="isActive('admin/reviews')" (click)="setActiveTab('admin/reviews')">
-    <i class="fas fa-star"></i>
-    <span>Reviews</span>
-</div>
+      <!-- <div class="nav-item" [class.active]="isActive('category-requests')" (click)="setActiveTab('category-requests')">
+        <i class="fas fa-tags"></i>
+        <span>Category Requests</span>
+      </div> -->
+
+      <div class="nav-item" [class.active]="isActive('admin/reviews')" (click)="setActiveTab('admin/reviews')">
+        <i class="fas fa-star"></i>
+        <span>Reviews</span>
+      </div>
       <!-- ⭐ FRAUD REPORTS TAB -->
       <div class="nav-item" [class.active]="isActive('fraud-reports')" (click)="setActiveTab('fraud-reports')">
         <i class="fas fa-exclamation-triangle"></i>
         <span>Fraud Reports</span>
       </div>
- 
+
       <div class="nav-item" (click)="logout()">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
@@ -59,7 +64,7 @@
           <span *ngIf="activeTab === 'orders'">Manage Orders</span>
           <span *ngIf="activeTab === 'settings'">Settings</span>
           <span *ngIf="activeTab === 'fraud-reports'">Fraud Reports</span>
-           <span *ngIf="activeTab === 'admin/reviews'">Reviews</span>
+          <span *ngIf="activeTab === 'admin/reviews'">Reviews</span>
         </h2>
         <button class="btn btn-light" (click)="logout()">
           <i class="fas fa-sign-out-alt me-1"></i> Logout
@@ -116,8 +121,8 @@
           <button class="btn btn-add" (click)="openAdd()">
             <i class="fas fa-plus-circle me-1"></i> Add Distributor
           </button>
-          <input type="text" [(ngModel)]="searchText" (input)="applyFilter()" 
-                 class="form-control search-box" placeholder="Search by Name, Company, Email" />
+          <input type="text" [(ngModel)]="searchText" (input)="applyFilter()" class="form-control search-box"
+            placeholder="Search by Name, Company, Email" />
         </div>
       </div>
 
@@ -167,17 +172,20 @@
                   <button class="btn-action btn-edit me-1" (click)="openEdit(d)">
                     <i class="fas fa-pen fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-deactivate me-1" *ngIf="d.isActive" (click)="deactivate(d.distributorId)">
+                  <button class="btn-action btn-deactivate me-1" *ngIf="d.isActive"
+                    (click)="deactivate(d.distributorId)">
                     <i class="fas fa-toggle-on fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-activate me-1" *ngIf="!d.isActive" (click)="reactivate(d.distributorId)">
+                  <button class="btn-action btn-activate me-1" *ngIf="!d.isActive"
+                    (click)="reactivate(d.distributorId)">
                     <i class="fas fa-toggle-off fa-xs"></i>
                   </button>
                   <button class="btn-action btn-delete me-1" (click)="delete(d.distributorId)">
                     <i class="fas fa-trash fa-xs"></i>
                   </button>
                   <button class="btn-action btn-premium" (click)="togglePremium(d)">
-                    <i class="fas fa-crown fa-xs" [ngClass]="{ 'text-warning': d.isPremium, 'text-muted': !d.isPremium }">
+                    <i class="fas fa-crown fa-xs"
+                      [ngClass]="{ 'text-warning': d.isPremium, 'text-muted': !d.isPremium }">
                     </i>
                   </button>
                 </td>
@@ -196,6 +204,46 @@
       </div>
     </div>
 
+    <!-- Products Tab -->
+    <!-- <div class="tab-content" *ngIf="activeTab === 'category-requests'">
+  <div class="dashboard-card">
+    <h3>Pending Category Approvals</h3>
+
+    <div *ngIf="pendingCategories.length == 0" class="text-muted">
+      No pending categories.
+    </div>
+
+    <table class="table table-bordered mt-3" *ngIf="pendingCategories.length > 0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Requested By</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cat of pendingCategories">
+          <td>{{ cat.name }}</td>
+          <td>{{ cat.distributorName || 'Distributor' }}</td>
+          <td>{{ cat.status }}</td>
+
+          <td>
+            <button class="btn btn-success btn-sm me-2" (click)="approve(cat.categoryId)">
+              Approve
+            </button>
+
+            <button class="btn btn-danger btn-sm" (click)="reject(cat.categoryId)">
+              Reject
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div> -->
+
+
     <div class="tab-content" *ngIf="activeTab === 'orders'">
       <div class="dashboard-card">
         <h3>Orders Management</h3>
@@ -212,10 +260,11 @@
 
     <!-- Fraud Reports Tab -->
     <app-admin-fraud-list *ngIf="activeTab === 'fraud-reports'"></app-admin-fraud-list>
-       <app-admin-review-list *ngIf="activeTab === 'admin/reviews'"></app-admin-review-list>
+    <app-admin-review-list *ngIf="activeTab === 'admin/reviews'"></app-admin-review-list>
 
     <!-- ⭐ ADD DISTRIBUTOR MODAL - ADD THIS RIGHT HERE -->
-    <div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel" aria-hidden="true">
+    <div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel"
+      aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -232,7 +281,8 @@
                     <label class="form-label">Company Name *</label>
                     <input type="text" class="form-control" formControlName="companyName"
                       [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
                       Company name is required
                     </div>
                   </div>
@@ -242,7 +292,8 @@
                     <label class="form-label">Contact Name *</label>
                     <input type="text" class="form-control" formControlName="name"
                       [class.is-invalid]="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
                       Contact name is required
                     </div>
                   </div>
@@ -255,10 +306,12 @@
                     <label class="form-label">Email *</label>
                     <input type="email" class="form-control" formControlName="email"
                       [class.is-invalid]="distributorForm.get('email')?.invalid && distributorForm.get('email')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required'] && distributorForm.get('email')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('email')?.errors?.['required'] && distributorForm.get('email')?.touched">
                       Email is required
                     </div>
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email'] && distributorForm.get('email')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('email')?.errors?.['email'] && distributorForm.get('email')?.touched">
                       Please enter a valid email
                     </div>
                   </div>
@@ -268,7 +321,8 @@
                     <label class="form-label">Phone Number *</label>
                     <input type="text" class="form-control" formControlName="phoneNumber"
                       [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
                       Phone number is required
                     </div>
                   </div>
@@ -281,7 +335,8 @@
                     <label class="form-label">GST Number *</label>
                     <input type="text" class="form-control" formControlName="gst"
                       [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
                       GST number is required
                     </div>
                   </div>
@@ -291,14 +346,15 @@
                     <label class="form-label">Address *</label>
                     <textarea class="form-control" formControlName="address" rows="2"
                       [class.is-invalid]="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched"></textarea>
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
                       Address is required
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="row">
+              <!-- <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Categories</label>
@@ -318,10 +374,11 @@
                 <div class="col-md-6">
                   <div class="mb-3" *ngIf="distributorForm.get('categories')?.value?.includes('Others')">
                     <label class="form-label">Custom Category</label>
-                    <input type="text" class="form-control" formControlName="customCategory" placeholder="Enter custom category">
+                    <input type="text" class="form-control" formControlName="customCategory"
+                      placeholder="Enter custom category">
                   </div>
                 </div>
-              </div>
+              </div> -->
 
               <div class="row">
                 <div class="col-md-6">
@@ -345,14 +402,16 @@
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
+                      <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-primary" (click)="saveDistributor()">
               {{ isEdit ? 'Update' : 'Save' }} Distributor
             </button>
           </div>
+            </form>
+
+          </div>
+  
         </div>
       </div>
     </div>

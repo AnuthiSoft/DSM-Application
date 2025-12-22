@@ -4,6 +4,7 @@ import { OrderService } from '../../services/order.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-employee-orders',
@@ -25,7 +26,8 @@ export class EmployeeOrdersComponent implements OnInit {
 
   constructor(
   private http: HttpClient, 
-  private orderService: OrderService
+  private orderService: OrderService,
+  private toastr: ToastrService
 ) {}
   ngOnInit(): void {
     console.log('Employee ID:', this.employeeId);
@@ -54,7 +56,9 @@ export class EmployeeOrdersComponent implements OnInit {
   openPaymentModal(order: DistributorOrder) {
     this.selectedOrder = order;
     this.paymentMethod = 'Cash';
-    this.collectedAmount = this.subtotal(order); // pre-fill with subtotal
+    // this.collectedAmount = this.subtotal(order); // pre-fill with subtotal
+    this.collectedAmount = order.totalAmount;
+
     this.showPaymentModal = true;
   }
 
@@ -70,12 +74,12 @@ export class EmployeeOrdersComponent implements OnInit {
     if (!this.selectedOrder) return;
 
     if (!this.paymentMethod) {
-      alert("Please select a payment method");
+      this.toastr.warning("Please select a payment method","warning");
       return;
     }
 
     if (this.collectedAmount <= 0 || isNaN(this.collectedAmount)) {
-      alert("Invalid collected amount");
+      this.toastr.error("Invalid collected amount","Error");
       return;
     }
 
@@ -84,12 +88,13 @@ export class EmployeeOrdersComponent implements OnInit {
       paymentMethod: this.paymentMethod
     }).subscribe({
       next: () => {
+        this.toastr.success("Payment collected successfully!", "Success"); // ✅ toastr
         this.closePaymentModal();
         this.loadOrders();
       },
       error: (err) => {
         console.error("Error collecting payment", err);
-        alert(err.error?.message || "Failed to collect payment");
+        this.toastr.error(err.error?.message || "Failed to collect payment","Error");
       }
     });
   }
@@ -98,12 +103,12 @@ export class EmployeeOrdersComponent implements OnInit {
     status: "Delivered"
   }).subscribe({
     next: () => {
-      alert("Order marked as Delivered!");
+      this.toastr.success("Order marked as Delivered!","Success");
       this.loadOrders();
     },
     error: (err) => {
       console.error(err);
-      alert("Failed to update order status.");
+      this.toastr.error("Failed to update order status.","Error");
     }
   });
 }

@@ -3,8 +3,8 @@ import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';  // ✅ Fix: Import HttpClient
+import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
-
 
 @Component({
   selector: 'app-customer-orders',
@@ -21,7 +21,7 @@ export class CustomerOrdersComponent {
 
 
 
-  constructor(private orderService: OrderService, private router: Router, private http: HttpClient  ) { }
+  constructor(private orderService: OrderService, private router: Router, private http: HttpClient,  private toastr: ToastrService ) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -72,12 +72,12 @@ computeExpectedDelivery(orderDate: any, distributorId: string): string {
 
     this.orderService.cancelOrder(orderId).subscribe({
       next: () => {
-        alert('Order canceled successfully');
+        this.toastr.success('Order cancelled successfully');
         this.loadOrders(); // refresh
       },
       error: (err: any) => {
         console.error('Failed to cancel order', err);
-        alert('Failed to cancel order');
+       this.toastr.error('Failed to cancel order');
       }
     });
   }
@@ -86,12 +86,12 @@ computeExpectedDelivery(orderDate: any, distributorId: string): string {
   reorder(orderId: string): void {
     this.orderService.reorder(orderId).subscribe({
       next: () => {
-        alert('Order placed successfully');
+         this.toastr.success('Order placed successfully');
         this.loadOrders();
       },
       error: (err: any) => {
         console.error('Failed to reorder', err);
-        alert('Failed to place reorder');
+         this.toastr.error('Failed to place reorder');
       }
     });
   }
@@ -134,16 +134,14 @@ computeExpectedDelivery(orderDate: any, distributorId: string): string {
           </div>
         `,
         icon: 'info',
-        width: 400,
+        width: 300,
         confirmButtonText: 'Close'
       });
     },
     error: err => {
       console.error("Error loading order:", err);
-      Swal.fire('Error', 'Unable to load order details', 'error');
+      this.toastr.error('Unable to load order details');
     }
   });
 }
-
 }
-

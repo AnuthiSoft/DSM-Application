@@ -59,15 +59,16 @@ namespace DSM_Application.Server.Controllers
 
             var update = Builders<User>.Update
                 .Set(u => u.Name, dto.Name)
-                .Set(u => u.Email, dto.Email)           // duplicates allowed
+                .Set(u => u.Email, dto.Email)
                 .Set(u => u.PhoneNumber, dto.PhoneNumber)
                 .Set(u => u.Address, dto.Address);
 
             var result = await _db.Users.UpdateOneAsync(
                 u => u.EmployeeId == employeeId, update);
 
-            if (result.ModifiedCount == 0)
-                return NotFound("Employee not found or unchanged");
+            // FIX HERE — do not use ModifiedCount
+            if (result.MatchedCount == 0)
+                return NotFound("Employee not found");
 
             return Ok(new { message = "Profile updated successfully" });
         }
@@ -81,7 +82,7 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("{distributorId}")]
         public async Task<IActionResult> GetEmployees(string distributorId)
         {
-            Console.WriteLine($"Incoming distributorId: '{distributorId}'");
+ Console.WriteLine($"Incoming distributorId: '{distributorId}'");
 
             // 1) String match (most common)
             var employees = await _db.Employees
@@ -119,13 +120,20 @@ namespace DSM_Application.Server.Controllers
 
             Console.WriteLine($"Total employees stored: {total}");
 
-            return Ok(new List<object>());
-        }
+            return Ok(new List<object>());        }
 
         // ============================================================
+
+
         // ADD EMPLOYEE  (EMPLOYEE DUPLICATES ALLOWED!)
+
+
         // ============================================================
+
+
         [HttpPost("{distributorId}")]
+
+
         public async Task<IActionResult> Add(string distributorId, [FromBody] Employee emp)
     {
             // ✅ Step 1: Validate Designation (NEW CODE ADDED)
@@ -171,41 +179,84 @@ namespace DSM_Application.Server.Controllers
 
             // ✅ Ensure EmployeeId exists
             if (string.IsNullOrEmpty(emp.EmployeeId))
+
+
                 emp.EmployeeId = ObjectId.GenerateNewId().ToString();
 
             emp.DistributorId = distributorId;
+
+
             emp.IsActive = true;
+
+
             emp.IsRegistered = false;
 
             // Insert into Employees
+
+
             var addedEmployee = await _service.AddEmployeeAsync(emp);
 
             // Insert/Sync into Users
+
+
             var newUser = new User
+
+
             {
+
+
                 Email = emp.Email,
+
+
                 PhoneNumber = emp.PhoneNumber,
+
+
                 Role = "Employee",
+
+
                 DistributorId = distributorId,
+
+
                 Username = emp.Name,
+
+
                 IsRegistered = false,
 
+
                 IsActive = true,
+
+
                 EmployeeId = emp.EmployeeId,
-                CreatedAt = DateTime.UtcNow
+
+
+                CreatedAt = DateTime.UtcNow,
+                Designation = emp.Designation
+
             };
 
             await _db.Users.InsertOneAsync(newUser);
 
             return Ok(new
+
+
             {
+
+
                 message = "Employee added successfully",
+
+
                 employee = addedEmployee
+
+
             });
+
+
         }
 
         // ✅ Update employee
         [HttpPut("{distributorId}/{employeeId}")]
+
+
         public async Task<IActionResult> Update(string distributorId, string employeeId, [FromBody] Employee emp)
      {
 
@@ -253,23 +304,52 @@ namespace DSM_Application.Server.Controllers
             }
 
             var updated = await _service.UpdateEmployeeAsync(distributorId, employeeId, emp);
+
+
             if (updated == null) return NotFound("Employee not found");
 
             // Sync into Users
+
+
             await _db.Users.UpdateOneAsync(
+
+
                 u => u.EmployeeId == updated.EmployeeId,
+
+
                 Builders<User>.Update
+
+
                     .Set(u => u.Username, updated.Name)
+
+
                     .Set(u => u.Email, updated.Email)
+
+
                     .Set(u => u.PhoneNumber, updated.PhoneNumber)
-                    .Set(u => u.IsActive, updated.IsActive));
+
+
+                    .Set(u => u.IsActive, updated.IsActive)
+
+                    .Set(u => u.Designation, updated.Designation));
 
             return Ok(new
+
+
             {
+
+
                 message = "Employee updated successfully",
+
+
                 employee = updated
+
+
             });
+
+
         }
+
 
         // ============================================================
         // DELETE EMPLOYEE

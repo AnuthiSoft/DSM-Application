@@ -90,9 +90,14 @@ namespace DSM_Application.Server.Controllers
 
             foreach (var p in dto.Products)
             {
-                var product = await _products.Find(x => x.ProductId == p.ProductId).FirstOrDefaultAsync();
+
+                var product = await _products
+    .Find(x => x.ProductId == p.ProductId)
+    .FirstOrDefaultAsync();
+
                 if (product == null)
-                    return NotFound($"Product not found: {p.ProductId}");
+                    return NotFound("Product not found");
+
 
 
                 // Capture lead time from product (only once)
@@ -180,7 +185,7 @@ namespace DSM_Application.Server.Controllers
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
                 OrderedDate = DateTime.UtcNow,
-               // ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
+                // ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
                 ExpectedDeliveryDate = expectedDelivery,   // ✅ CORRECT
 
                 Products = orderProducts,
@@ -325,7 +330,7 @@ namespace DSM_Application.Server.Controllers
                     Status = o.Status,
                     EmployeeId = employee?.EmployeeId,
                     Name = employee?.Name,
-                     PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
+                    PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
                     CollectedAmount = o.CollectedAmount,
                     PaymentMethod = o.PaymentMethod,
                     CollectedOn = o.CollectedOn
@@ -338,6 +343,7 @@ namespace DSM_Application.Server.Controllers
             return Ok(result);
         }
 
+
         // Optional: distributor can update order status
         //[HttpPut("{orderId}/status")]
         //public async Task<IActionResult> UpdateStatus(string orderId, [FromBody] string status)
@@ -348,6 +354,7 @@ namespace DSM_Application.Server.Controllers
         //    return NoContent();
         //}
         // GET: api/orders/{orderId}
+
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetOrdersByEmployee(string employeeId)
         {
@@ -379,6 +386,8 @@ namespace DSM_Application.Server.Controllers
                         quantity = p.Quantity
                     }),
                     subtotal = order.Subtotal,
+                    discount = order.TotalDiscount,     
+                    payableAmount = order.TotalAmount,
                     totalAmount = order.TotalAmount,
                     status = order.Status,
                     paymentCollectedByEmployee = order.PaymentCollectedByEmployee,
@@ -467,11 +476,6 @@ namespace DSM_Application.Server.Controllers
             return Ok(dto);
         }
 
-
-
-
-
-
         // Distributor-only endpoint to update status.
         // It ensures the logged-in distributor owns the order.
         [Authorize(Roles = "Distributor")]
@@ -482,54 +486,36 @@ namespace DSM_Application.Server.Controllers
             if (string.IsNullOrEmpty(requestedStatus))
                 return BadRequest("Status required");
 
-            // Get distributor id from JWT (your tokens include this claim in other controllers)
-            var distributorIdFromToken = User.FindFirst("DistributorId")?.Value;
-            if (string.IsNullOrEmpty(distributorIdFromToken))
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (string.IsNullOrEmpty(distributorId))
                 return Unauthorized("DistributorId missing from token");
 
-            // Find order
             var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (order == null) return NotFound("Order not found");
+            if (order == null)
+                return NotFound("Order not found");
 
-            // ensure distributor owns this order
-            if (order.DistributorId != distributorIdFromToken) return Unauthorized("Not authorized for this order");
+            if (order.DistributorId != distributorId)
+                return Unauthorized("Not authorized for this order");
 
-            // Example state transitions you might want to enforce:
-            // Pending -> Confirmed -> Shipped -> Delivered
-            // Pending -> Rejected (allowed)
-            // We'll implement a simple guard and special handling for Confirmed.
-            var from = order.Status;
-            var to = requestedStatus;
+            // ✅ ONLY UPDATE STATUS (NO STOCK)
+            // ✅ When order is DELIVERED → update product stock
+            
+            
 
-            // If moving to Confirmed from Pending: check product stock and decrement
-            if (from == "Pending" && to == "Confirmed")
+            // ✅ Update order status
+            order.Status = requestedStatus;
+            order.DeliveredOn = DateTime.UtcNow;
+
+            await _mongo.Orders.ReplaceOneAsync(o => o.Id == orderId, order);
+
+            return Ok(new
             {
-                // Validate stock
-                foreach (var p in order.Products)
-                {
-                    var product = await _mongo.Products.Find(x => x.ProductId == p.ProductId).FirstOrDefaultAsync();
-                    if (product == null)
-                        return BadRequest($"Product '{p.ProductId}' not found");
+                message = "Order status updated",
+                status = requestedStatus
+            });
 
-                    if (product.Stock < p.Quantity)
-                        return BadRequest($"Insufficient stock for '{product.ProductName}'. Available: {product.Stock}, Required: {p.Quantity}");
-                }
-
-                // Decrement stock for each product
-                foreach (var p in order.Products)
-                {
-                    var update = Builders<Product>.Update.Inc(pr => pr.Stock, -p.Quantity);
-                    await _mongo.Products.UpdateOneAsync(pr => pr.ProductId == p.ProductId, update);
-                }
-            }
-
-            // Update order status
-            var upd = Builders<Order>.Update.Set(o => o.Status, to);
-            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, upd);
-
-            return Ok(new { message = "Order status updated", status = to });
         }
-        [HttpPut("{orderId}/assign")]
+            [HttpPut("{orderId}/assign")]
         public async Task<IActionResult> AssignOrder(string orderId, [FromBody] AssignOrderDto dto)
         {
             var order = await _orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
@@ -656,6 +642,45 @@ namespace DSM_Application.Server.Controllers
 
         // DTOs inside controller for convenience (you can move these to separate files)
         //[Authorize(Roles = "Employee")]
+        //[HttpPut("{orderId}/employee-status")]
+        //public async Task<IActionResult> EmployeeUpdateStatus(string orderId, [FromBody] UpdateStatusDto body)
+        //{
+        //    var requestedStatus = (body?.Status ?? string.Empty).Trim();
+        //    if (string.IsNullOrEmpty(requestedStatus))
+        //        return BadRequest("Status required");
+
+        //    var employeeId = User.FindFirst("EmployeeId")?.Value;
+        //    if (string.IsNullOrEmpty(employeeId))
+        //        return Unauthorized("EmployeeId missing from token");
+
+        //    var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+        //    if (order == null) return NotFound("Order not found");
+
+        //    if (order.EmployeeId != employeeId)
+        //        return Unauthorized("Not authorized to modify this order");
+
+        //    if (order.Status != "Assigned" && order.Status != "Shipped")
+        //        return BadRequest($"Cannot change status from '{order.Status}'");
+
+        //    // 🔥 FIXED — Delivery boy should only update delivery, NOT payment
+        //    var update = Builders<Order>.Update
+        //        .Set(o => o.Status, requestedStatus)
+        //        .Set(o => o.DeliveredOn, DateTime.UtcNow)
+        //        .Set(o => o.PaymentCollectedByEmployee, false)   // 💥 Force NO PAYMENT
+        //        .Unset(o => o.PaymentMethod)                     // 💥 Remove payment if any
+        //        .Unset(o => o.CollectedAmount)
+        //        .Unset(o => o.CollectedOn);
+
+        //    await _mongo.Orders.UpdateOneAsync(o => o.Id == order.Id, update);
+
+        //    return Ok(new
+        //    {
+        //        message = "Order delivered successfully",
+        //        status = requestedStatus
+        //    });
+        //}
+
+
         [HttpPut("{orderId}/employee-status")]
         public async Task<IActionResult> EmployeeUpdateStatus(string orderId, [FromBody] UpdateStatusDto body)
         {
@@ -668,31 +693,26 @@ namespace DSM_Application.Server.Controllers
                 return Unauthorized("EmployeeId missing from token");
 
             var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (order == null) return NotFound("Order not found");
+            if (order == null)
+                return NotFound("Order not found");
 
             if (order.EmployeeId != employeeId)
-                return Unauthorized("Not authorized to modify this order");
+                return Unauthorized("Not authorized");
 
-            if (order.Status != "Assigned" && order.Status != "Shipped")
-                return BadRequest($"Cannot change status from '{order.Status}'");
-
-            // 🔥 FIXED — Delivery boy should only update delivery, NOT payment
+            // ✅ ONLY UPDATE STATUS & DELIVERY DATE
             var update = Builders<Order>.Update
                 .Set(o => o.Status, requestedStatus)
-                .Set(o => o.DeliveredOn, DateTime.UtcNow)
-                .Set(o => o.PaymentCollectedByEmployee, false)   // 💥 Force NO PAYMENT
-                .Unset(o => o.PaymentMethod)                     // 💥 Remove payment if any
-                .Unset(o => o.CollectedAmount)
-                .Unset(o => o.CollectedOn);
+                .Set(o => o.DeliveredOn, DateTime.UtcNow);
 
-            await _mongo.Orders.UpdateOneAsync(o => o.Id == order.Id, update);
+            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
 
             return Ok(new
             {
-                message = "Order delivered successfully",
+                message = "Order status updated",
                 status = requestedStatus
             });
         }
+
 
         [Authorize(Roles = "Customer")]
         [HttpPut("{orderId}/cancel")]

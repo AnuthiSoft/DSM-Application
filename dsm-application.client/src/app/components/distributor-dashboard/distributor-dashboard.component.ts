@@ -4,6 +4,8 @@ import { ConnectionRequestDto, DistributorService } from '../../services/distrib
 import { CustomerService } from '../../services/customer.service';
 import { HttpClient } from '@angular/common/http';
 
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-distributor-dashboard',
@@ -17,15 +19,25 @@ export class DistributorDashboardComponent  implements OnInit{
   expectedDate: string = '';
   expectedDays: number = 1; // default
   leadTime:number = 1;
+  
+
+  constructor(
+
+    private auth: AuthService,
+    private distributorService: DistributorService,
+    private router: Router,   // ✅ ADD THIS
+    private customerService: CustomerService,
+    private http: HttpClient
+  ) { }
  
 
   retailerCount: number = 0;
   activeTab: string = 'dashboard'; // default tab
   isMobileMenuOpen = false;
-isDarkTheme = false;
-openSubmenus: string[] = [];
+  isDarkTheme = false;
+  openSubmenus: string[] = [];
 
-    // pendingRequests: any[] = [];
+  // pendingRequests: any[] = [];
   distributorId: string = '';
   // ==============================
   // 🚀 LIVE TRACKING VARIABLES
@@ -37,23 +49,20 @@ openSubmenus: string[] = [];
   @ViewChild('trackingComp') trackingComp: any;
 
 
-submenuState: { [key: string]: boolean } = {
-  inventory: false,
-  orders: false,
-  sales: false,
-  retailers: false,
-  payments: false,
-  settings: false
-};
+  submenuState: { [key: string]: boolean } = {
+    inventory: false,
+    orders: false,
+    sales: false,
+    retailers: false,
+    payments: false,
+    settings: false
+  };
 
-constructor(
-    
-    private auth: AuthService,private distributorService: DistributorService,private customerService: CustomerService,private http: HttpClient 
-  ) {}
+
   
-// toggleSubmenu(menu: string) {
-//   this.submenuState[menu] = !this.submenuState[menu];
-// }
+  // toggleSubmenu(menu: string) {
+  //   this.submenuState[menu] = !this.submenuState[menu];
+  // }
 ngOnInit() {
     this.distributorId = localStorage.getItem('distributorId') || '';
     // this.loadRequests();
@@ -125,70 +134,73 @@ loadRetailerCount() {
   ).subscribe(()=> alert("Trip Ended"));
 }
 
-isSubmenuOpen(menu: string): boolean {
-  return this.openSubmenus.includes(menu);
-}
-// Add these methods to your component
-// toggleMobileMenu() {
-//   this.isMobileMenuOpen = !this.isMobileMenuOpen;
-// }
-
-// closeMobileMenu() {
-//   if (this.isMobileMenuOpen) {
-//     this.isMobileMenuOpen = false;
-//   }
-// }
-// Update these methods in your component
-toggleSubmenu(menu: string) {
-  // Check if the clicked menu is already open
-  const isCurrentlyOpen = this.isSubmenuOpen(menu);
-  
-  // Close all submenus first
-  this.closeAllSubmenus();
-  
-  // If the clicked menu wasn't already open, open it
-  if (!isCurrentlyOpen) {
-    this.openSubmenus.push(menu);
+  isSubmenuOpen(menu: string): boolean {
+    return this.openSubmenus.includes(menu);
   }
-}
+  // Add these methods to your component
+  // toggleMobileMenu() {
+  //   this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  // }
 
+  // closeMobileMenu() {
+  //   if (this.isMobileMenuOpen) {
+  //     this.isMobileMenuOpen = false;
+  //   }
+  // }
+  // Update these methods in your component
+  toggleSubmenu(menu: string) {
+    // Check if the clicked menu is already open
+    const isCurrentlyOpen = this.isSubmenuOpen(menu);
 
-// isSubmenuOpen(menu: string): boolean {
-//   return this.openSubmenus.includes(menu);
-// }
-closeAllSubmenus() {
-  this.openSubmenus = [];
-}
+    // Close all submenus first
+    this.closeAllSubmenus();
 
-// Update the setActiveTab method to close submenus when switching tabs
-setActiveTab(tab: string) {
-  this.activeTab = tab;
-  // no special logic for live-tracking now
-}
-
-
-
-// Update the toggleMobileMenu method
-
-toggleMobileMenu() {
-  this.isMobileMenuOpen = !this.isMobileMenuOpen;
-}
-// Update the closeMobileMenu method
-closeMobileMenu() {
-  if (this.isMobileMenuOpen) {
-    this.isMobileMenuOpen = false;
+    // If the clicked menu wasn't already open, open it
+    if (!isCurrentlyOpen) {
+      this.openSubmenus.push(menu);
+    }
   }
-}
-toggleTheme() {
-  this.isDarkTheme = !this.isDarkTheme;
-  // You can add logic to apply the theme to the document
-  if (this.isDarkTheme) {
-    document.body.setAttribute('data-theme', 'dark');
-  } else {
-    document.body.removeAttribute('data-theme');
+
+
+  // isSubmenuOpen(menu: string): boolean {
+  //   return this.openSubmenus.includes(menu);
+  // }
+  closeAllSubmenus() {
+    this.openSubmenus = [];
   }
+
+  // // Update the setActiveTab method to close submenus when switching tabs
+  // setActiveTab(tab: string) {
+  //   this.activeTab = tab;
+  //   // Don't close submenus here to allow navigation within the same section
+  // }
+
+  setActiveTab(tab: string) {
+  this.activeTab = tab;     // ✅ this controls page display
+  this.closeAllSubmenus();  // optional
 }
-currentDate: Date = new Date();
+
+  // Update the toggleMobileMenu method
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+  // Update the closeMobileMenu method
+  closeMobileMenu() {
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
+  toggleTheme() {
+    this.isDarkTheme = !this.isDarkTheme;
+    // You can add logic to apply the theme to the document
+    if (this.isDarkTheme) {
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+    }
+  }
+  currentDate: Date = new Date();
   // acceptedCustomers: ConnectionRequestDto[] = [];
   // loading = false;
 
@@ -214,41 +226,41 @@ saveExpectedDayss() {
 //   console.log("Expected Days saved:", this.expectedDays);
 // }
 
-//   loadRequests() {
-//     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
+  //   loadRequests() {
+  //     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
 
-//       this.pendingRequests = res;
-//     });
-//   }
+  //       this.pendingRequests = res;
+  //     });
+  //   }
 
-// respond(request: any, accept: boolean) {
-//   if (!request.connectionId) {
-//     console.error('No connectionId found!', request);
-//     return;
-//   }
-//   this.distributorService.respondConnection(request.connectionId, accept)
-//     .subscribe(() => this.loadRequests());
-// }
-//   loadAcceptedCustomers() {
-//     this.loading = true;
-//     this.distributorService.getAcceptedCustomers(this.distributorId || undefined).subscribe({
-//       next: data => { this.acceptedCustomers = data; this.loading = false; },
-//       error: err => { console.error(err); this.loading = false; }
-//     });
-//   }
-//    disconnect(connectionId: string) {
-//     if (!confirm('Are you sure you want to disconnect this customer?')) return;
-//     this.distributorService.disconnectCustomer(connectionId).subscribe({
-//       next: (res: any) => {
-//         alert(res?.message || 'Customer disconnected');
-//         this.loadAcceptedCustomers();
-//       },
-//       error: err => {
-//         console.error(err);
-//         alert('Failed to disconnect customer');
-//       }
-//     });
-//   }
+  // respond(request: any, accept: boolean) {
+  //   if (!request.connectionId) {
+  //     console.error('No connectionId found!', request);
+  //     return;
+  //   }
+  //   this.distributorService.respondConnection(request.connectionId, accept)
+  //     .subscribe(() => this.loadRequests());
+  // }
+  //   loadAcceptedCustomers() {
+  //     this.loading = true;
+  //     this.distributorService.getAcceptedCustomers(this.distributorId || undefined).subscribe({
+  //       next: data => { this.acceptedCustomers = data; this.loading = false; },
+  //       error: err => { console.error(err); this.loading = false; }
+  //     });
+  //   }
+  //    disconnect(connectionId: string) {
+  //     if (!confirm('Are you sure you want to disconnect this customer?')) return;
+  //     this.distributorService.disconnectCustomer(connectionId).subscribe({
+  //       next: (res: any) => {
+  //         alert(res?.message || 'Customer disconnected');
+  //         this.loadAcceptedCustomers();
+  //       },
+  //       error: err => {
+  //         console.error(err);
+  //         alert('Failed to disconnect customer');
+  //       }
+  //     });
+  //   }
   // Switch tab
   // setActiveTab(tab: string): void {
   //   this.activeTab = tab;
@@ -259,7 +271,7 @@ saveExpectedDayss() {
     return this.activeTab === tab;
   }
 
-   logout(): void {
+  logout(): void {
     this.auth.logout();
     window.location.href = "/distributor-login";
   }

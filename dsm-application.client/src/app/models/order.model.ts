@@ -22,20 +22,24 @@ export interface DistributorOrder {
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
-  customerAddress?:string;
+  customerAddress?: string;
   products: OrderProduct[];
   totalAmount: number;
   orderDate: string;
   status: string;
-   // ✅ Add these for assigned employee
-    employeeId?: string;
+  // ✅ Add these for assigned employee
+  employeeId?: string;
   name?: string;
   assignedOn?: string; // optional if you want to show assignment date
-  
+
   // ✅ Add these two fields to fix errors
   shippingAddress?: string;
-  shippingFee?: number;
-   // ✅ Payment fields
+  shippingFee?: number;// ✅ Payment fields
+  // ✅ ADD THESE (FROM BACKEND)
+  subtotal: number;
+  totalDiscount: number;
+  // totalAmount: number;
+
   paymentCollectedByEmployee?: boolean;
   collectedAmount?: number;
   paymentMethod?: string;
@@ -52,13 +56,13 @@ export interface DistributorOrder {
 export interface Order {
   id: string;
   customerId: string;
-  customerName:string;
+  customerName: string;
   distributorId: string;
-EmployeeId?: string;
- Name?: string;
+  EmployeeId?: string;
+  Name?: string;
   assignedOn?: Date;
- orderedDate: string;
-expectedDeliveryDate: string;
+  orderedDate: string;
+  expectedDeliveryDate: string;
 
   status: string;
   totalAmount: number;
@@ -71,20 +75,20 @@ expectedDeliveryDate: string;
   collectedOn?: Date;
   deliveryRemarks?: string;
 
- 
+
 
   // ➕ Add this field
- // deliveryEta?: string;
+  // deliveryEta?: string;
 
 }
 export interface Employee {
-  
-    id?: string;           // <-- Backend usually sends this
+
+  id?: string;           // <-- Backend usually sends this
   _id?: string;          // <-- MongoDB style ID (sometimes)
   employeeId?: string;   // <-- Use this in UI
   name: string;
   email: string;
   isActive: boolean;
   distributorId?: string;
-   designation?: string;   // <-- Add this line
+  designation?: string;   // <-- Add this line
 }

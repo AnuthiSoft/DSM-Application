@@ -3,69 +3,50 @@
     <h2>Distributor Products</h2>
   </div>
 
- <!-- 🔍 UNIFIED SEARCH SECTION -->
-<div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
-  
-  <!-- Search Box -->
-  <div class="search-box">
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Search products"
-      [(ngModel)]="searchTerm"
-      (input)="onSmartSearch()"
-      
-    />
-    <button class="search-btn" (click)="onSmartSearch()">
-    <i class="fas fa-search"></i>
-  </button>
-   
+  <!-- 🔍 UNIFIED SEARCH SECTION -->
+  <div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
+
+    <!-- Search Box -->
+    <div class="search-box">
+      <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
+        (input)="onSmartSearch()" />
+      <button class="search-btn" (click)="onSmartSearch()">
+        <i class="fas fa-search"></i>
+      </button>
+
+    </div>
+
+
+
+    <!-- Category Filter -->
+    <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)"
+      style="width: 180px;">
+      <option value="">All Categories</option>
+      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+    </select>
+
+
+
+    <!-- Distributor Filter -->
+    <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
+      style="width: 180px;">
+      <option value="">All Distributors</option>
+      <option *ngFor="let d of distributors" [value]="d">{{ d }}</option>
+    </select>
+
+
+
+
+
+    <!-- Stock Filter -->
+    <select class="form-select" [(ngModel)]="stockFilter" (change)="filteredProducts()" style="width: 160px;">
+      <option value="">All Stock</option>
+      <option value="inStock">In Stock</option>
+      <option value="lowStock">Low Stock</option>
+      <option value="outOfStock">Out of Stock</option>
+    </select>
+
   </div>
-
- 
-
-  <!-- Category Filter -->
-  <select
-    class="form-select"
-    [(ngModel)]="categoryFilter"
-    (change)="onCategoryChange(categoryFilter)"
-    style="width: 180px;"
-  >
-    <option value="">All Categories</option>
-    <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-  </select>
-
-
-
-  <!-- Distributor Filter -->
- <select
-  class="form-select"
-  [(ngModel)]="distributorFilter"
-  (change)="onDistributorChange(distributorFilter)"
-  style="width: 180px;"
->
-  <option value="">All Distributors</option>
-  <option *ngFor="let d of distributors" [value]="d">{{ d }}</option>
-</select>
-
-
-
-
-
-  <!-- Stock Filter -->
-  <select
-    class="form-select"
-    [(ngModel)]="stockFilter"
-    (change)="filteredProducts()"
-    style="width: 160px;"
-  >
-    <option value="">All Stock</option>
-    <option value="inStock">In Stock</option>
-    <option value="lowStock">Low Stock</option>
-    <option value="outOfStock">Out of Stock</option>
-  </select>
-
-</div>
 
 
 
@@ -84,63 +65,62 @@
   <div *ngIf="!loading && filterProducts.length > 0" class="products-content">
     <div class="products-grid">
       <div class="product-card" *ngFor="let prod of filterProducts">
-        <!-- <div class="product-image"> -->
-          <!-- <img
+
+        <!-- <img
             *ngIf="prod.imageUrls"
             [src]="apiBaseUrl + prod.imageUrls"
             [alt]="prod.productName"
           />
           <div *ngIf="!prod.imageUrls" class="product-image-placeholder">
             <i class="fas fa-box"></i>
-          </div>
-        </div> -->
-        
-        <div class="product-image">
- 
-  <!-- Multiple Images → Slider -->
-  <div *ngIf="prod.imageUrls && prod.imageUrls.length > 1"
-     id="carousel{{prod.productId}}"
-     class="carousel slide"
-     data-bs-ride="false"
-     data-bs-interval="false">
- 
- 
-    <div class="carousel-inner">
-      <div *ngFor="let img of prod.imageUrls; let i = index"
-           class="carousel-item"
-           [class.active]="i === 0">
-        <img [src]="getFullImageUrl(img)" class="d-block w-100" />
-      </div>
-    </div>
- 
-    <button class="carousel-control-prev"
-            type="button"
-            [attr.data-bs-target]="'#carousel'+prod.productId"
-            data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
- 
-    <button class="carousel-control-next"
-            type="button"
-            [attr.data-bs-target]="'#carousel'+prod.productId"
-            data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
- 
-  <!-- One Image -->
-  <img *ngIf="prod.imageUrls && prod.imageUrls.length === 1"
-       [src]="getFullImageUrl(prod.imageUrls[0])"
-       class="single-product-image" />
- 
-  <!-- No Image -->
-  <div *ngIf="!prod.imageUrls || prod.imageUrls.length === 0" class="product-image-placeholder">
+          </div> -->
+
+
+        <!-- <img
+    *ngIf="prod?.imageUrls?.length"
+    [src]="getFullImageUrl(prod.imageUrls![0])"
+    [alt]="prod.productName"
+  />
+
+  <div *ngIf="!prod?.imageUrls?.length" class="product-image-placeholder">
     <i class="fas fa-box"></i>
-  </div>
- 
-</div>
- 
- 
+  </div> -->
+
+        <div class="product-image">
+
+          <!-- Multiple Images → Slider -->
+          <div *ngIf="prod.imageUrls && prod.imageUrls.length > 1" id="carousel{{prod.productId}}"
+            class="carousel slide" data-bs-ride="false" data-bs-interval="false">
+
+
+            <div class="carousel-inner">
+              <div *ngFor="let img of prod.imageUrls; let i = index" class="carousel-item" [class.active]="i === 0">
+                <img [src]="getFullImageUrl(img)" class="d-block w-100" />
+              </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
+              data-bs-slide="prev">
+              <span class="carousel-control-prev-icon"></span>
+            </button>
+
+            <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
+              data-bs-slide="next">
+              <span class="carousel-control-next-icon"></span>
+            </button>
+          </div>
+
+          <!-- One Image -->
+          <img *ngIf="prod.imageUrls && prod.imageUrls.length === 1" [src]="getFullImageUrl(prod.imageUrls[0])"
+            class="single-product-image" />
+
+          <!-- No Image -->
+          <div *ngIf="!prod.imageUrls || prod.imageUrls.length === 0" class="product-image-placeholder">
+            <i class="fas fa-box"></i>
+          </div>
+
+        </div>
+
 
         <div class="product-body">
           <p>Distributor: {{ prod.distributorName }}</p>
@@ -150,40 +130,33 @@
             <p class="product-price">₹{{ prod.price }}</p>
             <p>
               <strong>Stock:</strong>
-              <span
-                [class]="
+              <span [class]="
                   prod.stock > 10
                     ? 'stock-high'
                     : prod.stock > 0
                     ? 'stock-low'
                     : 'stock-out'
-                "
-              >
+                ">
                 {{ prod.stock > 0 ? prod.stock + ' available' : 'Out of stock' }}
               </span>
             </p>
             <p><strong>Brand:</strong> {{ prod.brand }}</p>
-            <p><strong>Category:</strong> {{ prod.category }}</p>
+            <!-- <p><strong>Category:</strong> {{ prod.category }}</p> -->
             <!-- <p><strong>Color:</strong>{{prod.color}}</p> -->
-            
+
           </div>
 
-          <button
-  class="btn btn-primary add-to-cart-btn"
-  
-  (click)="openAddToCart(prod)"
-  [disabled]="prod.stock === 0"
->
-  <i class="fas fa-cart-plus"></i>
-  {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
-</button>
+          <button class="btn btn-primary add-to-cart-btn" (click)="openAddToCart(prod)" [disabled]="prod.stock === 0">
+            <i class="fas fa-cart-plus"></i>
+            {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+          </button>
 
         </div>
       </div>
     </div>
 
 
-  
- 
-   
-</div>
+
+
+
+  </div>

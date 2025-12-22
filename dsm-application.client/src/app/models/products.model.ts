@@ -30,6 +30,7 @@ export interface Product {
   imageUrls: string[]; 
     distributorId?: string;
     distributorName?: string; // Add this
+     currentStock: number;
 
 }
 // export interface Product {

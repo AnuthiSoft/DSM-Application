@@ -228,11 +228,7 @@
     <!-- Page Header -->
     <div class="welcome-header">
       <h2><i class="fas fa-users"></i> Employee Management</h2>
-      <button
-        *ngIf="!loading && filteredEmployees.length > 0" 
-        class="btn btn-primary"
-        (click)="openEmployeeModal()"
-      >
+      <button *ngIf="!loading && filteredEmployees.length > 0" class="btn btn-primary" (click)="openEmployeeModal()">
         <i class="fas fa-plus"></i> Add Employee
       </button>
     </div>
@@ -246,39 +242,28 @@
         <div class="search-box">
           <div class="search-input-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              class="form-control search-input"
-              placeholder="    Search employees by name, email, or phone..."
-              [(ngModel)]="searchTerm"
-              (input)="applyFilters()"
-            />
+            <input type="text" class="form-control search-input"
+              placeholder="    Search employees by name, email, or phone..." [(ngModel)]="searchTerm"
+              (input)="applyFilters()" />
           </div>
         </div>
-        
+
         <div class="filter-group">
           <label class="filter-label">Designation</label>
-          <select
-            class="form-select"
-            [(ngModel)]="roleFilter"
-            (change)="applyFilters()"
-          >
+          <select class="form-select" [(ngModel)]="roleFilter" (change)="applyFilters()">
             <option value="">All Designations</option>
-            <option value="Administrator">Administrator</option>
+            <option value="Delivery Boy">Delivery Boy</option>
+            <option value="Cash Collector">Cash Collector</option>
             <option value="Manager">Manager</option>
             <option value="Sales Representative">Sales Representative</option>
             <option value="Delivery Boy">Delivery Boy</option>
-             <option value="Cash Collector">Cash Collector</option>
+            <option value="Cash Collector">Cash Collector</option>
           </select>
         </div>
-        
+
         <div class="filter-group">
           <label class="filter-label">Status</label>
-          <select
-            class="form-select"
-            [(ngModel)]="statusFilter"
-            (change)="applyFilters()"
-          >
+          <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
@@ -330,20 +315,22 @@
               </td>
               <td class="employee-actions">
                 <div class="action-buttons">
-                  <button
-                    class="btn btn-outline-primary btn-sm action-btn"
-                    (click)="editEmployee(emp)"
-                  >
+                  <button class="btn btn-outline-primary btn-sm action-btn" (click)="editEmployee(emp)">
                     <i class="fas fa-edit"></i>
                     Edit
                   </button>
-                  <button
-                    class="btn btn-outline-danger btn-sm action-btn"
-                    (click)="deleteEmployee(emp)"
-                  >
+                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="deleteEmployee(emp)">
                     <i class="fas fa-trash"></i>
                     Delete
                   </button>
+
+                  <button *ngIf="(emp.designation || '').toLowerCase().trim() === 'delivery boy'"
+                    class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
+                    <i class="fas fa-file-upload"></i> Upload Invoice
+                  </button>
+
+
+
                 </div>
               </td>
             </tr>
@@ -362,10 +349,7 @@
         <i class="fas fa-users"></i>
         <h4>No Employees Found</h4>
         <p>Try adjusting your search or filter criteria</p>
-        <button
-          class="btn btn-primary"
-          (click)="openEmployeeModal()"
-        >
+        <button class="btn btn-primary" (click)="openEmployeeModal()">
           <i class="fas fa-plus"></i> Add First Employee
         </button>
       </div>
@@ -385,127 +369,130 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Employee Modal -->
-  <div *ngIf="showModal" class="modal-overlay">
-    <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
-    
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>
-          <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
-          {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
-        </h3>
-        <button class="modal-close" (click)="closeEmployeeModal()">
-          <i class="fas fa-times"></i>
-        </button>
+    <!-- ================= Upload Invoice Modal ================= -->
+    <div *ngIf="showUploadModal" class="modal-overlay">
+      <div class="modal-backdrop" (click)="closeUploadModal()"></div>
+
+      <div class="modal-content" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h3><i class="fas fa-file-upload"></i> Upload Invoice PDF</h3>
+          <button class="modal-close" (click)="closeUploadModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p>
+
+          <input type="file" (change)="onFileSelected($event)" accept="application/pdf" />
+
+          <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
+            Upload PDF
+          </button>
+        </div>
+
       </div>
-      
-      <div class="modal-body">
-        <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-user"></i>
-                Full Name
-              </label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="name"
-                placeholder="Enter employee name"
-              />
-            </div>
+    </div>
+    <!-- ========================================================== -->
 
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-envelope"></i>
-                Email Address
-              </label>
-              <input 
-                type="email" 
-                class="form-control" 
-                formControlName="email"
-                placeholder="Enter email address"
-              />
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-phone"></i>
-                Phone Number
-              </label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="phoneNumber"
-                placeholder="Enter phone number"
-                (input)="restrictPhoneInput($event)" 
-              />
-            </div>
+    <!-- Employee Modal -->
+    <div *ngIf="showModal" class="modal-overlay">
+      <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
 
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-briefcase"></i>
-                Designation
-              </label>
-              <select class="form-select" formControlName="designation">
-                <option value="">Select Designation</option>
-                <option value="Administrator">Administrator</option>
-                <option value="Manager">Manager</option>
-                <option value="Sales Representative">Sales Representative</option>
-                <option value="Delivery Boy">Delivery Boy</option>
-                 <option value="Cash Collector">Cash Collector</option>
-              </select>
-            </div>
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>
+            <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
+            {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
+          </h3>
+          <button class="modal-close" (click)="closeEmployeeModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-user-tag"></i>
-                Role
-              </label>
-              <input 
-                type="text" 
-                class="form-control" 
-                formControlName="role"
-                placeholder="Enter role"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fas fa-toggle-on"></i>
-                Status
-              </label>
-              <div class="status-toggle">
-                <label class="toggle-switch">
-                  <input
-                    type="checkbox"
-                    class="toggle-input"
-                    formControlName="isActive"
-                  />
-                  <span class="toggle-slider"></span>
+        <div class="modal-body">
+          <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-user"></i>
+                  Full Name
                 </label>
-                <span class="toggle-label">
-                  {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
-                </span>
+                <input type="text" class="form-control" formControlName="name" placeholder="Enter employee name" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-envelope"></i>
+                  Email Address
+                </label>
+                <input type="email" class="form-control" formControlName="email" placeholder="Enter email address" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-phone"></i>
+                  Phone Number
+                </label>
+                <input type="text" class="form-control" formControlName="phoneNumber" placeholder="Enter phone number"
+                  (input)="restrictPhoneInput($event)" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-briefcase"></i>
+                  Designation
+                </label>
+                <select class="form-select" formControlName="designation">
+                  <option value="">Select Designation</option>
+                  <option value="Administrator">Administrator</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Sales Representative">Sales Representative</option>
+                  <option value="Delivery Boy">Delivery Boy</option>
+                  <option value="Cash Collector">Cash Collector</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-user-tag"></i>
+                  Role
+                </label>
+                <input type="text" class="form-control" formControlName="role" placeholder="Enter role" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-toggle-on"></i>
+                  Status
+                </label>
+                <div class="status-toggle">
+                  <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" formControlName="isActive" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">
+                    {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-          
-        <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
-        <i class="fas fa-times"></i> Cancel
-    </button>
 
-    <button type="submit" class="btn btn-primary">
-        <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
-        {{ isEdit ? 'Update Employee' : 'Save Employee' }}
-    </button>
-</div>
-</form>
-</div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+
+              <button type="submit" class="btn btn-primary">
+                <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
+                {{ isEdit ? 'Update Employee' : 'Save Employee' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-</div>

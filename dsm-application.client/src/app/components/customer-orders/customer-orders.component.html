@@ -98,10 +98,10 @@
             </div>
 
             <div class="detail-item">
-  <span class="detail-label">Expected Delivery:</span>
-<span class="detail-value">{{ order.expectedDeliveryDate | date:'mediumDate' }}</span>
-</div>
-<!-- <div class="detail-item">
+              <span class="detail-label">Expected Delivery:</span>
+              <span class="detail-value">{{ order.expectedDeliveryDate | date:'mediumDate' }}</span>
+            </div>
+            <!-- <div class="detail-item">
   <span class="detail-label">Order Date:</span>
   <span class="detail-value">
     {{ order.orderedDate | date:'medium' }}
@@ -149,16 +149,14 @@
           </button>
 
           <!-- Cancel -->
-          <button class="btn btn-outline-secondary btn-sm"
-                  *ngIf="order.status === 'Pending'"
-                  (click)="cancelOrder(order.id)">
+          <button class="btn btn-outline-secondary btn-sm" *ngIf="order.status === 'Pending'"
+            (click)="cancelOrder(order.id)">
             <i class="fas fa-times"></i> Cancel Order
           </button>
 
           <!-- Reorder -->
-          <button class="btn btn-outline-success btn-sm"
-                  *ngIf="order.status === 'Delivered'"
-                  (click)="reorder(order.id)">
+          <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'"
+            (click)="reorder(order.id)">
             <i class="fas fa-redo"></i> Reorder
           </button>
         </div>

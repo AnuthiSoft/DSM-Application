@@ -35,6 +35,9 @@ namespace DSM_Application.Server.Models
         public string PaymentMethod { get; set; }
         public DateTime? CollectedOn { get; set; }
 
+        public bool StockUpdated { get; set; } = false;
+
+
         public DateTime? DeliveredOn { get; set; }
         public string DeliveryRemarks { get; set; }
         public string Status { get; set; } = "Pending";

@@ -20,11 +20,13 @@ namespace DSM_Application.Server.Controllers
     {
         private readonly ProductService _productService;
         private readonly CategoryService _categoryService;
+        private readonly InventoryService _inventoryService;
 
-        public ProductsController(ProductService productService, CategoryService categoryService)
+        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService )
         {
             _productService = productService;
             _categoryService = categoryService;
+            _inventoryService = inventoryService;
         }
 
         [Authorize(Roles = "Distributor")]
@@ -338,10 +340,41 @@ namespace DSM_Application.Server.Controllers
         //    var products = await _productService.SearchByQualityAsync(distributorId, qualityGrade, originCountry, certification);
         //    return Ok(products);
         //}
-        
+        [HttpPut("{id}/increase-stock")]
+        public async Task<IActionResult> IncreaseStock(
+    string id,
+    [FromQuery] int quantity)
+        {
+            if (quantity <= 0)
+                return BadRequest("Quantity must be greater than zero");
+
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+            if (string.IsNullOrEmpty(distributorId))
+                return Unauthorized("DistributorId not found");
+
+            // ✅ CALL INVENTORY SERVICE INSTEAD
+            await _inventoryService.AddStockAsync(
+                id,
+                distributorId,
+                quantity,
+                "Manual stock add"
+            );
+
+            return Ok(new
+            {
+                message = "Stock increased successfully",
+                productId = id,
+                addedQuantity = quantity
+            });
+        }
+
+
+        }
+
+
 
 
     }
-}
+
 
 

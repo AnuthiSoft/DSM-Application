@@ -27,7 +27,7 @@ import { TestComponent } from './components/test/test.component';
 import { EmployeeLoginComponent } from './components/employee-login/employee-login.component';
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
-import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
+import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component'; import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 
 import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
 import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
@@ -35,6 +35,11 @@ import { AdminReviewListComponent } from './components/admin-review-list/admin-r
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
+
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+
+import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
+import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
 import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
 import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
@@ -45,7 +50,7 @@ import { PendingPaymentsComponent } from './components/pending-payments/pending-
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
 
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
-
+import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
 
 
 
@@ -69,7 +74,7 @@ const routes: Routes = [
   { path: 'distributor-login', component: DistributorLoginComponent },
   { path: 'distributor-signup', component: DistributorSignupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'employees', component: EmployeesComponent },
+  // { path: 'employees', component: EmployeesComponent },
   { path: 'set-password', component: SetPasswordComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'products/:distributorId', component: ProductsByDistComponent },
@@ -82,8 +87,8 @@ const routes: Routes = [
   { path: 'employee-login', component: EmployeeLoginComponent },
   { path: 'employee-signup', component: EmployeeSignupComponent },
 
-    { path: 'admin-fruad-list', component: AdminFraudListComponent},
-
+  { path: 'tasks', component: DashboardComponent },
+  { path: 'admin-fruad-list', component: AdminFraudListComponent },
 
   {
     path: 'report-fraud/:targetType/:targetId',
@@ -91,28 +96,33 @@ const routes: Routes = [
   },
   { path: 'review/:targetType/:targetId', component: ReviewSubmitComponent },
   { path: 'admin/reviews', component: AdminReviewListComponent },
-{
+  {
     path: 'admin/fraud-history',
     component: FraudHistoryComponent
   },
   { path: 'admin/review-history', component: AdminReviewHistoryComponent },
 
-            {path:'add-to-cart',component:AddToCartComponent},
-            { path: 'employee-profile', component:EmployeeProfileComponent},
-             { path: 'cash-collection', component:CashCollectionComponent},
-              { path: 'cash-summary', component:CashSummaryComponent},
-              { path: 'collector-reports', component:CollectorReportsComponent},
-              { path: ' payment-summary', component:PaymentSummaryComponent},
-              { path: ' customer-payment-status', component:CustomerPaymentStatusComponent},
-
- { path: 'payment-report', component:PaymentReportComponent},
- { path: 'pending-payments', component: PendingPaymentsComponent },
- { path: 'pending-handovers', component: PendingHandoversComponent },
+  { path: 'add-to-cart', component: AddToCartComponent },
+  { path: 'employee-profile', component: EmployeeProfileComponent },
+  { path: 'cash-collection', component: CashCollectionComponent },
+  { path: 'cash-summary', component: CashSummaryComponent },
+  { path: 'collector-reports', component: CollectorReportsComponent },
+  { path: 'payment-summary', component: PaymentSummaryComponent },
+  { path: 'customer-payment-status', component: CustomerPaymentStatusComponent },
 
 
-            { path: 'customers', component: CustomersListComponent },
-            
+  { path: 'payment-report', component: PaymentReportComponent },
+  { path: 'pending-payments', component: PendingPaymentsComponent },
+  { path: 'pending-handovers', component: PendingHandoversComponent },
 
+
+
+  { path: 'invoice-create', component: InvoiceCreateComponent },
+  { path: 'invoice-detail/:id', component: InvoiceDetailComponent },
+  { path: 'customers', component: CustomersListComponent },
+  
+  { path: 'distributor-orders', component: DistributorOrdersComponent },
+  
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

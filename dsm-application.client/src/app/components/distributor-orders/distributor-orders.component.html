@@ -108,6 +108,7 @@
             <th>Total Amount</th>
             <th>Status</th>
             <th>Assigned Employee</th>
+            <th>View details</th>
             <th class="actions-column">Actions</th>
             <th>Payment</th>
           </tr>
@@ -130,42 +131,46 @@
             </td>
 
             <td class="employee-name">{{ o.name || 'Not assigned' }}</td>
+            <td>
+              <button class="view-details-btn" (click)="openProductDetails(o, 'view')">
+                <i class="fas fa-eye"></i>View Details
+              </button>
+            </td>
+
+
+
+
 
             <td class="order-actions">
-  <div class="action-buttons">
+              <div class="action-buttons">
 
-    <!-- Pending -->
-    <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm"
-            (click)="confirmOrder(o)">
-      <i class="fas fa-check"></i> Confirm
-    </button>
+                <!-- Pending -->
+                <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm" (click)="confirmOrder(o)">
+                  <i class="fas fa-check"></i> Confirm
+                </button>
 
-    <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm"
-            (click)="rejectOrder(o)">
-      <i class="fas fa-times"></i> Reject
-    </button>
+                <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm" (click)="rejectOrder(o)">
+                  <i class="fas fa-times"></i> Reject
+                </button>
 
-    <!-- Confirmed → Assign & Ship -->
-   <button
-  *ngIf="o.status === 'Confirmed'"
-  class="btn btn-primary btn-sm"
-  (click)="openAssignModal(o)">
-  <i class="fas fa-truck"></i> Check & Assign
-</button>
+                <!-- Confirmed → Assign & Ship -->
+                <button *ngIf="o.status === 'Confirmed'" class="btn btn-primary btn-sm" (click)="openAssignModal(o)">
+                  <i class="fas fa-truck"></i> Check & Assign
+                </button>
 
 
-    <!-- Shipped → Distributor cannot do anything -->
-    <span *ngIf="o.status === 'Shipped'" class="badge bg-info">
-      Delivery in progress
-    </span>
+                <!-- Shipped → Distributor cannot do anything -->
+                <span *ngIf="o.status === 'Shipped'" class="badge bg-info">
+                  Delivery in progress
+                </span>
 
-    <!-- Delivered → Distributor sees final status -->
-    <span *ngIf="o.status === 'Delivered'" class="badge bg-success">
-      Delivered
-    </span>
+                <!-- Delivered → Distributor sees final status -->
+                <span *ngIf="o.status === 'Delivered'" class="badge bg-success">
+                  Delivered
+                </span>
 
-  </div>
-</td>
+              </div>
+            </td>
 
             <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
               <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
@@ -185,15 +190,14 @@
       <p>There are no orders matching the current filter.</p>
     </div>
   </div>
-  
+
 </div>
- 
+
 
 <!-- ✅ Assign Modal -->
-<!-- Assign Modal -->
-<div *ngIf="selectedOrder" class="modal-overlay">
+<div *ngIf="showAssignModal" class="modal-overlay">
   <div class="modal-backdrop" (click)="closeAssignModal()"></div>
- 
+
 
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -204,50 +208,52 @@
     </div>
 
     <div class="modal-body">
-        <!-- EMPLOYEE AVAILABILITY SECTION -->
-<div class="availability-box mt-3">
+      <!-- EMPLOYEE AVAILABILITY SECTION -->
+      <div class="availability-box mt-3">
 
-  <h5 class="fw-bold">Employee Availability</h5>
+        <h5 class="fw-bold">Employee Availability</h5>
 
-  <!-- Permanent Availability -->
-  <p>
-    <strong>Permanent Employee:</strong>
-    <span *ngIf="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
-      <span [style.color]="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ? 'green' : 'red'">
-        {{ employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ?
-        'Available Today' : 'Not Available Today' }}
-      </span>
-      <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
-       style="color:red">
-  Reason: {{ employeeAvailability[selectedOrder.customerId]?.permanentReason }}
-</small>
-    </span>
-    <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
-      <span style="color: gray;">Not Assigned</span>
-    </span>
-  </p>
+        <!-- Permanent Availability -->
+        <p>
+          <strong>Permanent Employee:</strong>
+          <span *ngIf="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
+            <span
+              [style.color]="employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ? 'green' : 'red'">
+              {{ employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable ?
+              'Available Today' : 'Not Available Today' }}
+            </span>
+            <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
+              style="color:red">
+              Reason: {{ employeeAvailability[selectedOrder.customerId]?.permanentReason }}
+            </small>
+          </span>
+          <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeId">
+            <span style="color: gray;">Not Assigned</span>
+          </span>
+        </p>
 
-  <!-- Temporary Availability -->
-  <p>
-    <strong>Temporary Employee (Today):</strong>
-    <span *ngIf="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
-      <span [style.color]="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ? 'green' : 'red'">
-        {{ employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ?
-        'Available Today' : 'Not Available Today' }}
-      </span>
-       <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
-       style="color:red">
-  (Reason: {{ employeeAvailability[selectedOrder.customerId]?.temporaryReason }})
+        <!-- Temporary Availability -->
+        <p>
+          <strong>Temporary Employee (Today):</strong>
+          <span *ngIf="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
+            <span
+              [style.color]="employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ? 'green' : 'red'">
+              {{ employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeAvailable ?
+              'Available Today' : 'Not Available Today' }}
+            </span>
+            <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
+              style="color:red">
+              (Reason: {{ employeeAvailability[selectedOrder.customerId]?.temporaryReason }})
 
-</small>
-   
-    </span>
-    <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
-      <span style="color: gray;">No temporary employee assigned today</span>
-    </span>
-  </p>
+            </small>
 
-</div>
+          </span>
+          <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
+            <span style="color: gray;">No temporary employee assigned today</span>
+          </span>
+        </p>
+
+      </div>
 
       <!-- ORDER INFO -->
       <div class="order-info">
@@ -276,19 +282,71 @@
         </select>
       </div>
 
-    </div>
-
     <div class="modal-footer">
       <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
         Cancel
       </button>
-     <button class="btn btn-primary"
-       [disabled]="false"
-        (click)="assignAndShip()">
-  Assign & Ship
-</button>
+      <button class="btn btn-primary" [disabled]="false" (click)="assignAndShip()">
+        Assign & Ship
+      </button>
     </div>
   </div>
 
 
 </div>
+</div>
+
+<!-- 📌 PRODUCT DETAILS POPUP -->
+<div *ngIf="showProductPopup" class="modal-overlay">
+
+  <div class="modal-backdrop" (click)="closeProductPopup()"></div>
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3><i class="fas fa-box"></i> Product Details</h3>
+      <button class="modal-close" (click)="closeProductPopup()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div *ngFor="let item of selectedOrder?.products" class="product-box d-flex gap-3 mb-3">
+
+        <img
+          [src]="item.imageUrl || 'assets/no-image.png'"
+          class="product-img"
+          style="width:80px;height:80px;object-fit:contain;"
+        />
+
+        <div class="product-info">
+          <h5>{{ item.productName }}</h5>
+          <p><strong>Brand:</strong> {{ item.brand }}</p>
+          <!-- <p><strong>Category:</strong> {{ item.category }}</p> -->
+          <p><strong>Price:</strong> ₹{{ item.price }}</p>
+          <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+          <p><strong>Total:</strong> ₹{{ item.price * item.quantity }}</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeProductPopup()">Close</button>
+    </div>
+
+  </div>
+</div>
+
+    
+
+    <div class="modal-footer">
+      <!-- Continue Button Based on Action -->
+      <button class="btn btn-primary" (click)="continueAction()">
+        Continue
+      </button>
+    </div>
+
+

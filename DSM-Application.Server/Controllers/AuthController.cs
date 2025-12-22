@@ -77,6 +77,14 @@ namespace DistributorManagementSystem.Server.Controllers
                 ExpiryDate = DateTime.UtcNow.AddDays(7)
             });
 
+            // ✅ Fetch employee details from Employees Collection
+            var emp = await _db.Employees
+                .Find(e => e.EmployeeId == user.EmployeeId)
+                .FirstOrDefaultAsync();
+
+            string designation = emp?.Designation ?? "";
+
+            // Return login response
             return Ok(new
             {
                 token,
@@ -180,12 +188,19 @@ namespace DistributorManagementSystem.Server.Controllers
             }
 
             // -------- NORMAL USER LOGIN --------
-            string lookup = request.Email ?? request.PhoneNumber;
-
             var user = await _db.Users
-                .Find(u => u.Email == lookup || u.PhoneNumber == lookup)
-                .SortByDescending(u => u.CreatedAt)
-                .FirstOrDefaultAsync();
+       .Find(u =>
+           (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
+           (!string.IsNullOrEmpty(request.PhoneNumber) && u.PhoneNumber == request.PhoneNumber)
+       )
+       .SortByDescending(u => u.CreatedAt)
+       .FirstOrDefaultAsync();
+
+
+            //var user = await _db.Users
+            //    .Find(u => u.Email == lookup || u.PhoneNumber == lookup)
+            //    .SortByDescending(u => u.CreatedAt)
+            //    .FirstOrDefaultAsync();
 
             if (user == null)
                 return Unauthorized("User not found");
@@ -208,8 +223,9 @@ namespace DistributorManagementSystem.Server.Controllers
                     return Unauthorized("Distributor account is deactivated.");
             }
 
-            if (!user.IsRegistered)
-                return Unauthorized("Please sign up first.");
+            if (!user.IsRegistered || string.IsNullOrEmpty(user.PasswordHash))
+                return Unauthorized("Please sign up to create your password.");
+
 
             if (user.PasswordHash != ComputeHash(request.Password))
                 return Unauthorized("Invalid password");
@@ -284,8 +300,48 @@ namespace DistributorManagementSystem.Server.Controllers
                     .Set(u => u.PasswordHash, user.PasswordHash)
                     .Set(u => u.IsRegistered, true));
 
-            return Ok("Password created successfully. You can now login.");
+            return Ok(new
+            {
+                success = true,
+                message = "Password created successfully. You can now login."
+            });
         }
+        //[HttpPost("signup")]
+        //public async Task<IActionResult> SignUp([FromBody] LoginRequest request)
+        //{
+        //    if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+        //        return BadRequest("Email or Phone is required.");
+
+        //    if (string.IsNullOrEmpty(request.Password))
+        //        return BadRequest("Password is required.");
+
+        //    var user = await _db.Users
+        //        .Find(u =>
+        //            (u.Email == request.Email || u.PhoneNumber == request.PhoneNumber) &&
+        //            u.Role == "Distributor"
+        //        )
+        //        .SortByDescending(u => u.CreatedAt)
+        //        .FirstOrDefaultAsync();
+
+        //    if (user == null)
+        //        return NotFound("Distributor not found. Contact admin.");
+
+        //    if (user.IsRegistered && !string.IsNullOrEmpty(user.PasswordHash))
+        //        return BadRequest("Password already created. Please login.");
+
+
+        //    // ✅ THIS IS THE FIX
+        //    var hashedPassword = ComputeHash(request.Password);
+
+        //    await _db.Users.UpdateOneAsync(
+        //        u => u.Id == user.Id,
+        //        Builders<User>.Update
+        //            .Set(u => u.PasswordHash, hashedPassword) // ✅ CORRECT
+        //            .Set(u => u.IsRegistered, true)
+        //    );
+
+        //    return Ok(new { message = "Password created successfully. You can now login." });
+        //}
 
         // ============================================================
         // OTP + RESET PASSWORD

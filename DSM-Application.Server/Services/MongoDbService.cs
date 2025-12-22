@@ -16,6 +16,12 @@ namespace DistributorManagementSystem.Server.Services
             _db = client.GetDatabase(options.Value.DatabaseName);
         }
 
+        // ⭐ Required for InvoiceService, EmployeeService, etc.
+        public IMongoDatabase GetDatabase()
+        {
+            return _db;
+        }
+
         // ⭐⭐ VERY IMPORTANT: expose database ⭐⭐
         public IMongoDatabase Database => _db;
 
@@ -44,6 +50,7 @@ namespace DistributorManagementSystem.Server.Services
     _db.GetCollection<PaymentCollectionHistory>("PaymentCollectionHistory");
         public IMongoCollection<HSN> HsnCodes => _db.GetCollection<HSN>("HsnCodes");
 
+        
 
 
 
@@ -54,5 +61,10 @@ namespace DistributorManagementSystem.Server.Services
     {
         public string ConnectionString { get; set; } = string.Empty;
         public string DatabaseName { get; set; } = string.Empty;
+
+
+       
+
+
     }
 }

@@ -49,20 +49,10 @@
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
                   <div class="password-container">
-                    <input
-                      [(ngModel)]="password"
-                      name="password"
-                      [type]="showPassword ? 'text' : 'password'"
-                      class="form-control"
-                      id="password"
-                      placeholder="Enter your password"
-                      required
-                    />
+                    <input [(ngModel)]="password" name="password" [type]="showPassword ? 'text' : 'password'"
+                      class="form-control" id="password" placeholder="Enter your password" required />
                     <span class="password-toggle" (click)="togglePassword()">
-                      <i
-                        class="far"
-                        [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-                      ></i>
+                      <i class="far" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                     </span>
                   </div>
                 </div>
@@ -91,61 +81,61 @@
 
         <!-- Features Section -->
         <!-- Features Section -->
-<div class="col-md-6">
-  <div class="login-features">
-    <h4 class="mb-4">Employee Portal Benefits</h4>
+        <div class="col-md-6">
+          <div class="login-features">
+            <h4 class="mb-4">Employee Portal Benefits</h4>
 
-    <div class="feature-item">
-      <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
-      <div>
-        <h5>Attendance Tracking</h5>
-        <p class="text-muted mb-0">
-          Record and review your daily check-in and check-out times easily.
-        </p>
-      </div>
-    </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+              <div>
+                <h5>Attendance Tracking</h5>
+                <p class="text-muted mb-0">
+                  Record and review your daily check-in and check-out times easily.
+                </p>
+              </div>
+            </div>
 
-    <div class="feature-item">
-      <div class="feature-icon"><i class="fas fa-plane-departure"></i></div>
-      <div>
-        <h5>Leave Management</h5>
-        <p class="text-muted mb-0">
-          Apply, approve, and track your leave requests conveniently.
-        </p>
-      </div>
-    </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="fas fa-plane-departure"></i></div>
+              <div>
+                <h5>Leave Management</h5>
+                <p class="text-muted mb-0">
+                  Apply, approve, and track your leave requests conveniently.
+                </p>
+              </div>
+            </div>
 
-    <div class="feature-item">
-      <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
-      <div>
-        <h5>Salary Details</h5>
-        <p class="text-muted mb-0">
-          View your monthly payslips and salary breakdowns.
-        </p>
-      </div>
-    </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="fas fa-money-bill-wave"></i></div>
+              <div>
+                <h5>Salary Details</h5>
+                <p class="text-muted mb-0">
+                  View your monthly payslips and salary breakdowns.
+                </p>
+              </div>
+            </div>
 
-    <div class="feature-item">
-      <div class="feature-icon"><i class="fas fa-id-card"></i></div>
-      <div>
-        <h5>Profile Management</h5>
-        <p class="text-muted mb-0">
-          Update your personal details and contact information anytime.
-        </p>
-      </div>
-    </div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="fas fa-id-card"></i></div>
+              <div>
+                <h5>Profile Management</h5>
+                <p class="text-muted mb-0">
+                  Update your personal details and contact information anytime.
+                </p>
+              </div>
+            </div>
 
-    <div class="feature-item">
-      <div class="feature-icon"><i class="fas fa-headset"></i></div>
-      <div>
-        <h5>HR Support</h5>
-        <p class="text-muted mb-0">
-          Get quick assistance from HR for queries or issues.
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
+            <div class="feature-item">
+              <div class="feature-icon"><i class="fas fa-headset"></i></div>
+              <div>
+                <h5>HR Support</h5>
+                <p class="text-muted mb-0">
+                  Get quick assistance from HR for queries or issues.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>

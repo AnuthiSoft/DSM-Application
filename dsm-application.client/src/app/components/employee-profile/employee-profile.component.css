@@ -181,6 +181,11 @@ textarea.form-control {
   font-family: inherit;
 }
 
+input.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border: 1px solid red !important;
+}
+
 .save-btn {
   background-color: var(--primary-color);
   color: white;

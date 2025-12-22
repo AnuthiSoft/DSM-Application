@@ -13,7 +13,8 @@ export class DistributorSignupComponent {
     confirmPassword = '';
     message = '';
     error = '';
-  
+  isSubmitting = false;
+
     showPassword = false;
     showConfirmPassword = false;
   
@@ -58,6 +59,8 @@ export class DistributorSignupComponent {
     }
   
     onSignup(): void {
+       this.error = '';
+  this.message = '';
   if (this.password !== this.confirmPassword) {
     this.error = 'Passwords do not match';
     return;
@@ -65,9 +68,13 @@ export class DistributorSignupComponent {
 
   this.auth.signup(this.identifier, this.password).subscribe({
     next: (res: any) => {
-      this.message = res?.message || "Signup successful";
-      this.error = "";
-      setTimeout(() => this.router.navigate(['/distributor-login']), 0);
+      this.message = res.message || 'Signup successful';
+        this.error = '';
+
+      // ✅ Give UI time to update
+      setTimeout(() => {
+        this.router.navigate(['/distributor-login']);
+      }, 800);
     },
     error: (err) => {
       this.error = err.error?.message || 'Signup failed';

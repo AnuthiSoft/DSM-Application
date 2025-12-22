@@ -72,7 +72,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
-
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-create-customer-distributor',
   templateUrl: './create-customer-distributor.component.html',
@@ -104,8 +104,11 @@ selectedEmployeeId = '';
   message = '';
 
   email = '';
+  confirmDelete: string | null = null;
 
-  constructor(private customerService: CustomerService) {}
+  constructor(private customerService: CustomerService,
+    private toastr:ToastrService
+  ) {}
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -231,50 +234,63 @@ savePermanentEmployee() {
 
 
   createCustomer() {
-    this.customerService.createByDistributor(this.customer).subscribe({
-      next: (res: any) => {
-        this.message = res.message;
-        this.closeModal();
-        this.loadCustomers();
-      },
-      error: (err) => {
-        this.message = err.error || 'Failed to create customer';
-      }
-    });
-  }
+  this.customerService.createByDistributor(this.customer).subscribe({
+    next: (res: any) => {
+      this.toastr.success('Customer created successfully', 'Success');
+      this.closeModal();
+      this.loadCustomers();
+    },
+    error: () => {
+      this.toastr.error('Failed to create customer', 'Error');
+    }
+  });
+}
+
 
   /* ----------------------------- UPDATE ------------------------------ */
 
   updateCustomer() {
-    if (!this.customer.customerId) return;
+  if (!this.customer.customerId) return;
 
-    this.customerService.updateCustomer(this.customer.customerId, this.customer).subscribe({
-      next: (res: any) => {
-        this.message = res.message;
-        this.closeModal();
-        this.loadCustomers();
-      },
-      error: (err) => {
-        this.message = err.error || 'Failed to update customer';
-      }
-    });
-  }
-
-  /* ----------------------------- DELETE ------------------------------ */
-
-  deleteCustomer(customerId: string) {
-    if (!confirm('Are you sure you want to delete this customer?')) return;
-
-    this.customerService.deleteCustomer(customerId).subscribe({
-      next: (res: any) => {
-        this.message = res.message;
-        this.loadCustomers();
-      },
-      error: (err) => {
-        this.message = err.error || 'Failed to delete customer';
-      }
-    });
-  }
-  
+  this.customerService.updateCustomer(this.customer.customerId, this.customer).subscribe({
+    next: () => {
+      this.toastr.success('Customer updated successfully', 'Updated');
+      this.closeModal();
+      this.loadCustomers();
+    },
+    error: () => {
+      this.toastr.error('Failed to update customer', 'Error');
+    }
+  });
 }
+deleteCustomer(customerId: string) {
 
+  // FIRST CLICK → SHOW CONFIRMATION TOAST
+  if (this.confirmDelete !== customerId) {
+    this.toastr.clear(); // remove existing toasts
+
+    this.toastr.warning(
+      'Click DELETE again to confirm',
+      'Confirm Delete',
+      { timeOut: 3000 }
+    );
+
+    this.confirmDelete = customerId;
+    return; // stop here
+  }
+
+  // SECOND CLICK → DELETE THE CUSTOMER
+  this.customerService.deleteCustomer(customerId).subscribe({
+    next: () => {
+      this.toastr.clear(); // remove confirm toast
+      this.toastr.success('Customer deleted successfully', 'Deleted');
+      this.confirmDelete = null; // reset
+      this.loadCustomers();
+    },
+    error: () => {
+      this.toastr.clear();
+      this.toastr.error('Failed to delete customer', 'Error');
+    }
+  });
+}
+}

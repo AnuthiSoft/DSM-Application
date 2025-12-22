@@ -3,6 +3,8 @@ import { Employee, EmployeeService } from '../../services/employee.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { InvoiceUploadService } from '../../services/invoice-upload.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-employees',
@@ -14,46 +16,52 @@ export class EmployeesComponent {
   filteredEmployees: Employee[] = [];   // ✅ for search/filter results
   employeeForm!: FormGroup;
   distributorId = '';
-  employeeId='';
-  selectedEmployee: Employee | null = null;
+  employeeId = '';
+  // selectedEmployee: Employee | null = null;
   isEdit = false;
   loading = false;
- 
+  selectedEmployee: any = null;
+  selectedFile: File | null = null;
+  showUploadModal = false;
+
   // filters
   searchTerm = '';
   roleFilter = '';
   statusFilter = '';
   email = '';
   showModal = false;
-// isEdit = false;
+  // isEdit = false;
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
-    private fb: FormBuilder, private toastr: ToastrService
-  ) {}
- 
+    private fb: FormBuilder, 
+    private toastr: ToastrService,
+    private uploadService:InvoiceUploadService,
+    private http: HttpClient
+  ) { }
+
   ngOnInit(): void {
     this.distributorId = this.auth.getDistributorId();
     this.employeeId = this.auth.getEmployeeId();
- 
+
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: [''],
       phoneNumber: ['', Validators.required],
       role: ['Employee', Validators.required],
       designation: ['', Validators.required],
       isActive: [true],
     });
- 
+
     this.loadEmployees();
   }
- 
+
   // ✅ Load all employees
   loadEmployees() {
     this.loading = true;
     this.employeeService.getEmployees(this.distributorId).subscribe({
       next: (data) => {
-       
+
         this.employees = data;
         this.filteredEmployees = [...this.employees];
         this.loading = false;
@@ -64,7 +72,7 @@ export class EmployeesComponent {
       }
     });
   }
- 
+
   // ✅ Add / Update employee
 onSubmit() {
   if (this.employeeForm.invalid) return;
@@ -119,12 +127,12 @@ restrictPhoneInput(event: any) {
 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
-     this.isEdit = true;
-  this.employeeForm.patchValue(emp);
-  this.showModal = true; // ✅ this opens the modal automatically
-   this.selectedEmployee = emp; // ✅ Add this line
+    this.isEdit = true;
+    this.employeeForm.patchValue(emp);
+    this.showModal = true; // ✅ this opens the modal automatically
+    this.selectedEmployee = emp; // ✅ Add this line
   }
- 
+
   // // ✅ Delete employee
   // deleteEmployee(emp: Employee) {
   //   if (!confirm(`Delete ${emp.name}?`)) return;
@@ -133,24 +141,30 @@ restrictPhoneInput(event: any) {
   //   });
   // }
 
+
   deleteEmployee(emp: Employee) {
-  if (!confirm(`Delete ${emp.name}?`)) return;
+    if (!confirm(`Delete ${emp.name}?`)) return;
 
-  const id = emp.employeeId; // <– use MongoDB id
-
-  if (!id) {
-    this.toastr.error("Employee ID missing!");
-    return;
+    this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
+      next: () => {
+        this.toastr.success("Employee deleted successfully", "Success");
+        this.loadEmployees();
+      },
+      error: (err) => {
+        // ✔ If backend returned text instead of JSON, treat 200 as success
+        if (err.status === 200) {
+          this.toastr.success("Employee deleted successfully", "Success");
+          this.loadEmployees();
+        } else {
+          this.toastr.error("Failed to delete employee", "Error");
+        }
+      }
+    });
   }
 
-  this.employeeService.deleteEmployee(this.distributorId, id).subscribe({
-    next: () => this.loadEmployees(),
-    error: (err) => console.error("Delete error:", err)
-  });
-}
 
 
- 
+
   // ✅ Toggle active/inactive
   toggleActive(emp: Employee) {
     this.employeeService.toggleActive(this.distributorId, emp.employeeId!).subscribe({
@@ -159,25 +173,25 @@ restrictPhoneInput(event: any) {
       }
     });
   }
- 
+
   // ✅ Search + Filter employees
   applyFilters() {
     this.filteredEmployees = this.employees.filter(emp => {
       const matchesSearch =
         emp.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         emp.email.toLowerCase().includes(this.searchTerm.toLowerCase());
- 
+
       const matchesRole = !this.roleFilter || emp.designation === this.roleFilter;
- 
+
       const matchesStatus =
         !this.statusFilter ||
         (this.statusFilter === 'active' && emp.isActive) ||
         (this.statusFilter === 'inactive' && !emp.isActive);
- 
+
       return matchesSearch && matchesRole && matchesStatus;
     });
   }
- 
+
   // ✅ Reset form after submit/edit
   resetForm() {
     this.isEdit = false;
@@ -193,13 +207,51 @@ restrictPhoneInput(event: any) {
   }
   openEmployeeModal(): void {
     this.isEdit = false;
-  this.employeeForm.reset();
-  this.showModal = true;
+    this.employeeForm.reset();
+    this.showModal = true;
+  }
+
+  closeEmployeeModal(): void {
+    this.showModal = false;
+  }
+
+  openUploadModal(emp: any) {
+  this.selectedEmployee = emp;
+  this.showUploadModal = true;
 }
- 
-closeEmployeeModal(): void {
-  this.showModal = false;
+
+closeUploadModal() {
+  this.showUploadModal = false;
+  this.selectedFile = null;
 }
+
+onFileSelected(event: any) {
+  this.selectedFile = event.target.files[0];
 }
- 
- 
+
+uploadInvoice() {
+  if (!this.selectedFile || !this.selectedEmployee) {
+    this.toastr.error("Please select a file.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", this.selectedFile);
+  formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
+
+  this.http.post("http://localhost:5164/api/invoice-upload/upload", formData)
+    .subscribe({
+      next: (res: any) => {
+        this.toastr.success("Invoice uploaded successfully!");
+        this.closeUploadModal();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error("Upload failed!");
+      }
+    });
+}
+
+
+}
+

@@ -23,5 +23,8 @@ namespace DSM_Application.Server.Models
         public int ReorderLevel { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
+        
+
     }
 }

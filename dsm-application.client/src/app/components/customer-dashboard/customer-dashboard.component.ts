@@ -5,9 +5,10 @@ import { Customer } from '../../models/customer.model';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
-import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
 import { OrderService } from '../../services/order.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 
 
@@ -80,50 +81,54 @@ export class CustomerDashboardComponent {
 
   expectedDays: number = 1;
 
-orderedDate: string = '';
+  orderedDate: string = '';
   expectedDate: string = '';
-   productForm: FormGroup;
+  productForm: FormGroup;
   @Input() selectedProduct: Product | null = null;
-@Output() cartUpdated = new EventEmitter<any[]>();
-cart: any[] = [];
+  @Output() cartUpdated = new EventEmitter<any[]>();
+  cart: any[] = [];
 
   activeTab: string = 'dashboard';
   currentDate: Date = new Date();
-orderStats: { total: number } = { total: 0 };
-productStats: { total: number } = { total: 0 };
-distributorStats: { total: number } = { total: 0 };
-revenueStats: { total: number } = { total: 0 };
-recentOrders: any[] = [];
-// products: any[] = [];
-productsLoading: boolean = true;
+  orderStats: { total: number } = { total: 0 };
+  productStats: { total: number } = { total: 0 };
+  distributorStats: { total: number } = { total: 0 };
+  revenueStats: { total: number } = { total: 0 };
+  recentOrders: any[] = [];
+  // products: any[] = [];
+  productsLoading: boolean = true;
 
 
   selectedCartProduct: Product | null = null;
   customerId = localStorage.getItem('customerId') ?? '';
 
-  constructor(private customerService: CustomerService,  private route: ActivatedRoute,
-      private fb: FormBuilder,
-      private productService: ProductService,
-      private orderService: OrderService,
-   private router: Router, private http: HttpClient, private productservice: ProductService)  {
-      this.productForm = this.fb.group({
-        productName: [''],
-        productCode: [''],
-        color: [''],
-        category: [''],
-        description: [''],
-        unit: [''],
-        price: [0],
-        costPrice: [0],
-        discount: [0],
-        gst: [0],
-        stock: [0],
-        reorderLevel: [0],
-        brand: [''],
-        imageUrls: [''],
-        distributorName:['']
-      });
-    }
+  constructor(private customerService: CustomerService,
+    private route: ActivatedRoute,
+    private fb: FormBuilder,
+    private productService: ProductService,
+    private orderService: OrderService,
+    private router: Router,
+    private http: HttpClient,
+    private toastr: ToastrService,
+    private productservice: ProductService) {
+    this.productForm = this.fb.group({
+      productName: [''],
+      productCode: [''],
+      color: [''],
+      category: [''],
+      description: [''],
+      unit: [''],
+      price: [0],
+      costPrice: [0],
+      discount: [0],
+      gst: [0],
+      stock: [0],
+      reorderLevel: [0],
+      brand: [''],
+      imageUrls: [''],
+      distributorName: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.customerEmail = localStorage.getItem('customerEmail');
@@ -134,15 +139,12 @@ productsLoading: boolean = true;
 
 
     if (!this.customerId) {
-      Swal.fire({
-        icon: 'error',
-        title: 'No Customer ID',
-        text: 'Customer ID not found in localStorage'
-      });
+      this.toastr.error('Customer ID not found in localStorage', 'Error');
+
 
 
       // console.error('No customerId found in localStorage');
- 
+
       return;
     }
 
@@ -155,53 +157,50 @@ productsLoading: boolean = true;
 
 
 
- getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
-  if (!orderDate || !distributorId) return '';
+  getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
+    if (!orderDate || !distributorId) return '';
 
-  const lead = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+    const lead = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-  const date = new Date(orderDate);
-  date.setDate(date.getDate() + lead);
+    const date = new Date(orderDate);
+    date.setDate(date.getDate() + lead);
 
-  return date.toISOString().split("T")[0]; // YYYY-MM-DD
-}
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD
+  }
 
 
- loadDashboard() {
+  loadDashboard() {
 
-  
+
 
 
     this.recentOrders = this.recentOrders.map(o => ({
-  ...o,
-  distributorId: o.distributorId || this.distributorId
-}));
-  this.loading = true;
-  this.http
-    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-    .subscribe({
-      next: (data) => {
-        this.dashboardData = data;
-        this.loading = false;
+      ...o,
+      distributorId: o.distributorId || this.distributorId
+    }));
+    this.loading = true;
+    this.http
+      .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
+      .subscribe({
+        next: (data) => {
+          this.dashboardData = data;
+          this.loading = false;
 
-       // ❌ DO NOT load products automatically
-// Products should load ONLY after clicking View Products
-this.products = [];
+          // ❌ DO NOT load products automatically
+          // Products should load ONLY after clicking View Products
+          this.products = [];
 
-      },
-      error: (err) => {
-        // console.error('Error loading dashboard', err);
-        this.loading = false;
-        Swal.fire({
-            icon: 'error',
-            title: 'Failed to Load Dashboard',
-            text: err.error || 'An unexpected error occurred'
-          });
+        },
+        error: (err) => {
+          // console.error('Error loading dashboard', err);
+          this.loading = false;
+          this.toastr.error(err.error || 'Failed to load dashboard', 'Error');
+
         }
       });
 
 
-    
+
 
 
   }
@@ -209,14 +208,14 @@ this.products = [];
 
 
 
-//   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
-//   const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+  //   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
+  //   const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-//   const date = new Date(orderDate);
-//   date.setDate(date.getDate() + leadTime);
+  //   const date = new Date(orderDate);
+  //   date.setDate(date.getDate() + leadTime);
 
-//   return date.toDateString();  // or format as you like
-// }
+  //   return date.toDateString();  // or format as you like
+  // }
   connectDistributor(distributor: Distributor) {
     Swal.fire({
       title: 'Are you sure?',
@@ -228,27 +227,27 @@ this.products = [];
     }).then((result) => {
       if (!result.isConfirmed) return;
 
-    const body = {
-      customerId: this.customerId,
-      distributorId: distributor.distributorId
-    };
+      const body = {
+        customerId: this.customerId,
+        distributorId: distributor.distributorId
+      };
 
-    this.http.post('http://localhost:5164/api/customers/connect-distributor', body)
-      .subscribe({
-        next: (res: any) => {
-          // alert(res);
-          Swal.fire({
+      this.http.post('http://localhost:5164/api/customers/connect-distributor', body)
+        .subscribe({
+          next: (res: any) => {
+            // alert(res);
+            Swal.fire({
               icon: 'success',
               title: 'Request Sent',
               text: res
             });
-          this.loadDashboard();
-        },
-        error: (err) => {
-        //   console.error('Error connecting distributor', err);
-        //   alert(err.error || 'Failed to send connection request');
-        
-       Swal.fire({
+            this.loadDashboard();
+          },
+          error: (err) => {
+            //   console.error('Error connecting distributor', err);
+            //   alert(err.error || 'Failed to send connection request');
+
+            Swal.fire({
               icon: 'error',
               title: 'Failed',
               text: err.error || 'Failed to send request'
@@ -259,30 +258,30 @@ this.products = [];
   }
   viewProducts(distributor: any) {
 
-    
-  localStorage.setItem("distributorId", distributor.distributorId);
-  this.router.navigate(['/products', distributor.distributorId]);
-}
+
+    localStorage.setItem("distributorId", distributor.distributorId);
+    this.router.navigate(['/products', distributor.distributorId]);
+  }
 
 
-openProductsForDistributor(distributorId: string) {
+  openProductsForDistributor(distributorId: string) {
 
-  this.distributorId = distributorId;   // store selected distributor
+    this.distributorId = distributorId;   // store selected distributor
 
-   localStorage.setItem("distributorId", distributorId);
+    localStorage.setItem("distributorId", distributorId);
 
-  // 🔥 Filter products belonging ONLY to this distributor
-  this.products = this.dashboardData.distributors
-    .find(d => d.distributor.distributorId === distributorId)
-    ?.products || [];
+    // 🔥 Filter products belonging ONLY to this distributor
+    this.products = this.dashboardData.distributors
+      .find(d => d.distributor.distributorId === distributorId)
+      ?.products || [];
 
-  this.activeTab = 'products'; // switch tab
-}
-
-
+    this.activeTab = 'products'; // switch tab
+  }
 
 
- 
+
+
+
 
   // setActiveTab(tab: string) {
   //   this.activeTab = tab;
@@ -299,9 +298,9 @@ openProductsForDistributor(distributorId: string) {
 
 
   updateCart(newCart: any[]) {
-  this.cart = [...newCart];
-  localStorage.setItem('cart', JSON.stringify(this.cart));
-}
+    this.cart = [...newCart];
+    localStorage.setItem('cart', JSON.stringify(this.cart));
+  }
 
 
   logout() {
@@ -314,31 +313,27 @@ openProductsForDistributor(distributorId: string) {
       cancelButtonText: 'Cancel'
     }).then(result => {
       if (result.isConfirmed) {
-            this.router.navigate(['/customer/login']);
+        this.router.navigate(['/customer/login']);
       }
+      
     });
   }
- 
 
   switchToProducts() {
-  this.activeTab = 'products';
-}
-   
+    this.activeTab = 'products';
+  }
+
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
- 
+
   isActive(tab: string): boolean {
     return this.activeTab === tab;
   }
 
   addToCart(product: any) {
-  // console.log('Add to cart:', product);
-  // Call your cart service here
-  Swal.fire({
-      icon: 'success',
-      title: 'Added to Cart',
-      text: `${product.productName} added successfully!`
-    });
+    // console.log('Add to cart:', product);
+    // Call your cart service here
+    this.toastr.success(`${product.productName} added successfully`, 'Added to Cart');
   }
 }

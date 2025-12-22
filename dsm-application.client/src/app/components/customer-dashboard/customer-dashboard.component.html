@@ -1,51 +1,36 @@
-
 <div class="body">
-  
+
   <!-- Sidebar Navigation -->
   <div class="dashboard-sidebar">
     <div class="sidebar-header">
       <h3><i class="fas fa-building"></i> <span>BusinessPortal</span></h3>
     </div>
     <div class="nav-items">
-      <div class="nav-item" 
-           [class.active]="isActive('dashboard')" 
-           (click)="setActiveTab('dashboard')">
+      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')">
         <i class="fas fa-th-large"></i> <span>Dashboard</span>
       </div>
 
-      <div class="nav-item" 
-           [class.active]="isActive('distributors')" 
-           (click)="setActiveTab('distributors')">
+      <div class="nav-item" [class.active]="isActive('distributors')" (click)="setActiveTab('distributors')">
         <i class="fas fa-truck"></i> <span>Distributors</span>
       </div>
 
-      <div class="nav-item" 
-           [class.active]="isActive('products')" 
-           (click)="setActiveTab('products')">
+      <div class="nav-item" [class.active]="isActive('products')" (click)="setActiveTab('products')">
         <i class="fas fa-box"></i> <span>Products</span>
       </div>
 
-      <div class="nav-item" 
-           [class.active]="isActive('orders')" 
-           (click)="setActiveTab('orders')">
+      <div class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')">
         <i class="fas fa-shopping-cart"></i> <span>My Orders</span>
       </div>
 
-      <div class="nav-item" 
-           [class.active]="isActive('profile')" 
-           (click)="setActiveTab('profile')">
+      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')">
         <i class="fas fa-user"></i> <span>My Profile</span>
       </div>
 
 
-        <div 
-  class="nav-item" 
-  [class.active]="isActive('cart')" 
-  (click)="setActiveTab('cart')"
->
-  <i class="fas fa-shopping-cart"></i>
-  <span>Add-to-Cart</span>
-  </div>
+      <div class="nav-item" [class.active]="isActive('cart')" (click)="setActiveTab('cart')">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Add-to-Cart</span>
+      </div>
 
       <div class="nav-item" (click)="logout()">
         <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
@@ -55,7 +40,7 @@
 
   <!-- Main Content -->
   <div class="dashboard-main">
-    
+
     <!-- Dashboard Tab -->
     <div class="tab-content active" *ngIf="isActive('dashboard')">
       <div class="welcome-header">
@@ -105,46 +90,43 @@
     </div>
 
     <!-- Distributors Tab -->
-    <div class="tab-content"  *ngIf="activeTab === 'distributors'"> 
+    <div class="tab-content" *ngIf="activeTab === 'distributors'">
       div class="welcome-header">
-        <h2>My Distributors</h2>
-      </div> 
-
-   
-     <app-cust-dashboard
-  *ngIf="activeTab === 'distributors'"
-  (viewProductsClicked)="openProductsForDistributor($event)">
-</app-cust-dashboard>
-
-
-<div *ngIf="activeTab === 'products'">
-
- <div *ngIf="activeTab === 'products'" class="products-wrapper">
-
-  <ng-container *ngIf="products.length > 0; else noProductsYet">
-    <app-products-by-dist
-      [products]="products"
-      [distributorId]="distributorId"
-      [customerId]="customerId"
-      (addToCartClicked)="onAddToCart($event)">
-    </app-products-by-dist>
-  </ng-container>
-
-  <ng-template #noProductsYet>
-    <div class="empty-products">
-      <h3>No products to display</h3>
-      <p>Please select products from the Distributors tab.</p>
+      <h2>My Distributors</h2>
     </div>
-  </ng-template>
-
-</div>
-
-</div>
-
-      
 
 
-<!-- 
+
+
+    <app-cust-dashboard *ngIf="activeTab === 'distributors'" (viewProductsClicked)="openProductsForDistributor($event)">
+    </app-cust-dashboard>
+
+
+    <div *ngIf="activeTab === 'products'">
+
+      <div *ngIf="activeTab === 'products'" class="products-wrapper">
+
+        <ng-container *ngIf="products.length > 0; else noProductsYet">
+          <app-products-by-dist [products]="products" [distributorId]="distributorId" [customerId]="customerId"
+            (addToCartClicked)="onAddToCart($event)">
+          </app-products-by-dist>
+        </ng-container>
+
+        <ng-template #noProductsYet>
+          <div class="empty-products">
+            <h3>No products to display</h3>
+            <p>Please select products from the Distributors tab.</p>
+          </div>
+        </ng-template>
+
+      </div>
+
+    </div>
+
+
+
+
+    <!-- 
 <app-products-by-dist
   *ngIf="activeTab === 'products'"
   [products]="products"
@@ -155,27 +137,23 @@
 </app-products-by-dist> -->
 
 
-<!-- Add-to-Cart Tab -->
-<app-add-to-cart
-  *ngIf="activeTab === 'cart'"
-  [distributorId]="distributorId"
-  [products]="products"
-  (goToProductsClicked)="switchToProducts()"
-  [selectedProduct]="selectedCartProduct">
-</app-add-to-cart>
+    <!-- Add-to-Cart Tab -->
+    <app-add-to-cart *ngIf="activeTab === 'cart'" [distributorId]="distributorId" [products]="products"
+      (goToProductsClicked)="switchToProducts()" [selectedProduct]="selectedCartProduct">
+    </app-add-to-cart>
 
 
 
 
     <!-- Orders Tab -->
-    
-      <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>
-   
+
+    <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>
+
 
     <!-- Profile Tab -->
-    
-      
-   <app-profile *ngIf="activeTab === 'profile'"></app-profile>
+
+
+    <app-profile *ngIf="activeTab === 'profile'"></app-profile>
     <!-- <app-review-submit *ngIf="activeTab === 'review'"></app-review-submit> -->
 
-</div>
+  </div>

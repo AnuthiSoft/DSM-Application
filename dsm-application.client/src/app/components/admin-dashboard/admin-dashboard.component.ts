@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AdminService, Distributor } from '../../services/admin.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { CategoryService } from '../../services/category.service';
+import { ToastrService } from 'ngx-toastr';
 import * as bootstrap from 'bootstrap';
 
 @Component({
@@ -10,8 +12,10 @@ import * as bootstrap from 'bootstrap';
   styleUrl: './admin-dashboard.component.css'
 })
 export class AdminDashboardComponent implements OnInit {
-    // ⭐ Required for tab switching
+  // ⭐ Required for tab switching
   activeTab: string = 'dashboard';
+  categories: any[] = [];
+  pendingCategories: any[] = [];
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
@@ -26,7 +30,7 @@ export class AdminDashboardComponent implements OnInit {
   distributorForm!: FormGroup;
   isEdit = false;
   message = '';
-  email ='';
+  email = '';
   searchText = '';
   role: string | null = null;
   customCategory: string = "";
@@ -40,14 +44,18 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private fb: FormBuilder,
-    private auth: AuthService
-  ) {}
-  
+    private auth: AuthService,
+    private categoryService: CategoryService,
+    private toastr: ToastrService
+  ) { }
+
 
   ngOnInit(): void {
     this.loadDistributors();
     this.initForm();
     this.role = this.auth.getRole();
+    this.loadCategories();
+    this.loadPendingCategories();
 
     // ✅ Initialize modal instance
     const modalEl = document.getElementById('distributorModal');
@@ -56,20 +64,51 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  loadCategories() {
+    this.categoryService.getAll().subscribe(res => {
+      this.categories = res;
+    });
+  }
+
+  loadPendingCategories() {
+    this.categoryService.getAll().subscribe((cats: any[]) => {
+      this.pendingCategories = cats.filter(c => c.status === 'pending');
+    });
+  }
+
+  approve(id: string) {
+    this.categoryService.approve(id).subscribe(() => {
+      this.toastr.success("Category Approved");
+      this.loadPendingCategories();
+    });
+  }
+
+  reject(id: string) {
+    const reason = prompt("Enter rejection reason");
+
+    if (!reason) return;
+
+    this.categoryService.reject(id, reason).subscribe(() => {
+      this.toastr.error("Category Rejected");
+      this.loadCategories();
+    });
+  }
+
+
 
 
 
 
   restrictPhoneInput(event: any) {
-  const input = event.target.value;
+    const input = event.target.value;
 
-  // Allow unlimited characters for email,
-  // but restrict pure numbers to max 10 digits.
-  if (/^[0-9]+$/.test(input)) {
-    event.target.value = input.substring(0, 10);
-    this.email = event.target.value;
+    // Allow unlimited characters for email,
+    // but restrict pure numbers to max 10 digits.
+    if (/^[0-9]+$/.test(input)) {
+      event.target.value = input.substring(0, 10);
+      this.email = event.target.value;
+    }
   }
-}
 
   initForm(): void {
     this.distributorForm = this.fb.group({
@@ -77,13 +116,13 @@ export class AdminDashboardComponent implements OnInit {
       companyName: ['', Validators.required],
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required, Validators.pattern(/^[0-9]{10}$/) ],
+      phoneNumber: ['', Validators.required, Validators.pattern(/^[0-9]{10}$/)],
       gst: ['', Validators.required],
       address: ['', Validators.required],
-       isPremium: [''],
+      isPremium: [''],
       isActive: [true],
-      categories: [[]] , // ✅ new field
-       customCategory: [''] // ✅ new form control
+      // categories: [[]], // ✅ new field
+      // customCategory: [''] // ✅ new form control
     });
   }
 
@@ -95,10 +134,10 @@ export class AdminDashboardComponent implements OnInit {
         this.distributors = res;
         this.filteredDistributors = res;
 
-      this.totalDistributors = res.length;
-      this.activeDistributors = res.filter(d => d.isActive).length;
-      this.inactiveDistributors = res.filter(d => !d.isActive).length;
-      this.premiumDistributors = res.filter(d => d.isPremium).length;
+        this.totalDistributors = res.length;
+        this.activeDistributors = res.filter(d => d.isActive).length;
+        this.inactiveDistributors = res.filter(d => !d.isActive).length;
+        this.premiumDistributors = res.filter(d => d.isPremium).length;
       },
       error: err => console.error(err)
     });
@@ -108,10 +147,10 @@ export class AdminDashboardComponent implements OnInit {
     this.isEdit = false;
     this.selectedDistributor = null;
     this.distributorForm.reset({ isActive: true });
-     this.distributorForm.reset({ isPremium: true });
+    this.distributorForm.reset({ isPremium: true });
     this.distributorModal?.show();
   }
-   togglePremium(d: Distributor) {
+  togglePremium(d: Distributor) {
     if (d.isPremium) {
       this.adminService.removePremium(d.distributorId).subscribe({
         next: () => d.isPremium = false,
@@ -124,7 +163,7 @@ export class AdminDashboardComponent implements OnInit {
       });
     }
   }
-  
+
 
   openEdit(d: Distributor): void {
     this.isEdit = true;
@@ -133,47 +172,47 @@ export class AdminDashboardComponent implements OnInit {
     this.distributorModal?.show();
   }
 
-saveDistributor(): void {
-  if (this.distributorForm.invalid) {
-    this.distributorForm.markAllAsTouched();
-    return;
-  }
+  saveDistributor(): void {
+    if (this.distributorForm.invalid) {
+      this.distributorForm.markAllAsTouched();
+      return;
+    }
 
-  const dist = this.distributorForm.value;
-  console.log("Submitting distributor:", dist);
-  if (dist.categories.includes('Others') && dist.customCategory.trim()) {
-    dist.categories = dist.categories
-      .filter((c: string) => c !== 'Others')
-      .concat(dist.customCategory.trim());
-  }
-    delete dist.customCategory; // ✅ remove before sending to API
+    const dist = this.distributorForm.value;
+    console.log("Submitting distributor:", dist);
+    // if (dist.categories.includes('Others') && dist.customCategory.trim()) {
+    //   dist.categories = dist.categories
+    //     .filter((c: string) => c !== 'Others')
+    //     .concat(dist.customCategory.trim());
+    // }
+    // delete dist.customCategory; // ✅ remove before sending to API
 
-  if (this.isEdit && this.selectedDistributor) {
-    this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({
-      next: res => {
-        this.message = res;
-        this.loadDistributors();
-        this.distributorModal?.hide();
-      },
-      error: err => {
-        console.error('Update error:', err.error);
-        alert('Update failed: ' + JSON.stringify(err.error.errors));
-      }
-    });
-  } else {
-    this.adminService.addDistributor(dist).subscribe({
-      next: res => {
-        this.message = res;
-        this.loadDistributors();
-        this.distributorModal?.hide();
-      },
-      error: err => {
-        console.error('Add error:', err.error);
-        alert('Add failed: ' + JSON.stringify(err.error.errors));
-      }
-    });
+    if (this.isEdit && this.selectedDistributor) {
+      this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({
+        next: res => {
+          this.message = res;
+          this.loadDistributors();
+          this.distributorModal?.hide();
+        },
+        error: err => {
+          console.error('Update error:', err.error);
+          alert('Update failed: ' + JSON.stringify(err.error.errors));
+        }
+      });
+    } else {
+      this.adminService.addDistributor(dist).subscribe({
+        next: res => {
+          this.message = res;
+          this.loadDistributors();
+          this.distributorModal?.hide();
+        },
+        error: err => {
+          console.error('Add error:', err.error);
+          alert('Add failed: ' + JSON.stringify(err.error.errors));
+        }
+      });
+    }
   }
-}
 
   deactivate(id: string): void {
     this.adminService.deactivateDistributor(id).subscribe({

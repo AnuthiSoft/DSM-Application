@@ -9,25 +9,27 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 // import { environment } from '../../../environments/environment';
 // import { Product } from '../../services/customer-api.service';
- 
+
 @Component({
   selector: 'app-products-by-dist',
   templateUrl: './products-by-dist.component.html',
   styleUrl: './products-by-dist.component.css'
 })
 export class ProductsByDistComponent implements OnInit {
-      apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
-      // ⭐ FIX IMAGE PATH FOR CUSTOMER SIDE
+  apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+
+
+  // ⭐ FIX IMAGE PATH FOR CUSTOMER SIDE
   getFullImageUrl(img: string) {
     if (!img) return "assets/no-image.png";
- 
+
     if (img.startsWith("http://") || img.startsWith("https://")) {
       return img;
     }
- 
+
     return this.apiBaseUrl + img;
   }
- @Input() distributorId?: string;  // ✅ accept from parent
+  @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];
   // distributorId!: string;
@@ -37,15 +39,15 @@ export class ProductsByDistComponent implements OnInit {
   isEdit = false;
   selectedProductId: string | null = null;
 
- 
- 
-    cart: { product: Product; quantity: number }[] = [];
+
+
+  cart: { product: Product; quantity: number }[] = [];
   // customerId = localStorage.getItem('customerId') || '';
-    showPopup = false;
+  showPopup = false;
   selectedProduct: Product | null = null;
   selectedQuantity = 1;
-   color = '';
-   searchTerm: string = '';
+  color = '';
+  searchTerm: string = '';
   minPriceFilter?: number;
   maxPriceFilter?: number;
   categoryFilter: string = '';
@@ -57,11 +59,11 @@ export class ProductsByDistComponent implements OnInit {
   distributorFilter: string = '';
 distributors: string[] = [];
 
-  
- 
+
+
   @Output() addToCartClicked = new EventEmitter<Product>();
 
- 
+
 
 
    constructor(
@@ -149,7 +151,7 @@ onDistributorChange(distributor: string) {
 
 
   // call this when you want to fetch products 
-    loadProducts(): void {
+  loadProducts(): void {
     if (!this.distributorId) return;
     this.loading = true;
 
@@ -246,76 +248,76 @@ AddtoCart(product: Product) {
 
   
   extractCategories() {
-  this.categories = Array.from(
-    new Set(
-      this.products
-        .map(p => p.category)
-        .filter((c): c is string => !!c) // ✅ ensures only strings remain
-    )
-  );
-}
+    this.categories = Array.from(
+      new Set(
+        this.products
+          .map(p => p.category)
+          .filter((c): c is string => !!c) // ✅ ensures only strings remain
+      )
+    );
+  }
 
 
 
   onSmartSearch() {
-  const term = this.searchTerm.toLowerCase().trim();
-  if (!term) {
-    this.filterProducts = [...this.products];
-    return;
+    const term = this.searchTerm.toLowerCase().trim();
+    if (!term) {
+      this.filterProducts = [...this.products];
+      return;
+    }
+
+    // Parse common keywords for price ranges
+    let minPrice: number | null = null;
+    let maxPrice: number | null = null;
+
+    // Match "under 500", "below 200", "less than 100"
+    const underMatch = term.match(/(under|below|less than)\s*(\d+)/);
+    if (underMatch) maxPrice = Number(underMatch[2]);
+
+    // Match "above 100", "over 200", "greater than 300"
+    const aboveMatch = term.match(/(above|over|greater than)\s*(\d+)/);
+    if (aboveMatch) minPrice = Number(aboveMatch[2]);
+
+    // Match "between 100 and 300"
+    const betweenMatch = term.match(/between\s*(\d+)\s*(and|-|to)\s*(\d+)/);
+    if (betweenMatch) {
+      minPrice = Number(betweenMatch[1]);
+      maxPrice = Number(betweenMatch[3]);
+    }
+
+    // Remove numeric/price words for better text matching
+    const cleanedTerm = term
+      .replace(/(under|below|less than|above|over|greater than|between|and|to|under|over)\s*\d+/g, "")
+      .replace(/\d+/g, "")
+      .trim();
+
+    this.filterProducts = this.products.filter(p => {
+      const nameMatch = p.productName?.toLowerCase().includes(cleanedTerm);
+      const categoryMatch = p.category?.toLowerCase().includes(cleanedTerm);
+      const colorMatch = p.color?.toLowerCase().includes(cleanedTerm);
+      const brandMatch = p.brand?.toLowerCase().includes(cleanedTerm);
+
+      // Price filtering
+      let priceMatch = true;
+      if (minPrice !== null && p.price < minPrice) priceMatch = false;
+      if (maxPrice !== null && p.price > maxPrice) priceMatch = false;
+
+      // Stock keyword detection
+      const stockMatch =
+        (term.includes("in stock") && p.stock > 0) ||
+        (term.includes("out of stock") && p.stock === 0) ||
+        (!term.includes("stock") && true);
+
+      return (
+        (nameMatch || categoryMatch || colorMatch || brandMatch) &&
+        priceMatch &&
+        stockMatch
+      );
+    });
   }
-
-  // Parse common keywords for price ranges
-  let minPrice: number | null = null;
-  let maxPrice: number | null = null;
-
-  // Match "under 500", "below 200", "less than 100"
-  const underMatch = term.match(/(under|below|less than)\s*(\d+)/);
-  if (underMatch) maxPrice = Number(underMatch[2]);
-
-  // Match "above 100", "over 200", "greater than 300"
-  const aboveMatch = term.match(/(above|over|greater than)\s*(\d+)/);
-  if (aboveMatch) minPrice = Number(aboveMatch[2]);
-
-  // Match "between 100 and 300"
-  const betweenMatch = term.match(/between\s*(\d+)\s*(and|-|to)\s*(\d+)/);
-  if (betweenMatch) {
-    minPrice = Number(betweenMatch[1]);
-    maxPrice = Number(betweenMatch[3]);
-  }
-
-  // Remove numeric/price words for better text matching
-  const cleanedTerm = term
-    .replace(/(under|below|less than|above|over|greater than|between|and|to|under|over)\s*\d+/g, "")
-    .replace(/\d+/g, "")
-    .trim();
-
-  this.filterProducts = this.products.filter(p => {
-    const nameMatch = p.productName?.toLowerCase().includes(cleanedTerm);
-    const categoryMatch = p.category?.toLowerCase().includes(cleanedTerm);
-    const colorMatch = p.color?.toLowerCase().includes(cleanedTerm);
-    const brandMatch = p.brand?.toLowerCase().includes(cleanedTerm);
-
-    // Price filtering
-    let priceMatch = true;
-    if (minPrice !== null && p.price < minPrice) priceMatch = false;
-    if (maxPrice !== null && p.price > maxPrice) priceMatch = false;
-
-    // Stock keyword detection
-    const stockMatch =
-      (term.includes("in stock") && p.stock > 0) ||
-      (term.includes("out of stock") && p.stock === 0) ||
-      (!term.includes("stock") && true);
-
-    return (
-      (nameMatch || categoryMatch || colorMatch || brandMatch) &&
-      priceMatch &&
-      stockMatch
-    );
-  });
-}
 
   onColorChange(color: string) {
-  
+
     const distributorId = localStorage.getItem('DistributorId');
     if (!distributorId) return;
 
@@ -326,60 +328,60 @@ AddtoCart(product: Product) {
     });
   }
 
-   onCategoryChange(category: string) {
+  onCategoryChange(category: string) {
     const distributorId = localStorage.getItem('DistributorId');
     if (!distributorId) return;
 
-   this.categoryFilter = category;
+    this.categoryFilter = category;
 
-  // 🔥 If "All Categories" selected → show all products
-  if (!category || category.trim() === '') {
-    this.filterProducts = [...this.products];
-    return;
+    // 🔥 If "All Categories" selected → show all products
+    if (!category || category.trim() === '') {
+      this.filterProducts = [...this.products];
+      return;
+    }
+
+    // Otherwise, filter by category
+    this.productService.searchByCategory(distributorId, category).subscribe({
+      next: data => this.filterProducts = data,
+      error: err => console.error('Error filtering by categories:', err)
+    });
   }
-
-  // Otherwise, filter by category
-  this.productService.searchByCategory(distributorId, category).subscribe({
-    next: data => this.filterProducts = data,
-    error: err => console.error('Error filtering by categories:', err)
-  });
-}
   filteredProducts() {
-  this.filterProducts = this.products.filter(p => {
-    const matchesSearch =
-      p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      p.productCode.toLowerCase().includes(this.searchTerm.toLowerCase());
+    this.filterProducts = this.products.filter(p => {
+      const matchesSearch =
+        p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        p.productCode.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-    const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
+      const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
 
-    let matchesStock = true;
-    if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
-    else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
-    else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
+      let matchesStock = true;
+      if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
+      else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
+      else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
 
-    const matchesColor =
-      !this.color || p.color.toLowerCase().includes(this.color.toLowerCase());
+      const matchesColor =
+        !this.color || p.color.toLowerCase().includes(this.color.toLowerCase());
 
-    const matchesMinPrice = this.minPriceFilter == null || p.price >= this.minPriceFilter;
-    const matchesMaxPrice = this.maxPriceFilter == null || p.price <= this.maxPriceFilter;
+      const matchesMinPrice = this.minPriceFilter == null || p.price >= this.minPriceFilter;
+      const matchesMaxPrice = this.maxPriceFilter == null || p.price <= this.maxPriceFilter;
 
-    return (
-      matchesSearch &&
-      matchesCategory &&
-      matchesStock &&
-      matchesColor &&
-      matchesMinPrice &&
-      matchesMaxPrice
-    );
-  });
-}
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesStock &&
+        matchesColor &&
+        matchesMinPrice &&
+        matchesMaxPrice
+      );
+    });
+  }
 
   // 🧩 Apply filters
   applyFilters() {
     this.filterProducts = this.products.filter(p => {
       const matchesSearch = this.searchTerm
         ? p.productName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          p.productCode?.toLowerCase().includes(this.searchTerm.toLowerCase())
+        p.productCode?.toLowerCase().includes(this.searchTerm.toLowerCase())
         : true;
 
       const matchesCategory = this.categoryFilter
@@ -390,10 +392,10 @@ AddtoCart(product: Product) {
         this.stockFilter === 'inStock'
           ? p.stock > 10
           : this.stockFilter === 'lowStock'
-          ? p.stock > 0 && p.stock <= 10
-          : this.stockFilter === 'outOfStock'
-          ? p.stock === 0
-          : true;
+            ? p.stock > 0 && p.stock <= 10
+            : this.stockFilter === 'outOfStock'
+              ? p.stock === 0
+              : true;
 
       const matchesPrice =
         (!this.minPriceFilter || p.price >= this.minPriceFilter) &&
@@ -403,7 +405,7 @@ AddtoCart(product: Product) {
     });
   }
 
-  
+
 
 
   // addToCart(product: Product) {
@@ -411,13 +413,13 @@ AddtoCart(product: Product) {
   //   if (found) found.quantity++;
   //   else this.cart.push({ product, quantity: 1 });
   // }
-    // ✅ Confirm add to cart
+  // ✅ Confirm add to cart
   confirmAddToCart() {
 
     
   if (!this.selectedProduct) return;
 
-  const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
+    const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
 
   if (existing) {
     existing.quantity += this.selectedQuantity;
@@ -431,23 +433,23 @@ console.log("Add to cart clicked");
   // ✅ save updated cart
   localStorage.setItem('cart', JSON.stringify(this.cart));
 
-  this.showPopup = false;
-  this.selectedProduct = null;
-}
+    this.showPopup = false;
+    this.selectedProduct = null;
+  }
 
- 
+
   // ❌ Cancel popup
   closePopup() {
     this.showPopup = false;
     this.selectedProduct = null;
   }
- 
-  
+
+
 
   getTotal() {
     return this.cart.reduce((s, c) => s + (c.product.price * c.quantity), 0);
   }
- 
- 
- 
+
+
+
 }

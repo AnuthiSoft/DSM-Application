@@ -1,5 +1,6 @@
 ﻿using DSM_Application.Server.Models;
 using MongoDB.Driver;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace DSM_Application.Server.Services
 {
@@ -33,72 +34,54 @@ namespace DSM_Application.Server.Services
             {
                 var item = inventory.FirstOrDefault(i => i.ProductId == product.ProductId);
 
+
+
                 result.Add(new
                 {
-                    ProductId = product.ProductId,
+                    productId = product.ProductId,
                     productName = product.ProductName,
                     productCode = product.ProductCode,
                     measure = product.Measure,
                     costPrice = product.CostPrice,
+                    currentStock = item?.CurrentStock ?? product.Stock,
+
                     sellingPrice = product.Price,
 
-                    // 🔥 If inventory missing → fallback to product.stock
-                    CurrentStock = item?.CurrentStock ?? product.Stock,
-                    ReorderLevel = item?.ReorderLevel ?? 0,
-                    UpdatedAt = item?.UpdatedAt ?? product.UpdatedDate
+                    reorderLevel = product.ReorderLevel,
+                    updatedAt = item?.UpdatedAt ?? product.UpdatedDate
                 });
             }
 
             return result;
         }
 
+
+
+
+
+
         // 🔥 Stock In
         public async Task AddStockAsync(string productId, string distributorId, int quantity, string reason)
         {
-            var item = await _inventory.Find(i =>
-                i.ProductId == productId &&
-                i.DistributorId == distributorId
-            ).FirstOrDefaultAsync();
-
-            int previous = item?.CurrentStock ?? 0;
-            int newStock = previous + quantity;
-
-            if (item == null)
-            {
-                item = new InventoryItem
-                {
-                    ProductId = productId,
-                    DistributorId = distributorId,
-                    CurrentStock = quantity,
-                    ReorderLevel = 0,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                await _inventory.InsertOneAsync(item);
-            }
-            else
-            {
-                item.CurrentStock = newStock;
-                item.UpdatedAt = DateTime.UtcNow;
-
-                await _inventory.ReplaceOneAsync(
-                    x => x.ProductId == productId && x.DistributorId == distributorId,
-                    item
-                );
-            }
+            await _inventory.UpdateOneAsync(
+                i => i.ProductId == productId && i.DistributorId == distributorId,
+                Builders<InventoryItem>.Update
+                    .Inc(i => i.CurrentStock, quantity)
+                    .Set(i => i.UpdatedAt, DateTime.UtcNow),
+                new UpdateOptions { IsUpsert = true }
+            );
 
             await _movements.InsertOneAsync(new StockMovement
             {
                 ProductId = productId,
                 DistributorId = distributorId,
                 Date = DateTime.UtcNow,
-                PreviousStock = previous,
-                NewStock = newStock,
                 Quantity = quantity,
                 Type = "IN",
                 Reason = reason
             });
         }
+
 
         // 🔥 Stock Out
         public async Task RemoveStockAsync(string productId, string distributorId, int quantity, string reason)
@@ -109,29 +92,29 @@ namespace DSM_Application.Server.Services
             );
 
             var item = await _inventory.Find(filter).FirstOrDefaultAsync();
-            if (item == null) return;
 
-            int previous = item.CurrentStock;
-            int newStock = Math.Max(previous - quantity, 0);
+            if (item == null || item.CurrentStock < quantity)
+                throw new Exception("Out of stock");
 
-            var update = Builders<InventoryItem>.Update
-                .Set(i => i.CurrentStock, newStock)
-                .Set(i => i.UpdatedAt, DateTime.UtcNow);
-
-            await _inventory.UpdateOneAsync(filter, update);
+            await _inventory.UpdateOneAsync(
+                filter,
+                Builders<InventoryItem>.Update
+                    .Inc(i => i.CurrentStock, -quantity)
+                    .Set(i => i.UpdatedAt, DateTime.UtcNow)
+            );
 
             await _movements.InsertOneAsync(new StockMovement
             {
                 ProductId = productId,
                 DistributorId = distributorId,
                 Date = DateTime.UtcNow,
-                PreviousStock = previous,
-                NewStock = newStock,
                 Quantity = quantity,
                 Type = "OUT",
                 Reason = reason
             });
         }
+
+
 
         // ⭐ CRITICAL FIX — Auto create Inventory if missing
         public async Task UpdateStockAfterProductEdit(string productId, string distributorId, int newStock)
@@ -175,5 +158,9 @@ namespace DSM_Application.Server.Services
                                    .SortByDescending(m => m.Date)
                                    .ToListAsync();
         }
+
+
     }
 }
+
+    

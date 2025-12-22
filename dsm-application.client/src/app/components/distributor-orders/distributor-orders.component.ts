@@ -1,17 +1,19 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DistributorOrder, Employee } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
-import {   EmployeeService } from '../../services/employee.service';
+import { EmployeeService } from '../../services/employee.service';
 import { DistributorService } from '../../services/distributor.service';
+import { ToastrService } from 'ngx-toastr';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-distributor-orders',
   templateUrl: './distributor-orders.component.html',
   styleUrl: './distributor-orders.component.css'
 })
-export class DistributorOrdersComponent implements OnInit{
-   distributorId = localStorage.getItem('distributorId') || '';
-   empId = localStorage.getItem('employeeId') || '';
+export class DistributorOrdersComponent implements OnInit {
+  distributorId = localStorage.getItem('distributorId') || '';
+  empId = localStorage.getItem('employeeId') || '';
 
   orders: DistributorOrder[] = [];
   employees: Employee[] = [];
@@ -19,17 +21,20 @@ export class DistributorOrdersComponent implements OnInit{
   filteredEmployees: Employee[] = [];   // ✅ for search/filter results
   statusFilter = 'All';
   statuses = ['All', 'Pending', 'Confirmed', 'Shipped', 'Delivered', 'Rejected'];
+  nextAction: string="";
   showAssignModal = false;
 assignMode: 'temp' | 'perm' = 'temp';
 activeEmployeeId: string = '';
 activeEmployeeName = '';
 tempEmployeeId = '';
-showTempDropdown = false;
+showTempDropdown = false;  showProductPopup = false;        
+  selectedOrder: any = null;
+  
 
   // For assignment modal
   // selectedOrder: DistributorOrder | null = null;
   employeeId = '';
-  selectedOrder: any;
+  // selectedOrder: any;
 
 employeeAvailability: {
   [customerId: string]: {
@@ -46,8 +51,11 @@ employeeAvailability: {
 } = {}
   constructor(
     private orderService: OrderService,
-    private employeeService: EmployeeService, private distService :DistributorService,private cd: ChangeDetectorRef
-  ) {}
+    private employeeService: EmployeeService,
+    private distService :DistributorService,private cd: ChangeDetectorRef,
+    private toastr: ToastrService,
+    private productService: ProductService
+  ) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -108,15 +116,62 @@ loadAvailabilityForCustomer(customerId: string) {
       error: (err) => console.error('❌ Failed to load employees:', err)
     });
   }
+  // confirmOrder(order: DistributorOrder) {
+  //   if (!confirm(`Confirm order ${order.id}?`)) return;
+  //   this.updateStatus(order, 'Confirmed');
+  // }
+
   confirmOrder(order: DistributorOrder) {
-    if (!confirm(`Confirm order ${order.id}?`)) return;
     this.updateStatus(order, 'Confirmed');
+    this.toastr.success(`Order ${order.id} confirmed successfully!`);
   }
 
+  // rejectOrder(order: DistributorOrder) {
+  //   if (!confirm(`Reject order ${order.id}?`)) return;
+  //   this.updateStatus(order, 'Rejected');
+  // }
+
   rejectOrder(order: DistributorOrder) {
-    if (!confirm(`Reject order ${order.id}?`)) return;
     this.updateStatus(order, 'Rejected');
+    this.toastr.error(`Order ${order.id} has been rejected`);
   }
+
+ openProductDetails(order: any, action: string) {
+
+  // 🔥 CLOSE assign modal if it is open
+  this.showAssignModal = false;
+
+  // small delay so DOM updates cleanly
+  setTimeout(() => {
+    this.selectedOrder = order;
+    this.nextAction = action;
+
+    order.products = order.products || [];
+
+    order.products.forEach((item: any) => {
+      this.productService.getById(item.productId).subscribe((p: any) => {
+        item.brand = p.brand;
+        item.category = p.category;
+        item.imageUrl = p.imageUrls?.length
+          ? `http://localhost:5164${p.imageUrls[0]}`
+          : 'assets/no-image.png';
+      });
+    });
+
+    this.showProductPopup = true;
+  }, 100);
+}
+
+continueAction() {
+  this.showProductPopup = false;
+
+  if (this.nextAction === 'confirm') {
+    this.confirmOrder(this.selectedOrder);
+  }
+  
+
+  this.nextAction = "";  // clear action
+}
 
 // openAssignModal(orderId: string) {
 //   const modal = document.getElementById('assignModal');
@@ -158,11 +213,40 @@ openAssignModal(order: DistributorOrder) {
       status.permanentEmployeeAvailable === false;
 
   });
+  this.showAssignModal = true;   // 🔥 show assign modal
+  this.filteredEmployees = this.employees.filter(e => e.isActive);
+  this.cd.detectChanges();
 }
-closeAssignModal() {
+
+ closeAssignModal() {
+  this.showAssignModal = false;
   this.selectedOrder = null;
   this.tempEmployeeId = '';
 }
+
+
+  //   assignAndShip() {
+  //     if (!this.selectedOrder || !this.employeeId) {
+  //       alert('Please select an employee to assign the order.');
+  //       return;
+  //     }
+
+  //    this.orderService.assignOrder(this.selectedOrder.id, {
+  //   employeeId: this.employeeId,
+  //   employeeName: this.filteredEmployees.find(e => e.employeeId === this.employeeId)?.name,
+  //    note: 'Assigned by distributor' // ✅ Added note
+  // }).subscribe({
+  //   next: () => {
+  //     alert('Order assigned and shipped successfully!');
+  //     this.closeAssignModal();
+  //     this.loadOrders();
+  //   },
+  //   error: (err) => {
+  //     console.error('Error assigning order:', err);
+  //     alert('Failed to assign order.');
+  //   }
+  // });
+  //   }
 
   assignAndShip() {
   if (!this.selectedOrder) return;
@@ -212,6 +296,10 @@ closeAssignModal() {
 
     return;
   }
+    if (!this.selectedOrder || !this.employeeId) {
+      this.toastr.warning('Please select an employee before assigning.');
+      return;
+    }
 
   alert("Temporary employee not selected");
 }
@@ -234,41 +322,78 @@ finalOrderAssign(employeeId: string) {
   });
 }
 
+   
 
+  // markDelivered(order: DistributorOrder) {
+  //   if (!confirm(`Mark order ${order.id} as Delivered?`)) return;
+  //   this.updateStatus(order, 'Delivered');
+  // }
 
   markDelivered(order: DistributorOrder) {
-    if (!confirm(`Mark order ${order.id} as Delivered?`)) return;
     this.updateStatus(order, 'Delivered');
+    this.toastr.success(`Order ${order.id} marked as Delivered`);
   }
+
+  // updateStatus(order: DistributorOrder, status: string) {
+  //   this.orderService.updateStatus(order.id, status).subscribe({
+  //     next: (res: any) => {
+  //       alert(res?.message || 'Status updated');
+  //       this.loadOrders();
+  //     },
+  //     error: (err) => {
+  //       console.error('Failed update', err);
+  //       alert(err?.error || 'Failed to update status');
+  //     }
+  //   });
+  // }
+
+  // updateStatus(order: DistributorOrder, status: string) {
+  //   this.orderService.updateStatus(order.id, status).subscribe({
+  //     next: (res: any) => {
+  //       this.toastr.success(res?.message || `Status updated to ${status}`);
+  //       this.loadOrders();
+  //     },
+  //     error: (err) => {
+  //       console.error('Failed update', err);
+  //       this.toastr.error(err?.error || 'Failed to update status');
+  //     }
+  //   });
+  // }
 
   updateStatus(order: DistributorOrder, status: string) {
-    this.orderService.updateStatus(order.id, status).subscribe({
-      next: (res: any) => {
-        alert(res?.message || 'Status updated');
-        this.loadOrders();
-      },
-      error: (err) => {
-        console.error('Failed update', err);
-        alert(err?.error || 'Failed to update status');
+  this.orderService.updateStatus(order.id, status).subscribe({
+    next: (res: any) => {
+      this.toastr.success(res?.message || `Status updated to ${status}`);
+      this.loadOrders();
+
+      // 🔥 IMPORTANT: trigger product stock refresh
+      if (status === 'Delivered') {
+        localStorage.setItem('REFRESH_PRODUCTS', 'true');
       }
-    });
-  }
-  totalAmount(o: any): number {
-  if (!o || !o.products || o.products.length === 0) {
-    return o?.totalAmount ?? 0;
-  }
-
-  const subtotal = o.products.reduce((sum: number, p: any) => {
-    const price = Number(p.price ?? p.unitPrice ?? 0);
-    const qty = Number(p.quantity ?? p.qty ?? 1);
-    return sum + price * qty;
-  }, 0);
-
-  // ✅ Safe fallback discount handling
-  const discount = Number((o.discount ?? o.totalDiscount ?? 0) || 0);
-
-  return Math.max(subtotal - discount, 0);
+    },
+    error: (err) => {
+      console.error('Failed update', err);
+      this.toastr.error(err?.error || 'Failed to update status');
+    }
+  });
 }
+
+  totalAmount(o: any): number {
+    if (!o || !o.products || o.products.length === 0) {
+      return o?.totalAmount ?? 0;
+    }
+
+    const subtotal = o.products.reduce((sum: number, p: any) => {
+      const price = Number(p.price ?? p.unitPrice ?? 0);
+      const qty = Number(p.quantity ?? p.qty ?? 1);
+      return sum + price * qty;
+    }, 0);
+
+    // ✅ Safe fallback discount handling
+    const discount = Number((o.discount ?? o.totalDiscount ?? 0) || 0);
+
+    return Math.max(subtotal - discount, 0);
+  }
 
    assignTempToCustomer() {
   if (!this.selectedOrder || !this.employeeId) {
@@ -317,7 +442,7 @@ savePermanentEmployee() {
 }
 
 
-  
+
   // ✅ Added function to fix your template error
   getStatusClass(status: string): string {
     switch (status) {
@@ -335,4 +460,14 @@ savePermanentEmployee() {
         return 'badge bg-secondary';
     }
   }
+
+ closeProductPopup() {
+  this.showProductPopup = false;
+  this.nextAction = "";   // 🔥 prevents unwanted opening
+}
+
+toggleTheme() {
+  document.body.classList.toggle('dark');
+}
+
 }

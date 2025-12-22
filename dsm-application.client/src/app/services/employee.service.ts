@@ -109,12 +109,24 @@ deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
 // }
   
 getMyProfile(): Observable<any> {
-  return this.http.get(`${this.apiUrl}/employees/my-profile`);
+  const token = localStorage.getItem("token");
+  return this.http.get(
+    `${this.apiUrl}/employees/my-profile`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 }
 
+
 updateMyProfile(profile: any): Observable<any> {
-  return this.http.put(`${this.apiUrl}/employees/my-profile`, profile);
+  const token = localStorage.getItem("token");
+  return this.http.put(
+    `${this.apiUrl}/employees/my-profile`,
+    profile,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 }
+
+
 
 uploadProfileImage(file: File) {
   const formData = new FormData();
@@ -125,11 +137,7 @@ uploadProfileImage(file: File) {
   return this.http.post(
     `${this.apiUrl}/employees/my-profile/upload-image`,
     formData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 }
 
@@ -140,9 +148,7 @@ getProfileImage() {
     `${this.apiUrl}/employees/my-profile/image`,
     {
       responseType: "blob",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     }
   );
 }

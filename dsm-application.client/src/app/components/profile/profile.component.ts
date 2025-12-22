@@ -199,6 +199,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ProfileService } from '../../services/profile.service';
 import { CustomerProfileDto } from '../../models/customer.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-profile',
@@ -219,7 +220,7 @@ export class ProfileComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput: any;// removed any and replaced this with !
 
-  constructor(private profileService: ProfileService) {}
+  constructor(private profileService: ProfileService, private toastr:ToastrService) {}
 
   ngOnInit(): void {
     this.loadProfile();
@@ -240,8 +241,11 @@ export class ProfileComponent implements OnInit {
 
         this.isLoading = false;
       },
-      error: () => {
-        this.errorMessage = "Failed to load profile";
+      error: (err) => {
+        console.error('Error loading profile', err);
+        this.errorMessage = 'Failed to load profile';
+        this.toastr.error('Failed to load profile', 'Error');
+
         this.isLoading = false;
       }
     });
@@ -287,13 +291,17 @@ export class ProfileComponent implements OnInit {
 
     this.profileService.updateProfile(formData).subscribe({
       next: () => {
-        alert("Profile updated successfully!");
+         this.toastr.success('Your profile has been updated successfully!', 'Profile Updated');
+
         this.selectedFile = null;
         this.loadProfile();
         this.isSaving = false;
       },
-      error: () => {
-        alert("Failed to update profile");
+      error: (err) => {
+        this.toastr.error('Could not update your profile. Try again.', 'Update Failed');
+
+
+        this.originalCustomer = { ...this.customer }; // update original copy
         this.isSaving = false;
       }
     });

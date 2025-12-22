@@ -19,7 +19,8 @@
       <th>Product</th>
       <th>Code</th>
       <th>Measure</th>
-      <th>Stock</th>
+      
+      <th>Available Stock</th>
       <th>Reorder</th>
       <th>Updated</th>
     </tr>
@@ -30,18 +31,17 @@
       <td>{{ s.productName }}</td>
       <td>{{ s.productCode }}</td>
       <td>{{ s.measure }}</td>
-     <td
-  [ngClass]="{
+      
+      
+      <td [ngClass]="{
     'low-stock': s.currentStock <= 5,
     'medium-stock': s.currentStock > 5 && s.currentStock <= 20,
     'high-stock': s.currentStock > 20
-  }"
->
-  {{ s.currentStock }}
-</td>
+  }">
+        {{ s.currentStock }}
+      </td>
       <td>{{ s.reorderLevel }}</td>
- <td>{{ s.updatedAt | date:'short' }}</td>
+      <td>{{ s.updatedAt | date:'short' }}</td>
     </tr>
   </tbody>
 </table>
-

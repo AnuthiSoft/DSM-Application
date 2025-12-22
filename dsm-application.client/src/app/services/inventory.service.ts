@@ -25,4 +25,5 @@ export class InventoryService {
   getMovements(distributorId: string) {
     return this.api.get<any[]>(`${this.endpoint}/movements/${distributorId}`);
   }
+  
 }

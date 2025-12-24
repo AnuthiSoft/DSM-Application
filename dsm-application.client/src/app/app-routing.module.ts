@@ -36,10 +36,10 @@ import { FraudHistoryComponent } from './components/fraud-history/fraud-history.
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+// import { DashboardComponent } from './components/dashboard/dashboard.component';
 
-import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
-import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
+// import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
+// import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
 import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
 import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
@@ -87,7 +87,7 @@ const routes: Routes = [
   { path: 'employee-login', component: EmployeeLoginComponent },
   { path: 'employee-signup', component: EmployeeSignupComponent },
 
-  { path: 'tasks', component: DashboardComponent },
+  // { path: 'tasks', component: DashboardComponent },
   { path: 'admin-fruad-list', component: AdminFraudListComponent },
 
   {
@@ -117,8 +117,8 @@ const routes: Routes = [
 
 
 
-  { path: 'invoice-create', component: InvoiceCreateComponent },
-  { path: 'invoice-detail/:id', component: InvoiceDetailComponent },
+  // { path: 'invoice-create', component: InvoiceCreateComponent },
+  // { path: 'invoice-detail/:id', component: InvoiceDetailComponent },
   { path: 'customers', component: CustomersListComponent },
   
   { path: 'distributor-orders', component: DistributorOrdersComponent },

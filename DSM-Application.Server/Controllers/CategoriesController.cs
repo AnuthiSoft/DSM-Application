@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using DSM_Application.Server.Services;
+﻿using DistributorManagementSystem.Server.Services;
+using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -8,85 +12,68 @@ namespace DSM_Application.Server.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly CategoryService _categoryService;
-        public CategoriesController(CategoryService categoryService)
+        private readonly IMongoCollection<Category> _categories;
+        private readonly MongoDbService _mongo;
+
+        public CategoriesController(MongoDbService mongo)
         {
-            _categoryService = categoryService;
+            _mongo = mongo;
+            _categories = _mongo.Categories;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var cats = await _categoryService.GetAllAsync();
-            return Ok(cats);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
-        {
-            var cat = await _categoryService.GetByIdAsync(id);
-            if (cat == null) return NotFound();
-            return Ok(cat);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CategoryCreateDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name required");
-            var created = await _categoryService.CreateAsync(dto);
-            return Ok(created);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] CategoryUpdateDto dto)
-        {
-            var existing = await _categoryService.GetByIdAsync(id);
-            if (existing == null) return NotFound();
-            await _categoryService.UpdateAsync(id, dto);
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var existing = await _categoryService.GetByIdAsync(id);
-            if (existing == null) return NotFound();
-            await _categoryService.DeleteAsync(id);
-            return NoContent();
-        }
-
-        [HttpPost("distributor/{distributorId}")]
-        public async Task<IActionResult> SetDistributorCategories(string distributorId, [FromBody] List<string> categoryIds)
-        {
-            await _categoryService.SetDistributorCategoriesAsync(distributorId, categoryIds);
-            return NoContent();
-        }
-
-        [HttpGet("distributor/{distributorId}")]
-        public async Task<IActionResult> GetDistributorCategories(string distributorId)
-        {
-            var ids = await _categoryService.GetCategoriesForDistributorAsync(distributorId);
-            return Ok(ids);
-        }
-        [HttpGet("subcategory/{id}/gst")]
-        public async Task<IActionResult> GetGstFromSubcategory(string id)
-        {
-            var cat = await _categoryService.GetByIdAsync(id);
-            if (cat == null) return NotFound("Subcategory not found");
-
-            return Ok(cat.GST);
-        }
         [HttpGet("main")]
         public async Task<IActionResult> GetMainCategories()
         {
-            var cats = await _categoryService.GetMainCategoriesAsync();
-            return Ok(cats);
+            var data = await _categories
+                .Find(x => x.ParentId == null)
+                .ToListAsync();
+
+            var result = data.Select(c => new CategoryReadDto
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,           // 👈 THIS WAS MISSING
+                ParentId = null,
+                HsnCode = c.HsnCode
+            });
+
+            return Ok(result);
         }
         [HttpGet("sub/{parentId}")]
         public async Task<IActionResult> GetSubCategories(string parentId)
         {
-            var cats = await _categoryService.GetSubCategoriesAsync(parentId);
-            return Ok(cats);
+            parentId = parentId.Trim();
+
+            if (!ObjectId.TryParse(parentId, out var parentObjectId))
+                return BadRequest("Invalid parentId");
+
+            var data = await _categories
+                .Find(c => c.ParentId == parentObjectId)
+                .ToListAsync();
+
+            var result = data.Select(c => new CategoryReadDto
+            {
+                CategoryId = c.CategoryId,
+                Name = c.Name,
+                ParentId = c.ParentId, // ✅ IMPORTANT
+                HsnCode = c.HsnCode                      // ✅ THIS FIXES NULL
+            });
+
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("gst/{hsnCode}")]
+        public async Task<IActionResult> GetGstByHsn(string hsnCode)
+        {
+            var hsn = await _mongo.HsnCodes
+                .Find(x => x.HsnCode == hsnCode)
+                .FirstOrDefaultAsync();
+
+            if (hsn == null)
+                return NotFound("HSN not found");
+
+            return Ok(hsn.Gst);
         }
 
     }

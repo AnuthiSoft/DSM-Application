@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
 import { Router } from '@angular/router';
+import { Payment } from '../../models/payment.model';
 
 @Component({
   selector: 'app-collector-reports',
@@ -52,11 +53,19 @@ goToPendingPayments() {
 loadPendingPayments() {
   const cashierId = localStorage.getItem('employeeId')!;
   const selectedDate = this.form.date;
+  const rejected = this.unhandedPayments.filter(p => p.handoverStatus === 'Rejected');
+
+if (rejected.length > 0) {
+  alert(`⚠️ ${rejected.length} payment(s) were rejected by distributor. Please check the reason.`);
+}
+
 
   this.paymentService.getCashierSummary(cashierId, selectedDate).subscribe(res => {
-    this.unhandedPayments = res.payments.filter((p: any) => 
-      p.isHandedOver === false && p.isSubmittedForHandover !== true
-    );
+this.unhandedPayments = res.payments.filter(
+  (p: Payment) =>
+    p.isHandedOver === false
+);
+
   });
 }
 

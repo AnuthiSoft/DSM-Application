@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using MongoDB.Bson;
+using System.Text.Json.Serialization;
 
 namespace DSM_Application.Server.Models.DTOs
 {
@@ -21,6 +22,13 @@ namespace DSM_Application.Server.Models.DTOs
     public class CategoryUpdateDto : CategoryCreateDto
     {
         public string CategoryId { get; set; } = string.Empty;
+        public string? HsnCode { get; set; }
+    }
+    public class CategoryReadDto
+    {
+        public string CategoryId { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public ObjectId? ParentId { get; set; }
         public string? HsnCode { get; set; }
     }
 }

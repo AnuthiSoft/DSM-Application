@@ -44,10 +44,7 @@ export class EmployeeDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.employeeName = localStorage.getItem('employeeName') || 'Employee';
     this.employeeId = localStorage.getItem('employeeId') || '';
-    this.employeeRole = (localStorage.getItem('employeeDesignation') || '').toLowerCase();
-    // Read from the correct key and normalize text
-    this.designation = (localStorage.getItem("employeeDesignation") || "").trim().toLowerCase();
-    this.canSeeInvoices = this.designation.includes("delivery boy");
+ this.employeeRole = (localStorage.getItem('employeeDesignation') || '').toLowerCase();
 
     this.loadDashboardData();
     this.loadAvailability();

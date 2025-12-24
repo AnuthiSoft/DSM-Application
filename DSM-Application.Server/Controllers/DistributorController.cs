@@ -20,6 +20,8 @@ namespace DSM_Application.Server.Controllers
         private readonly TemporaryAssignmentService _tempService;
         private readonly TemporaryEmployeeHistoryService _tempHistoryService;
         private readonly IMongoCollection<EmployeeAvailability> _availability;
+        private readonly IMongoCollection<Employee> _employees;
+
 
 
 
@@ -32,7 +34,8 @@ namespace DSM_Application.Server.Controllers
             _emailService = emailService;
             _tempService = tempService;
             _tempHistoryService = tempHistoryService;   // ADD THIS
-            
+            _employees = mongoService.Employees;
+
 
 
         }
@@ -313,54 +316,62 @@ namespace DSM_Application.Server.Controllers
         // ============================
         [HttpPut("assign-permanent-employee")]
         public async Task<IActionResult> AssignPermanentEmployee(
-            [FromQuery] string distributorId,
-            [FromQuery] string customerId,
-            [FromQuery] string employeeId)
+      [FromQuery] string distributorId,
+      [FromQuery] string customerId,
+      [FromQuery] string employeeId)
         {
-            // 1️⃣ Find connection record
-            var connection = await _connections
-                .Find(x => x.CustomerId == customerId && x.DistributorId == distributorId)
+            if (string.IsNullOrEmpty(distributorId) ||
+                string.IsNullOrEmpty(customerId) ||
+                string.IsNullOrEmpty(employeeId))
+                return BadRequest("Invalid parameters");
+
+            // 1️⃣ Verify customer ownership
+            var customer = await _customers
+                .Find(x => x.CustomerId == customerId)
                 .FirstOrDefaultAsync();
 
-            // 2️⃣ If connection does NOT exist → check if customer was added by distributor
-            if (connection == null)
+            //if (customer == null || customer.AddedByDistributorId != distributorId)
+            //    return BadRequest("Customer not linked to this distributor");
+
+            // 2️⃣ Verify employee belongs to distributor
+            var employee = await _employees
+                .Find(e => e.EmployeeId == employeeId &&
+                           e.DistributorId == distributorId &&
+                           e.IsActive)
+                .FirstOrDefaultAsync();
+
+            if (employee == null)
+                return BadRequest("Employee not found or inactive");
+
+            // 3️⃣ Upsert connection
+            var filter = Builders<CustomerDistributorConnection>.Filter.And(
+                Builders<CustomerDistributorConnection>.Filter.Eq(x => x.DistributorId, distributorId),
+                Builders<CustomerDistributorConnection>.Filter.Eq(x => x.CustomerId, customerId)
+            );
+
+            var update = Builders<CustomerDistributorConnection>.Update
+                .Set(x => x.PermanentEmployeeId, employeeId)
+                .Set(x => x.Status, ConnectionStatus.Accepted)
+                .SetOnInsert(x => x.ConnectedOn, DateTime.UtcNow);
+
+            var result = await _connections.UpdateOneAsync(
+                filter,
+                update,
+                new UpdateOptions { IsUpsert = true }
+            );
+
+            if (result.MatchedCount == 0 && result.UpsertedId == null)
+                return StatusCode(500, "Assignment failed");
+
+            return Ok(new
             {
-                var customer = await _customers
-                    .Find(x => x.CustomerId == customerId)
-                    .FirstOrDefaultAsync();
-
-                if (customer != null && customer.AddedByDistributorId == distributorId)
-                {
-                    // Auto-create connection for distributor-added customers
-                    connection = new CustomerDistributorConnection
-                    {
-                        //Id = ObjectId.GenerateNewId().ToString(),  // ✔ Correct format for Mongo
-                        DistributorId = distributorId,
-                        CustomerId = customerId,
-                        Status = ConnectionStatus.Accepted,
-                        ConnectedOn = DateTime.UtcNow
-                    };
-
-                    await _connections.InsertOneAsync(connection);
-                }
-                else
-                {
-                    return NotFound("Customer is not connected to this distributor");
-                }
-            }
-
-            // 3️⃣ Assign permanent employee
-            connection.PermanentEmployeeId = employeeId;
-
-            var result = await _connections.ReplaceOneAsync(x => x.Id == connection.Id, connection);
-            if (result.ModifiedCount == 0)
-            {
-                return BadRequest("Failed to update permanent employee. (Mongo did not modify document)");
-            }
-
-            return Ok("Permanent employee assigned successfully.");
+                message = "Permanent employee assigned successfully",
+                customerId,
+                distributorId,
+                employeeId,
+                employeeName = employee.Name
+            });
         }
-
 
 
 

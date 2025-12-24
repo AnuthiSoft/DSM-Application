@@ -22,17 +22,19 @@ namespace DSM_Application.Server.Models
     {
         [BsonId, BsonRepresentation(BsonType.ObjectId)]
         public string CategoryId { get; set; } = ObjectId.GenerateNewId().ToString();
-
+        // ✅ THIS IS THE MISSING PIECE
+        [BsonElement("name")]
         public string Name { get; set; } = string.Empty;
-
-        //[BsonRepresentation(BsonType.ObjectId)]
-        public string? ParentId { get; set; } = null;
+        [BsonElement("parentId")]
+        public ObjectId? ParentId { get; set; }
 
         public string? IconUrl { get; set; }
         public string? BannerUrl { get; set; }
 
         // NEW FIELD ↓↓↓
+        [BsonElement("hsnCode")]
         public string? HsnCode { get; set; }
+    
 
         // GST pulled automatically from HSN (or manually stored)
         public decimal GST { get; set; } = 0m;

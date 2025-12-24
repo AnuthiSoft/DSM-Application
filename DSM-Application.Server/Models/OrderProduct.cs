@@ -10,7 +10,7 @@ namespace DSM_Application.Server.Models
             public decimal? Price { get; set; }  // ✅ Use decimal, replaces Price
 
         [BsonElement("UnitPrice")]
-        [BsonSerializer(typeof(NullableDecimalSafeSerializer))]
+  
         public decimal? UnitPrice { get; set; }
 
         public int Quantity { get; set; }

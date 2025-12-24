@@ -42,6 +42,7 @@
           <th>Customer</th>
           <th>Date & Time</th>
           <th>Payment Mode</th>
+          <th class="reason-col">Reject Reason</th>
         </tr>
       </thead>
       <tbody>
@@ -50,16 +51,31 @@
             [class.selected]="isSelected(p)">
           <td class="select-cell">
             <div class="checkbox-container">
-              <input type="checkbox"
-                     class="payment-checkbox"
-                     [checked]="isSelected(p)"
-                     (change)="togglePaymentSelection(p, $any($event.target).checked)">
+  <input type="checkbox"
+  class="payment-checkbox"
+  [checked]="isSelected(p)"
+  [disabled]="p.isSubmittedForHandover === true && p.handoverStatus !== 'Rejected'"
+  (change)="togglePaymentSelection(p, $any($event.target).checked)">
+
+
+
               <label class="checkbox-label"></label>
             </div>
           </td>
-          <td>
-            <span class="payment-id">#{{ p.paymentId }}</span>
-          </td>
+        <td>
+  <span class="payment-id">#{{ p.paymentId }}</span>
+
+<div *ngIf="p.isSubmittedForHandover && p.handoverStatus !== 'Rejected'"
+     class="status pending">
+  ⏳ Waiting for approval
+</div>
+
+<!-- Rejected -->
+<div *ngIf="p.handoverStatus === 'Rejected'"
+     class="status rejected">
+  ❌ Rejected
+</div>
+</td>
           <td>
             <span class="amount-badge">₹{{ p.amountPaidToday | number:'1.2-2' }}</span>
           </td>
@@ -89,6 +105,14 @@
               {{ p.paymentMode }}
             </span>
           </td>
+          <td class="reject-reason">
+  <span *ngIf="p.handoverStatus === 'Rejected'" class="text-danger fw-bold">
+  {{ p.rejectReason }}
+</span>
+<span *ngIf="p.handoverStatus !== 'Rejected'" class="text-muted">
+  -
+</span>
+</td>
         </tr>
       </tbody>
     </table>

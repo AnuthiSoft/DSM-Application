@@ -59,7 +59,7 @@ namespace DSM_Application.Server.Models
         // NEW FIELD → Expected Delivery Date
         public DateTime ExpectedDeliveryDate { get; set; }
 
-       
 
+        public decimal RemainingAmount { get; set; }
     }
 }

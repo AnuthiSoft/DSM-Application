@@ -43,6 +43,9 @@ builder.Services.AddScoped<TemporaryEmployeeHistoryService>();
 
 builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<HsnService>();
+builder.Services.AddScoped<BlobService>();
+
+
 
 // JWT
 builder.Services.AddSingleton<JwtService>();

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { CustomerLedgerDay } from '../models/payment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -90,4 +91,36 @@ export class PaymentService {
   getHandoverDetails(handoverId: string): Observable<any> {
   return this.api.get(`payment/handover-details/${handoverId}`);
 }
+// 🔥 Collect consolidated customer payment
+collectCustomerPayment(data: any): Observable<any> {
+  return this.api.post(`${this.endpoint}/collect-customer-payment`, data);
+}
+
+// 🔥 Get customer pending summary
+getCustomerPending(customerId: string, distributorId: string) {
+  return this.api.get(`payment/customer-pending`, {
+    params: { customerId, distributorId }
+  });
+}
+// getCustomerLedger(
+//   customerId: string,
+//   distributorId: string
+// ): Observable<CustomerLedgerDay[]> {
+//   return this.api.get<CustomerLedgerDay[]>(
+//     'payment/customer-ledger',
+//     { params: { customerId, distributorId } }
+//   );
+// }
+// 🔥 NEW — Customer payment receipts (customer-level payments)
+getCustomerReceipts(
+  customerId: string,
+  distributorId: string
+): Observable<any[]> {
+  return this.api.get<any[]>(
+    'payment/customer-receipts',
+    { params: { customerId, distributorId } }
+  );
+}
+
+
 }

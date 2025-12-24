@@ -1,186 +1,139 @@
 <div class="dashboard-card">
-  <div class="card-header">
-    <!-- <h3><i class="fas fa-rupee-sign"></i> Collect Cash</h3> -->
-  </div>
-
-  <!-- Delivered Orders Pending Payment -->
+  <!-- Header -->
   <div class="section-header">
-    <h4><i class="fas fa-clipboard-check"></i> Delivered Orders Pending Payment</h4>
+    <h4>
+      <i class="fas fa-users"></i>
+      Customers Pending Payment
+    </h4>
   </div>
 
-  <div *ngIf="deliveredOrders.length > 0; else noOrders" class="orders-table-container">
+  <!-- Customers Table -->
+  <div *ngIf="customers.length > 0; else noCustomers" class="orders-table-container">
     <table class="orders-table">
       <thead>
         <tr>
           <th>Action</th>
-          <th>Order ID</th>
           <th>Customer</th>
           <th>Phone</th>
-          <th>Total</th>
-          <th>Pending</th>
-          <th>Status</th>
+          <th>Total Pending</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let o of deliveredOrders" class="order-row">
+        <tr *ngFor="let c of customers">
           <td>
-            <button class="btn btn-sm btn-primary collect-btn"
-                    (click)="openCollectionModal(o)"
-                    [disabled]="o.pendingAmount === 0">
-              <i class="fas fa-hand-holding-usd"></i>
-              {{ o.pendingAmount === 0 ? 'Completed' : 'Collect' }}
+            <button class="btn btn-sm btn-primary"
+                    (click)="openModal(c)">
+              <i class="fas fa-credit-card"></i> Collect
+            </button>
+
+            <button class="btn btn-sm btn-outline-info ms-2"
+                    (click)="viewDetails(c)">
+              <i class="fas fa-eye"></i> View Details
             </button>
           </td>
-          <td><strong>#{{ o.orderId }}</strong></td>
-          <td>{{ o.customerName }}</td>
-          <td><span class="phone-number">{{ o.customerPhone }}</span></td>
-          <td class="amount-cell">₹{{ o.totalAmount | number:'1.2-2' }}</td>
+
+          <td>{{ c.customerName }}</td>
+          <td>{{ c.customerPhone }}</td>
           <td class="pending-amount">
-            <span *ngIf="o.pendingAmount > 0">
-              ₹{{ o.pendingAmount | number:'1.2-2' }}
-            </span>
-            <span *ngIf="o.pendingAmount === 0" class="badge-paid">
-              ✔ Paid
-            </span>
-          </td>
-          <td>
-            <span class="payment-status" [class]="getPaymentStatusClass(o)">
-              {{ getPaymentStatusText(o) }}
-            </span>
+            ₹{{ c.totalPending | number:'1.2-2' }}
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <ng-template #noOrders>
+  <!-- No Customers -->
+  <ng-template #noCustomers>
     <div class="no-data-message">
       <i class="fas fa-inbox"></i>
-      <p>No delivered orders available for cash collection</p>
+      <p>No customers with pending payments</p>
     </div>
   </ng-template>
 
-  <!-- Modal Overlay -->
+
+  
+
+  <!-- ================= COLLECT PAYMENT MODAL ================= -->
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
-      <!-- Modal Header -->
       <div class="modal-header">
-        <h3><i class="fas fa-credit-card"></i> Collect Payment</h3>
+        <h3>
+          <i class="fas fa-credit-card"></i>
+          Collect Customer Payment
+        </h3>
         <button class="modal-close-btn" (click)="closeModal()">
           <i class="fas fa-times"></i>
         </button>
       </div>
 
-      <!-- Modal Body -->
       <div class="modal-body">
-        <!-- Order Summary -->
         <div class="order-summary-card">
-          <div class="order-summary-header">
-            <h4><i class="fas fa-receipt"></i> Order Details</h4>
-          </div>
           <div class="order-summary-grid">
             <div class="summary-item">
-              <span class="summary-label">Order ID</span>
-              <span class="summary-value">#{{ form.orderId }}</span>
-            </div>
-            <div class="summary-item">
               <span class="summary-label">Customer</span>
-              <span class="summary-value">{{ form.customerName }}</span>
+              <span class="summary-value">
+                {{ selectedCustomer?.customerName }}
+              </span>
             </div>
+
             <div class="summary-item">
               <span class="summary-label">Phone</span>
-              <span class="summary-value phone-number">{{ selectedOrder?.customerPhone }}</span>
+              <span class="summary-value">
+                {{ selectedCustomer?.customerPhone }}
+              </span>
             </div>
+
             <div class="summary-item">
-              <span class="summary-label">Total Amount</span>
-              <span class="summary-value amount">₹{{ selectedOrder?.totalAmount | number:'1.2-2' }}</span>
-            </div>
-            <div class="summary-item">
-              <span class="summary-label">Pending Amount</span>
-              <span class="summary-value pending">₹{{ selectedOrder?.pendingAmount | number:'1.2-2' }}</span>
+              <span class="summary-label">Total Pending</span>
+              <span class="summary-value pending">
+                ₹{{ selectedCustomer?.totalPending | number:'1.2-2' }}
+              </span>
             </div>
           </div>
         </div>
 
         <!-- Payment Form -->
         <div class="payment-form-section">
-          <div class="section-header">
-            <h4><i class="fas fa-money-check-alt"></i> Payment Details</h4>
-          </div>
-
           <div class="form-group">
-            <label><i class="fas fa-rupee-sign"></i> Amount to Collect</label>
-            <div class="amount-input-container">
-              <span class="currency-symbol">₹</span>
-              <input type="number" 
-                     class="form-input amount-input"
-                     [(ngModel)]="form.amountPaidToday"
-                     placeholder="Enter amount"
-                     min="0"
-                     [max]="selectedOrder?.pendingAmount"
-                     (input)="validateAmount()">
-            </div>
+            <label>Amount to Collect</label>
+            <input type="number"
+                   class="form-input"
+                   [(ngModel)]="form.amountPaid"
+                   min="0"
+                   [max]="selectedCustomer?.totalPending"
+                   (input)="validateAmount()">
             <div class="form-hint">
-              Maximum: ₹{{ selectedOrder?.pendingAmount | number:'1.2-2' }}
-              <span *ngIf="amountError" class="error-message"> - {{ amountError }}</span>
+              Max: ₹{{ selectedCustomer?.totalPending | number:'1.2-2' }}
+              <span *ngIf="amountError" class="error-message">
+                - {{ amountError }}
+              </span>
             </div>
           </div>
 
           <div class="form-group">
-            <label><i class="fas fa-money-check-alt"></i> Payment Mode</label>
-            <div class="payment-mode-grid">
-              <label class="payment-mode-option" 
-                     [class.selected]="form.paymentMode === 'cash'"
-                     (click)="form.paymentMode = 'cash'">
-                <input type="radio" name="paymentMode" value="cash" [(ngModel)]="form.paymentMode" hidden>
-                <i class="fas fa-money-bill-wave"></i>
-                <span>Cash</span>
-              </label>
-              
-              <label class="payment-mode-option"
-                     [class.selected]="form.paymentMode === 'upi'"
-                     (click)="form.paymentMode = 'upi'">
-                <input type="radio" name="paymentMode" value="upi" [(ngModel)]="form.paymentMode" hidden>
-                <i class="fas fa-mobile-alt"></i>
-                <span>UPI</span>
-              </label>
-              
-              <label class="payment-mode-option"
-                     [class.selected]="form.paymentMode === 'scanner'"
-                     (click)="form.paymentMode = 'scanner'">
-                <input type="radio" name="paymentMode" value="scanner" [(ngModel)]="form.paymentMode" hidden>
-            <i class="fas fa-qrcode"></i>
-                <span>Scanner</span>
-              </label>
-            </div>
+            <label>Payment Mode</label>
+            <select class="form-select" [(ngModel)]="form.paymentMode">
+              <option value="cash">Cash</option>
+              <option value="upi">UPI</option>
+              <option value="scanner">Scanner</option>
+            </select>
           </div>
 
           <div *ngIf="form.paymentMode !== 'cash'" class="form-group">
-            <label><i class="fas fa-hashtag"></i> Transaction Reference</label>
-            <input type="text" 
+            <label>Transaction Reference</label>
+            <input type="text"
                    class="form-input"
                    [(ngModel)]="form.transactionReference"
-                   placeholder="Enter transaction ID/Reference"
-                   [required]="form.paymentMode !== 'cash'">
-          </div>
-
-          <!-- Notes -->
-          <div class="form-group">
-            <label><i class="fas fa-sticky-note"></i> Notes (Optional)</label>
-            <textarea class="form-textarea"
-                      [(ngModel)]="form.notes"
-                      placeholder="Add any additional notes..."
-                      rows="2"></textarea>
+                   placeholder="Enter reference number">
           </div>
         </div>
       </div>
 
-      <!-- Modal Footer -->
       <div class="modal-footer">
         <button class="btn btn-outline-secondary" (click)="closeModal()">
-          <i class="fas fa-times"></i> Cancel
+          Cancel
         </button>
-        <button class="btn btn-primary collect-action-btn" 
+        <button class="btn btn-primary"
                 (click)="submit()"
                 [disabled]="!canSubmit()">
           <i class="fas fa-check-circle"></i> Collect Payment
@@ -189,17 +142,110 @@
     </div>
   </div>
 
-  <!-- Success Toast -->
-  <div *ngIf="showSuccessToast" class="success-toast">
-    <div class="toast-content">
-      <i class="fas fa-check-circle"></i>
-      <div class="toast-message">
-        <strong>Payment Collected Successfully!</strong>
-        <p>₹{{ form.amountPaidToday | number:'1.2-2' }} collected for Order #{{ form.orderId }}</p>
+  <!-- ================= VIEW DETAILS MODAL ================= -->
+  <div *ngIf="showDetailsModal" class="modal-overlay" (click)="closeDetailsModal()">
+    <div class="modal-container large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>
+          <i class="fas fa-file-invoice"></i>
+          Order-wise Pending Details
+        </h3>
+        <button class="modal-close-btn" (click)="closeDetailsModal()">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <button class="toast-close" (click)="closeToast()">
-        <i class="fas fa-times"></i>
-      </button>
+
+      <div class="modal-body">
+        <div class="order-summary-card mb-3">
+          <strong>Total Pending:</strong>
+          <span class="pending-amount">₹{{ orderDetails?.totalPending | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="orders-table-container">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Total Amount</th>
+                <th>Remaining Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let o of orderDetails?.orders">
+                <td>{{ o.id }}</td>
+                <td>₹{{ o.totalAmount | number:'1.2-2' }}</td>
+                <td class="pending-amount">
+                  ₹{{ o.remainingAmount | number:'1.2-2' }}
+                </td>
+                <td>
+                  <span class="status-badge"
+                        [ngClass]="{
+                          'badge-success': o.remainingAmount === 0,
+                          'badge-warning': o.remainingAmount > 0 && o.remainingAmount < o.totalAmount,
+                          'badge-danger': o.remainingAmount === o.totalAmount
+                        }">
+                    {{
+                      o.remainingAmount === 0
+                        ? 'Completed'
+                        : o.remainingAmount < o.totalAmount
+                          ? 'Partial'
+                          : 'Pending'
+                    }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <hr />
+
+<div class="payment-history-section">
+  <h4>
+    <i class="fas fa-receipt"></i>
+    Customer Payment History
+  </h4>
+  
+  <div *ngIf="customerReceipts.length > 0" class="orders-table-container">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Receipt</th>
+          <th>Amount Paid</th>
+          <th>Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of customerReceipts">
+          <td>{{ r.paidOn | date:'dd-MMM-yyyy hh:mm a' }}</td>
+          <td class="receipt-id">{{ r.receiptId }}</td>
+          <td class="text-success">
+            <strong>₹{{ r.amountPaid | number:'1.2-2' }}</strong>
+          </td>
+          <td>
+            <span class="payment-mode-badge" [class]="r.paymentMode">
+              {{ r.paymentMode }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div *ngIf="customerReceipts.length === 0" class="no-data-message">
+    <i class="fas fa-inbox"></i>
+    <p>No payment history found</p>
+  </div>
+</div>
+
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeDetailsModal()">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 </div>

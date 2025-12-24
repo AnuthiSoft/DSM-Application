@@ -126,7 +126,8 @@ namespace DSM_Application.Server.Controllers
                     SpecialDiscountPercent = dto.SpecialDiscountPercent,
                     TotalDiscountPercent = calc.totalPercent,
                     DiscountAmount = calc.discountAmount,
-                    FinalPrice = calc.finalPrice
+                    FinalPrice = calc.finalPrice,
+
                 });
 
                 totalSubtotal += subtotal;
@@ -196,7 +197,8 @@ namespace DSM_Application.Server.Controllers
                 OrderDate = DateTime.UtcNow,
                 Status = "Pending",
 
-                EmployeeId = assignedEmployeeId
+                EmployeeId = assignedEmployeeId,
+                RemainingAmount = totalFinalAmount, // ⭐ MUST ADD
             };
 
 
@@ -839,8 +841,7 @@ namespace DSM_Application.Server.Controllers
                     .ToListAsync();
 
                 decimal total = order.TotalAmount;
-                decimal paidSoFar = payments.Sum(p => p.AmountPaidToday);
-                decimal pending = total - paidSoFar;
+                decimal pending = order.RemainingAmount;
                 if (pending < 0) pending = 0;
 
                 result.Add(new
@@ -849,8 +850,8 @@ namespace DSM_Application.Server.Controllers
                     customerId = order.CustomerId,
                     customerName = customer?.Name,
                     customerPhone = customer?.PhoneNumber,
-                    totalAmount = total,
-                    pendingAmount = pending   // <-- corrected balance
+                    totalAmount = order.TotalAmount,
+                    pendingAmount = order.RemainingAmount
                 });
             }
 

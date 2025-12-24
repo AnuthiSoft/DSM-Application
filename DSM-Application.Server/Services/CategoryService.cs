@@ -59,7 +59,7 @@ namespace DSM_Application.Server.Services
             var category = new Category
             {
                 Name = dto.Name,
-                ParentId = dto.ParentId,
+                //ParentId = dto.ParentId,
                 HsnCode = dto.HsnCode,
                 GST = gst,
 
@@ -99,7 +99,7 @@ namespace DSM_Application.Server.Services
 
             var update = Builders<Category>.Update
                 .Set(c => c.Name, dto.Name)
-                .Set(c => c.ParentId, dto.ParentId)
+                //.Set(c => c.ParentId, dto.ParentId)
                 .Set(c => c.HsnCode, dto.HsnCode)
                 .Set(c => c.GST, gst)
                 .Set(c => c.Attributes, dto.Attributes ?? new())
@@ -154,10 +154,11 @@ namespace DSM_Application.Server.Services
         {
             return await _categories.Find(c => c.ParentId == null && c.IsActive).ToListAsync();
         }
-        public async Task<List<Category>> GetSubCategoriesAsync(string parentId)
-        {
-            return await _categories.Find(c => c.ParentId == parentId && c.IsActive).ToListAsync();
-        }
+        //public async Task<List<Category>> GetSubCategoriesAsync(string parentId)
+        //{
+        //    return await _categories.Find(c => c.ParentId == parentId && c.IsActive).ToListAsync();
+        //}
+
 
 
     }

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+// import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { Product } from '../models/products.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { Observable } from 'rxjs';
 
 export interface Category {
   category: string;
@@ -95,8 +96,8 @@ getSubCategories(parentId: string) {
   return this.api.get<any[]>(`categories/sub/${parentId}`);
 }
 
-getSubCategoryGst(subId: string) {
-  return this.api.get<number>(`categories/subcategory/${subId}/gst`);
+getGstByHsn(hsnCode: string) {
+  return this.api.get<number>(`categories/gst/${hsnCode}`);
 }
 increaseStock(productId: string, quantity: number): Observable<any> {
   return this.api.put(

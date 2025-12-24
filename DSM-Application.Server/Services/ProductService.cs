@@ -23,7 +23,8 @@ namespace DSM_Application.Server.Services
             _products = db.Products;
             _distributors = db.Distributors;
             _categoryService = categoryService;
-           
+            _inventory = db.InventoryItems;
+
         }
 
         public async Task<List<Product>> GetAllAsync(string distributorId)

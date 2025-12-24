@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class HSN
     {
         [BsonId]

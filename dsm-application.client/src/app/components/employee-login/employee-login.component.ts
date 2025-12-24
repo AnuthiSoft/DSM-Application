@@ -65,6 +65,10 @@ export class EmployeeLoginComponent {
       localStorage.setItem('distributorId', res.distributorId);
       localStorage.setItem('EmployeeId', res.employeeId);
       localStorage.setItem('employeeId', res.employeeId);
+        localStorage.setItem('employeeDesignation', res.designation);
+          localStorage.setItem('employeeName', res.name);
+
+  this.router.navigate(['/employee-dashboard']);
 
       const role = this.auth.getRole();
 

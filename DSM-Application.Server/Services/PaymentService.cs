@@ -1,5 +1,6 @@
 ﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
 using MongoDB.Driver;
 using YourApp.Models;
 
@@ -57,7 +58,11 @@ namespace DSM_Application.Server.Services
                 DistributorId = dto.DistributorId,
 
                 PaymentDate = DateTime.UtcNow,
-                IsHandedOver = false
+                IsHandedOver = false,
+                 
+                IsSubmittedForHandover = false,
+                HandoverStatus = null,
+                RejectReason = null
             };
 
             await collection.InsertOneAsync(record);
@@ -160,6 +165,9 @@ namespace DSM_Application.Server.Services
             decimal scanner = all.Where(x => x.PaymentMode == "scanner").Sum(x => x.AmountPaidToday);
 
             decimal total = cash + upi + scanner;
+            if (all.Any(x => x.IsSubmittedForHandover == true))
+                throw new Exception("One or more payments are already submitted for handover");
+
 
             if (dto.CashAmountSubmitted != cash)
                 throw new Exception("Cash amount mismatch!");
@@ -181,6 +189,8 @@ namespace DSM_Application.Server.Services
                 x => dto.PaymentIds.Contains(x.PaymentId),
                 Builders<PaymentCollectionHistory>.Update
                     .Set(x => x.IsSubmittedForHandover, true)
+                    .Set(x => x.HandoverStatus, null)
+                    .Set(x => x.RejectReason, null)
             );
 
             return dto;
@@ -200,11 +210,13 @@ namespace DSM_Application.Server.Services
 
             // Mark payments as handed over
             await payments.UpdateManyAsync(
-         x => handover.PaymentIds.Contains(x.PaymentId),
-         Builders<PaymentCollectionHistory>.Update
-             .Set(x => x.IsHandedOver, true)
-             .Set(x => x.IsSubmittedForHandover, false)
-     );
+     x => handover.PaymentIds.Contains(x.PaymentId),
+     Builders<PaymentCollectionHistory>.Update
+         .Set(x => x.HandoverStatus, "Accepted")
+         .Set(x => x.RejectReason, null)
+         .Set(x => x.IsHandedOver, true)
+         .Set(x => x.IsSubmittedForHandover, false)
+ );
 
             // Update handover status
             await handovers.UpdateOneAsync(
@@ -219,19 +231,29 @@ namespace DSM_Application.Server.Services
         public async Task<object> RejectHandover(string handoverId, string reason)
         {
             var handovers = _db.Database.GetCollection<Handover>("Handover");
-
-            var handover = await handovers.Find(x => x.HandoverId == handoverId).FirstOrDefaultAsync();
             var payments = _db.PaymentHistory;
+
+            var handover = await handovers
+                .Find(x => x.HandoverId == handoverId)
+                .FirstOrDefaultAsync();
+
             if (handover == null)
                 throw new Exception("Handover not found");
 
             if (handover.Status != "Pending")
                 throw new Exception("Already reviewed");
+
+            // ✅ MARK PAYMENTS AS REJECTED
             await payments.UpdateManyAsync(
-    x => handover.PaymentIds.Contains(x.PaymentId),
-    Builders<PaymentCollectionHistory>.Update
-        .Set(x => x.IsSubmittedForHandover, false)
-);
+                x => handover.PaymentIds.Contains(x.PaymentId),
+                Builders<PaymentCollectionHistory>.Update
+                    .Set(x => x.HandoverStatus, "Rejected")
+                    .Set(x => x.RejectReason, reason)
+                    .Set(x => x.IsSubmittedForHandover, false)
+                    .Set(x => x.IsHandedOver, false)
+            );
+
+            // ✅ UPDATE HANDOVER
             await handovers.UpdateOneAsync(
                 x => x.HandoverId == handoverId,
                 Builders<Handover>.Update
@@ -267,7 +289,8 @@ namespace DSM_Application.Server.Services
             decimal totalPaid = payments.Sum(x => x.AmountPaidToday);
             if (totalPaid > orderTotal) totalPaid = orderTotal;
 
-            decimal pending = orderTotal - totalPaid;
+            decimal pending = order.RemainingAmount;
+
             if (pending < 0) pending = 0;
 
             // 4️⃣ Return ALL payments
@@ -276,9 +299,9 @@ namespace DSM_Application.Server.Services
                 OrderId = order.Id,
                 CustomerName = order.CustomerName,
                 TotalAmount = orderTotal,
-                TotalPaid = totalPaid,
-                PendingAmount = pending,
-                Payments = payments   // full history 🔥
+                TotalPaid = orderTotal - order.RemainingAmount,
+                PendingAmount = order.RemainingAmount,
+                Payments = payments
             };
         }
         public async Task<List<Handover>> GetPendingHandovers(string distributorId)
@@ -360,6 +383,187 @@ namespace DSM_Application.Server.Services
                 Payments = paymentList
             };
         }
+        public async Task<object> CollectCustomerPayment(CustomerPaymentDto dto)
+        {
+            var orders = await _db.Orders
+                .Find(o =>
+                    o.CustomerId == dto.CustomerId &&
+                    o.DistributorId == dto.DistributorId &&
+                    o.Status == "Delivered" &&
+                    o.RemainingAmount > 0)
+                .SortBy(o => o.OrderDate)
+                .ToListAsync();
+
+            if (!orders.Any())
+                throw new Exception("No pending orders for this customer");
+
+            // ⭐ CREATE CUSTOMER RECEIPT (NEW)
+            var receipt = new CustomerPaymentReceipt
+            {
+                Id = Guid.NewGuid().ToString(),
+                ReceiptId = "RCP-" + DateTime.UtcNow.Ticks,
+                CustomerId = dto.CustomerId,
+                CustomerName = dto.CustomerName,
+                DistributorId = dto.DistributorId,
+                CashierId = dto.CashierId,
+                AmountPaid = dto.AmountPaid,
+                PaymentMode = dto.PaymentMode,
+                TransactionReference = dto.TransactionReference,
+                PaidOn = DateTime.UtcNow,
+                 Orders = new List<OrderPaymentSplit>() // ✅ REQUIRED
+            
+        };
+
+            decimal remaining = dto.AmountPaid;
+
+            foreach (var order in orders)
+            {
+                if (remaining <= 0)
+                    break;
+
+                decimal used = Math.Min(order.RemainingAmount, remaining);
+                remaining -= used;
+
+                // ⭐ SAVE SPLIT INFO
+                receipt.Orders.Add(new OrderPaymentSplit
+                {
+                    OrderId = order.Id,
+                    AmountApplied = used
+                });
+
+                // EXISTING PAYMENT HISTORY (NO CHANGE)
+                await _db.PaymentHistory.InsertOneAsync(new PaymentCollectionHistory
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PaymentId = Guid.NewGuid().ToString(),
+                    CustomerId = dto.CustomerId,
+                    CustomerName = dto.CustomerName,
+                    OrderId = order.Id,
+                    OrderTotalAmount = order.TotalAmount,
+                    AmountPaidToday = used,
+                    PendingAmount = order.RemainingAmount - used,
+                    PaymentMode = dto.PaymentMode,
+                    TransactionReference = dto.TransactionReference,
+                    CashierId = dto.CashierId,
+                    DistributorId = dto.DistributorId,
+                    PaymentDate = DateTime.UtcNow,
+                    IsHandedOver = false,
+                    IsSubmittedForHandover = false
+                });
+
+                await _db.Orders.UpdateOneAsync(
+                    o => o.Id == order.Id,
+                    Builders<Order>.Update
+                        .Set(o => o.RemainingAmount, order.RemainingAmount - used)
+                );
+            }
+
+            // ⭐ SAVE CUSTOMER RECEIPT (IMPORTANT)
+            await _db.CustomerPaymentReceipts.InsertOneAsync(receipt);
+
+            var remainingPending = await _db.Orders
+                .Find(o =>
+                    o.CustomerId == dto.CustomerId &&
+                    o.DistributorId == dto.DistributorId &&
+                    o.RemainingAmount > 0)
+                .Project(o => o.RemainingAmount)
+                .ToListAsync();
+
+            return new
+            {
+                message = "Customer payment collected successfully",
+                receiptId = receipt.ReceiptId,
+                totalPaid = receipt.AmountPaid,
+                remainingCustomerPending = remainingPending.Sum()
+            };
+        }
+
+        public async Task<List<CustomerPaymentReceipt>> GetCustomerReceipts(
+    string customerId,
+    string distributorId)
+        {
+            return await _db.CustomerPaymentReceipts
+                .Find(x =>
+                    x.CustomerId == customerId &&
+                    x.DistributorId == distributorId)
+                .SortByDescending(x => x.PaidOn)
+                .ToListAsync();
+        }
+
+        public async Task<object> GetCustomerPendingSummary(
+          string customerId,
+          string distributorId
+      )
+        {
+            var orders = await _db.Orders
+       .Find(o =>
+           o.CustomerId == customerId &&
+           o.DistributorId == distributorId &&   // ⭐ IMPORTANT
+           o.RemainingAmount >= 0
+       )
+       .SortBy(o => o.OrderDate)
+       .ToListAsync();
+
+
+            return new
+            {
+                CustomerId = customerId,
+
+                TotalPending = orders.Sum(o => o.RemainingAmount),
+
+                Orders = orders.Select(o => new
+                {
+                    o.Id,
+                    o.TotalAmount,
+                    o.RemainingAmount,
+
+                    Status =
+                        o.RemainingAmount == 0
+                            ? "Completed"
+                            : o.RemainingAmount < o.TotalAmount
+                                ? "Partial"
+                                : "Pending"
+                })
+            };
+
+        }
+        public async Task<List<object>> GetCustomerPaymentLedger(
+      string customerId,
+      string distributorId)
+        {
+            customerId = customerId.Trim();
+            distributorId = distributorId.Trim();   // ⭐⭐⭐ FIX ⭐⭐⭐
+
+            var payments = await _db.PaymentHistory
+                .Find(p =>
+                    p.CustomerId == customerId &&
+                    p.DistributorId == distributorId &&
+                    p.AmountPaidToday > 0
+                )
+                .SortByDescending(p => p.PaymentDate)
+                .ToListAsync();
+
+            var ledger = payments
+                .GroupBy(p => p.PaymentDate.Date)
+                .Select(g => new
+                {
+                    Date = g.Key,
+                    TotalPaid = g.Sum(x => x.AmountPaidToday),
+                    Payments = g.Select(x => new
+                    {
+                        x.OrderId,
+                        x.AmountPaidToday,
+                        x.PaymentMode,
+                        x.PaymentDate
+                    }).ToList()
+                })
+                .OrderByDescending(x => x.Date)
+                .ToList();
+
+            return ledger.Cast<object>().ToList();
+        }
+
+
 
     }
 }

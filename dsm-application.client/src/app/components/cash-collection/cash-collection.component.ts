@@ -8,146 +8,117 @@ import { PaymentService } from '../../services/payment.service';
   styleUrl: './cash-collection.component.css'
 })
 export class CashCollectionComponent implements OnInit  {
- form = {
-    orderId: '',
+ customers: any[] = [];
+  selectedCustomer: any = null;
+  showModal = false;
+  showDetailsModal = false;
+orderDetails: any = null;
+customerLedger: any[] = [];
+customerReceipts: any[] = [];
+
+
+  amountError: string | null = null;
+
+  form = {
     customerId: '',
     customerName: '',
-    orderTotalAmount: 0,
-    amountPaidToday: 0,
+    amountPaid: 0,
     paymentMode: 'cash',
     transactionReference: '',
-     notes: '',
     cashierId: localStorage.getItem('employeeId') || '',
     distributorId: localStorage.getItem('distributorId') || ''
   };
 
-  deliveredOrders: any[] = [];
-  response: any;
-selectedOrder: any = null;
-showModal = false;
-showSuccessToast = false;
-amountError: string | null = null;
-
-// Optional Notes field (your HTML uses it)
-formNotes: string = "";
   constructor(private paymentService: PaymentService) {}
 
   ngOnInit() {
-    this.loadDeliveredOrders();
+    this.loadCustomersWithPending();
   }
-openCollectionModal(order: any) {
-  this.selectedOrder = order;   
 
-  this.form.orderId = order.orderId;
-  this.form.customerId = order.customerId;
-  this.form.customerName = order.customerName;
-  this.form.orderTotalAmount = order.totalAmount;
-  this.form.amountPaidToday = order.pendingAmount;
-  this.form.notes = "";
-
-  this.amountError = null;
-  this.showModal = true;
-}
-
-// Close modal
-closeModal() {
-  this.showModal = false;
-}
-
-// Validation for amount input
-validateAmount() {
-  if (this.form.amountPaidToday > this.getMaxAmount()) {
-    this.amountError = "Amount exceeds pending balance";
-  } else {
-    this.amountError = null;
-  }
-}
-
-// Enable/disable submit button
-canSubmit() {
-  return this.form.amountPaidToday > 0 && !this.amountError;
-}
-
-// Close toast message
-closeToast() {
-  this.showSuccessToast = false;
-}
-
-// Payment status styling for pending/paid
-getPaymentStatusClass(order: any) {
-  return order.pendingAmount === 0 ? "status-paid" : "status-pending";
-}
-
-getPaymentStatusText(order: any) {
-  return order.pendingAmount === 0 ? "Paid" : "Pending";
-}
-  loadDeliveredOrders() {
+  // 🔥 GROUP ORDERS BY CUSTOMER
+  loadCustomersWithPending() {
     const distributorId = localStorage.getItem('distributorId')!;
-    this.paymentService.getDeliveredOrders(distributorId).subscribe({
-      next: res => this.deliveredOrders = res,
-      error: err => console.error("Failed to load delivered orders", err)
+
+    this.paymentService.getDeliveredOrders(distributorId).subscribe(res => {
+      const map = new Map<string, any>();
+
+      res.forEach((o: any) => {
+        if (!map.has(o.customerId)) {
+          map.set(o.customerId, {
+            customerId: o.customerId,
+            customerName: o.customerName,
+            customerPhone: o.customerPhone,
+            totalPending: 0
+          });
+        }
+        map.get(o.customerId).totalPending += o.pendingAmount;
+      });
+
+      this.customers = Array.from(map.values());
     });
   }
 
-  selectOrder(order: any) {
-  this.form.orderId = order.orderId;
-  this.form.customerId = order.customerId;
-  this.form.customerName = order.customerName;
+  openModal(customer: any) {
+    this.selectedCustomer = customer;
 
-  this.form.orderTotalAmount = order.totalAmount;   // ✔ required
-  this.form.amountPaidToday = order.pendingAmount; // autofill max
-}
+    this.form.customerId = customer.customerId;
+    this.form.customerName = customer.customerName;
+    this.form.amountPaid = customer.totalPending;
 
-submit() {
-  if (this.form.amountPaidToday <= 0) {
-    alert("Enter a valid amount");
-    return;
+    this.amountError = null;
+    this.showModal = true;
   }
 
-  this.paymentService.collectPayment(this.form).subscribe({
-    next: res => {
-      alert("Payment collected!");
+  closeModal() {
+    this.showModal = false;
+  }
 
-      this.resetForm();
-      this.loadDeliveredOrders(); // reload with updated pending
-    },
-    error: err => {
-      console.error(err);
-      alert("Payment failed");
+  validateAmount() {
+    if (this.form.amountPaid > this.selectedCustomer.totalPending) {
+      this.amountError = 'Amount exceeds total pending';
+    } else {
+      this.amountError = null;
     }
-  });
-}
-  resetForm() {
-    this.form = {
-      orderId: '',
-      customerId: '',
-      customerName: '',
-      orderTotalAmount: 0,
-      amountPaidToday: 0,
-      paymentMode: 'cash',
-      transactionReference: '',
-       notes: '',
-      cashierId: localStorage.getItem('employeeId') || '',
-      distributorId: localStorage.getItem('distributorId') || ''
-    };
   }
-getMaxAmount() {
-  return this.selectedOrder ? this.selectedOrder.pendingAmount : 0;
-}
-clearForm() {
-  this.form = {
-    orderId: '',
-    customerId: '',
-    customerName: '',
-    orderTotalAmount: 0,
-    amountPaidToday: 0,
-    paymentMode: 'cash',
-    transactionReference: '',
-     notes: '',
-    cashierId: localStorage.getItem('employeeId') || '',
-    distributorId: localStorage.getItem('distributorId') || ''
-  };
 
-  this.selectedOrder = null;
+  canSubmit() {
+    return this.form.amountPaid > 0 && !this.amountError;
+  }
+
+  submit() {
+    this.paymentService.collectCustomerPayment(this.form).subscribe({
+      next: res => {
+        alert(`Payment collected. Remaining pending: ₹${res.remainingCustomerPending}`);
+        this.showModal = false;
+        this.loadCustomersWithPending();
+      },
+      error: err => alert(err.error?.message || 'Payment failed')
+    });
+  }
+viewDetails(customer: any) {
+  const distributorId = localStorage.getItem('distributorId')!;
+
+  // 1️⃣ Load order-wise pending (existing)
+  this.paymentService
+    .getCustomerPending(customer.customerId, distributorId)
+    .subscribe(res => {
+      this.orderDetails = res;
+    });
+
+  // 2️⃣ Load customer-level receipts (NEW)
+  this.paymentService
+    .getCustomerReceipts(customer.customerId, distributorId)
+    .subscribe(res => {
+      this.customerReceipts = res;
+    });
+
+  this.showDetailsModal = true;
 }
+closeDetailsModal() {
+  this.showDetailsModal = false;
+  this.orderDetails = null;
+  this.customerReceipts = [];   // ⭐ IMPORTANT
+}
+
+
 }

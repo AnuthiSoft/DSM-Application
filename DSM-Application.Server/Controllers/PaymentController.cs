@@ -120,6 +120,54 @@ namespace DSM_Application.Server.Controllers
             var result = await _paymentService.GetHandoverDetails(handoverId);
             return Ok(result);
         }
+        [HttpPost("collect-customer-payment")]
+        public async Task<IActionResult> CollectCustomerPayment(
+       [FromBody] CustomerPaymentDto dto)
+        {
+            if (dto.AmountPaid <= 0)
+                return BadRequest("Invalid payment amount");
+
+            var result = await _paymentService.CollectCustomerPayment(dto);
+            return Ok(result);
+        }
+        [HttpGet("customer-pending")]
+        public async Task<IActionResult> GetCustomerPending(
+           [FromQuery] string customerId,
+           [FromQuery] string distributorId)
+        {
+            return Ok(await _paymentService.GetCustomerPendingSummary(customerId, distributorId));
+        }
+        // ================================================================
+        //  CUSTOMER LEDGER (DATE-WISE PAYMENT HISTORY)
+        // ================================================================
+        [HttpGet("customer-ledger")]
+        public async Task<IActionResult> GetCustomerLedger(
+    [FromQuery] string customerId,
+    [FromQuery] string distributorId)
+        {
+            if (string.IsNullOrWhiteSpace(customerId) ||
+                string.IsNullOrWhiteSpace(distributorId))
+                return BadRequest("customerId and distributorId are required");
+
+            var result = await _paymentService.GetCustomerPaymentLedger(
+                customerId.Trim(),
+                distributorId.Trim()
+            );
+
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("customer-receipts")]
+        public async Task<IActionResult> GetCustomerReceipts(
+    [FromQuery] string customerId,
+    [FromQuery] string distributorId)
+        {
+            return Ok(await _paymentService.GetCustomerReceipts(customerId, distributorId));
+        }
+
+
 
     }
 }

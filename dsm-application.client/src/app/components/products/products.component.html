@@ -78,39 +78,47 @@
                     <!-- <img [src]="apiBaseUrl + img"
                class="d-block w-100 rounded"
                style="max-height: 180px; object-fit: contain;" /> -->
+ 
+               <img [src]="getFullImageUrl(img)"
 
-                    <img [src]="getFullImageUrl(img)" class="d-block w-100 rounded"
-                      style="max-height:180px; object-fit:contain;">
-
-                  </div>
-
-                </div>
-
-                <!-- Prev -->
-                <button class="carousel-control-prev" type="button"
-                  [attr.data-bs-target]="'#carousel-' + product.productId" data-bs-slide="prev">
-                  <span class="carousel-control-prev-icon"></span>
-                </button>
-
-                <!-- Next -->
-                <button class="carousel-control-next" type="button"
-                  [attr.data-bs-target]="'#carousel-' + product.productId" data-bs-slide="next">
-                  <span class="carousel-control-next-icon"></span>
-                </button>
-              </div>
-
-            </div>
-
-            <!-- If no images -->
-            <div *ngIf="!product.imageUrls || product.imageUrls.length === 0">
-              <img src="assets/no-image.png" class="img-fluid rounded"
-                style="max-height: 180px; object-fit: contain;" />
-            </div>
-
-          </div>
-
-
-
+               class="d-block w-100 rounded"
+          
+               style="max-height:180px; object-fit:contain;">
+          
+           
+ 
+        </div>
+ 
+      </div>
+ 
+      <!-- Prev -->
+      <button class="carousel-control-prev" type="button"
+              [attr.data-bs-target]="'#carousel-' + product.productId"
+              data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+ 
+      <!-- Next -->
+      <button class="carousel-control-next" type="button"
+              [attr.data-bs-target]="'#carousel-' + product.productId"
+              data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+ 
+  </div>
+ 
+  <!-- If no images -->
+  <div *ngIf="!product.imageUrls || product.imageUrls.length === 0">
+    <img src="assets/no-image.png"
+         class="img-fluid rounded"
+         style="max-height: 180px; object-fit: contain;" />
+  </div>
+ 
+</div>
+ 
+ 
+ 
           <div class="product-info p-3">
 
             <!-- Product Name & Price -->
@@ -215,7 +223,12 @@
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">GST (%)</label>
-                  <input type="number" class="form-control" formControlName="gst" />
+                  <input
+  type="number"
+  class="form-control"
+  formControlName="gst"
+  readonly
+/>
                 </div>
               </div>
 
@@ -265,10 +278,12 @@
                 </div> -->
 
                 <div *ngIf="previewUrls.length > 0" class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
-                  <img *ngIf="selectedProduct?.imageUrls?.length" [src]="apiBaseUrl + selectedProduct.imageUrls[0]"
-                    class="img-fluid rounded" style="max-height: 180px; object-fit: contain;" />
-                </div>
-
+<img *ngIf="selectedProduct?.imageUrls?.length"
+     [src]="getFullImageUrl(selectedProduct.imageUrls[0])"
+     class="img-fluid rounded"
+     style="max-height: 180px; object-fit: contain;" />
+</div>
+ 
               </div>
 
               <div class="mb-3">

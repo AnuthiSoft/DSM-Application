@@ -23,7 +23,7 @@ namespace DSM_Application.Server.Controllers
         private readonly ProductService _productService;
         private readonly IMongoCollection<Customer> _customersCollection;
         private readonly TemporaryAssignmentService _tempService;
-
+        private readonly IMongoCollection<Employee> _employees;
 
         public CustomersController(MongoDbService db, JwtService jwt, ProductService productService, TemporaryAssignmentService tempService)
         {
@@ -32,6 +32,8 @@ namespace DSM_Application.Server.Controllers
             _productService = productService;
             _tempService = tempService;
             _customersCollection = db.Customers;
+            _employees = _db.Employees;
+
         }
 
         // 🌍 Global Registration
@@ -783,6 +785,7 @@ namespace DSM_Application.Server.Controllers
 
 
         //[Authorize(Roles = "Distributor")]
+        // [Authorize(Roles = "Distributor")]
         [HttpGet("all-for-distributor")]
         public async Task<IActionResult> GetAllCustomersForDistributor()
         {
@@ -790,32 +793,67 @@ namespace DSM_Application.Server.Controllers
             if (distributorId == null)
                 return Unauthorized("Distributor ID missing");
 
-            // 1️⃣ Customers created by this distributor
+            // 1️⃣ Customers created by distributor
             var createdCustomers = await _db.Customers
                 .Find(c => c.AddedByDistributorId == distributorId)
                 .ToListAsync();
 
-            // 2️⃣ Customers connected via Accepted connection
-            var acceptedConnections = await _db.Connections
-                .Find(c => c.DistributorId == distributorId && c.Status == ConnectionStatus.Accepted)
+            // 2️⃣ Accepted connections
+            var connections = await _db.Connections
+                .Find(c => c.DistributorId == distributorId &&
+                           c.Status == ConnectionStatus.Accepted)
                 .ToListAsync();
 
-            var connectedCustomerIds = acceptedConnections.Select(c => c.CustomerId).ToList();
+            var connectedCustomerIds = connections
+                .Select(c => c.CustomerId)
+                .ToList();
 
             var connectedCustomers = await _db.Customers
                 .Find(c => connectedCustomerIds.Contains(c.CustomerId))
                 .ToListAsync();
 
-            // 3️⃣ Merge both lists (avoid duplicates)
-            var combined = createdCustomers
+            // 3️⃣ Merge customers (avoid duplicates)
+            var customers = createdCustomers
                 .Concat(connectedCustomers)
                 .GroupBy(c => c.CustomerId)
                 .Select(g => g.First())
                 .ToList();
 
-            return Ok(combined);
+            // 4️⃣ Load employees (for name lookup)
+            var employeeIds = connections
+                .Where(c => !string.IsNullOrEmpty(c.PermanentEmployeeId))
+                .Select(c => c.PermanentEmployeeId)
+                .Distinct()
+                .ToList();
+
+            var employees = await _db.Employees
+                .Find(e => employeeIds.Contains(e.EmployeeId))
+                .ToListAsync();
+
+            // 5️⃣ Final response with permanent employee name
+            var result = customers.Select(c =>
+            {
+                var conn = connections.FirstOrDefault(x => x.CustomerId == c.CustomerId);
+                var emp = employees.FirstOrDefault(e => e.EmployeeId == conn?.PermanentEmployeeId);
+
+                return new
+                {
+                    c.CustomerId,
+                    c.Name,
+                    c.Email,
+                    c.PhoneNumber,
+                    c.Address,
+                    c.IsRegistered,
+
+                    PermanentEmployeeId = conn?.PermanentEmployeeId,
+                    PermanentEmployeeName = emp?.Name   // ✅ KEY FIX
+                };
+            });
+
+            return Ok(result);
         }
- 
+
+
         public class ConnectRequest
         {
             public string CustomerId { get; set; }

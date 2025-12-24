@@ -105,33 +105,32 @@ export class ProductsComponent {
     }
   }
   loadMainCategories() {
-    this.productService.getMainCategories().subscribe(res => this.mainCategories = res);
-  }
-  onMainCategoryChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const value = select.value;
-    this.productForm.patchValue({ mainCategory: value });
-    this.productService.getSubCategories(value).subscribe(res => this.subCategories = res);
-  }
-  onSubCategoryChange(event: Event) {
-    const select = event.target as HTMLSelectElement;
-    const value = select.value;
+  this.productService.getMainCategories().subscribe(res => this.mainCategories = res);
+}
+onMainCategoryChange(event: Event) {
+  const select = event.target as HTMLSelectElement;
+  const value = select.value;
+  this.productForm.patchValue({ mainCategory: value });
+  this.productService.getSubCategories(value).subscribe(res => this.subCategories = res);
+}
+onSubCategoryChange(event: Event) {
+  const select = event.target as HTMLSelectElement;
+  const subCategoryId = select.value;
 
-    this.productForm.patchValue({ category: value });
+  const selectedSub = this.subCategories.find(sc => sc.categoryId === subCategoryId);
+  if (!selectedSub) return;
 
-    this.productService.getSubCategoryGst(value).subscribe(gst => {
+  // 1️⃣ set subcategory
+  this.productForm.patchValue({
+    category: subCategoryId
+  });
+
+  // 2️⃣ fetch GST using HSN
+  this.productService.getGstByHsn(selectedSub.hsnCode)
+    .subscribe(gst => {
       this.productForm.patchValue({ gst });
     });
-  }
-  // loadProducts(distributorId: string) {
-  //   this.productService.getProductsByDistributor(distributorId).subscribe({
-  //     next: (data) => {
-  //       this.products = data;
-  //       this.filteredProducts = [...data];
-  //     },
-  //     error: (err) => console.error('Error loading products:', err)
-  //   });
-  // }
+}
 
   loadProducts(distributorId: string) {
   this.productService.getProductsByDistributor(distributorId).subscribe({
@@ -140,7 +139,7 @@ export class ProductsComponent {
       this.filteredProducts = [...data];
 
       // ✅ NOW merge inventory stock
-      this.loadInventoryStock(distributorId);
+      // this.loadInventoryStock(distributorId);
     },
     error: (err) => console.error('Error loading products:', err)
   });
@@ -451,8 +450,8 @@ export class ProductsComponent {
       this.selectedProduct = product;
 
       this.productForm.patchValue(product);
-      this.previewUrl = product.imageUrls ? this.apiBaseUrl + product.imageUrls : null;
-      this.previewUrls = [];
+      this.previewUrl = product.imageUrls?.length? this.getFullImageUrl(product.imageUrls[0]): null;
+        this.previewUrls = [];  
     } else {
       this.selectedProduct = null;
       this.resetForm();
@@ -474,14 +473,9 @@ export class ProductsComponent {
 
   getFullImageUrl(img: string) {
     if (!img) return 'assets/no-image.png';
-
-    // If image is already a full URL, return as is
-    if (img.startsWith('http://') || img.startsWith('https://')) {
-      return img;
-    }
-
-    // Otherwise append API base URL
-    return this.apiBaseUrl + img;
+  
+    // 🔥 ALWAYS go through backend image API
+    return `${environment.apiUrl}/images/${img}`;
   }
   increaseStock(productId: string) {
   const qty = prompt('Enter quantity to add:');
@@ -541,7 +535,7 @@ toggleTheme() {
     current === 'dark' ? 'light' : 'dark'
   );
 }
-
-
+ 
+ 
 }
 

@@ -52,8 +52,11 @@ namespace DistributorManagementSystem.Server.Services
 
         
 
+        public IMongoCollection<CustomerPaymentReceipt> CustomerPaymentReceipts =>
+    _db.GetCollection<CustomerPaymentReceipt>("CustomerPaymentReceipt");
 
-
+        public IMongoCollection<InventoryItem> InventoryItems =>
+    _db.GetCollection<InventoryItem>("InventoryItems");
 
     }
 

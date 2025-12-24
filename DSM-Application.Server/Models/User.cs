@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DistributorManagementSystem.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class User
     {
         [BsonId]
@@ -29,6 +30,7 @@ namespace DistributorManagementSystem.Server.Models
 
 
         public string Address { get; set; }
+ 
 
         public bool IsRegistered { get; set; } = true; // true if password created by distributor
         [BsonElement("ResetOtp")]

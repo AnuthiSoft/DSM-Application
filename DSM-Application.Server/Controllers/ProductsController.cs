@@ -20,13 +20,15 @@ namespace DSM_Application.Server.Controllers
     {
         private readonly ProductService _productService;
         private readonly CategoryService _categoryService;
+        private readonly BlobService _blobService;
         private readonly InventoryService _inventoryService;
 
-        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService )
+        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService , BlobService blobService)
         {
             _productService = productService;
             _categoryService = categoryService;
             _inventoryService = inventoryService;
+            _blobService = blobService;
         }
 
         [Authorize(Roles = "Distributor")]
@@ -105,19 +107,11 @@ namespace DSM_Application.Server.Controllers
 
             if (dto.Images != null && dto.Images.Any())
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
                 foreach (var file in dto.Images)
                 {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await file.CopyToAsync(stream);
-
-                    imageUrls.Add("/uploads/" + fileName);
+                    var blobUrl = await _blobService.UploadAsync(file);
+                    var blobName = Path.GetFileName(new Uri(blobUrl).LocalPath);
+                    imageUrls.Add(blobName);
                 }
             }
             var subCategory = await _categoryService.GetByIdAsync(dto.Category);
@@ -190,13 +184,10 @@ namespace DSM_Application.Server.Controllers
 
                 foreach (var file in dto.Images)
                 {
-                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    var blobUrl = await _blobService.UploadAsync(file);
+                    var blobName = Path.GetFileName(new Uri(blobUrl).LocalPath);
+                    newUrls.Add(blobName);
 
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await file.CopyToAsync(stream);
-
-                    newUrls.Add("/uploads/" + fileName);
                 }
 
                 existing.ImageUrls = newUrls;

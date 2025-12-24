@@ -28,6 +28,9 @@ namespace DSM_Application.Server.Models
 
         public bool IsHandedOver { get; set; } = false;
         public bool IsSubmittedForHandover { get; set; }
+        public string HandoverStatus { get; set; } = "Pending"; // Pending | Rejected | Accepted
+        public string RejectReason { get; set; }
+
 
 
     }

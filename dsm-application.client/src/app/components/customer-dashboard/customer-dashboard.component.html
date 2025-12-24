@@ -156,4 +156,13 @@
     <app-profile *ngIf="activeTab === 'profile'"></app-profile>
     <!-- <app-review-submit *ngIf="activeTab === 'review'"></app-review-submit> -->
 
+    <!--search by pincode-->
+      <div
+    class="nav-item"
+    [class.active]="isActive('search')"
+    (click)="setActiveTab('search')">
+    <i class="fas fa-search"></i> <span>Search</span>
   </div>
+<app-customer-search *ngIf="activeTab === 'search'"></app-customer-search>
+
+</div>

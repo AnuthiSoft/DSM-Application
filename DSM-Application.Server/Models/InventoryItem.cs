@@ -24,7 +24,12 @@ namespace DSM_Application.Server.Models
 
         public DateTime UpdatedAt { get; set; }
 
-        
+        public int AvailableQuantity { get; set; }
 
+        public DateTime ManufactureDate { get; set; }
+        public DateTime ExpiryDate { get; set; }
+
+        // FIFO key
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

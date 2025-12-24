@@ -1,4 +1,6 @@
-﻿using DSM_Application.Server.Services;
+using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +55,29 @@ namespace DSM_Application.Server.Controllers
             var result = await _inventoryService.GetMovements(distributorId);
             return Ok(result);
         }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> AddInventory(AddInventoryDto dto)
+        {
+            if (dto.ExpiryDate <= dto.ManufactureDate)
+                return BadRequest(new { message = "Expiry date must be after manufacture date" });
+
+            await _inventoryService.AddInventoryAsync(dto);
+            return Ok(new { message = "Inventory batch added successfully" });
+        }
+
+
+        [HttpGet("batches/{productId}")]
+        public async Task<IActionResult> GetBatchesByProduct(string productId)
+        {
+            var batches = await _inventoryService.GetBatchesByProduct(productId);
+
+            // ✅ ALWAYS return 200 OK for list endpoints
+            return Ok(batches);
+        }
+
+
+
     }
 
     public class StockInRequest

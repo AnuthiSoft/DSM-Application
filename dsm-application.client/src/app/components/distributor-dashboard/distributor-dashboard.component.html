@@ -279,11 +279,12 @@
     <app-products *ngIf="isActive('products')"></app-products>
     <!-- <app-warehouse *ngIf="isActive('warehouse')"></app-warehouse> -->
     <app-main-inventory *ngIf="isActive('main-inventory')"></app-main-inventory>
-    <!-- <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches> -->
+    <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches>
     <!-- Orders -->
     <!-- <app-order-list *ngIf="isActive('order-list')"></app-order-list> -->
     <app-distributor-orders *ngIf="isActive('order-list')"></app-distributor-orders>
     <app-distributor-connection-requests *ngIf="isActive('connection-requests')"></app-distributor-connection-requests>
+    <!-- <app-distributor-view *ngIf="isActive('distributor-view')"></app-distributor-view> -->
     <!-- <app-order-tracking *ngIf="isActive('order-tracking')"></app-order-tracking> -->
  
     <!-- Sales -->
@@ -313,58 +314,58 @@
     <!-- <app-reports *ngIf="isActive('reports')"></app-reports> -->
     <!-- LIVE TRACKING PAGE -->
     <!-- <div *ngIf="isActive('live-tracking')" style="padding: 15px;">
- 
+
     <h2 style="margin-bottom:15px; font-weight:bold;">📍 Live Employee Tracking</h2>
- 
+
     <div class="d-flex align-items-center mb-3">
- 
+
   <select [(ngModel)]="selectedEmployeeId" class="form-control w-auto me-2">
     <option value="">Select Employee</option>
     <option *ngFor="let e of employees" [value]="e.employeeId">
       {{ e.name }}
     </option>
   </select>
- 
+
   <button class="btn btn-success mx-2" (click)="startTrip()" [disabled]="!selectedEmployeeId">
     Start Trip
   </button>
- 
+
   <button class="btn btn-danger" (click)="stopTrip()" [disabled]="!selectedEmployeeId">
     Stop Trip
   </button>
- 
+
 </div> -->
- 
+
     <div *ngIf="isActive('live-tracking')" class="live-tracking-container">
- 
+
       <h2 class="tracking-title">📍 Live Employee Tracking</h2>
- 
+
       <div class="tracking-controls">
- 
+
         <select [(ngModel)]="selectedEmployeeId" class="employee-select">
           <option value="">Select Employee</option>
           <option *ngFor="let e of employees" [value]="e.employeeId">
             {{ e.name }}
           </option>
         </select>
- 
- 
+
+
         <button class="btn-start" (click)="startTrip()" [disabled]="!selectedEmployeeId">▶ Start Trip</button>
         <button class="btn-stop" (click)="stopTrip()" [disabled]="!selectedEmployeeId">⛔ Stop Trip</button>
- 
+
       </div>
- 
+
       <div class="tracking-map-card">
-        <!-- <div class="map-wrapper">
+        <div class="map-wrapper">
           <app-employee-tracking #trackingComp></app-employee-tracking>
- 
-        </div> -->
+
+        </div>
       </div>
     </div>
- 
- 
- 
- 
+
+
+
+
   </div>
 </div>
  

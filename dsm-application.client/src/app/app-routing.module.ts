@@ -36,10 +36,9 @@ import { FraudHistoryComponent } from './components/fraud-history/fraud-history.
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 
-// import { DashboardComponent } from './components/dashboard/dashboard.component';
+// //import { DashboardComponent } from './components/dashboard/dashboard.component';
 
-// import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
-// import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
+
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
 import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
 import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
@@ -87,8 +86,9 @@ const routes: Routes = [
   { path: 'employee-login', component: EmployeeLoginComponent },
   { path: 'employee-signup', component: EmployeeSignupComponent },
 
-  // { path: 'tasks', component: DashboardComponent },
+
   { path: 'admin-fruad-list', component: AdminFraudListComponent },
+
 
   {
     path: 'report-fraud/:targetType/:targetId',
@@ -107,9 +107,8 @@ const routes: Routes = [
   { path: 'cash-collection', component: CashCollectionComponent },
   { path: 'cash-summary', component: CashSummaryComponent },
   { path: 'collector-reports', component: CollectorReportsComponent },
-  { path: 'payment-summary', component: PaymentSummaryComponent },
-  { path: 'customer-payment-status', component: CustomerPaymentStatusComponent },
-
+  { path: ' payment-summary', component: PaymentSummaryComponent },
+  { path: ' customer-payment-status', component: CustomerPaymentStatusComponent },
 
   { path: 'payment-report', component: PaymentReportComponent },
   { path: 'pending-payments', component: PendingPaymentsComponent },
@@ -117,12 +116,11 @@ const routes: Routes = [
 
 
 
-  // { path: 'invoice-create', component: InvoiceCreateComponent },
-  // { path: 'invoice-detail/:id', component: InvoiceDetailComponent },
+ 
+ 
   { path: 'customers', component: CustomersListComponent },
-  
-  { path: 'distributor-orders', component: DistributorOrdersComponent },
-  
+
+ { path: 'distributor-orders', component: DistributorOrdersComponent },
 
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];

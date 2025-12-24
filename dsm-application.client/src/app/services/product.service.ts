@@ -88,6 +88,15 @@ private baseUrl = environment.apiUrl + '/products';
       params: { distributorId, color }
     });
   }
+
+  // 🔍 Justdial-style distributor search
+searchDistributorsByProduct(keyword: string) {
+  return this.api.get<any[]>(
+    `search/distributors`,
+    { params: { keyword } }
+  );
+}
+
   getMainCategories() {
   return this.api.get<any[]>('categories/main');
 }

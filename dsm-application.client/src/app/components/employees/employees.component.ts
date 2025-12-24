@@ -3,7 +3,7 @@ import { Employee, EmployeeService } from '../../services/employee.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-// import { InvoiceUploadService } from '../../services/invoice-upload.service';
+//import { InvoiceUploadService } from '../../services/invoice-upload.service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -36,7 +36,7 @@ export class EmployeesComponent {
     private auth: AuthService,
     private fb: FormBuilder, 
     private toastr: ToastrService,
-
+    //private uploadService:InvoiceUploadService,
     private http: HttpClient
   ) { }
 

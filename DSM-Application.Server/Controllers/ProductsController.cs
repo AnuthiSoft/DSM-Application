@@ -1,6 +1,5 @@
-﻿using System.Data;
-using System.Drawing;
-using DistributorManagementSystem.Server.Models;
+﻿using DistributorManagementSystem.Server.Models;
+using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
@@ -8,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System.Data;
+using System.Drawing;
 
 namespace DSM_Application.Server.Controllers
 {
@@ -27,6 +28,7 @@ namespace DSM_Application.Server.Controllers
         {
             _productService = productService;
             _categoryService = categoryService;
+            _blobService = blobService;
             _inventoryService = inventoryService;
             _blobService = blobService;
         }
@@ -114,6 +116,7 @@ namespace DSM_Application.Server.Controllers
                     imageUrls.Add(blobName);
                 }
             }
+
             var subCategory = await _categoryService.GetByIdAsync(dto.Category);
             decimal gst = subCategory?.GST ?? 0;
             var product = new Product
@@ -192,6 +195,7 @@ namespace DSM_Application.Server.Controllers
 
                 existing.ImageUrls = newUrls;
             }
+
             else
             {
                 // ⭐ 2. KEEP OLD IMAGES when user does not upload new ones

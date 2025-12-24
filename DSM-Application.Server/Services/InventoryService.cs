@@ -1,4 +1,5 @@
 ﻿using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
 using MongoDB.Driver;
 
 
@@ -9,6 +10,7 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<InventoryItem> _inventory;
         private readonly IMongoCollection<StockMovement> _movements;
         private readonly IMongoCollection<Product> _products;
+
 
         public InventoryService(IMongoDatabase db)
         {
@@ -159,6 +161,66 @@ namespace DSM_Application.Server.Services
                                    .ToListAsync();
         }
 
+
+        public async Task AddInventoryAsync(AddInventoryDto dto)
+        {
+            var item = new InventoryItem
+            {
+                ProductId = dto.ProductId,
+                //DistributorId = dto.DistributorId,   // include if needed
+                AvailableQuantity = dto.Quantity,
+                ManufactureDate = dto.ManufactureDate,
+                ExpiryDate = dto.ExpiryDate,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _inventory.InsertOneAsync(item);
+        }
+
+        public async Task<List<InventoryItem>> GetBatchesByProduct(string productId)
+        {
+            return await _inventory
+                .Find(i => i.ProductId == productId)
+                .SortBy(i => i.CreatedAt) // FIFO order
+                .ToListAsync();
+        }
+
+        public async Task DeductStockFIFO(string productId, int orderQty)
+        {
+            var batches = await _inventory
+                .Find(i => i.ProductId == productId
+                        && i.AvailableQuantity > 0
+                        && i.ExpiryDate > DateTime.UtcNow)
+                .SortBy(i => i.CreatedAt) // FIFO
+                .ToListAsync();
+
+            if (!batches.Any())
+                throw new Exception("No valid stock available");
+
+            int remaining = orderQty;
+
+            foreach (var batch in batches)
+            {
+                if (remaining <= 0)
+                    break;
+
+                if (batch.AvailableQuantity >= remaining)
+                {
+                    batch.AvailableQuantity -= remaining;
+                    remaining = 0;
+                }
+                else
+                {
+                    remaining -= batch.AvailableQuantity;
+                    batch.AvailableQuantity = 0;
+                }
+
+                await _inventory.ReplaceOneAsync(i => i.ProductId == batch.ProductId, batch);
+            }
+
+            if (remaining > 0)
+                throw new Exception("Insufficient stock");
+        }
 
     }
 }

@@ -116,4 +116,12 @@ body.dark, .dark-theme {
   top: 80px !important;   /* Move toast down */
   right: 12px !important;
 }
-
+.btn {
+    padding:6px 15px;
+    border-radius:6px;
+    font-size:14px;
+}
+select.form-control{
+    height:38px;
+    font-size:14px;
+}

@@ -25,5 +25,13 @@ export class InventoryService {
   getMovements(distributorId: string) {
     return this.api.get<any[]>(`${this.endpoint}/movements/${distributorId}`);
   }
-  
+
+  // 🔥 NEW FIFO / BATCH APIs
+  getBatches(productId: string) {
+    return this.api.get<any[]>(`${this.endpoint}/batches/${productId}`);
+  }
+
+  addInventoryBatch(data: any) {
+    return this.api.post(`${this.endpoint}/add`, data);
+  }
 }

@@ -28,5 +28,13 @@ namespace DistributorManagementSystem.Server.Models
         public int FraudCount { get; set; } = 0;
       
         public string? Status { get; set; } // Pending / Accepted / Rejected / null
+                                            // 👇 serves multiple pincodes
+
+        [BsonElement("ServicePincodes")]
+        public List<string> ServicePincodes { get; set; } = new();
+
+        public string City { get; set; }
+        public int YearsInBusiness { get; set; }
+        public double Rating { get; set; }
     }
 }

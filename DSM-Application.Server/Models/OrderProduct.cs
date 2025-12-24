@@ -9,9 +9,11 @@ namespace DSM_Application.Server.Models
             public string ProductName { get; set; }
             public decimal? Price { get; set; }  // ✅ Use decimal, replaces Price
 
-        [BsonElement("UnitPrice")]
-  
+
+        //[BsonSerializer(typeof(NullableDecimalSafeSerializer))]
+        [BsonElement("unitPrice")]
         public decimal? UnitPrice { get; set; }
+
 
         public int Quantity { get; set; }
 

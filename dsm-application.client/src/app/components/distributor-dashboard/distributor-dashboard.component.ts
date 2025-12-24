@@ -44,7 +44,7 @@ export class DistributorDashboardComponent  implements OnInit{
   // ==============================
   selectedEmployeeId: string = "";     // ⬅ added
   employees: any[] = [];               // ⬅ added
-  polylinePath: any[] =[];
+  //polylinePath: any[] =[];
 
   @ViewChild('trackingComp') trackingComp: any;
 
@@ -104,18 +104,26 @@ loadRetailerCount() {
   // ▶ START TRIP
   // ==============================
   startTrip() {
-  if (!this.selectedEmployeeId) return alert("Select employee first!");
+  if (!this.selectedEmployeeId) {
+    alert("Select employee first!");
+    return;
+  }
 
-  this.http.post(`http://192.168.1.21:5164/api/Delivery/start`,
-     { employeeId: this.selectedEmployeeId }
-  ).subscribe({
-      next: (res) => {
-        alert("Trip Started");
-      },
-      error: (err) => {
-        console.error(err);
-        alert("Failed to start trip");
+  this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
+    employeeId: this.selectedEmployeeId
+  }).subscribe({
+    next: () => {
+      alert("Trip Started");
+
+      // ✅ START MAP POLLING
+      if (this.trackingComp) {
+        this.trackingComp.startPolling();
       }
+    },
+    error: (err) => {
+      console.error(err);
+      alert(err.error || "Failed to start trip");
+    }
   });
 }
 
@@ -124,15 +132,32 @@ loadRetailerCount() {
   // ==============================
   // ⏹ STOP TRIP
   // ==============================
-  stopTrip(){
-    this.polylinePath = [];  // clear route instantly
+  stopTrip() {
+  if (!this.selectedEmployeeId) {
+    alert("Select employee first!");
+    return;
+  }
 
-  if(!this.selectedEmployeeId) return alert("Select employee first!");
+  this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
+    employeeId: this.selectedEmployeeId
+  }).subscribe({
+    next: () => {
+      alert("Trip Ended");
 
-  this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`,
-     { employeeId: this.selectedEmployeeId }
-  ).subscribe(()=> alert("Trip Ended"));
+      // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
+      if (this.trackingComp) {
+        this.trackingComp.removeEmployee(this.selectedEmployeeId);
+      }
+    },
+    error: err => {
+      console.error(err);
+      alert("Failed to stop trip");
+    }
+  });
 }
+
+
+
 
   isSubmenuOpen(menu: string): boolean {
     return this.openSubmenus.includes(menu);
@@ -289,17 +314,17 @@ saveExpectedDayss() {
   }
 
 
-onEmployeeSelect() {
-  console.log("Employee changed → Clearing map polyline");
+// onEmployeeSelect() {
+//   console.log("Employee changed → Clearing map polyline");
 
-  // Clear map route inside child component
-  if (this.trackingComp) {
-    this.trackingComp.clearPolyline();
-  }
+//   // Clear map route inside child component
+//   if (this.trackingComp) {
+//     this.trackingComp.clearPolyline();
+//   }
 
-  // Also clear local route
-  this.polylinePath = [];
-}
+//   // Also clear local route
+//   this.polylinePath = [];
+// }
 
 
 }

@@ -1,0 +1,32 @@
+<div class="search-box">
+  <input
+    type="text"
+    [(ngModel)]="keyword"
+    placeholder="Search products (e.g. cement, tiles)"
+  />
+  <button (click)="search()">Search</button>
+</div>
+
+<div *ngIf="loading">Searching...</div>
+
+<div *ngIf="!loading && distributors.length === 0">
+  <p>No distributors found</p>
+</div>
+
+<div class="results">
+  <div class="card" *ngFor="let d of distributors">
+    <h4>{{ d.companyName }}</h4>
+    <p>📍 {{ d.city }}</p>
+    <p>⭐ {{ d.rating }} | {{ d.yearsInBusiness }} years</p>
+
+    <button
+      *ngIf="d.canConnect"
+      (click)="connect(d.distributorId)">
+      Connect
+    </button>
+
+    <span *ngIf="!d.canConnect">
+      {{ d.status }}
+    </span>
+  </div>
+</div>

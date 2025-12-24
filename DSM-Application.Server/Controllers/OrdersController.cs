@@ -26,6 +26,9 @@ namespace DSM_Application.Server.Controllers
 
         private readonly DiscountService _discountService;
 
+        private readonly InventoryService _inventoryService;
+
+
         public OrdersController(MongoDbService mongo, DiscountService discountService)
 
         {
@@ -905,7 +908,15 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(history);
         }
-      
+
+
+        [HttpPost("place")]
+        public async Task<IActionResult> PlaceOrder(OrderRequestDto dto)
+        {
+            await _inventoryService.DeductStockFIFO(dto.ProductId, dto.Quantity);
+            return Ok("Order placed successfully");
+        }
+
 
 
     }

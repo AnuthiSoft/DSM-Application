@@ -6,7 +6,7 @@
         <i class="fas fa-building me-2"></i>BusinessPortal
       </a>
       <div class="navbar-nav ms-auto">
-        <a href="#" class="nav-link" >Return to Home</a>
+        <a href="#" class="nav-link">Return to Home</a>
       </div>
     </div>
   </nav>
@@ -29,22 +29,14 @@
               <form (ngSubmit)="onLogin()">
 
                 <div *ngIf="error" class="alert alert-danger text-center">
-  {{ error }}
-</div>
+                  {{ error }}
+                </div>
 
 
                 <div class="mb-3">
-                 <label for="email" class="form-label">Email or Phone Number</label>
-<input
-  [(ngModel)]="email"
-  name="email"
-  type="text"
-  class="form-control"
-  id="email"
-  placeholder="Enter your email or phone number"
-  required
-  (input)="restrictPhoneInput($event)" 
-/>
+                  <label for="email" class="form-label">Email or Phone Number</label>
+                  <input [(ngModel)]="email" name="email" type="text" class="form-control" id="email"
+                    placeholder="Enter your email or phone number" required (input)="restrictPhoneInput($event)" />
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>

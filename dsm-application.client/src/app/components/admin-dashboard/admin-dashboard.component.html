@@ -281,9 +281,9 @@
                     <label class="form-label">Company Name *</label>
                     <input type="text" class="form-control" formControlName="companyName"
                       [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
-                      Company name is required
+
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']">
+                      Name must start with a capital letter
                     </div>
                   </div>
                 </div>
@@ -292,9 +292,8 @@
                     <label class="form-label">Contact Name *</label>
                     <input type="text" class="form-control" formControlName="name"
                       [class.is-invalid]="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
-                      Contact name is required
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.errors?.['firstLetterCapital']">
+                      Name must start with a capital letter
                     </div>
                   </div>
                 </div>
@@ -321,10 +320,10 @@
                     <label class="form-label">Phone Number *</label>
                     <input type="text" class="form-control" formControlName="phoneNumber"
                       [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
-                      Phone number is required
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('phoneNumber')?.errors?.['pattern']">
+                      Phone number must be exactly 10 digits
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -335,10 +334,10 @@
                     <label class="form-label">GST Number *</label>
                     <input type="text" class="form-control" formControlName="gst"
                       [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
-                      GST number is required
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.errors?.['invalidGST']">
+                      Enter a valid 15-digit GST number
                     </div>
+
                   </div>
                 </div>
                 <div class="col-md-6">
@@ -402,16 +401,16 @@
                   </div>
                 </div>
               </div>
-                      <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="saveDistributor()">
-              {{ isEdit ? 'Update' : 'Save' }} Distributor
-            </button>
-          </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" (click)="saveDistributor()">
+                  {{ isEdit ? 'Update' : 'Save' }} Distributor
+                </button>
+              </div>
             </form>
 
           </div>
-  
+
         </div>
       </div>
     </div>

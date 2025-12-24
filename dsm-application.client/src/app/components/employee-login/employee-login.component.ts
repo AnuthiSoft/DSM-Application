@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
   selector: 'app-employee-login',
@@ -14,7 +15,10 @@ export class EmployeeLoginComponent {
       error = '';
       showPassword = false; 
     
-      constructor(private auth: AuthService, private router: Router) {}
+      constructor(private auth: AuthService, 
+        private router: Router,
+        private toastr: ToastrService,
+        private ngZone: NgZone) {}
   
        togglePassword(): void {
       this.showPassword = !this.showPassword;
@@ -77,7 +81,12 @@ export class EmployeeLoginComponent {
       } else if (role === 'Distributor') {
         this.router.navigate(['/distributor-dashboard']);
       } else if (role === 'Employee') {
-        this.router.navigate(['/employee-dashboard']);
+        this.toastr.success('Welcome Distributor', 'Login Successfull');
+          setTimeout(() => {
+            this.ngZone.run(() => {
+              this.router.navigate(['/employee-dashboard']);
+            });
+          }, 1000);
       } else {
         this.error = 'Unauthorized role';
       }

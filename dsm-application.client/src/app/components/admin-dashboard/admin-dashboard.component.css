@@ -196,3 +196,186 @@ footer {
   padding: 20px;
   margin-top: auto;
 }
+
+@media (max-width: 768px) {
+
+  .body {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+  }
+
+  .dashboard-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 64px;
+    min-width: 64px;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    z-index: 1000;
+  }
+
+  .sidebar-header h3 span,
+  .admin-badge,
+  .nav-item span {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 14px 0;
+  }
+
+  .dashboard-main {
+    margin-left: 64px;
+    width: calc(100vw - 64px);
+    max-width: none;
+    padding: 12px;
+  }
+
+  .dashboard-card .d-flex {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .dashboard-table {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 700px;
+  }
+}
+
+
+@media (max-width: 992px) {
+
+  /* Collapse sidebar */
+  .dashboard-sidebar {
+    width: 70px;
+  }
+
+  .sidebar-header h3 span,
+  .admin-badge,
+  .nav-item span {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+  }
+
+  .dashboard-main {
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    max-width: 95%;
+    margin: 10px auto;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Keep sidebar + content in a row */
+  .body {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+  }
+
+  /* Sidebar stays left */
+  .dashboard-sidebar {
+    width: 64px;
+    min-width: 64px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+  }
+
+  /* Hide text, icons only */
+  .sidebar-header h3 span,
+  .admin-badge,
+  .nav-item span {
+    display: none;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 14px 0;
+  }
+
+  /* 🔥 MAIN FIX */
+  .dashboard-main {
+    margin-left: 64px;
+    width: calc(100vw - 64px);   /* FULL WIDTH */
+    max-width: none;             /* 🔥 VERY IMPORTANT */
+    padding: 12px;
+  }
+
+  /* Header full width */
+  .dashboard-header {
+    width: 100%;
+    padding: 12px;
+  }
+
+  /* Cards full width */
+  .stats-card,
+  .dashboard-card {
+    width: 100%;
+    margin: 0 0 12px 0;
+  }
+
+  /* Grid → single column */
+  .row {
+    margin: 0;
+  }
+
+  .col-md-3 {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+
+  /* Tables scroll properly */
+  .dashboard-table {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 800px;
+  }
+}

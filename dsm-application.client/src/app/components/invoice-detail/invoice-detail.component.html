@@ -1,0 +1,123 @@
+<div class="main-box" *ngIf="!loading && invoice">
+
+  <h2 class="page-title">Invoice {{ invoice.invoiceNo }}</h2>
+
+  <div class="section-wrapper">
+    <h4>Invoice Info</h4>
+    <p><strong>Invoice No:</strong> {{ invoice.invoiceNo }}</p>
+    <p><strong>Date:</strong> {{ invoice.invoiceDate | date }}</p>
+    <p><strong>Customer:</strong> {{ invoice.customerId }}</p>
+    <p>
+      <strong>E-Way Bill No:</strong>
+      {{ invoice.ewayBillNo || 'Not provided' }}
+    </p>
+  </div>
+
+  <hr>
+
+  <!-- <div class="section-wrapper">
+    <h4>Items</h4>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>HSN</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Taxable</th>
+          <th>GST %</th>
+          <th>GST Amt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let it of invoice.items; let i = index">
+  <td>{{ i + 1 }}</td>
+  <td>{{ it.productName }}</td>
+  <td>{{ it.hsnCode }}</td>
+  <td>{{ it.quantity }}</td>
+  <td>{{ it.price }}</td>
+  <td>{{ it.taxableValue }}</td> -->
+
+  <!-- GST % FIXED -->
+  <!-- <td>{{ it.gstRate }}%</td> -->
+
+
+  <!-- GST Amount -->
+  <!-- <td>
+  {{ ((it.gstAmount / it.taxableValue) * 100) | number:'1.0-0' }}%
+</td> -->
+
+<!-- <td>{{ it.gstRate }}%</td>
+<td>{{ it.gstAmount }}</td>
+
+</tr>
+
+  <div class="section-wrapper">
+    <h4>Totals</h4>
+    <p><strong>Total Amount:</strong> {{ invoice.totalAmount }}</p>
+  </div>
+
+
+<div *ngIf="loading" class="loading">
+  Loading invoice...
+</div> -->
+
+<div class="section-wrapper">
+  <h4>Items</h4>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Product</th>
+        <th>HSN</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Taxable</th>
+        <th>GST %</th>
+        <th>GST Amt</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let it of invoice.items; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ it.productName }}</td>
+        <td>{{ it.hsnCode }}</td>
+        <td>{{ it.quantity }}</td>
+        <td>{{ it.price }}</td>
+        <td>{{ it.taxableValue }}</td>
+
+        <!-- GST % (REQUIRES backend GstRate field) -->
+        <td>{{ it.gstRate }}%</td>
+
+        <!-- GST Amount (₹) -->
+        <td>{{ it.gstAmount }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ✅ MOVE TOTALS OUTSIDE TABLE -->
+<div class="section-wrapper">
+  <h4>Totals</h4>
+  <p><strong>Total Amount:</strong> {{ invoice.totalAmount }}</p>
+</div>
+
+<!-- ❌ DO NOT PUT THIS INSIDE TABLE -->
+<div *ngIf="loading" class="loading">
+  Loading invoice...
+</div>
+
+<div class="actions mb-3">
+  <button class="btn btn-primary" (click)="downloadSimplePdf()">Download PDF</button>
+  <!-- <button class="btn btn-success" (click)="downloadA4Pdf()">Download A4 PDF</button> -->
+   <button class="btn btn-primary" (click)="generateProfessionalPdf()">
+  Download GST Invoice (A4)
+</button>
+
+  <button class="btn btn-info" (click)="shareWhatsApp()">Share on WhatsApp</button>
+  <button class="btn btn-warning" (click)="sendEmailToDriver()">Email to Driver</button>
+</div>
+

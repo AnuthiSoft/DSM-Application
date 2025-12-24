@@ -60,14 +60,21 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
 import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
-import { GoogleMapsModule } from '@angular/google-maps';
+// import { GoogleMapsModule } from '@angular/google-maps';
 import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
+import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
+import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
+import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
+import { EmployeeInvoicesComponent } from './components/employee-invoices/employee-invoices.component';
 
 
 
 
- 
+
+
 
 @NgModule({
   declarations: [
@@ -89,59 +96,112 @@ import { CustomerSearchComponent } from './components/customer-search/customer-s
     ProfileComponent,
     ThemeToggleComponent,
     ProductsByDistComponent,
-      OrderHistoryComponent,
-      DistributorOrdersComponent,
-      CustomerOrdersComponent,
-      EmployeeOrdersComponent,
-      CustDashboardComponent,
-      DistributorConnectionRequestsComponent,
-      TestComponent,
-      EmployeeLoginComponent,
-      EmployeeSignupComponent,
-      AddToCartComponent,
-      EmployeeProfileComponent,
-      
-      FraudReportComponent,
-  
-      AdminFraudListComponent,
-         
-          TruncatePipe,
-          ReviewSubmitComponent,
-          AdminReviewListComponent,
-       
-       
-                   FraudHistoryComponent,
-                   AdminReviewHistoryComponent,
-                   CashCollectionComponent,
-                   CashSummaryComponent,
-                   PaymentSummaryComponent,
-                   CollectorReportsComponent,
-                   CustomerPaymentStatusComponent,
-                   PaymentReportComponent,
-                   PendingPaymentsComponent,
-                   PendingHandoversComponent,
-                 
-                
-                   MainInventoryComponent,
-                   CustomersListComponent,
-                   EmployeeTrackingComponent,
-                   InventoryBatchesComponent,
-                   CustomerSearchComponent,
-                  
-                   
-                   
-                   
-                   
-                
-          
-      // AdminDistributorsComponent
-   
+    OrderHistoryComponent,
+    DistributorOrdersComponent,
+    CustomerOrdersComponent,
+    EmployeeOrdersComponent,
+    CustDashboardComponent,
+    DistributorConnectionRequestsComponent,
+    TestComponent,
+    EmployeeLoginComponent,
+    EmployeeSignupComponent,
+    AddToCartComponent,
+    EmployeeProfileComponent,
+
+    FraudReportComponent,
+
+    AdminFraudListComponent,
+
+    TruncatePipe,
+    ReviewSubmitComponent,
+    AdminReviewListComponent,
+
+
+    FraudHistoryComponent,
+    AdminReviewHistoryComponent,
+    CashCollectionComponent,
+    CashSummaryComponent,
+    PaymentSummaryComponent,
+    CollectorReportsComponent,
+    CustomerPaymentStatusComponent,
+    PaymentReportComponent,
+    PendingPaymentsComponent,
+    PendingHandoversComponent,
+
+
+    MainInventoryComponent,
+    CustomersListComponent,
+
+
+
+
+
+
+
+    DistributorViewComponent,
+    AddPaymentNoteComponent,
+    DashboardComponent,
+
+    InvoiceCreateComponent,
+    InvoiceDetailComponent,
+    EmployeeInvoicesComponent,
+
+
+    // AdminDistributorsComponent
+
+    OrderHistoryComponent,
+    DistributorOrdersComponent,
+    CustomerOrdersComponent,
+    EmployeeOrdersComponent,
+    CustDashboardComponent,
+    DistributorConnectionRequestsComponent,
+    TestComponent,
+    EmployeeLoginComponent,
+    EmployeeSignupComponent,
+    AddToCartComponent,
+    EmployeeProfileComponent,
+
+    FraudReportComponent,
+
+    AdminFraudListComponent,
+
+    TruncatePipe,
+    ReviewSubmitComponent,
+    AdminReviewListComponent,
+
+
+    FraudHistoryComponent,
+    AdminReviewHistoryComponent,
+    CashCollectionComponent,
+    CashSummaryComponent,
+    PaymentSummaryComponent,
+    CollectorReportsComponent,
+    CustomerPaymentStatusComponent,
+    PaymentReportComponent,
+    PendingPaymentsComponent,
+    PendingHandoversComponent,
+
+
+    MainInventoryComponent,
+    CustomersListComponent,
+    EmployeeTrackingComponent,
+    InventoryBatchesComponent,
+    CustomerSearchComponent,
+
+
+
+
+
+
+
+    // AdminDistributorsComponent
+
 
 
   ],
   imports: [
-    BrowserModule, HttpClientModule,
-    AppRoutingModule, FormsModule,    GoogleMapsModule, ReactiveFormsModule,BrowserAnimationsModule, ToastrModule.forRoot({
+    BrowserModule, HttpClientModule,  
+    AppRoutingModule, FormsModule,  ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
       timeOut: 2000,
       positionClass: 'toast-center-center',
       preventDuplicates: true,

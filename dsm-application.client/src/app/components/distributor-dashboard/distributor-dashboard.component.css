@@ -16,23 +16,39 @@
 }
 html[data-theme="dark"] {
   --primary-color: #5faee3;
-  --bg-color: #121212;
-  --text-color: #e0e0e0;
-  --card-bg: #1e1e1e;
-  --sidebar-bg: #1a1a1a;
-  --sidebar-text: #e0e0e0;
-  --border-color: #333333;
-  --hover-color: #2d2d2d;
-  --shadow: 0 4px 6px rgba(0,0,0,0.5);
+  --bg-color: #0f1218;      /* darker page background */
+  --text-color: #e5e7eb;
+  --card-bg: #1b2028;      /* lighter than bg */
+  --sidebar-bg: #141821;   /* distinct sidebar */
+  --sidebar-text: #e5e7eb;
+  --border-color: #2a2f38;
+  --hover-color: #1f2530;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
+
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   transition: background-color .3s, color .3s, border-color .3s;
 }
- 
-html, body {
+
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1300;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+html,
+body {
   width: 100%;
   height: 100%;
   background-color: var(--bg-color);
@@ -205,25 +221,34 @@ html, body {
   padding: 20px;
   box-shadow: var(--shadow);
 }
- 
-        .welcome-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
- 
-        .welcome-header h2 {
-            color: var(--text-color);
-            margin: 0;
-        }
- 
-        .date-display {
-            color: var(--text-color);
-            opacity: 0.7;
-        }
- 
-       .stats-grid {
+
+/* Dark mode dashboard cards */
+.dark-theme .dashboard-card,
+body[data-theme='dark'] .dashboard-card {
+  background: #1f1f1f !important;
+  color: #e5e7eb !important;
+  border: 1px solid #333;
+}
+
+
+.welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.welcome-header h2 {
+  color: var(--text-color);
+  margin: 0;
+}
+
+.date-display {
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 20px;
@@ -344,33 +369,43 @@ html, body {
 .settings-card .save-btn:hover {
   background: #2777c7;
 }
- 
- 
-/* Mobile Responsive */
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.9;
+  font-weight: 600;
+}
+
+.dashboard-sidebar {
+  border-right: 1px solid var(--border-color);
+}
+
+.dashboard-main {
+  background: var(--bg-color);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+}
 @media (max-width: 768px) {
   .settings-card {
     width: 100%;
   }
 }
- 
- 
-/* Responsive Design */
-@media (max-width: 992px) {
+
+@media (max-width: 992px) and (min-width: 769px) {
   .dashboard-sidebar {
     width: 70px;
     overflow: visible;
   }
- 
-  .sidebar-header h3 span,
-  .nav-item span,
-  .submenu-arrow {
-    display: none;
-  }
- 
-  .nav-item i {
-    margin-right: 0;
-  }
- 
+
   .dashboard-main {
     margin-left: 70px;
   }
@@ -674,4 +709,23 @@ html, body {
     height: 600px; /* You can change to 70vh if you prefer */
     border-radius: 8px;
     overflow: hidden;
+}
+
+/* 🔥 FIX: Chart titles not visible in dark mode */
+html[data-theme="dark"] .chart-card h3 {
+  color: #ffffff !important;
+  font-weight: 700;
+  opacity: 1 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Optional: add slight separation for charts */
+html[data-theme="dark"] .chart-card {
+  background: linear-gradient(180deg, #1e2430, #151a22);
+  border: 1px solid #2a2f38;
+}
+
+.chart-container { 
+  min-height: 100px; 
+  margin-top: 12px; 
 }

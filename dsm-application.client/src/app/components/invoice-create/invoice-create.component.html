@@ -1,0 +1,142 @@
+<div class="main-box">
+
+  <h2 class="page-title">Create Invoice</h2>
+
+  <form [formGroup]="invoiceForm" (ngSubmit)="submit()">
+
+    <!-- Invoice Header -->
+    <div class="section-wrapper">
+      <h4>Invoice Details</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <label>Invoice No</label>
+          <input type="text" class="form-control" formControlName="invoiceNo">
+        </div>
+        <div class="col-md-4">
+          <label>Invoice Date</label>
+          <input type="date" class="form-control" formControlName="invoiceDate">
+        </div>
+        <div class="col-md-4">
+          <label>Customer</label>
+          <input type="text" class="form-control" formControlName="customerId">
+          <!-- you can replace with customer dropdown later -->
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- E-Way Bill Section -->
+    <div class="section-wrapper">
+      <h4>E-Way Bill</h4>
+
+      <div class="row">
+        <div class="col-md-6">
+          <label>E-Way Bill No (from Govt Portal)</label>
+          <input type="text"
+                 class="form-control"
+                 formControlName="ewayBillNo"
+                 placeholder="Paste EWB No after generating on Govt portal">
+        </div>
+        <div class="col-md-6 d-flex align-items-end">
+          <button type="button"
+                  class="btn btn-secondary"
+                  (click)="openGovtEwayBillPortal()">
+            Open Govt E-Way Bill Portal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Items Section -->
+    <div class="section-wrapper">
+      <h4>Items</h4>
+
+      <div formArrayName="items">
+        <div *ngFor="let item of items.controls; let i = index"
+             [formGroupName]="i" class="item-row">
+
+          <div class="row mb-2">
+            <div class="col-md-3">
+              <label>Product</label>
+              <input type="text" class="form-control" formControlName="productName"
+                     (input)="recalcTotals()">
+            </div>
+            <div class="col-md-2">
+              <label>HSN</label>
+              <input type="text" class="form-control" formControlName="hsnCode">
+            </div>
+            <div class="col-md-2">
+              <label>Qty</label>
+              <input type="number" class="form-control" formControlName="quantity"
+                     (input)="recalcTotals()">
+            </div>
+            <div class="col-md-2">
+              <label>Price</label>
+              <input type="number" class="form-control" formControlName="price"
+                     (input)="recalcTotals()">
+            </div>
+            <div class="col-md-2">
+              <label>GST %</label>
+              <input type="number" class="form-control" formControlName="gstRate"
+                     (input)="recalcTotals()">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <button type="button"
+                      class="btn btn-danger btn-sm"
+                      *ngIf="items.length > 1"
+                      (click)="removeItem(i)">
+                X
+              </button>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label>Taxable Value</label>
+              <input type="number" class="form-control" formControlName="taxableValue" readonly>
+            </div>
+            <div class="col-md-3">
+              <label>GST Amount</label>
+              <input type="number" class="form-control" formControlName="gstAmount" readonly>
+            </div>
+          </div>
+
+          <hr *ngIf="i < items.length - 1">
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-outline-primary" (click)="addItem()">
+        + Add Item
+      </button>
+    </div>
+
+    <hr>
+
+    <!-- Total -->
+    <div class="section-wrapper">
+      <h4>Totals</h4>
+      <div class="row">
+        <div class="col-md-4">
+          <label>Total Invoice Amount</label>
+          <input type="number" class="form-control" formControlName="totalAmount" readonly>
+        </div>
+      </div>
+    </div>
+
+   
+    <div class="button-row mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="loading">
+        {{ loading ? 'Saving...' : 'Save Invoice' }}
+      </button>
+
+      
+
+      
+
+    </div>
+  </form>
+  
+</div>

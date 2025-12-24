@@ -130,22 +130,28 @@ resetPassword(email: string, otp: string, newPassword: string) {
   
   //Me added this
   employeeLogin(email: string, password: string): Observable<any> {
-  return this.api.post<any>(`auth/employee-login`, { email, password }).pipe(
+  return this.api.post<any>('auth/employee-login', { email, password }).pipe(
     tap(res => {
       const token = res.token;
       const refreshToken = res.refreshToken;
 
       if (token) {
         localStorage.setItem('token', token);
-        if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
+        }
 
         localStorage.setItem('role', res.role);
         localStorage.setItem('EmployeeId', res.employeeId);
         localStorage.setItem('DistributorId', res.distributorId);
+
+        // ✅ THIS LINE IS THE KEY
+        localStorage.setItem('designation', res.designation);
       }
     })
   );
 }
+
 
 }
 

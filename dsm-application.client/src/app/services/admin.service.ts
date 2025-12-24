@@ -69,7 +69,15 @@ export class AdminService {
     );
   }
 
-  deleteDistributor(id: string): Observable<any> {
-    return this.api.delete(`admin/distributors/${id}`, {});
-  }
+  // deleteDistributor(id: string): Observable<any> {
+  //   return this.api.delete(`admin/distributors/${id}`, {});
+  // }
+deleteDistributor(id: string): Observable<string> {
+  return this.api.delete<string>(
+    `admin/distributors/${id}`,
+    { responseType: 'text' }
+  );
+}
+
+
 }

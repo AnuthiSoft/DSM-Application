@@ -171,9 +171,38 @@
   color: gray;
 }
 
-.availability-actions button {
-  margin-right: 10px;
+/* Availability card safety */
+.dashboard-card {
+  overflow: hidden;
+  min-width: 400px;
+  min-height: 200px;
 }
+
+/* Buttons container */
+.availability-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buttons – PROPER SIZE */
+.availability-actions .btn {
+  flex: 1;                     /* equal width */
+  min-width: 128px;            /* 👈 minimum readable size */
+  height: 35px;                /* 👈 bigger height */
+  font-size: 15px;             /* 👈 bigger text */
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
 
 
 .stat-card {

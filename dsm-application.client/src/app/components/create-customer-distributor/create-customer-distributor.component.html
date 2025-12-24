@@ -45,6 +45,7 @@
       <span class="count-badge">{{ filteredCustomers.length }} customer(s)</span>
     </div>
 
+    <div class="table-container">
     <table class="directory-table" *ngIf="filteredCustomers.length > 0">
       <thead>
         <tr>
@@ -78,13 +79,12 @@
             </span>
           </td>
           <td>
-  {{ c.permanentEmployeeName || 'Not Assigned' }}
+            {{ c.permanentEmployeeName || 'Not Assigned' }}
 
-  <button class="btn btn-outline-success btn-sm ms-2"
-          (click)="openAssignModal(c.customerId!)">
-    <i class="fas fa-user-check"></i> Assign
-  </button>
-</td>
+            <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
+              <i class="fas fa-user-check"></i> Assign
+            </button>
+          </td>
 
           <td class="table-actions">
             <button class="btn btn-outline-primary btn-sm" (click)="editCustomer(c)">
@@ -98,8 +98,10 @@
 
 
         </tr>
+
       </tbody>
     </table>
+    </div>
 
     <div *ngIf="filteredCustomers.length === 0" class="empty-state">
       <i class="fas fa-users"></i>
@@ -112,7 +114,8 @@
     <div class="customer-modal">
 
       <div class="modal-header">
-        <h3><i class="fas fa-user-plus"></i> {{ isEdit ? 'Update Customer' : 'Add Customer' }}</h3>
+        <h3><i class="fas fa-user-plus"></i> 
+          {{ isEdit ? 'Update Customer' : 'Add Customer' }}</h3>
         <i class="fas fa-times close-icon" (click)="closeModal()"></i>
       </div>
 
@@ -121,12 +124,19 @@
 
           <div class="form-group">
             <label><i class="fas fa-user"></i> Full Name</label>
-            <input class="form-control" type="text" [(ngModel)]="customer.name" />
+            <input class="form-control" type="text" [(ngModel)]="customer.name" name="name" required #name="ngModel" />
+            <div class="text-danger" *ngIf="name.invalid && name.touched">
+              Name is required
+            </div>
           </div>
 
           <div class="form-group">
             <label><i class="fas fa-envelope"></i> Email Address</label>
-            <input class="form-control" type="email" [(ngModel)]="customer.email" />
+            <input class="form-control" type="email" [(ngModel)]="customer.email" name="email" required email
+              #email="ngModel" />
+            <div class="text-danger" *ngIf="email.invalid && email.touched">
+              Valid email is required
+            </div>
           </div>
 
           <div class="form-group">
@@ -134,14 +144,15 @@
               <i class="fas fa-phone"></i>
               Phone Number
             </label>
-            <input type="text" 
-                   class="form-control" 
-                   placeholder="Enter phone number" 
-                   [(ngModel)]="customer.phoneNumber" 
-                   name="phoneNumber"
-                   (input)="restrictPhoneInput($event)" 
-                   >
-                   
+            <!-- <input type="text" class="form-control" placeholder="Enter phone number" [(ngModel)]="customer.phoneNumber"
+              name="phoneNumber" (input)="restrictPhoneInput($event)"> -->
+            <input class="form-control" type="text" [(ngModel)]="customer.phoneNumber" name="phoneNumber" required
+              pattern="^[0-9]{10}$" (input)="restrictPhoneInput($event)" #phone="ngModel" />
+
+            <div class="text-danger" *ngIf="phone.invalid && phone.touched">
+              Phone number must be 10 digits
+            </div>
+
           </div>
 
           <div class="form-group full-width">
@@ -149,34 +160,38 @@
               <i class="fas fa-map-marker-alt"></i>
               Address
             </label>
-            <textarea class="form-control" 
-                      placeholder="Enter complete address" 
-                      [(ngModel)]="customer.address" 
-                      name="address" 
-                      rows="3"></textarea>
+            <!-- <textarea class="form-control" placeholder="Enter complete address" [(ngModel)]="customer.address"
+              name="address" rows="3"></textarea> -->
+            <textarea class="form-control" [(ngModel)]="customer.address" name="address" required rows="3"
+              #address="ngModel"></textarea>
+
+            <div class="text-danger" *ngIf="address.invalid && address.touched">
+              Address is required
+            </div>
+
           </div>
         </div>
 
-          <div class="form-group full-row">
-            <label><i class="fas fa-map-marker-alt"></i> Address</label>
-            <textarea class="form-control" [(ngModel)]="customer.address"></textarea>
-          </div>
+        <!-- <div class="form-group full-row">
+          <label><i class="fas fa-map-marker-alt"></i> Address</label>
+          <textarea class="form-control" [(ngModel)]="customer.address"></textarea>
+        </div> -->
 
-        </div>
-      </div>
+      
+    </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create Customer'
-          }}</button>
-      </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create Customer'
+        }}</button>
+    </div>
 
   </div>
 
 
 </div>
 <!-- Permanent Employee Modal -->
- <div class="modal-backdrop" *ngIf="showAssignModal">
+<div class="modal-backdrop" *ngIf="showAssignModal">
   <div class="customer-modal">
 
     <div class="modal-header">

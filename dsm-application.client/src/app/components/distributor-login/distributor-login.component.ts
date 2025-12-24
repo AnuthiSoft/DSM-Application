@@ -45,14 +45,19 @@ export class DistributorLoginComponent {
         localStorage.setItem('employeeId', res.employeeId);
 
         if (role === 'Admin') {
+          this.toastr.success('Welcome Admin', 'Login Successfull');
+          setTimeout(() => {
+            this.ngZone.run(() => {
           this.router.navigate(['/admin-dashboard']);
+          });
+          }, 1000);
         } else if (role === 'Distributor') {
           this.toastr.success('Welcome Distributor', 'Login Successfull');
           setTimeout(() => {
             this.ngZone.run(() => {
               this.router.navigate(['/distributor-dashboard']);
             });
-          }, 1500);
+          }, 1000);
         } else if (role === 'Employee') {
           this.router.navigate(['/employee-dashboard']);
         } else {

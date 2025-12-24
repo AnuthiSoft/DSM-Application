@@ -27,8 +27,9 @@ export class EmployeeDashboardComponent implements OnInit {
   recentOrders: DistributorOrder[] = [];
   showReasonInput = false;
   reasonText = "";
-  designation: string | null = null;
-  canSeeInvoices: boolean = false;
+  designation = '';
+  canSeeInvoices = false;
+  isCashCollector = false;
 
 
   // ✅ Fix: Define as Task[]
@@ -39,16 +40,39 @@ export class EmployeeDashboardComponent implements OnInit {
   ];
   employeeRole = '';
 
-  constructor(private orderService: OrderService, private router: Router, private employeeService: EmployeeService, private toastr: ToastrService) { }
+  constructor(private orderService: OrderService,
+    private router: Router,
+    private employeeService: EmployeeService,
+    private toastr: ToastrService) { }
 
-  ngOnInit(): void {
-    this.employeeName = localStorage.getItem('employeeName') || 'Employee';
-    this.employeeId = localStorage.getItem('employeeId') || '';
- this.employeeRole = (localStorage.getItem('employeeDesignation') || '').toLowerCase();
+  // ngOnInit(): void {
+  //   this.employeeName = localStorage.getItem('employeeName') || 'Employee';
+  //   this.employeeId = localStorage.getItem('employeeId') || '';
+  //   this.employeeRole = (localStorage.getItem('employeeDesignation') || '').toLowerCase();
+  //   // Read from the correct key and normalize text
+  //   this.designation = (localStorage.getItem("employeeDesignation") || "").trim().toLowerCase();
+  //   this.canSeeInvoices = this.designation.includes("delivery boy");
 
-    this.loadDashboardData();
-    this.loadAvailability();
-  }
+  //   this.loadDashboardData();
+  //   this.loadAvailability();
+  // 
+
+ngOnInit(): void {
+  this.employeeName = localStorage.getItem('employeeName') || 'Employee';
+  this.employeeId = localStorage.getItem('employeeId') || '';
+
+  this.designation = (localStorage.getItem('designation') || '')
+    .trim()
+    .toLowerCase();
+
+  // ✅ ROLE FLAGS
+  this.isCashCollector = this.designation.includes('cash');
+  this.canSeeInvoices = this.designation.includes('delivery');
+
+  this.loadDashboardData();
+  this.loadAvailability();
+}
+
 
   setActiveTab(tab: string) {
     console.log("Switched to tab:", tab);
@@ -90,7 +114,7 @@ export class EmployeeDashboardComponent implements OnInit {
         isAvailable: true,
         reason: ''
       }).subscribe(() => {
-        alert('Availability updated!');
+        this.toastr.success('Availability updated!');
         this.loadAvailability();
       });
     } else {
@@ -135,7 +159,7 @@ export class EmployeeDashboardComponent implements OnInit {
   }
   submitReason() {
     if (!this.reasonText.trim()) {
-      this.toastr.warning("Please enter a valid reason.","warning");
+      this.toastr.warning("Please enter a valid reason.", "warning");
       return;
     }
 
@@ -147,7 +171,7 @@ export class EmployeeDashboardComponent implements OnInit {
       isAvailable: false,
       reason: this.reasonText
     }).subscribe(() => {
-      this.toastr.success("Availability updated!","Success");
+      this.toastr.success("Availability updated!", "Success");
       this.showReasonInput = false;
       this.reasonText = "";
       this.loadAvailability();

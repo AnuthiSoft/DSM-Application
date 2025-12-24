@@ -174,9 +174,15 @@ namespace DistributorManagementSystem.Server.Controllers
         public async Task<IActionResult> DeleteDistributor(string id)
         {
             var result = await _db.Distributors.DeleteOneAsync(d => d.DistributorId == id);
-            if (result.DeletedCount == 0) return NotFound("Distributor not found");
-            return Ok("Distributor deleted successfully");
+
+            if (result.DeletedCount == 0)
+                return NotFound(new { message = "Distributor not found" });
+
+            return Ok(new { message = "Distributor deleted successfully" });
         }
+
+
+
         [HttpPut("distributors/{id}/set-premium")]
         public async Task<IActionResult> SetPremium(string id)
         {

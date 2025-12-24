@@ -1,0 +1,109 @@
+.main-box {
+  width: 90%;
+  margin: 20px auto;
+  padding: 25px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.section-wrapper h4 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #34495e;
+  margin-bottom: 10px;
+}
+
+.section-wrapper p {
+  font-size: 14px;
+  color: #555;
+  margin: 4px 0;
+}
+.section-wrapper strong {
+  color: #222;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table thead th {
+  background: #2980b9;
+  color: white;
+  padding: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.table tbody td {
+  padding: 10px;
+  font-size: 13px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.totals-box {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f4f6f7;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+}
+
+.totals-box p {
+  font-size: 16px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.btn {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  margin-right: 10px;
+}
+
+.btn-primary {
+  background: #2980b9;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1f6391;
+}
+
+.btn-success {
+  background: #27ae60;
+  border: none;
+}
+
+.btn-warning {
+  background: #f39c12;
+  border: none;
+}
+
+.btn-info {
+  background: #16a085;
+  border: none;
+}
+
+.loading {
+  text-align: center;
+  font-size: 18px;
+  color: #888;
+  padding: 20px;
+}

@@ -33,6 +33,9 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 
 builder.Services.AddSingleton<MongoDbService>();
 
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<EmailService>();
+
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var mongoService = sp.GetRequiredService<MongoDbService>();
@@ -45,6 +48,8 @@ builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<HsnService>();
 builder.Services.AddScoped<BlobService>();
 
+
+builder.Services.AddScoped<EwayBillService>();
 
 
 // JWT
@@ -79,8 +84,10 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "https://dsm-application.web.app",
-            "https://dsm-application.onrender.com",
-            "http://localhost:58555"
+   
+            "https://dsm-application.onrender.com" ,
+                "http://localhost:58555",
+                "http://localhost:4200"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -142,15 +149,14 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
-app.UseStaticFiles(); // Default wwwroot support
 
-// Serve /uploads from wwwroot/uploads
+app.UseStaticFiles(); // default wwwroot
+
+// ---------- Serve /uploads ----------
 var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads");
-
 if (!Directory.Exists(uploadsPath))
-{
     Directory.CreateDirectory(uploadsPath);
-}
+
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".avif"] = "image/avif";
 
@@ -159,6 +165,17 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(uploadsPath),
     RequestPath = "/uploads",
     ContentTypeProvider = provider
+});
+
+// ---------- Serve /ewaybills ----------
+var ewbPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "ewaybills");
+if (!Directory.Exists(ewbPath))
+    Directory.CreateDirectory(ewbPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(ewbPath),
+    RequestPath = "/ewaybills"
 });
 
 //var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -185,4 +202,7 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+
 app.Run();
+
+

@@ -3,7 +3,7 @@ import { Employee, EmployeeService } from '../../services/employee.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-//import { InvoiceUploadService } from '../../services/invoice-upload.service';
+import { InvoiceUploadService } from '../../services/invoice-upload.service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -34,9 +34,9 @@ export class EmployeesComponent {
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private toastr: ToastrService,
-    //private uploadService:InvoiceUploadService,
+    private uploadService: InvoiceUploadService,
     private http: HttpClient
   ) { }
 
@@ -46,12 +46,16 @@ export class EmployeesComponent {
 
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
-      email: [''],
-      phoneNumber: ['', Validators.required],
-      role: ['Employee', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', [
+        Validators.required,
+        Validators.pattern(/^[0-9]{10}$/)
+      ]],
+      role: ['', Validators.required],
       designation: ['', Validators.required],
-      isActive: [true],
+      isActive: [true, Validators.requiredTrue] // ensures value exists
     });
+
 
     this.loadEmployees();
   }
@@ -74,56 +78,56 @@ export class EmployeesComponent {
   }
 
   // ✅ Add / Update employee
-onSubmit() {
-  if (this.employeeForm.invalid) return;
- 
-  const emp: Employee = {
-    ...this.employeeForm.value,
-    distributorId: this.distributorId,
-    isRegistered: false
-  };
- 
-  if (this.isEdit && this.selectedEmployee?.employeeId) {
-    this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
-      next: (res: any) => {
-        this.toastr.success(res.message || 'Employee updated successfully!');
-        this.loadEmployees();
-        this.resetForm();
-        this.showModal = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Failed to update employee.');
-      }
-    });
-  } else {
-    this.employeeService.addEmployee(this.distributorId, emp).subscribe({
-      next: (res: any) => {
-        this.toastr.success(res.message || 'Employee added successfully!');
-        this.loadEmployees();
-        this.resetForm();
-        this.showModal = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error('Failed to add employee.');
-      }
-    });
+  onSubmit() {
+    if (this.employeeForm.invalid) return;
+
+    const emp: Employee = {
+      ...this.employeeForm.value,
+      distributorId: this.distributorId,
+      isRegistered: false
+    };
+
+    if (this.isEdit && this.selectedEmployee?.employeeId) {
+      this.employeeService.updateEmployee(this.distributorId, this.selectedEmployee.employeeId, emp).subscribe({
+        next: (res: any) => {
+          this.toastr.success(res.message || 'Employee updated successfully!');
+          this.loadEmployees();
+          this.resetForm();
+          this.showModal = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Failed to update employee.');
+        }
+      });
+    } else {
+      this.employeeService.addEmployee(this.distributorId, emp).subscribe({
+        next: (res: any) => {
+          this.toastr.success(res.message || 'Employee added successfully!');
+          this.loadEmployees();
+          this.resetForm();
+          this.showModal = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('Failed to add employee.');
+        }
+      });
+    }
   }
-}
 
 
 
-restrictPhoneInput(event: any) {
-  const input = event.target.value;
+  restrictPhoneInput(event: any) {
+    const input = event.target.value;
 
-  // Allow unlimited characters for email,
-  // but restrict pure numbers to max 10 digits.
-  if (/^[0-9]+$/.test(input)) {
-    event.target.value = input.substring(0, 10);
-    this.email = event.target.value;
+    // Allow unlimited characters for email,
+    // but restrict pure numbers to max 10 digits.
+    if (/^[0-9]+$/.test(input)) {
+      event.target.value = input.substring(0, 10);
+      this.email = event.target.value;
+    }
   }
-}
 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
@@ -216,41 +220,41 @@ restrictPhoneInput(event: any) {
   }
 
   openUploadModal(emp: any) {
-  this.selectedEmployee = emp;
-  this.showUploadModal = true;
-}
-
-closeUploadModal() {
-  this.showUploadModal = false;
-  this.selectedFile = null;
-}
-
-onFileSelected(event: any) {
-  this.selectedFile = event.target.files[0];
-}
-
-uploadInvoice() {
-  if (!this.selectedFile || !this.selectedEmployee) {
-    this.toastr.error("Please select a file.");
-    return;
+    this.selectedEmployee = emp;
+    this.showUploadModal = true;
   }
 
-  const formData = new FormData();
-  formData.append("file", this.selectedFile);
-  formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
+  closeUploadModal() {
+    this.showUploadModal = false;
+    this.selectedFile = null;
+  }
 
-  this.http.post("http://localhost:5164/api/invoice-upload/upload", formData)
-    .subscribe({
-      next: (res: any) => {
-        this.toastr.success("Invoice uploaded successfully!");
-        this.closeUploadModal();
-      },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error("Upload failed!");
-      }
-    });
-}
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  uploadInvoice() {
+    if (!this.selectedFile || !this.selectedEmployee) {
+      this.toastr.error("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", this.selectedFile);
+    formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
+
+    this.http.post("http://localhost:5164/api/invoice-upload/upload", formData)
+      .subscribe({
+        next: (res: any) => {
+          this.toastr.success("Invoice uploaded successfully!");
+          this.closeUploadModal();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error("Upload failed!");
+        }
+      });
+  }
 
 
 }

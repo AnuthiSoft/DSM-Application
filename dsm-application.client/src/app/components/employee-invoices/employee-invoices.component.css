@@ -1,0 +1,43 @@
+/* MAIN WHITE BOX */
+.main-box {
+  width: 0%;
+  margin: 25px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e5e5;
+}
+
+/* WRAPPER → aligns the white box nicely */
+.invoice-wrapper {
+  display: flex;
+  justify-content: center;   /* centers box horizontally */
+  padding: 40px;
+}
+
+/* MAIN WHITE BOX */
+.invoice-box {
+  background: #ffffff;
+  width: 85%;                 /* big but not full width */
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* EACH INVOICE ENTRY */
+.invoice-item {
+  margin-top: 20px;
+}
+
+/* PDF LINK */
+.pdf-link {
+  color: #0d6efd;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pdf-link:hover {
+  text-decoration: underline;
+}

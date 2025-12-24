@@ -5,12 +5,45 @@ import { AuthService } from '../../services/auth.service';
 import { CategoryService } from '../../services/category.service';
 import { ToastrService } from 'ngx-toastr';
 import * as bootstrap from 'bootstrap';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+
+
+// Capital letter validator
+export function firstLetterCapital(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  return control.value[0] === control.value[0].toUpperCase()
+    ? null
+    : { firstLetterCapital: true };
+}
+
+// GST Validator (India – 15 chars)
+export function gstValidator(control: AbstractControl): ValidationErrors | null {
+  const gstRegex =
+    /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  return gstRegex.test(control.value) ? null : { invalidGST: true };
+}
+
+export function firstLetterCapitalValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null;
+
+  const firstChar = value.charAt(0);
+  return firstChar === firstChar.toUpperCase()
+    ? null
+    : { firstLetterCapital: true };
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
+
+
+
 export class AdminDashboardComponent implements OnInit {
   // ⭐ Required for tab switching
   activeTab: string = 'dashboard';
@@ -46,10 +79,12 @@ export class AdminDashboardComponent implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private categoryService: CategoryService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    
   ) { }
 
 
+  
   ngOnInit(): void {
     this.loadDistributors();
     this.initForm();
@@ -111,20 +146,60 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   initForm(): void {
-    this.distributorForm = this.fb.group({
-      distributorId: [''],
-      companyName: ['', Validators.required],
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required, Validators.pattern(/^[0-9]{10}$/)],
-      gst: ['', Validators.required],
-      address: ['', Validators.required],
-      isPremium: [''],
-      isActive: [true],
-      // categories: [[]], // ✅ new field
-      // customCategory: [''] // ✅ new form control
-    });
-  }
+  this.distributorForm = this.fb.group({
+    distributorId: [''],
+
+    companyName: [
+    '',
+    [
+      Validators.required,
+      firstLetterCapitalValidator   // 👈 ADD HERE
+    ]
+  ],
+
+    name: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(3),
+        firstLetterCapital   // ✅ Capital letter check
+      ]
+    ],
+
+    email: [
+      '',
+      [Validators.required, Validators.email]
+    ],
+
+    phoneNumber: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern(/^[0-9]{10}$/) // ✅ 10 digits only
+      ]
+    ],
+
+    gst: [
+      '',
+      [
+        Validators.required,
+        gstValidator // ✅ Proper GST validation
+      ]
+    ],
+
+    address: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(10) // ✅ Address length
+      ]
+    ],
+
+    isPremium: [false],
+    isActive: [true]
+  });
+}
+
 
 
 
@@ -188,67 +263,80 @@ export class AdminDashboardComponent implements OnInit {
     // delete dist.customCategory; // ✅ remove before sending to API
 
     if (this.isEdit && this.selectedDistributor) {
-      this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist).subscribe({
-        next: res => {
-          this.message = res;
+      this.adminService.updateDistributor(this.selectedDistributor!.distributorId, dist).subscribe({
+        next: () => {
+          this.toastr.success('Distributor updated successfully', 'Updated');
           this.loadDistributors();
           this.distributorModal?.hide();
         },
-        error: err => {
-          console.error('Update error:', err.error);
-          alert('Update failed: ' + JSON.stringify(err.error.errors));
+        error: () => {
+          this.toastr.error('Update failed', 'Error');
         }
       });
+
     } else {
       this.adminService.addDistributor(dist).subscribe({
-        next: res => {
-          this.message = res;
+        next: () => {
+          this.toastr.success('Distributor added successfully', 'Success');
           this.loadDistributors();
           this.distributorModal?.hide();
         },
-        error: err => {
-          console.error('Add error:', err.error);
-          alert('Add failed: ' + JSON.stringify(err.error.errors));
+        error: () => {
+          this.toastr.error('Failed to add distributor', 'Error');
         }
       });
     }
   }
 
   deactivate(id: string): void {
-    this.adminService.deactivateDistributor(id).subscribe({
-      next: (res: any) => {
-        console.log("deactivate" + res)
-        this.message = typeof res === 'string' ? res : 'Distributor deactivated successfully';
-        this.loadDistributors();
-      },
-      error: err => console.error(err)
-    });
-  }
+  this.adminService.deactivateDistributor(id).subscribe({
+    next: () => {
+      this.toastr.warning('Distributor deactivated', 'Status');
+      this.loadDistributors();
+    },
+    error: () => this.toastr.error('Action failed', 'Error')
+  });
+}
 
   reactivate(id: string): void {
-    this.adminService.reactivateDistributor(id).subscribe({
-      next: (res: any) => {
-        console.log("activate" + res)
-        this.message = typeof res === 'string' ? res : 'Distributor reactivated successfully';
-        this.loadDistributors();
-      },
-      error: err => console.error(err)
-    });
-  }
+  this.adminService.reactivateDistributor(id).subscribe({
+    next: () => {
+      this.toastr.success('Distributor reactivated', 'Status');
+      this.loadDistributors();
+    },
+    error: () => this.toastr.error('Action failed', 'Error')
+  });
+}
+
 
   delete(id: string): void {
-    if (confirm('Are you sure to delete?')) {
-      this.adminService.deleteDistributor(id).subscribe(() => {
-        this.message = 'Distributor deleted successfully';
-        this.loadDistributors();
-      });
+  if (!confirm('Are you sure to delete?')) return;
+
+  this.adminService.deleteDistributor(id).subscribe({
+    next: (msg: string) => {
+      this.toastr.success(msg, 'Success');
+      this.loadDistributors();
+    },
+    error: err => {
+      const message =
+        typeof err.error === 'string'
+          ? err.error
+          : 'Failed to delete distributor';
+
+      this.toastr.error(message, 'Error');
     }
-  }
+  });
+}
+
+
+
 
   logout(): void {
-    this.auth.logout();
-    window.location.href = "/distributor-login";
-  }
+  this.auth.logout();
+  this.toastr.info('Logged out successfully');
+  window.location.href = '/distributor-login';
+}
+
 
   applyFilter(): void {
     if (!this.searchText) {

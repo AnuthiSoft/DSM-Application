@@ -31,7 +31,9 @@
     <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
       style="width: 180px;">
       <option value="">All Distributors</option>
-      <option *ngFor="let d of distributors" [value]="d">{{ d }}</option>
+<option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
+  {{ d.name }}
+</option>
     </select>
 
 
@@ -56,7 +58,7 @@
     <span>Loading products...</span>
   </div>
 
-  <div *ngIf="!loading && products.length === 0" class="no-products">
+  <div *ngIf="!loading && filterProducts.length === 0" class="no-products">
     <i class="fas fa-box-open"></i>
     <h3>No Products Available</h3>
     <p>There are no products available from this distributor at the moment.</p>

@@ -8,8 +8,10 @@
       </button>
     </div>
 
+
     <!-- 🔍 UNIFIED SEARCH SECTION -->
     <div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
+
 
       <!-- Search Box -->
       <div class="search-box">
@@ -67,7 +69,8 @@
        style="max-height: 180px; object-fit: contain;" /> -->
 
             <!-- If product has images: show image slider -->
-            <div *ngIf="product.imageUrls && product.imageUrls.length > 0">
+            <div *ngIf="product.imageUrls && product.imageUrls.length > 0" id="carousel-{{ product.productId }}"
+              class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000" data-bs-pause="false">
 
               <div id="carousel-{{ product.productId }}" class="carousel slide">
                 <div class="carousel-inner">
@@ -115,18 +118,18 @@
 
           <div class="product-info p-3">
 
-            <!-- Product Name & Price -->
-            <h5 class="product-title">{{ product.productName }}</h5>
-            <div class="product-price text-primary fw-bold">
-              {{ product.price | currency:'INR':'symbol' }}
-            </div>
+        <!-- Product Name & Price -->
+        <h5 class="product-title">{{ product.productName }}</h5>
+        <div class="product-price text-primary fw-bold">
+          {{ product.price | currency:'INR':'symbol' }}
+        </div>
 
-            <!-- Quick badges -->
-            <div class="d-flex gap-2 mb-2 flex-wrap">
-              <!-- <span class="badge bg-light text-dark border">{{ product.category }}</span> -->
-              <span class="badge bg-secondary text-light">{{ product.measure }}</span>
-              <span class="badge bg-info text-light">{{ product.brand || 'No Brand' }}</span>
-            </div>
+        <!-- Quick badges -->
+        <div class="d-flex gap-2 mb-2 flex-wrap">
+          <!-- <span class="badge bg-light text-dark border">{{ product.category }}</span> -->
+          <span class="badge bg-secondary text-light">{{ product.measure }}</span>
+          <span class="badge bg-info text-light">{{ product.brand || 'No Brand' }}</span>
+        </div>
 
             <!-- Minimal Product Details -->
             <div class="small text-muted">
@@ -146,7 +149,7 @@
 
             </div>
 
-          </div>
+      </div>
 
           <!-- Buttons -->
           <div class="product-actions">
@@ -156,29 +159,25 @@
               <i class="fas fa-edit me-1"></i>Edit
             </button>
 
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product.productId!)">
-              <i class="fas fa-trash me-1"></i>Delete
-            </button>
-            <button class="btn btn-sm btn-outline-success" *ngIf="product.productId"
-              (click)="increaseStock(product.productId)">
-              <i class="fas fa-plus"></i> Add Stock
-            </button>
-          </div>
-
-        </div>
+        <button class="btn btn-sm btn-outline-danger" (click)="deleteProduct(product.productId!)">
+          <i class="fas fa-trash me-1"></i>Delete
+        </button>
       </div>
-    </div>
 
-    <!-- 🪟 PRODUCT MODAL -->
-    <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              {{ isEdit ? "Edit Product" : "Add New Product" }}
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🪟 PRODUCT MODAL -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ isEdit ? "Edit Product" : "Add New Product" }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
 
           <div class="modal-body">
             <form [formGroup]="productForm">
@@ -328,12 +327,12 @@
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">Product Image</label>
-                <!-- <input type="file" class="form-control" (change)="onFileSelected($event)" #fileInput /> -->
-                <input type="file" multiple (change)="onFileSelected($event)" class="form-control" />
+          <div class="mb-3">
+            <label class="form-label">Product Image</label>
+            <!-- <input type="file" class="form-control" (change)="onFileSelected($event)" #fileInput /> -->
+            <input type="file" multiple (change)="onFileSelected($event)" class="form-control" />
 
-                <!-- <div *ngIf="previewUrl" class="mt-3 text-center">
+            <!-- <div *ngIf="previewUrl" class="mt-3 text-center">
                   <img [src]="previewUrl" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
                 </div> -->
 
@@ -364,17 +363,17 @@
             </form>
           </div>
 
-          <div class="modal-footer">
+      <div class="modal-footer">
 
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button type="button" class="btn btn-primary" (click)="submitForm()">
-              {{ isEdit ? "Update" : "Save" }} Product
-            </button>
-          </div>
-        </div>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="submitForm()">
+          {{ isEdit ? "Update" : "Save" }} Product
+        </button>
       </div>
     </div>
   </div>
+</div>
+</div>
 </div>

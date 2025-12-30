@@ -145,9 +145,12 @@
               <div class="action-buttons">
 
                 <!-- Pending -->
-                <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm" (click)="confirmOrder(o)">
-                  <i class="fas fa-check"></i> Confirm
-                </button>
+                <button *ngIf="o.status === 'Pending'" 
+        class="btn btn-success btn-sm" 
+        (click)="confirmOrderWithCheck(o)">
+  Confirm
+</button>
+
 
                 <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm" (click)="rejectOrder(o)">
                   <i class="fas fa-times"></i> Reject
@@ -276,9 +279,11 @@
 
         <select class="form-select" [(ngModel)]="tempEmployeeId">
           <option value="">-- Select Temp Employee --</option>
-          <option *ngFor="let e of employees" [value]="e.employeeId">
-            {{ e.name }}
-          </option>
+         <option *ngFor="let e of getTempEmployees(selectedOrder)"
+        [value]="e.employeeId">
+  {{ e.name }}
+</option>
+
         </select>
       </div>
 

@@ -127,6 +127,46 @@
     </div>
   </div>
 
+
+  <!-- 🔐 Change Password Modal -->
+<div class="modal-backdrop-custom" *ngIf="showChangePasswordModal">
+  <div class="change-password-card">
+
+    <div class="login-header">
+      <h4>Set Your New Password</h4>
+      <p class="mb-0">Please update your password to continue</p>
+    </div>
+
+    <div class="login-body">
+
+      <input
+        type="password"
+        class="form-control"
+        placeholder="New Password"
+        [(ngModel)]="newPassword"
+      />
+
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Confirm Password"
+        [(ngModel)]="confirmPassword"
+      />
+
+      <button class="btn btn-login" (click)="submitNewPassword()">
+        Update Password
+      </button>
+
+      <p class="text-danger mt-2" *ngIf="passwordError">
+        {{ passwordError }}
+      </p>
+
+    </div>
+
+  </div>
+</div>
+
+
   <!-- Footer -->
   <footer>
     <div class="container">

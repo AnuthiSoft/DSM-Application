@@ -47,12 +47,62 @@ export function firstLetterCapitalValidator(
 export class AdminDashboardComponent implements OnInit {
   // ⭐ Required for tab switching
   activeTab: string = 'dashboard';
-  categories: any[] = [];
-  pendingCategories: any[] = [];
+otpSent = false;
+otpVerified = false;
+otpFailed = false;
+otpCode = "";
+phoneVerifiedUI = false;
+
+categories: any[] = [];
+pendingCategories: any[] = [];
+
+
+
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+
+  sendOtp() {
+  const phone = this.distributorForm.get("phoneNumber")!.value;
+
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.otpSent = true;
+      this.otpFailed = false;
+
+      // ⭐ SHOW THE OTP FROM BACKEND
+      alert("OTP sent! Your OTP is: " + res.otp);
+
+      console.log("OTP from backend:", res.otp);
+    },
+    error: () => alert("Failed to send OTP")
+  });
+}
+
+
+  // ------------------- OTP VERIFY -------------------
+ verifyOtp() {
+  const phone = this.distributorForm.get("phoneNumber")!.value;
+
+  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+    next: () => {
+      this.otpVerified = true;
+      this.otpFailed = false;
+      this.phoneVerifiedUI = true; // ⭐ Show tick mark
+      this.otpSent = false;        // ⭐ Hide OTP inputs
+      alert("Phone verified successfully!");
+    },
+    error: () => {
+      this.otpVerified = false;
+      this.otpFailed = true;
+      alert("Invalid or expired OTP");
+    }
+  });
+}
+
+  
+  
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;
@@ -231,6 +281,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   openAdd(): void {
+
+    // this.otpSent = false;
+    // this.otpVerified = false;
+    // this.otpFailed = false;
+    // this.otpCode = "";
     this.isEdit = false;
     this.selectedDistributor = null;
     this.distributorForm.reset({ isActive: true });
@@ -327,10 +382,23 @@ export class AdminDashboardComponent implements OnInit {
       return;
     }
 
-    const dist = { ...this.distributorForm.value };
+  const dist = { ...this.distributorForm.value };
 
-    // 🇮🇳 Auto add +91
-    dist.phoneNumber = '+91' + dist.phoneNumber;
+  // ✅ Normalize pincodes to array
+if (typeof dist.pincodes === 'string') {
+  dist.pincodes = dist.pincodes
+    .split(',')
+    .map((p: string) => p.trim());
+}
+
+
+  if (dist.categories.includes('Others') && dist.customCategory.trim()) {
+    dist.categories = dist.categories
+      .filter((c: string) => c !== 'Others')
+      .concat(dist.customCategory.trim());
+  }
+
+  delete dist.customCategory;
 
     if (this.isEdit && this.selectedDistributor) {
       this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist)

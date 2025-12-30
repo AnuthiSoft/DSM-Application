@@ -10,6 +10,7 @@ import { DistributorService } from '../../services/distributor.service';
 import { HostListener } from '@angular/core';
 import { Product } from '../../models/products.model';
 import { ToastrService } from 'ngx-toastr';
+import { CustomerApiService, DistributorDto } from '../../services/customer-api.service';
 
 interface Distributor {
   distributorId: string;
@@ -48,6 +49,10 @@ interface DashboardResponse {
 })
 export class AddToCartComponent implements OnInit, OnChanges {
 
+  popupMode: 'connect' | 'pending' = 'connect';
+  popupMessage: string = '';
+
+  isPlacingOrder = false;
 
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
@@ -90,6 +95,9 @@ export class AddToCartComponent implements OnInit, OnChanges {
   error: any;
   @Input() selectedCartProduct: Product | null = null;
 
+  showConnectionPopup = false;
+  notConnectedDistributors: DistributorDto[] = [];
+  connectedDistributorIds: string[] = [];
 
   showCustomerDropdown = false;
 
@@ -114,6 +122,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
     private customerService: CustomerService,  // 👈 ADD THIS
     private http: HttpClient,
     private distributorService: DistributorService,
+    private customerApiService: CustomerApiService,
     private elRef: ElementRef,  // << add this
     private toastr: ToastrService
 
@@ -241,6 +250,8 @@ export class AddToCartComponent implements OnInit, OnChanges {
     }
 
 
+
+
     //  this.cart = JSON.parse(localStorage.getItem('cart') ?? '[]');
     // existing code
     if (this.products && this.products.length > 0) {
@@ -262,6 +273,135 @@ export class AddToCartComponent implements OnInit, OnChanges {
 
   }
 
+
+
+  connectDistributorFromCart(distributorId: string) {
+    const body = {
+      customerId: this.customerId,
+      distributorId: distributorId
+    };
+
+    this.http
+      .post<{ message: string; status: string }>(
+        'http://localhost:5164/api/customers/connect-distributor',
+        body
+      )
+      .subscribe({
+        next: (res) => {
+          alert(res.message);
+
+          // remove distributor from pending list
+          this.notConnectedDistributors =
+            this.notConnectedDistributors.filter(
+              d => d.distributorId !== distributorId
+            );
+
+          // close popup if all handled
+          if (this.notConnectedDistributors.length === 0) {
+            this.showConnectionPopup = false;
+          }
+        },
+        error: (err) => {
+          alert(err.error || 'Failed to send connection request');
+        }
+      });
+  }
+
+
+  connectAllDistributorsFromCart() {
+    if (!this.notConnectedDistributors.length) return;
+
+    const requests = this.notConnectedDistributors.map(d => {
+      const body = {
+        customerId: this.customerId,
+        distributorId: d.distributorId
+      };
+
+      return this.http.post(
+        'http://localhost:5164/api/customers/connect-distributor',
+        body
+      );
+    });
+
+    // Send all requests
+    Promise.all(requests.map(req => req.toPromise()))
+      .then(() => {
+        alert('Connection request sent to all distributors');
+
+        // Clear list & close popup
+        this.notConnectedDistributors = [];
+        this.showConnectionPopup = false;
+      })
+      .catch(() => {
+        alert('Failed to send some connection requests');
+      });
+  }
+
+  checkDistributorConnections(): Promise<boolean> {
+    return new Promise((resolve) => {
+
+      this.customerApiService
+        .getConnectedDistributors(this.customerId)
+        .subscribe({
+          next: (response: any) => {
+
+            const acceptedIds: string[] = response.acceptedDistributors || [];
+            const pendingIds: string[] = response.pendingDistributors || [];
+
+            const pending: DistributorDto[] = [];
+            const unconnected: DistributorDto[] = [];
+
+            this.orderProducts.forEach(item => {
+              const distId = item.product.distributorId;
+              const companyName = item.product.distributorName;
+
+              // ✅ Accepted → OK
+              if (acceptedIds.includes(distId)) return;
+
+              // 🟠 Pending → BLOCK
+              // 🔴 PENDING
+              this.popupMode = 'pending';
+              this.popupMessage =
+                'Connection request is pending. Order cannot be placed until approved.';
+              this.showConnectionPopup = true;
+
+
+              // 🔴 Not connected → BLOCK
+              unconnected.push({ distributorId: distId, companyName });
+            });
+
+            // 🔴 Priority 1: Pending popup
+            if (pending.length > 0) {
+              this.notConnectedDistributors = pending;
+              this.popupMode = 'pending';
+              this.popupMessage =
+                'Connection request is pending. Order cannot be placed until approved.';
+              this.showConnectionPopup = true;
+              resolve(false);
+              return;
+            }
+
+            // 🔴 Priority 2: Connect popup
+            if (unconnected.length > 0) {
+              this.notConnectedDistributors = unconnected;
+              this.popupMode = 'connect';
+              this.popupMessage =
+                'Please connect to the following distributors before placing the order.';
+              this.showConnectionPopup = true;
+              resolve(false);
+              return;
+            }
+
+            // ✅ All distributors accepted
+            resolve(true);
+          },
+          error: () => {
+            alert('Server not reachable');
+            resolve(false);
+          }
+        });
+    });
+  }
 
 
 
@@ -716,149 +856,88 @@ export class AddToCartComponent implements OnInit, OnChanges {
   // ---------------------------------------------------
   //  RESET ORDER
   // ---------------------------------------------------
-  // resetOrder() {
-  //   this.cart = [];
-  //   this.orderProducts = [];
-  //   localStorage.removeItem('cart');
-  //   this.cartUpdated.emit([]);
-  // }
+  resetOrder() {
+    this.cart = [];
+    this.orderProducts = [];
+    localStorage.removeItem('cart');
+    this.cartUpdated.emit([]);
+  }
 
   // ---------------------------------------------------
   //  PLACE ORDER
   // ---------------------------------------------------
   // placeOrder() {
-  //   if (!this.customerId) return alert('Please login first');
-  //   if (this.orderProducts.length === 0) return alert('Cart is empty');
-
-  //   const groupedOrders: { [key: string]: any[] } = {};
-
-  //   this.orderProducts.forEach(item => {
-  //     const distId = item.product.distributorId;
-
-  //     if (!groupedOrders[distId]) {
-  //       groupedOrders[distId] = [];
-  //     }
-
-  //     groupedOrders[distId].push(item);
-  //   });
-
-  //   const distributorIds = Object.keys(groupedOrders);
-
-  //   distributorIds.forEach(distId => {
-  //     const items = groupedOrders[distId];
-
-  //     // ⭐ Compute expected delivery PER distributor
-  //     const leadTime = this.getDistLeadTime(distId);
-
-  //     const expectedDeliveryDate = (() => {
-  //       const d = new Date(this.orderedDate);
-  //       d.setDate(d.getDate() + leadTime);
-  //       return d.toISOString().split("T")[0];
-  //     })();
-
-  //     const payload = {
-  //       customerId: this.customerId,
-  //       distributorId: distId,
-  //       products: items.map(c => ({
-  //         productId: c.product.productId,
-  //         productName: c.product.productName,
-  //         price: c.product.price,
-  //         quantity: c.quantity,
-  //         distributorName: c.distributorName,
-  //         distributorId: c.product.distributorId,  // must NOT be null
-
-  //         deliveryEta: c.deliveryEta,
-  //         leadTime: c.leadTimeValue
-  //       })),
-
-  //       // ⭐ FIXED — Now correct per distributor
-  //       expectedDeliveryDate: expectedDeliveryDate,
-
-  //       orderedDate: this.orderedDate
-  //     };
-
-  //     this.orderService.placeOrder(payload).subscribe({
-  //       next: () => console.log(`Order placed for Distributor ${distId}`),
-  //       error: err => console.error(`Failed for Distributor ${distId}`, err)
-  //     });
-  //   });
 
 
+  async placeOrder() {
 
-  //   this.toastr.success(
-  //     'Orders placed successfully for all distributors!',
-  //     'Order Placed'
-  //   );
+    if (this.isPlacingOrder) return;   // 🔒 HARD STOP
+    this.isPlacingOrder = true;
 
-  //   // give toastr time to show
-  //   setTimeout(() => {
-  //     this.resetOrder();
-  //     this.router.navigate(['/customer/orders']);
-  //   }, 800);
-  // }
-
-  
-  // ---------------------------------------------------
-  // PLACE ORDER
-  // ---------------------------------------------------
-  placeOrder() {
-    // FINAL STOCK CHECK
-    for (const item of this.orderProducts) {
-      if (item.quantity > item.product.stock) {
-        this.toastr.error(
-          `Only ${item.product.stock} available for ${item.product.productName}`
-        );
+    try {
+      if (!this.customerId) {
+        alert('Please login first');
         return;
       }
+
+      if (this.orderProducts.length === 0) {
+        alert('Cart is empty');
+        return;
+      }
+
+      const canProceed = await this.checkDistributorConnections();
+      if (!canProceed) return;
+
+      // ✅ ORDER LOGIC ONLY AFTER CONFIRMATION
+
+      const groupedOrders: { [key: string]: any[] } = {};
+
+      this.orderProducts.forEach(item => {
+        const distId = item.product.distributorId;
+        if (!groupedOrders[distId]) groupedOrders[distId] = [];
+        groupedOrders[distId].push(item);
+      });
+
+      for (const distId of Object.keys(groupedOrders)) {
+        const items = groupedOrders[distId];
+
+        const payload = {
+          customerId: this.customerId,
+          distributorId: distId,
+          products: items.map(c => ({
+            productId: c.product.productId,
+            quantity: c.quantity
+          })),
+          orderedDate: this.orderedDate
+        };
+
+        await this.orderService.placeOrder(payload).toPromise();
+      }
+
+      alert('Orders placed successfully');
+      this.resetOrder();
+      this.router.navigate(['/customer/orders']);
+
+    } finally {
+      this.isPlacingOrder = false;   // 🔓 RELEASE LOCK
     }
-
-    if (!this.customerId) {
-      this.toastr.warning('Please login first');
-      return;
-    }
-
-    if (this.orderProducts.length === 0) {
-      this.toastr.warning('Cart is empty');
-      return;
-    }
-
-    const payload = {
-      customerId: this.customerId,
-      distributorId: this.distributorId,
-      products: this.orderProducts.map(i => ({
-        productId: i.product.productId,
-        quantity: i.quantity,
-        price: i.product.price
-      })),
-      orderedDate: this.orderedDate,
-      expectedDeliveryDate: this.expectedDate
-    };
-
-    this.orderService.placeOrder(payload).subscribe({
-      next: () => {
-        this.toastr.success('Order placed successfully');
-        setTimeout(() => {
-          this.resetOrder();
-          this.router.navigate(['/customer/orders']);
-        }, 800);
-      },
-      error: () => this.toastr.error('Order failed')
-    });
   }
 
-  resetOrder() {
-    this.orderProducts = [];
-    this.cart = [];
-    localStorage.removeItem(`${this.CART_KEY}_${this.distributorId}`);
-    this.cartUpdated.emit([]);
-  }
+
+
 
   updateCart(newCart: any[]) {
     this.cart = [...newCart];
     this.orderProducts = [...newCart];
     localStorage.setItem('cart', JSON.stringify(this.cart));
   }
-  
+
+
+
+
+
+
+
   loadCustomerName(id: string) {
     this.customerService.getCustomerById(id).subscribe({
       next: (customer) => {
@@ -901,4 +980,13 @@ export class AddToCartComponent implements OnInit, OnChanges {
   goToProducts() {
     this.goToProductsClicked.emit();
   }
+
+
+
+  goToConnections() {
+    this.showConnectionPopup = false;
+    this.router.navigate(['/customer/distributors']);
+  }
+
+
 }

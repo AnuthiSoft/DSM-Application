@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { CustomerRegisterRequest } from '../../models/customer.model';
 import { Router } from '@angular/router';
+import { AdminService } from '../../services/admin.service';
 
 @Component({
   selector: 'app-customer-register',
@@ -18,12 +19,59 @@ passwordStrengthText = '';
   request: CustomerRegisterRequest = { name: '', email: '', phoneNumber: '', password: '' };
   message = '';
 
-  constructor(private customerService: CustomerService, private router:Router) {}
+ // OTP vars
+  otpSent = false;
+  otpVerified = false;
+  otpFailed = false;
+  otpCode = '';
+  phoneVerifiedUI = false;
+
+  constructor(private customerService: CustomerService, private router:Router, private adminService: AdminService) {}
 
 
-
- 
   
+  sendOtp() {
+const phone: string = this.request.phoneNumber || "";
+
+    if (!this.isPhoneValid()) {
+      this.error = "Enter a valid 10-digit phone number";
+      return;
+    }
+
+    this.adminService.sendOtp(phone).subscribe({
+      next: (res) => {
+        this.otpSent = true;
+        this.otpFailed = false;
+
+        // show OTP for testing
+        alert("OTP sent! Your OTP is: " + res.otp);
+      },
+      error: () => {
+        this.error = "Failed to send OTP";
+      }
+    });
+  }
+
+  verifyOtp() {
+const phone: string = this.request.phoneNumber || "";
+
+    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+      next: (res) => {
+        if (res.valid || res.success) {
+          this.otpVerified = true;
+          this.phoneVerifiedUI = true;
+          this.otpFailed = false;
+          alert("Phone number verified!");
+        } else {
+          this.otpFailed = true;
+        }
+      },
+      error: () => {
+        this.otpFailed = true;
+        this.error = "OTP verification failed";
+      }
+    });
+  }
 checkPasswordStrength() {
   const pwd = this.request.password;
   if (pwd.length >= 12) {

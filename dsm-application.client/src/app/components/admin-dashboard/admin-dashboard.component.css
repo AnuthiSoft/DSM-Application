@@ -1,14 +1,56 @@
+/* Theme Variables */
+
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --accent-color: #e74c3c;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --info-color: #0891b2;
+
+  --bg-color: #f5f7fa;
+  --text-color: #2c3e50;
+  --card-bg: #ffffff;
+  --sidebar-bg: #2c3e50;
+  --sidebar-text: #ffffff;
+  --header-bg: #ffffff;
+  --border-color: #ecf0f1;
+  --hover-color: #34495e;
+  --shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.dark-theme {
+  --primary-color: #5faee3;
+  --secondary-color: #3c4e60;
+  --accent-color: #e74c3c;
+  --success-color: #16a34a;
+  --warning-color: #d97706;
+  --info-color: #0891b2;
+
+  --bg-color: #121212;
+  --text-color: #e0e0e0;
+  --card-bg: #1e1e1e;
+  --sidebar-bg: #1a1a1a;
+  --sidebar-text: #e0e0e0;
+  --header-bg: #1e1e1e;
+  --border-color: #333333;
+  --hover-color: #2d2d2d;
+  --shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+
 .body {
   display: flex;
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: var(--bg-color);
+  color: var(--text-color);
 }
 
 /* Sidebar Styles */
 .dashboard-sidebar {
   width: 280px;
-  background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-  color: white;
+   background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   min-height: 100vh;
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 }
@@ -30,7 +72,7 @@
 
 .admin-badge {
   background: rgba(231, 76, 60, 0.2);
-  border: 1px solid #e74c3c;
+  border: 1px solid var(--accent-color);
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 0.8rem;
@@ -52,16 +94,17 @@
   gap: 12px;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+   color: var(--sidebar-text);
 }
 
 .nav-item:hover {
-  background: rgba(255,255,255,0.1);
-  border-left-color: #3498db;
+  background: var(--hover-color);
+  border-left-color: var(--primary-color);
 }
 
 .nav-item.active {
-  background: rgba(52, 152, 219, 0.2);
-  border-left-color: #3498db;
+   background: rgba(52, 152, 219, 0.25);
+  border-left-color: var(--primary-color);
 }
 
 .nav-item i {
@@ -73,11 +116,12 @@
 .dashboard-main {
   flex: 1;
   padding: 0;
-  background: #f8f9fa;
+ background: var(--bg-color);
+
 }
 
 .dashboard-header {
-  background: white;
+  background: var(--header-bg);
   padding: 20px 30px;
   border-bottom: 1px solid #e9ecef;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -86,59 +130,65 @@
 .header-content {
   display: flex;
   justify-content: space-between;
+   color: var(--text-color);
   align-items: center;
 }
 
 .header-content h2 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--text-color);
   font-size: 1.5rem;
 }
 
 /* Tab Content */
 .tab-content {
   padding: 30px;
+   color: var(--text-color);
 }
 
 /* Stats Cards */
 .stats-card {
-  background: white;
+ background: var(--card-bg);
   padding: 25px;
   border-radius: 10px;
   text-align: center;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  border-left: 4px solid #3498db;
+  border-left: 4px solid var(--primary-color);
+  color: var(--text-color);
 }
 
 .stats-icon {
   font-size: 2rem;
-  color: #3498db;
+   color: var(--primary-color);
   margin-bottom: 10px;
 }
 
 .stats-number {
   font-size: 2rem;
   font-weight: bold;
-  color: #2c3e50;
+   color: var(--text-color);
 }
 
 .stats-label {
-  color: #7f8c8d;
+   color: var(--secondary-color);
   font-size: 0.9rem;
 }
 
 /* Dashboard Cards */
 .dashboard-card {
-  background: white;
+  background: var(--card-bg);
   padding: 25px;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+ color: var(--text-color);
+
 }
 
 /* Table Styles */
 .dashboard-table {
-  background: white;
+   background: var(--card-bg);
+     color: var(--text-color);
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -146,16 +196,16 @@
 
 /* Buttons */
 .btn-add {
-  background: #27ae60;
+ background: var(--success-color);
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
-  transition: background 0.3s ease;
+  transition:0.3s ease;
 }
 
 .btn-add:hover {
-  background: #219a52;
+  background: #1f8b4d;
 }
 
 .search-box {
@@ -163,6 +213,8 @@
   border-radius: 25px;
   border: 1px solid #ddd;
   padding: 10px 20px;
+   background: var(--card-bg);
+  color: var(--text-color);
 }
 
 /* Action Buttons */
@@ -172,6 +224,7 @@
   padding: 5px 8px;
   border-radius: 4px;
   transition: all 0.3s ease;
+   color: var(--text-color);
 }
 
 .btn-edit:hover { background: #3498db; color: white; }
@@ -190,7 +243,7 @@
 
 /* Footer */
 footer {
-  background: #2c3e50;
+  background: var(--secondary-color);
   color: white;
   text-align: center;
   padding: 20px;

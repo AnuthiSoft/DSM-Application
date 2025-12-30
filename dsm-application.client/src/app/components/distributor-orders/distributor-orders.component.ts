@@ -136,6 +136,62 @@ loadAvailabilityForCustomer(customerId: string) {
     this.toastr.error(`Order ${order.id} has been rejected`);
   }
 
+
+  confirmOrderWithCheck(order: DistributorOrder) {
+
+  const availability = this.employeeAvailability[order.customerId];
+
+  // 🔥 CASE 1: Permanent employee available → auto ship
+  if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
+
+    const emp = this.employees.find(
+      e => e.employeeId === availability.permanentEmployeeId
+    );
+
+    // Assign order
+    this.orderService.assignOrder(order.id, {
+      employeeId: availability.permanentEmployeeId,
+      employeeName: emp?.name || '',
+      note: 'Auto assigned to permanent employee'
+    }).subscribe(() => {
+
+      // Move directly to SHIPPED
+      this.orderService.updateStatus(order.id, 'Shipped').subscribe(() => {
+        this.toastr.success(
+          `Order ${order.id} shipped. Delivery in progress 🚚`
+        );
+        this.loadOrders();
+      });
+
+    });
+
+    return;
+  }
+
+  // 🔥 CASE 2: Permanent employee NOT available → normal confirm
+  this.orderService.updateStatus(order.id, 'Confirmed').subscribe(() => {
+    this.toastr.info(
+      `Order ${order.id} confirmed. Please assign employee.`
+    );
+    this.loadOrders();
+  });
+}
+
+getTempEmployees(order: DistributorOrder): Employee[] {
+  const availability = this.employeeAvailability[order.customerId];
+
+  if (!availability?.permanentEmployeeId) {
+    return this.employees;
+  }
+
+  // 🔥 Remove permanent employee from list
+  return this.employees.filter(
+    e => e.employeeId !== availability.permanentEmployeeId
+  );
+}
+
+
+
  openProductDetails(order: any, action: string) {
 
   // 🔥 CLOSE assign modal if it is open

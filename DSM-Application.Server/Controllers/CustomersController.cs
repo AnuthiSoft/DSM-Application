@@ -58,7 +58,8 @@ namespace DSM_Application.Server.Controllers
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = ComputeHash(request.Password),
-                IsRegistered = true
+                IsRegistered = true,
+                MustChangePassword = false
             };
 
             await _db.Customers.InsertOneAsync(customer);
@@ -96,9 +97,30 @@ namespace DSM_Application.Server.Controllers
                 token,
                 customer,
                 role = customer.Role,
-                customerId = customer.CustomerId
+                customerId = customer.CustomerId,
+                mustChangePassword = customer.MustChangePassword
             });
         }
+
+        [Authorize(Roles = "Customer")]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            var customerId = User.FindFirstValue("CustomerId");
+
+            var update = Builders<Customer>.Update
+                .Set(c => c.PasswordHash, ComputeHash(dto.NewPassword))
+                .Set(c => c.MustChangePassword, false); // 🔥 IMPORTANT
+
+            await _db.Customers.UpdateOneAsync(
+                c => c.CustomerId == customerId,
+                update
+            );
+
+            return Ok(new { message = "Password updated successfully" });
+        }
+
+
 
         [Authorize(Roles = "Distributor")]
         [HttpPost("create-by-distributor")]
@@ -127,18 +149,31 @@ namespace DSM_Application.Server.Controllers
             if (distributorId == null)
                 return Unauthorized("Distributor ID not found in token");
 
+
+            // 🔒 🔥 THIS IS THE LINE (YOU ARE RIGHT)
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Password is required and must be set by distributor");
+
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Password is required");
+
             var customer = new Customer
             {
                 Name = dto.Name,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                Address = dto.Address,   // ✔ simple address only
+                Address = dto.Address,
 
                 Role = "Customer",
                 AddedByDistributorId = distributorId,
-                IsRegistered = false,
-                PasswordHash = null
+
+                // 🔥 PASSWORD SET HERE
+                PasswordHash = ComputeHash(dto.Password),
+                IsRegistered = true,
+                MustChangePassword = true
             };
+
 
             await _db.Customers.InsertOneAsync(customer);
 
@@ -400,44 +435,33 @@ namespace DSM_Application.Server.Controllers
                 var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
                 bool isCreator = customer.AddedByDistributorId == dist.DistributorId;
 
-                // ✅ Correct Status Logic for Creator Distributor
-                if (isCreator)
+                // Status logic (keep as-is)
+                if (conn != null)
                 {
-                    // If connection exists AND it is Accepted → show "Accepted"
-                    if (conn != null && conn.Status == ConnectionStatus.Accepted)
-                    {
-                        dist.Status = "Accepted";
-                    }
-                    else
-                    {
-                        // If creator and no connection → auto "Connected"
-                        dist.Status = "Accepted";
-                    }
+                    dist.Status = conn.Status.ToString(); // Pending / Accepted / Disconnected
                 }
                 else
                 {
-                    // Normal distributors → show their DB status OR "Available"
-                    dist.Status = conn?.Status.ToString() ?? "Available";
+                    dist.Status = "Available";
                 }
 
-                List<Product> products = new();
 
-                // Products only visible if:
-                // 1. Creator distributor
-                // 2. Connection accepted
-                if (isCreator || (conn != null && conn.Status == ConnectionStatus.Accepted))
-                {
-                    products = await _productService.GetProductsByDistributorAsync(dist.DistributorId);
-                }
+                // 🔥 ALWAYS LOAD PRODUCTS (GLOBAL)
+                var products = await _productService
+                    .GetProductsByDistributorAsync(dist.DistributorId);
+                bool canConnect =
+     conn == null ||
+     conn.Status == ConnectionStatus.Disconnected ||
+     conn.Status == ConnectionStatus.Rejected;
+
+
+
 
                 distributorsWithProducts.Add(new
                 {
                     distributor = dist,
                     products = products,
-
-                    // Creator cannot connect → false
-                    // Others can connect only if not already Accepted
-                    canConnect = !isCreator && (conn == null || conn.Status != ConnectionStatus.Accepted)
+                    canConnect = canConnect
                 });
             }
 
@@ -583,6 +607,17 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = "Connection request sent successfully", status = "Pending" });
         }
         // GET: api/customer/profile
+
+
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> GetAllProductsForCustomers()
+        {
+            var products = await _productService.GetAllActiveAsync();
+            return Ok(products);
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<CustomerProfileDto>> GetProfile()
@@ -768,20 +803,35 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("connected/{customerId}")]
         public async Task<IActionResult> GetConnectedDistributors(string customerId)
         {
+            var customer = await _db.Customers
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound();
+
             var connections = await _db.Connections
-                .Find(c => c.CustomerId == customerId && c.Status == ConnectionStatus.Accepted)
+                .Find(c => c.CustomerId == customerId)
                 .ToListAsync();
 
-            var distributors = new List<Distributor>();
-            foreach (var conn in connections)
+            return Ok(new
             {
-                var dist = await _db.Distributors.Find(d => d.DistributorId == conn.DistributorId).FirstOrDefaultAsync();
-                if (dist != null)
-                    distributors.Add(dist);
-            }
+                acceptedDistributors = connections
+                    .Where(c => c.Status == ConnectionStatus.Accepted)
+                    .Select(c => c.DistributorId),
 
-            return Ok(distributors);
+                // ✅ FIX IS HERE
+                pendingDistributors = connections
+                    .Where(c =>
+                        c.Status == ConnectionStatus.Pending &&
+                        c.DistributorId != customer.AddedByDistributorId
+                    )
+                    .Select(c => c.DistributorId),
+
+                creatorDistributorId = customer.AddedByDistributorId
+            });
         }
+
 
 
         //[Authorize(Roles = "Distributor")]

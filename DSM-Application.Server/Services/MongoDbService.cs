@@ -55,7 +55,8 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<HSN> HsnCodes => _db.GetCollection<HSN>("HsnCodes");
 
         
-
+  public IMongoCollection<Otp> Otps =>
+          _db.GetCollection<Otp>("Otps");
         public IMongoCollection<CustomerPaymentReceipt> CustomerPaymentReceipts =>
     _db.GetCollection<CustomerPaymentReceipt>("CustomerPaymentReceipt");
 

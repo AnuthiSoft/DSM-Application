@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 export interface Distributor {
   distributorId: string;
@@ -13,6 +15,8 @@ export interface Distributor {
   isPremium: boolean;
   isActive: boolean;
   categories?: string[]; // ✅ add this
+    pincodes: string[];   // ✅ NEW
+
 }
 
 @Injectable({
@@ -20,8 +24,9 @@ export interface Distributor {
 })
 export class AdminService {
   
-
-  constructor(private api: ApiService) {}
+private apiUrl = environment.apiUrl; 
+ 
+  constructor(private api: ApiService,private http: HttpClient) {}
 
   getDistributors(): Observable<Distributor[]> {
     return this.api.get<Distributor[]>(`admin/distributors`);
@@ -78,6 +83,20 @@ deleteDistributor(id: string): Observable<string> {
     { responseType: 'text' }
   );
 }
+sendOtp(phone: string) {
+  return this.http.post<any>(`${this.apiUrl}/otp/send`, {
+    phoneNumber: phone
+  });
+}
+
+verifyOtp(phone: string, otp: string) {
+  return this.http.post<any>(`${this.apiUrl}/otp/verify`, {
+    phoneNumber: phone,
+    code: otp   // ✅ now matches backend
+  });
+}
+
+
 
 checkPhoneExists(phone: string): Observable<boolean> {
   return this.api.get<boolean>(`admin/phone-exists/${phone}`);

@@ -7,6 +7,10 @@ import { environment } from '../../../environments/environment.prod';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AfterViewInit } from '@angular/core';
+import * as bootstrap from 'bootstrap';
+import { CustomerApiService } from '../../services/customer-api.service';
+
 // import { environment } from '../../../environments/environment';
 // import { Product } from '../../services/customer-api.service';
 
@@ -38,6 +42,7 @@ export class ProductsByDistComponent implements OnInit {
   productForm: FormGroup;
   isEdit = false;
   selectedProductId: string | null = null;
+  
 
 
 
@@ -63,6 +68,7 @@ distributors: string[] = [];
 
   @Output() addToCartClicked = new EventEmitter<Product>();
 
+@Input() connectedDistributors: { distributorId: string; name: string }[] = [];
 
 
 
@@ -71,7 +77,8 @@ distributors: string[] = [];
       private productService: ProductService,
       private fb: FormBuilder,
       private orderService: OrderService,
-      private router: Router
+      private router: Router,
+      private customerApiService: CustomerApiService
     ) {
       // Build product form
       this.productForm = this.fb.group({
@@ -91,34 +98,155 @@ distributors: string[] = [];
         imageUrls: [''],
       });
     }
-  ngOnInit(): void {
+ngOnInit(): void {
+  this.loading = false;
+  this.filterProducts = [...this.products];
+  this.extractCategories();
+   this.extractConnectedDistributors(); 
 
-  
-
-this.extractDistributors();
-
-
-    this.customerId = localStorage.getItem('CustomerId') || '';
-
-  // ✅ Load existing cart from localStorage
-  const savedCart = localStorage.getItem('cart');
-  if (savedCart) {
-    this.cart = JSON.parse(savedCart);
-  }
-
-   this.cart = JSON.parse(localStorage.getItem('cart') ?? '[]');
-  // existing code
-  if (this.products && this.products.length > 0) {
-    this.loading = false;
-    this.filterProducts = this.products;
-    this.extractCategories();
-  } else {
-    this.distributorId = this.route.snapshot.paramMap.get('distributorId')!;
-    this.loadProducts();
-  }
-
-  
 }
+
+
+  // this.productService.getAllProducts().subscribe({
+  //   next: (data) => {
+  //     this.products = data.map(p => ({
+  //       ...p,
+  //       imageUrls: Array.isArray(p.imageUrls)
+  //         ? p.imageUrls
+  //         : p.imageUrls ? [p.imageUrls] : []
+  //     }));
+
+  //     this.filterProducts = [...this.products];
+  //     this.extractCategories();
+  //     this.loading = false;
+  //   },
+  //   error: (err) => {
+  //     console.error(err);
+  //     this.loading = false;
+  //   }
+  // });
+
+
+
+// loadDistributors() {
+//   this.loading = true;
+
+//   this.http
+//     .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
+//     .subscribe({
+//       next: (res) => {
+//         if (res.isGlobal && res.distributors?.length) {
+//           this.dashboardType = 'global';
+//           this.distributors = res.distributors.map(d => ({
+//             ...d.distributor,
+//             canConnect: d.canConnect
+//           }));
+//         } else {
+//           this.distributors = [];
+//         }
+//         this.loading = false;
+//       },
+//       error: () => this.loading = false
+//     });
+// }
+
+
+
+
+
+// ngAfterViewInit(): void {
+//   setTimeout(() => {
+//     const carousels = document.querySelectorAll('.carousel');
+//     carousels.forEach(carousel => {
+//       new bootstrap.Carousel(carousel, {
+//         interval: 2500,
+//         ride: 'carousel',
+//         pause: false,
+//         wrap: true
+//       });
+//     });
+//   }, 0);
+// }
+
+
+chunkProducts(products: Product[], chunkSize: number): Product[][] {
+  const chunks: Product[][] = [];
+  for (let i = 0; i < products.length; i += chunkSize) {
+    chunks.push(products.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+
+// loadProductsByDistributor(distributorId: string): void {
+//   this.loading = true;
+
+//   this.productService.getProductsByDistributor(distributorId).subscribe({
+//     next: (data) => {
+//       this.products = data;
+//       this.filterProducts = [...data];
+//       this.extractCategories();
+//       this.loading = false;
+//     },
+//     error: () => {
+//       this.loading = false;
+//     }
+//   });
+
+//    this.initializeCarousels(); 
+// }
+
+
+
+// extractDistributors() {
+//   this.distributors = Array.from(
+//     new Set(
+//       this.products
+//         .map(p => p.distributorName)
+//         .filter(d => !!d) as string[]      // 👈 force cast
+//     )
+//   );
+// }
+
+
+
+
+  // call this when you want to fetch products 
+// loadAllProducts(): void {
+//   this.loading = true;
+
+//   this.productService.getAllProducts().subscribe({
+//     next: (products) => {
+//       this.products = products;
+//       this.filterProducts = [...products];
+//       this.extractCategories();
+//       this.loading = false;
+
+//       // ✅ WAIT UNTIL DOM IS RENDERED
+//       setTimeout(() => this.initializeCarousels(), 0);
+//     },
+//     error: () => (this.loading = false),
+//   });
+// }
+
+
+
+
+initializeCarousels() {
+  setTimeout(() => {
+    const carousels = document.querySelectorAll('.carousel');
+    carousels.forEach((carouselEl) => {
+      bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+        interval: 2000,
+        ride: 'carousel',
+        pause: 'hover',
+        wrap: true,
+        touch: true
+      });
+    });
+  }, 0);
+}
+
 
 
 extractDistributors() {
@@ -133,69 +261,92 @@ extractDistributors() {
 
 
 
-onDistributorChange(distributor: string) {
-  
-  this.distributorFilter = distributor;
-
-  if (!distributor || distributor.trim() === '') {
+onDistributorChange(distributorId: string) {
+  if (!distributorId) {
     this.filterProducts = [...this.products];
     return;
   }
 
-  // Filter locally
+
+  
   this.filterProducts = this.products.filter(
-    p => p.distributorName?.toLowerCase() === distributor.toLowerCase()
+    p => p.distributorId === distributorId
+  );
+}
+
+extractConnectedDistributors() {
+  this.connectedDistributors = Array.from(
+    new Map(
+      this.products
+        .filter(
+          (p): p is Product & { distributorId: string; distributorName: string } =>
+            !!p.distributorId && !!p.distributorName
+        )
+        .map(p => [
+          p.distributorId,
+          {
+            distributorId: p.distributorId,
+            name: p.distributorName
+          }
+        ])
+    ).values()
   );
 }
 
 
 
+
+
+
+
+
+
   // call this when you want to fetch products 
-  loadProducts(): void {
-    if (!this.distributorId) return;
-    this.loading = true;
+//   loadProducts(): void {
+//     if (!this.distributorId) return;
+//     this.loading = true;
 
-    this.productService.getProductsByDistributor(this.distributorId).subscribe({
-      next: (data: Product[]) => {
-
-
-        // 🔥 Normalize imageUrls so template never breaks
-      data = data.map(p => ({
-        ...p,
-        imageUrls: Array.isArray(p.imageUrls)
-          ? p.imageUrls
-          : p.imageUrls
-          ? [p.imageUrls]  // convert string → array
-          : []             // no images
-      }));
+//     this.productService.getProductsByDistributor(this.distributorId).subscribe({
+//       next: (data: Product[]) => {
 
 
-        this.products = data;
-        this.filterProducts = data;
-        this.extractCategories();
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load products', err);
-        this.loading = false;
-      }
-    });
-  }
+//         // 🔥 Normalize imageUrls so template never breaks
+//       data = data.map(p => ({
+//         ...p,
+//         imageUrls: Array.isArray(p.imageUrls)
+//           ? p.imageUrls
+//           : p.imageUrls
+//           ? [p.imageUrls]  // convert string → array
+//           : []             // no images
+//       }));
 
 
- getImageUrl(imageUrls: string[] | string | null | undefined): string {
-  if (!imageUrls) return 'assets/no-image.png';
+//         this.products = data;
+//         this.filterProducts = data;
+//         this.extractCategories();
+//         this.loading = false;
+//       },
+//       error: (err) => {
+//         console.error('Failed to load products', err);
+//         this.loading = false;
+//       }
+//     });
+//   }
 
-  if (typeof imageUrls === 'string') {
-    return this.apiBaseUrl + imageUrls;
-  }
 
-  if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-    return this.apiBaseUrl + imageUrls[0];
-  }
+//  getImageUrl(imageUrls: string[] | string | null | undefined): string {
+//   if (!imageUrls) return 'assets/no-image.png';
 
-  return 'assets/no-image.png';
-}
+//   if (typeof imageUrls === 'string') {
+//     return this.apiBaseUrl + imageUrls;
+//   }
+
+//   if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+//     return this.apiBaseUrl + imageUrls[0];
+//   }
+
+//   return 'assets/no-image.png';
+// }
 
 
 
@@ -316,36 +467,34 @@ AddtoCart(product: Product) {
     });
   }
 
-  onColorChange(color: string) {
+onColorChange(color: string) {
+  this.color = color;
 
-    const distributorId = localStorage.getItem('DistributorId');
-    if (!distributorId) return;
-
-    this.color = color;
-    this.productService.searchByColor(distributorId, color).subscribe({
-      next: data => this.filterProducts = data,
-      error: err => console.error('Error filtering by color:', err)
-    });
+  if (!color) {
+    this.filterProducts = [...this.products];
+    return;
   }
 
-  onCategoryChange(category: string) {
-    const distributorId = localStorage.getItem('DistributorId');
-    if (!distributorId) return;
+  this.filterProducts = this.products.filter(
+    p => p.color?.toLowerCase().includes(color.toLowerCase())
+  );
+}
 
-    this.categoryFilter = category;
+   onCategoryChange(category: string) {
+  this.categoryFilter = category;
 
-    // 🔥 If "All Categories" selected → show all products
-    if (!category || category.trim() === '') {
-      this.filterProducts = [...this.products];
-      return;
-    }
-
-    // Otherwise, filter by category
-    this.productService.searchByCategory(distributorId, category).subscribe({
-      next: data => this.filterProducts = data,
-      error: err => console.error('Error filtering by categories:', err)
-    });
+  if (!category || category.trim() === '') {
+    this.filterProducts = [...this.products];
+    return;
   }
+
+  this.filterProducts = this.products.filter(
+    p => p.category?.toLowerCase() === category.toLowerCase()
+  );
+}
+
+
+
   filteredProducts() {
     this.filterProducts = this.products.filter(p => {
       const matchesSearch =

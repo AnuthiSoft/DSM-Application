@@ -17,10 +17,12 @@ ngOnInit(): void {
     this.distributorId = localStorage.getItem('distributorId') || '';
     this.loadRequests();
     this.loadAcceptedCustomers();
+
+    
 }
  loadRequests() {
     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
-
+ console.log('Pending Requests:', res);
       this.pendingRequests = res;
     });
   }
@@ -40,18 +42,19 @@ respond(request: any, accept: boolean) {
       error: err => { console.error(err); this.loading = false; }
     });
   }
-   disconnect(connectionId: string) {
-    if (!confirm('Are you sure you want to disconnect this customer?')) return;
-    this.distributorService.disconnectCustomer(connectionId).subscribe({
-      next: (res: any) => {
-        alert(res?.message || 'Customer disconnected');
+   disconnect(customerId: string, distributorId: string) {
+  if (!confirm('Are you sure you want to disconnect this customer?')) return;
+
+  this.distributorService
+    .disconnectCustomer({ customerId, distributorId })
+    .subscribe({
+      next: () => {
+        alert('Customer disconnected');
         this.loadAcceptedCustomers();
       },
-      error: err => {
-        console.error(err);
-        alert('Failed to disconnect customer');
-      }
+      error: () => alert('Failed to disconnect customer')
     });
-  }
+}
+
 
 }

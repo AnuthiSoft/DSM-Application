@@ -46,8 +46,12 @@
   display: flex;
   align-items: flex-start;
   padding: 20px 20px 15px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-bottom: 1px solid #ecf0f1;
+ background: linear-gradient(
+    135deg,
+    var(--section-bg) 0%,
+    var(--border-color) 100%
+  );
+  border-bottom: 1px solid var(--border-color);
   position: relative;
 }
 
@@ -121,7 +125,7 @@
 /* Distributor Info */
 .distributor-info {
   padding: 20px;
-  background: white;
+  background: var(--card-bg);
   position: relative;
 }
 
@@ -152,22 +156,24 @@
 }
 
 .category-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  border: 1px solid var(--border-color);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid #bbdefb;
+  
 }
 
 /* Rating Section */
 .rating-section {
   margin-top: 15px;
   padding: 12px;
-  background: #f8f9fa;
+  background: var(--rating-bg);
+  border-left: 4px solid var(--rating-star);
   border-radius: 8px;
-  border-left: 4px solid #ffcc00;
+ 
 }
 
 .rating-stars {
@@ -178,7 +184,7 @@
 }
 
 .rating-stars i {
-  color: #ffcc00;
+ color: var(--rating-star);
   font-size: 16px;
   width: auto;
   margin: 0;
@@ -189,12 +195,12 @@
 }
 
 .rating-stars .fa-star-o {
-  color: #ddd;
+  color: var(--border-color);
 }
 
 .rating-value {
   font-size: 0.85rem;
-  color: #5a6c7d;
+   color: var(--text-muted);
   font-weight: 500;
   margin-left: 8px;
 }
@@ -204,8 +210,8 @@
   display: flex;
   gap: 8px;
   padding: 15px 20px 20px;
-  background: #f8f9fa;
-  border-top: 1px solid #ecf0f1;
+  background: var(--section-bg);
+  border-top: 1px solid var(--border-color);
   flex-wrap: wrap;
 }
 
@@ -286,6 +292,7 @@
 
 /* Report Button */
 .btn-danger {
+ 
   background-color: transparent;
   color: #e74c3c;
   border: 1px solid #e74c3c;
@@ -412,6 +419,17 @@
 .btn-view-products i {
   font-size: 15px;
 }
+
+.btn.pending {
+  background-color: #f39c12;
+  border-color: #f39c12;
+}
+
+.btn.connected {
+  background-color: #27ae60;
+  border-color: #27ae60;
+}
+
 
 
 /* Responsive Design */

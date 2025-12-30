@@ -34,15 +34,20 @@ namespace DSM_Application.Server.Models
         [BsonElement("ConnectedDistributors")]
         public List<string>? ConnectedDistributors { get; set; } // for global customers
         public string? ProfileImageUrl { get; set; }
-        
+        public bool PhoneVerified { get; set; } = false;
+
+
 
         // Address
         public string? Street { get; set; }
         public string? City { get; set; }
         public string? State { get; set; }
         public string? Country { get; set; }
-        public string Pincode { get; set; }
+
         public int FraudCount { get; set; } = 0;
         public bool IsActive { get; set; } = true;
+        public bool MustChangePassword { get; set; }
+        public string? Pincode { get; set; }
+
     }
 }

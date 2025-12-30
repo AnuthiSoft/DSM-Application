@@ -146,18 +146,63 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">
-              <i class="fas fa-phone"></i>
-              Phone Number
-            </label>
+  <label class="form-label">
+    <i class="fas fa-phone"></i>
+    Phone Number
+  </label>
 
-            <div class="phone-wrapper">
-              <span class="phone-prefix">+91</span>
+ <input
+  type="text"
+  class="form-control"
+  [(ngModel)]="customer.phoneNumber"
+  name="phoneNumber"
+  placeholder="Enter phone number"
+  [readonly]="phoneVerifiedUI"
+  (input)="restrictPhoneInput($event)"
+  required
+  pattern="^[6-9][0-9]{9}$"
+  #phone="ngModel"
+/>
 
-              <input class="form-control phone-input" type="text" [(ngModel)]="customer.phoneNumber" name="phoneNumber"
-                required pattern="^[6-9]\d{9}$" maxlength="10" placeholder="Enter phone number"
-                (input)="restrictPhoneInput($event)" #phone="ngModel" />
-            </div>
+  <!-- Verified Badge -->
+  <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+    <i class="fas fa-check-circle"></i> Verified
+  </div>
+
+  <!-- SEND OTP BUTTON -->
+  <button
+    *ngIf="!otpSent && !phoneVerifiedUI"
+    type="button"
+    class="btn btn-warning w-100 mt-2"
+    (click)="sendOtp()"
+  >
+    Send OTP
+  </button>
+
+  <!-- OTP INPUT + VERIFY BUTTON -->
+  <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
+    <label>Enter OTP</label>
+
+    <input
+      type="text"
+      class="form-control"
+      maxlength="6"
+      [(ngModel)]="otpCode"
+      name="otpCode"
+    />
+
+    <button
+      type="button"
+      class="btn btn-success w-100 mt-2"
+      (click)="verifyOtp()"
+    >
+      Verify OTP
+    </button>
+
+    <div *ngIf="otpFailed" class="text-danger mt-2">
+      ✖ Invalid or expired OTP
+    </div>
+  </div>
 
             <div class="text-danger" *ngIf="phone.touched && phone.errors">
               <div *ngIf="phone.errors['required']">

@@ -255,4 +255,70 @@
 </div> -->
 
 
+
+<!-- 🔴 UNCONNECTED DISTRIBUTOR POPUP -->
+<!-- 🔴 DISTRIBUTOR CONNECTION POPUP -->
+<!-- 🔴 DISTRIBUTOR CONNECTION / PENDING POPUP -->
+<div class="connection-overlay" *ngIf="showConnectionPopup">
+  <div class="connection-popup">
+
+    <!-- TITLE -->
+    <h3 *ngIf="popupMode === 'connect'" class="popup-title danger">
+      Connection Required
+    </h3>
+
+    <h3 *ngIf="popupMode === 'pending'" class="popup-title warning">
+      Connection Pending
+    </h3>
+
+    <!-- MAIN MESSAGE (🔥 IMPORTANT) -->
+    <p class="popup-message">
+      {{ popupMessage }}
+    </p>
+
+    <!-- DISTRIBUTOR LIST -->
+    <ul class="distributor-list">
+      <li *ngFor="let d of notConnectedDistributors">
+        {{ d.companyName }}
+      </li>
+    </ul>
+
+    <!-- EXTRA NOTE -->
+    <!-- <p class="popup-note" *ngIf="popupMode === 'pending'">
+      Please wait until the distributor approves your connection request.
+    </p> -->
+
+    <!-- ACTION BUTTONS -->
+    <div class="popup-actions">
+
+      <!-- CONNECT -->
+      <button
+        *ngIf="popupMode === 'connect'"
+        class="btn-primary"
+        (click)="connectAllDistributorsFromCart()">
+        Connect Distributor
+      </button>
+
+      <!-- PENDING -->
+      <button
+        *ngIf="popupMode === 'pending'"
+        class="btn-warning"
+        disabled>
+        Waiting for Approval
+      </button>
+
+      <!-- CANCEL -->
+      <button
+        class="btn-secondary"
+        (click)="showConnectionPopup = false">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+
 </div>

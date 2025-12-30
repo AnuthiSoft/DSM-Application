@@ -15,6 +15,14 @@ export interface Customer {
   registrationDate?: Date;       // ✅ Add this
   permanentEmployeeId?: string;      // 🔵 ADD THIS
   permanentEmployeeName?: string;    // 🔵 ADD THIS
+
+
+   password?: string;
+   street?: string | null;
+  city?: string | null;
+  state?: string | null;
+  pincode?: string | null;
+  country?: string | null;
 }
 
 export interface CustomerRegisterRequest {

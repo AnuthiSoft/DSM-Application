@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using SkiaSharp;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -83,6 +82,8 @@ namespace DistributorManagementSystem.Server.Controllers
                 distributor.DistributorId = ObjectId.GenerateNewId().ToString();
             }
             distributor.Categories ??= new List<string>(); // ✅ Ensure categories is never null
+                                                           // ✅ ADD THIS LINE
+            distributor.Pincodes ??= new List<string>();
             await _db.Distributors.InsertOneAsync(distributor);
 
             // create distributor login with temporary username
@@ -164,6 +165,8 @@ namespace DistributorManagementSystem.Server.Controllers
                     return BadRequest("This phone number is already used by another user.");
             }
             update.Categories ??= new List<string>();
+            update.Pincodes ??= new List<string>();
+
 
             var updateDef = Builders<Distributor>.Update
                 .Set(d => d.CompanyName, update.CompanyName)
@@ -171,6 +174,7 @@ namespace DistributorManagementSystem.Server.Controllers
                 .Set(d => d.PhoneNumber, update.PhoneNumber)
                 .Set(d => d.GST, update.GST)
                 .Set(d => d.Address, update.Address)
+                 .Set(d => d.Pincodes, update.Pincodes)
                 .Set(d => d.Categories, update.Categories); // ✅ Include categories
 
             await _db.Distributors.UpdateOneAsync(d => d.DistributorId == id, updateDef);

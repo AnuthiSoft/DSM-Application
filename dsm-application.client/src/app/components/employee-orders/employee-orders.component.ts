@@ -24,6 +24,11 @@ export class EmployeeOrdersComponent implements OnInit {
   paymentMethod: string = 'Cash';
   collectedAmount: number = 0;
 
+  allOrders: DistributorOrder[] = [];
+filteredOrders: DistributorOrder[] = [];
+selectedStatus: string = 'All';
+
+
   constructor(
   private http: HttpClient, 
   private orderService: OrderService,
@@ -34,20 +39,34 @@ export class EmployeeOrdersComponent implements OnInit {
     this.loadOrders();
   }
 
-  loadOrders(): void {
-    if (!this.employeeId) return;
-    this.loading = true;
-    this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
-      next: (data) => { 
-        this.orders = data; 
-        this.loading = false; 
-      },
-      error: (err) => { 
-        console.error(err); 
-        this.loading = false; 
-      }
-    });
+ loadOrders(): void {
+  if (!this.employeeId) return;
+
+  this.loading = true;
+  this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
+    next: (data) => {
+      this.allOrders = data;
+      this.applyStatusFilter(); // 👈 filter after load
+      this.loading = false;
+    },
+    error: (err) => {
+      console.error(err);
+      this.loading = false;
+    }
+  });
+}
+
+
+applyStatusFilter() {
+  if (this.selectedStatus === 'All') {
+    this.filteredOrders = this.allOrders;
+  } else {
+    this.filteredOrders = this.allOrders.filter(
+      o => o.status === this.selectedStatus
+    );
   }
+}
+
 
   subtotal(order: DistributorOrder) {
     return order.products.reduce((sum, p) => sum + (p.price * p.quantity), 0);

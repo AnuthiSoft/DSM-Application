@@ -72,6 +72,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
+import { AdminService } from '../../services/admin.service';
 import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-create-customer-distributor',
@@ -79,6 +80,12 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './create-customer-distributor.component.css'
 })
 export class CreateCustomerDistributorComponent implements OnInit {
+
+  otpSent = false;
+otpVerified = false;
+otpFailed = false;
+otpCode = '';
+phoneVerifiedUI = false;
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
@@ -108,12 +115,62 @@ selectedEmployeeId = '';
 
   constructor(private customerService: CustomerService,
     private toastr:ToastrService
-  ) {}
+  , private adminService:AdminService) {}
 
   ngOnInit(): void {
     this.loadCustomers();
     this.loadEmployees();
   }
+
+
+  sendOtp() {
+  const phone = this.customer.phoneNumber;
+
+  if (!phone || phone.length < 10) {
+    alert('Enter a valid 10-digit phone number');
+    return;
+  }
+
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.otpSent = true;
+      this.otpFailed = false;
+
+      // ⭐ SHOW THE OTP FROM BACKEND
+      alert("OTP sent! Your OTP is: " + res.otp);
+
+      console.log("OTP from backend:", res.otp);
+    },
+    error: () => alert("Failed to send OTP")
+  });
+}
+
+verifyOtp() {
+  const phone = this.customer.phoneNumber;
+
+  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+    next: (res) => {
+      
+      console.log("Verify response:", res);
+
+      if (res.valid || res.success === true) {
+        this.otpVerified = true;
+        this.phoneVerifiedUI = true;
+        this.otpFailed = false;
+        alert("Phone number verified!");
+      } else {
+        this.otpFailed = true;
+      }
+    },
+    error: (err) => {
+      console.error("OTP verification error:", err);
+      this.otpFailed = true;
+      alert('OTP verification failed!');
+    }
+  });
+}
+
+
 
   loadCustomers() {
     this.customerService.getMyCustomers().subscribe({
@@ -193,6 +250,8 @@ savePermanentEmployee() {
   openCustomerModal() {
     this.isEdit = false;
     this.customer = {
+
+      
   name: '',
   email: '',
   phoneNumber: '',
@@ -201,6 +260,12 @@ savePermanentEmployee() {
   isRegistered: false,
   isActive: true        // ✅ ADD THIS
 };
+this.otpSent = false;
+this.otpVerified = false;
+this.otpFailed = false;
+this.otpCode = '';
+this.phoneVerifiedUI = false;
+
 
     this.showModal = true;
   }
@@ -314,4 +379,5 @@ deleteCustomer(customerId: string) {
     }
   });
 }
+
 }

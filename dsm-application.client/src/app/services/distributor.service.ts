@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
+import { HttpClient } from '@angular/common/http';
 export interface ConnectionRequestDto {
   connectionId: string;
   customerId: string;
@@ -29,15 +30,23 @@ export interface CustomerEmployeeStatus {
 export class DistributorService {
 
 
-    constructor(private api: ApiService) {}
+    constructor(private api: ApiService,private http: HttpClient) {}
       getAcceptedCustomers(distributorId?: string): Observable<ConnectionRequestDto[]> {
     const url = `distributor/accepted-customers${distributorId ? '?distributorId='+distributorId : ''}`;
     return this.api.get<ConnectionRequestDto[]>(url);
   }
 
-  disconnectCustomer(connectionId: string) {
-    return this.api.post(`distributor/disconnect-customer`, { connectionId });
-  }
+
+
+ disconnectCustomer(payload: { customerId: string; distributorId: string }) {
+  return this.http.post(
+    'http://localhost:5164/api/distributor/disconnect-customer',
+    payload
+  );
+}
+
+
+
   
 
   getPendingRequests(distributorId: string): Observable<any[]> {

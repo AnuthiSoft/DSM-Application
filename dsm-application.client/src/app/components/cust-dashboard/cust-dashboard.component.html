@@ -40,10 +40,23 @@
       <div class="distributor-card" *ngFor="let d of distributors">
         <div class="distributor-header">
           <h4>{{ d.companyName }}</h4>
-          <span class="status-badge" [class]="(d.status || '').toLowerCase()">
+          <span class="status-badge" [ngClass]="{
+    'pending': d.status === 'Pending',
+    'accepted': d.status === 'Accepted',
+    'available': d.canConnect
+  }">
 
-            {{ d.status || 'Available' }}
+            {{
+            d.status === 'Pending'
+            ? 'Pending'
+            : d.status === 'Accepted'
+            ? 'Accepted'
+            : 'Available'
+            }}
+
           </span>
+
+
         </div>
 
         <div class="distributor-info">
@@ -51,6 +64,10 @@
           <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
           <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
           <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
+          <p *ngIf="d.pincodes?.length">
+            <i class="fas fa-map-pin"></i>
+            {{ (d.pincodes || []).join(', ') }}
+          </p>
           <p><i class="fas fa-tags"></i> {{ d.categories }}</p>
 
           <!-- ⭐ Average Rating Block -->
@@ -89,20 +106,18 @@
 
           <!-- Connect Button -->
           <button class="btn btn-primary" *ngIf="dashboardType === 'global'"
-            [disabled]="!d.canConnect || d.status === 'Pending' || d.status === 'Accepted'"
+            [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
             (click)="connectDistributor(d.distributorId)">
-
             {{
-            !d.canConnect
-            ? 'Connected'
-            : d.status === 'Pending'
+            d.status === 'Pending'
             ? 'Pending'
             : d.status === 'Accepted'
             ? 'Connected'
             : 'Connect'
             }}
-
           </button>
+
+
           <!-- ⭐ REPORT FRAUD BUTTON (FOR CUSTOMER REPORTING DISTRIBUTOR) -->
           <button class="btn btn-danger mt-2" [routerLink]="[
                     '/report-fraud',
@@ -120,10 +135,11 @@
           </button>
 
 
-          <button class="btn-view-products mt-2" *ngIf="d.status === 'Accepted' || !d.canConnect"
-            (click)="openProducts(d.distributorId)">
-            <i class="fas fa-box"></i> View Products
-          </button>
+          <!-- <button class="btn-view-products mt-2"
+        *ngIf="d.status === 'Accepted' || !d.canConnect"
+        (click)="openProducts(d.distributorId)">
+  <i class="fas fa-box"></i> View Products
+</button> -->
 
 
 

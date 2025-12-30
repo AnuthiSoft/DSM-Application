@@ -33,6 +33,15 @@ namespace DSM_Application.Server.Controllers
             _blobService = blobService;
         }
 
+
+        //[AllowAnonymous]
+        //[HttpGet("all")]
+        //public async Task<IActionResult> GetAllProducts()
+        //{
+        //    var products = await _productService.GetAllActiveAsync();
+        //    return Ok(products);
+        //}
+
         [Authorize(Roles = "Distributor")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -282,6 +291,16 @@ namespace DSM_Application.Server.Controllers
                 return StatusCode(500, new { message = "Error fetching products", error = ex.Message });
             }
         }
+
+
+        [AllowAnonymous]
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllProducts()
+        {
+            var products = await _productService.GetAllActiveAsync();
+            return Ok(products);
+        }
+
 
         // 🔍 SEARCH APIs ---------------------------------------------------
 

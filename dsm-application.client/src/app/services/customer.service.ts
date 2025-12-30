@@ -9,12 +9,14 @@ import {
   CustomerProfileDto
 } from '../models/customer.model';
 import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
 
+   private apiUrl = environment.apiUrl; 
   constructor(private api: ApiService, private http: HttpClient) {}
 
   // ---------------------- AUTH ----------------------
@@ -130,6 +132,19 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
       }
     );
   }
+
+
+  changePassword(data: { newPassword: string }) {
+  return this.http.post(
+    `${this.apiUrl}/customers/change-password`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    }
+  );
+}
 
   // ================= GET EMPLOYEES FOR DROPDOWN =================
   getEmployees(distributorId: string): Observable<any[]> {

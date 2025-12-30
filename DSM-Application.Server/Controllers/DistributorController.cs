@@ -144,32 +144,29 @@ namespace DSM_Application.Server.Controllers
             return Ok(new { message = request.Accept ? "Request accepted and notification sent" : "Request rejected and notification sent" });
         }
 
-        // New: Disconnect customer (soft) using connectionId
         [HttpPost("disconnect-customer")]
         public async Task<IActionResult> DisconnectCustomer([FromBody] DisconnectRequest request)
         {
-            if (request == null || string.IsNullOrEmpty(request.ConnectionId))
-                return BadRequest(new { message = "ConnectionId is required" });
+            if (string.IsNullOrEmpty(request.CustomerId) || string.IsNullOrEmpty(request.DistributorId))
+                return BadRequest("CustomerId and DistributorId are required");
 
-            var connection = await _connections.Find(c => c.Id == request.ConnectionId).FirstOrDefaultAsync();
-            if (connection == null) return NotFound("Connection not found");
+            var update = Builders<CustomerDistributorConnection>.Update
+                .Set(c => c.Status, ConnectionStatus.Disconnected)
+                .Set(c => c.DisconnectedOn, DateTime.UtcNow);
 
-            // Mark disconnected
-            connection.Status = ConnectionStatus.Disconnected;
-            connection.DisconnectedOn = DateTime.UtcNow;
-            await _connections.ReplaceOneAsync(c => c.Id == request.ConnectionId, connection);
+            var result = await _connections.UpdateOneAsync(
+                c => c.CustomerId == request.CustomerId &&
+                     c.DistributorId == request.DistributorId &&
+                     (c.Status == ConnectionStatus.Accepted || c.Status == ConnectionStatus.Pending),
+                update
+            );
 
-            // Notify customer by email (optional)
-            var customer = await _customers.Find(x => x.CustomerId == connection.CustomerId).FirstOrDefaultAsync();
-            if (customer != null && !string.IsNullOrEmpty(customer.Email))
-            {
-                var subject = "Your Distributor Connection has been Disconnected";
-                var body = $"Hi {customer.Name},\n\nThe distributor ({connection.DistributorId}) has disconnected you. You may send a new connection request if needed.";
-                await _emailService.SendEmailAsync(customer.Email, subject, body);
-            }
+            if (result.MatchedCount == 0)
+                return NotFound("Active connection not found");
 
             return Ok(new { message = "Customer disconnected successfully" });
         }
+
 
         // ============================
         //  TEMPORARY EMPLOYEE (TODAY)
@@ -452,7 +449,9 @@ namespace DSM_Application.Server.Controllers
 
         public class DisconnectRequest
         {
-            public string ConnectionId { get; set; }
+            
+            public string CustomerId { get; set; }
+            public string DistributorId { get; set; }
         }
     }
 

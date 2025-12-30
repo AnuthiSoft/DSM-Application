@@ -57,6 +57,7 @@ interface DashboardResponse {
   distributors: {
     distributor: Distributor;
     products: Product[];
+     canConnect: boolean
   }[];
   distributor?: Distributor;
   products?: Product[];
@@ -97,6 +98,7 @@ export class CustomerDashboardComponent {
   recentOrders: any[] = [];
   // products: any[] = [];
   productsLoading: boolean = true;
+connectedDistributors: { distributorId: string; name: string }[] = [];
 
 
   selectedCartProduct: Product | null = null;
@@ -157,6 +159,7 @@ export class CustomerDashboardComponent {
 
 
 
+
   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
     if (!orderDate || !distributorId) return '';
 
@@ -168,42 +171,41 @@ export class CustomerDashboardComponent {
     return date.toISOString().split("T")[0]; // YYYY-MM-DD
   }
 
+loadDashboard() {
+  this.loading = true;
 
-  loadDashboard() {
+  this.http
+    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
+    .subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+
+        // ✅ Connected distributors
+        this.connectedDistributors = data.distributors
+          .filter(d => d.distributor.status === 'Accepted')
+          .map(d => ({
+            distributorId: d.distributor.distributorId,
+            name: d.distributor.companyName || d.distributor.name || 'Distributor'
+          }));
+
+        const connectedDistributorIds = this.connectedDistributors.map(
+          d => d.distributorId
+        );
+
+        // ✅ ONLY CONNECTED PRODUCTS
+        this.products = data.distributors
+          .filter(d => connectedDistributorIds.includes(d.distributor.distributorId))
+          .flatMap(d => d.products || []);
+
+        // ✅ Auto-open products tab
+        // this.activeTab = 'products';
+        // this.loading = false;
+      },
+      error: () => (this.loading = false)
+    });
+}
 
 
-
-
-    this.recentOrders = this.recentOrders.map(o => ({
-      ...o,
-      distributorId: o.distributorId || this.distributorId
-    }));
-    this.loading = true;
-    this.http
-      .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-      .subscribe({
-        next: (data) => {
-          this.dashboardData = data;
-          this.loading = false;
-
-          // ❌ DO NOT load products automatically
-          // Products should load ONLY after clicking View Products
-          this.products = [];
-
-        },
-        error: (err) => {
-          // console.error('Error loading dashboard', err);
-          this.loading = false;
-          this.toastr.error(err.error || 'Failed to load dashboard', 'Error');
-
-        }
-      });
-
-
-
-
-
-  }
 
 
 

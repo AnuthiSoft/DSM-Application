@@ -17,12 +17,14 @@ customer: Customer = {
   name: '',
   email: '',
   phoneNumber: '',
+    password: '',        // ✅ EMPTY
   address: '',
   role: 'Customer',
   isRegistered: false,
   isActive: true          // ✅ ADD THIS
 };
 employees: any[] = [];
+showPassword = false;
 
   searchTerm = '';
   statusFilter = '';
@@ -58,6 +60,15 @@ closeAssignModal() {
   this.showAssignModal = false;
   this.selectedEmployeeId = '';
 }
+
+closeModal() {
+  this.customer.password = '';
+  this.showPassword = false;
+  this.showModal = false;
+}
+
+
+
 savePermanentEmployee() {
   if (!this.selectedEmployeeId) {
     alert("Select an employee");
@@ -83,21 +94,23 @@ savePermanentEmployee() {
 }
 
 
-  applyFilters() {
-    this.filteredCustomers = this.customers.filter(c => {
-      const matchesSearch =
-        c.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        c.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        (c.phoneNumber ?? '').toLowerCase().includes(this.searchTerm.toLowerCase());
 
-      const matchesStatus =
-        !this.statusFilter ||
-        (this.statusFilter === 'registered' && c.isRegistered) ||
-        (this.statusFilter === 'unregistered' && !c.isRegistered);
+applyFilters() {
+  this.filteredCustomers = this.allCustomers.filter(c => {
+    const matchesSearch =
+      c.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      c.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      (c.phoneNumber ?? '').toLowerCase().includes(this.searchTerm.toLowerCase());
 
-      return matchesSearch && matchesStatus;
-    });
-  }
+    const matchesStatus =
+      !this.statusFilter ||
+      (this.statusFilter === 'registered' && c.isRegistered) ||
+      (this.statusFilter === 'unregistered' && !c.isRegistered);
+
+    return matchesSearch && matchesStatus;
+  });
+}
+
 
   /* ----------------------------- Modal ------------------------------ */
 
@@ -111,6 +124,7 @@ savePermanentEmployee() {
   address: '',
   role: 'Customer',
   isRegistered: false,
+   password: '',  
   isActive: true        // ✅ ADD THIS
 };
 
@@ -122,9 +136,7 @@ editCustomer(c: Customer) {
   this.isEdit = true;
   this.showModal = true;
 }
-  closeModal() {
-    this.showModal = false;
-  }
+  
 
   saveCustomer() {
     this.isEdit ? this.updateCustomer() : this.createCustomer();

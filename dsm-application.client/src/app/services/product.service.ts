@@ -29,6 +29,12 @@ private baseUrl = environment.apiUrl + '/products';
     return this.api.get<Product[]>(this.endpoint);
   }
 
+  getAllProducts(): Observable<Product[]> {
+  return this.api.get<Product[]>(`products/all`);
+}
+
+
+
 
   // Load ALL products (no distributor needed)
  

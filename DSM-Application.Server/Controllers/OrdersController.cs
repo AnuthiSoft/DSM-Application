@@ -149,6 +149,17 @@ namespace DSM_Application.Server.Controllers
                            c.DistributorId == dto.DistributorId)
                 .FirstOrDefaultAsync();
 
+
+            // 🔒 BLOCK ORDER IF CONNECTION IS PENDING
+            if (connection != null && connection.Status == ConnectionStatus.Pending)
+            {
+                return BadRequest(new
+                {
+                    message = "Connection request is pending. Order cannot be placed until approved."
+                });
+            }
+
+
             // Check temporary assignment for today
             var todayTemp = await _mongo.TemporaryAssignments
                 .Find(x => x.CustomerId == dto.CustomerId &&

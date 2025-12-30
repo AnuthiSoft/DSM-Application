@@ -228,3 +228,161 @@ input:checked + .slider:before {
   font-size: 0.85rem;
   color: var(--light-color);
 }
+
+/* ===============================
+   DOUBLE SHADED BLUE MODAL
+================================ */
+
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+   background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal Card */
+.change-password-card {
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(
+    145deg,
+    #ffffff,
+    #f2f6fb
+  );
+  border-radius: 14px;
+  overflow: hidden;
+
+  /* 🔥 Double Shade Effect */
+  box-shadow:
+    0 25px 60px rgba(44, 62, 80, 0.55),   /* outer dark */
+    0 0 0 6px rgba(52, 152, 219, 0.15),   /* blue ring */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+
+  animation: modalPop 0.3s ease;
+}
+
+/* Header */
+.change-password-card .login-header {
+  background: linear-gradient(
+    135deg,
+    #2c3e50,
+    #3498db
+  );
+  color: #ffffff;
+  padding: 22px;
+  text-align: center;
+}
+
+.change-password-card .login-header h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.change-password-card .login-header p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Body */
+.change-password-card .login-body {
+  padding: 28px;
+}
+
+/* Inputs */
+.change-password-card .form-control {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid #dee2e6;
+  transition: all 0.25s ease;
+}
+
+.change-password-card .form-control:focus {
+  border-color: #3498db;
+  box-shadow:
+    0 0 0 4px rgba(52, 152, 219, 0.25);
+}
+
+/* Button */
+.change-password-card .btn-login {
+  margin-top: 10px;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    #3498db,
+    #2980b9
+  );
+  font-weight: 600;
+}
+
+.change-password-card .btn-login:hover {
+  background: linear-gradient(
+    135deg,
+    #2980b9,
+    #2471a3
+  );
+}
+
+/* Error text */
+.change-password-card .text-danger {
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Animation */
+@keyframes modalPop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===============================
+   MOBILE RESPONSIVE MODAL
+================================ */
+
+@media (max-width: 576px) {
+
+  .modal-backdrop-custom {
+    padding: 15px;
+  }
+
+  .change-password-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .change-password-card .login-header {
+    padding: 18px;
+  }
+
+  .change-password-card .login-header h4 {
+    font-size: 1.1rem;
+  }
+
+  .change-password-card .login-header p {
+    font-size: 13px;
+  }
+
+  .change-password-card .login-body {
+    padding: 20px;
+  }
+
+  .change-password-card .form-control {
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  .change-password-card .btn-login {
+    padding: 14px;
+    font-size: 16px;
+  }
+}

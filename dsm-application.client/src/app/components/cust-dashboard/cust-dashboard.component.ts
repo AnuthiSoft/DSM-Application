@@ -17,9 +17,10 @@ interface Distributor {
   address?: string;
   categories?: string[];
   createdDate?: string;
-   canConnect?: boolean;
-   averageRating: number;
+  canConnect?: boolean;
+  averageRating: number;
   reviewCount: number;
+  pincodes?: string[];
 }
 
 // interface Product {
@@ -75,20 +76,20 @@ interface DashboardResponse {
   styleUrl: './cust-dashboard.component.css'
 })
 export class CustDashboardComponent {
-   customerId: string = '';
+  customerId: string = '';
   distributors: Distributor[] = [];
   loading = true;
+  pincodes?: string[];
 
-  
 
   @Output() viewProductsClicked = new EventEmitter<string>();
   dashboardType: 'global' | 'local' = 'global';
   getStars(rating: number): number[] {
-  return [1, 2, 3, 4, 5];
-}
+    return [1, 2, 3, 4, 5];
+  }
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.customerId = localStorage.getItem('customerId') || '';
@@ -96,61 +97,52 @@ export class CustDashboardComponent {
   }
 
 
-openProducts(distributorId: string) {
-  this.viewProductsClicked.emit(distributorId);
-}
+  // openProducts(distributorId: string) {
+  //   this.viewProductsClicked.emit(distributorId);
+  // }
 
 
-loadDistributors() {
-  this.loading = true;
-  this.http
-    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-    .subscribe({
-      next: (res) => {
-        console.log('Dashboard response:', res);
+  loadDistributors() {
+    this.loading = true;
 
-        if (res.isGlobal && res.distributors?.length) {
-          this.dashboardType = 'global';
-          this.distributors = res.distributors.map(d => ({
-  ...d.distributor,
-  canConnect: d.canConnect
-}));
+    this.http
+      .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
+      .subscribe({
+        next: (res) => {
+          if (res.isGlobal && res.distributors?.length) {
+            this.dashboardType = 'global';
+            this.distributors = res.distributors.map(d => ({
+              ...d.distributor,
+              canConnect: d.canConnect
+            }));
+          } else {
+            this.distributors = [];
+          }
+          this.loading = false;
+        },
+        error: () => this.loading = false
+      });
+  }
 
-          // this.distributors = res.distributors.map(d => d.distributor);
-        } else if (!res.isGlobal && res.distributor) {
-          this.dashboardType = 'local';
-          this.distributors = [res.distributor];
-        } else {
-          this.distributors = [];
-        }
-
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error loading distributors:', err);
-        this.loading = false;
-      },
-    });
-}
 
 
   connectDistributor(distributorId: string) {
-  const body = { customerId: this.customerId, distributorId };
-  this.http
-    .post<{message: string, status: string}>('http://localhost:5164/api/customers/connect-distributor', body)
-    .subscribe({
-      next: (res) => {
-        alert(res.message);
-        // Update the distributor status locally
-        const distributor = this.distributors.find(d => d.distributorId === distributorId);
-        if (distributor) {
-          distributor.status = res.status;
-        }
-      },
-      error: (err) => {
-        alert('Error connecting: ' + err.message);
-      },
-    });
-}
+    const body = { customerId: this.customerId, distributorId };
+
+    this.http
+      .post<{ message: string }>(
+        'http://localhost:5164/api/customers/connect-distributor',
+        body
+      )
+      .subscribe({
+        next: (res) => {
+          alert(res.message);
+          this.loadDistributors(); // 🔥 SOURCE OF TRUTH
+        },
+        error: (err) => {
+          alert('Error connecting: ' + err.message);
+        },
+      });
+  }
 }
 

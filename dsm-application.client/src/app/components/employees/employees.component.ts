@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { InvoiceUploadService } from '../../services/invoice-upload.service';
 import { HttpClient } from '@angular/common/http';
+import { AdminService } from '../../services/admin.service';
 
 @Component({
   selector: 'app-employees',
@@ -30,17 +31,24 @@ export class EmployeesComponent {
   statusFilter = '';
   email = '';
   showModal = false;
-  // isEdit = false;
-  emailExists = false;
-  phoneExists = false;
+ emailExists = false;   // ✅ ADD THIS
+  phoneExists = false;   // ✅ ADD THIS
 
+
+  otpSent = false;
+otpVerified = false;
+otpFailed = false;
+otpCode = '';
+phoneVerifiedUI = false;
+// isEdit = false;
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
     private fb: FormBuilder,
     private toastr: ToastrService,
-    private uploadService: InvoiceUploadService,
-    private http: HttpClient
+ 
+    private http: HttpClient,
+    private adminService:AdminService
   ) { }
 
   ngOnInit(): void {
@@ -63,6 +71,45 @@ export class EmployeesComponent {
 
     this.loadEmployees();
   }
+
+  
+ sendOtp() {
+  const phone = this.employeeForm.get("phoneNumber")!.value;
+
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.otpSent = true;
+      this.otpFailed = false;
+
+      // ⭐ SHOW THE OTP FROM BACKEND
+      alert("OTP sent! Your OTP is: " + res.otp);
+
+      console.log("OTP from backend:", res.otp);
+    },
+    error: () => alert("Failed to send OTP")
+  });
+}
+
+
+  // ------------------- OTP VERIFY -------------------
+ verifyOtp() {
+  const phone = this.employeeForm.get("phoneNumber")!.value;
+
+  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+    next: () => {
+      this.otpVerified = true;
+      this.otpFailed = false;
+      this.phoneVerifiedUI = true; // ⭐ Show tick mark
+      this.otpSent = false;        // ⭐ Hide OTP inputs
+      alert("Phone verified successfully!");
+    },
+    error: () => {
+      this.otpVerified = false;
+      this.otpFailed = true;
+      alert("Invalid or expired OTP");
+    }
+  });
+}
 
   // ✅ Load all employees
   loadEmployees() {

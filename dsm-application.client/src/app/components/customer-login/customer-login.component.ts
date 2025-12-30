@@ -16,7 +16,12 @@ export class CustomerLoginComponent {
   request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
   email = '';
   message = '';
-  showPassword = false;
+   showPassword = false; 
+showChangePasswordModal = false;
+newPassword = '';
+confirmPassword = '';
+passwordError = '';
+
 
   constructor(
     private customerService: CustomerService,
@@ -44,16 +49,48 @@ export class CustomerLoginComponent {
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
+submitNewPassword() {
+  this.passwordError = '';
+
+  if (!this.newPassword || this.newPassword.length < 4) {
+    this.passwordError = 'Password must be at least 4 characters';
+    return;
+  }
+
+  if (this.newPassword !== this.confirmPassword) {
+    this.passwordError = 'Passwords do not match';
+    return;
+  }
+
+  this.customerService.changePassword({
+    newPassword: this.newPassword
+  }).subscribe({
+    next: () => {
+      this.showChangePasswordModal = false;
+      this.newPassword = '';
+      this.confirmPassword = '';
+
+      this.ngZone.run(() => {
+        this.router.navigateByUrl('/customer-dashboard');
+      });
+    },
+    error: () => {
+      this.passwordError = 'Failed to update password';
+    }
+  });
+}
 
 
 
 
   login() {
-    const identifier = this.request.email?.trim();
-    if (!identifier) {
-      this.message = "Please enter email or phone number";
-      return;
-    }
+  const identifier = this.request.email?.trim();
+  if (!identifier) {
+    this.message = "Please enter email or phone number";
+    return;
+  }
+
+ 
 
     if (/^\d+$/.test(identifier)) {
       this.request.phoneNumber = identifier;
@@ -83,6 +120,10 @@ export class CustomerLoginComponent {
         localStorage.setItem("customerEmail", res.email);
         localStorage.setItem("customerPhoneNumber", res.phoneNumber);
 
+ if (res.mustChangePassword) {
+  this.showChangePasswordModal = true;
+  return; // ⛔ stop dashboard navigation
+}
 
 
         // ⭐ SAVE DISTRIBUTOR ID HERE

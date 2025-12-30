@@ -116,9 +116,33 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Total Amount:</span>
-              <span class="detail-value amount">{{ order.totalAmount | currency:'INR':'symbol' }}</span>
+              <span class="detail-label">Subtotal:</span>
+              <span class="detail-value">
+                ₹{{ order.subtotal }}
+              </span>
             </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Product Discount:</span>
+              <span class="detail-value text-success">
+                - ₹{{ order.totalDiscount }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">General Discount:</span>
+              <span class="detail-value text-success">
+                - ₹{{ order.generalDiscount || 0 }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label fw-bold">Total Amount:</span>
+              <span class="detail-value amount fw-bold">
+                ₹{{ order.totalAmount }}
+              </span>
+            </div>
+
 
           </div>
 
@@ -190,8 +214,49 @@
       <h3 class="mb-3">Order Summary</h3>
       <hr>
 
-      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+      <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
       <p><strong>Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
+      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p> -->
+
+      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+
+      <p class="text-success">
+        <strong>Product Discount:</strong>
+        - ₹{{ selectedOrder.totalDiscount }}
+      </p>
+
+      <p class="text-success">
+        <strong>General Discount:</strong>
+        - ₹{{ selectedOrder.generalDiscount || 0 }}
+      </p>
+
+      <hr>
+
+      <p class="fw-bold">
+        <strong>Total Amount:</strong>
+        ₹{{ selectedOrder.totalAmount }}
+      </p>
+
+
+      <hr>
+
+      <p><strong>Special Discount (%):</strong> {{ selectedOrder.specialDiscountPercent }}</p>
+      <p><strong>Quantity Discount (%):</strong> {{ selectedOrder.quantityDiscountPercent }}</p>
+      <p><strong>Price Discount (%):</strong> {{ selectedOrder.priceDiscountPercent }}</p>
+      <p><strong>Total Discount (%):</strong> {{ selectedOrder.totalDiscountPercent }}</p>
+
+    </div>
+
+
+
+    <!-- ✅ Order Details(after clicking View Details) -->
+    <div *ngIf="selectedOrderss" class="selected-order-summary card p-4 mt-4 shadow">
+
+      <h3 class="mb-3">Order Details</h3>
+      <hr>
+
+      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+      <p><strong>Total Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
       <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
 
       <hr>
@@ -271,6 +336,54 @@
     </div>
 
   </div>
+
+  <!-- ============================== -->
+<!--        RETURN POPUP MODAL      -->
+<!-- ============================== -->
+
+<div class="modal-overlay" *ngIf="isReturnPopupOpen">
+  <div class="modal-box">
+
+    <h2>Return / Exchange / Replace</h2>
+
+    <label>Select Option:</label>
+    <select [(ngModel)]="returnData.returnType">
+      <option value="Return">Return</option>
+      <option value="Exchange">Exchange</option>
+      <option value="Replace">Replace (if damaged)</option>
+    </select>
+
+    <label>Reason:</label>
+    <select [(ngModel)]="returnData.reason">
+      <option>Received damaged product</option>
+      <option>Wrong item received</option>
+      <option>Item not as described</option>
+      <option>Size/fit issue</option>
+      <option>Quality issue</option>
+      <option>Changed my mind</option>
+      <option>Ordered by mistake</option>
+      <option>Other</option>
+    </select>
+
+    <textarea
+      placeholder="Type your reason..."
+      *ngIf="returnData.reason === 'Other'"
+      [(ngModel)]="returnData.otherReason">
+    </textarea>
+
+    <label>Upload Photos/Videos:</label>
+    <input type="file" multiple (change)="onFilesSelected($event)"
+>
+
+
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
+      <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
+    </div>
+
+  </div>
+</div>
+
 </div>
 
 </div>

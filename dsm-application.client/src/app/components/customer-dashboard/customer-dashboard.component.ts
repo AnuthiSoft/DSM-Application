@@ -9,8 +9,8 @@ import { ToastrService } from 'ngx-toastr';
 import { OrderService } from '../../services/order.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
-
-
+import { forkJoin } from 'rxjs';
+import { InventoryService } from '../../services/inventory.service';
 
 interface Distributor {
   distributorId: string;
@@ -112,7 +112,8 @@ connectedDistributors: { distributorId: string; name: string }[] = [];
     private router: Router,
     private http: HttpClient,
     private toastr: ToastrService,
-    private productservice: ProductService) {
+    private productservice: ProductService,
+    private inventoryService: InventoryService) {
     this.productForm = this.fb.group({
       productName: [''],
       productCode: [''],
@@ -267,17 +268,36 @@ loadDashboard() {
 
 
   openProductsForDistributor(distributorId: string) {
+    this.distributorId = distributorId;
+    localStorage.setItem('distributorId', distributorId);
 
-    this.distributorId = distributorId;   // store selected distributor
+    this.inventoryService.getStock(distributorId).subscribe(invList => {
 
-    localStorage.setItem("distributorId", distributorId);
+      console.log('Inventory:', invList); // 🔍 verify once
 
-    // 🔥 Filter products belonging ONLY to this distributor
-    this.products = this.dashboardData.distributors
-      .find(d => d.distributor.distributorId === distributorId)
-      ?.products || [];
+      if (!invList || invList.length === 0) {
+        this.products = [];
+        this.activeTab = 'products';
+        return;
+      }
 
-    this.activeTab = 'products'; // switch tab
+      const requests = invList.map(inv =>
+        this.productService.getById(inv.productId)
+      );
+
+      forkJoin(requests).subscribe(products => {
+        this.products = products.map((p, i) => ({
+          ...p,
+          currentStock:
+            invList[i].currentStock ??
+            invList[i].quantity ??
+            invList[i].stock ??
+            0
+        }));
+
+        this.activeTab = 'products';
+      });
+    });
   }
 
 
@@ -317,7 +337,7 @@ loadDashboard() {
       if (result.isConfirmed) {
         this.router.navigate(['/customer/login']);
       }
-      
+
     });
   }
 

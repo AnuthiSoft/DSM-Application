@@ -30,15 +30,15 @@ returnData = {
 currentOrderId: string = '';
 
 
-  constructor(private orderService: OrderService, private router: Router, private http: HttpClient,  private toastr: ToastrService ) { }
+  constructor(private orderService: OrderService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
-loadOrders(): void {
-  if (!this.customerId) return;
-  this.loading = true;
+  loadOrders(): void {
+    if (!this.customerId) return;
+    this.loading = true;
 
   this.orderService.getOrdersByCustomer(this.customerId).subscribe({
     next: (data: Order[]) => {
@@ -65,15 +65,15 @@ onFilesSelected(event: Event) {
 }
 
 
-computeExpectedDelivery(orderDate: any, distributorId: string): string {
-  if (!orderDate || !distributorId) return "";
+  computeExpectedDelivery(orderDate: any, distributorId: string): string {
+    if (!orderDate || !distributorId) return "";
 
-  const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+    const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-  // Convert Date OR string to Date object
-  const date = new Date(orderDate);
+    // Convert Date OR string to Date object
+    const date = new Date(orderDate);
 
-  date.setDate(date.getDate() + leadTime);
+    date.setDate(date.getDate() + leadTime);
 
   return date.toISOString().split("T")[0];
 }
@@ -214,7 +214,7 @@ submitReturnRequest() {
       },
       error: (err: any) => {
         console.error('Failed to cancel order', err);
-       this.toastr.error('Failed to cancel order');
+        this.toastr.error('Failed to cancel order');
       }
     });
   }
@@ -223,12 +223,12 @@ submitReturnRequest() {
   reorder(orderId: string): void {
     this.orderService.reorder(orderId).subscribe({
       next: () => {
-         this.toastr.success('Order placed successfully');
+        this.toastr.success('Order placed successfully');
         this.loadOrders();
       },
       error: (err: any) => {
         console.error('Failed to reorder', err);
-         this.toastr.error('Failed to place reorder');
+        this.toastr.error('Failed to place reorder');
       }
     });
   }
@@ -254,13 +254,29 @@ submitReturnRequest() {
       next: res => {
         const order = res;
 
-      Swal.fire({
-        title: `Order Summary`,
-        html: `
+        Swal.fire({
+          title: `Order Summary`,
+          html: `
           <div style="text-align:left; font-size:16px;">
-            <p><strong>Subtotal:</strong> ₹${order.subtotal}</p>
-            <p><strong>Total Discount:</strong> ₹${order.totalDiscount}</p>
-            <p><strong>Total Amount:</strong> ₹${order.totalAmount}</p>
+           <p><strong>Subtotal:</strong> ₹${order.subtotal}</p>
+
+      <p style="color:green">
+        <strong>Product Discount:</strong>
+        - ₹${order.totalDiscount}
+      </p>
+
+      <p style="color:green">
+        <strong>General Discount:</strong>
+        - ₹${order.generalDiscount || 0}
+      </p>
+
+      <hr>
+
+      <p style="font-size:17px">
+        <strong>Total Amount:</strong>
+        ₹${order.totalAmount}
+      </p>
+
 
             <hr>
 

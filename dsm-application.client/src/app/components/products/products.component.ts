@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment.prod';
 // import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
 import { InventoryService } from '../../services/inventory.service';
-
+import { forkJoin } from 'rxjs';
 
 
 
@@ -60,6 +60,7 @@ export class ProductsComponent {
   measures: string[] = [];
   inventoryStockMap: Record<string, number> = {};
   formSubmitted = false;
+  existingImageUrls: string[] = [];
 
 
   constructor(
@@ -88,6 +89,51 @@ export class ProductsComponent {
       brand: ['', Validators.required],
       imageUrls: [''],
     });
+  }
+
+  private patchEditForm(p: any) {
+    this.productForm.patchValue({
+      productName: p.productName,
+      productCode: p.productCode,
+      color: p.color,
+
+      mainCategory: p.mainCategory,
+      category: p.category,
+
+      price: p.price,
+      costPrice: p.costPrice,
+      discount: p.discount,
+
+      brand: p.brand,
+      measure: p.measure,
+      description: p.description,
+
+      stock: 0
+    });
+
+    // ✅ IMAGES
+    this.previewUrls = [];
+    this.existingImageUrls = [];
+    if (p.imageUrls?.length) {
+      p.imageUrls.forEach((img: string) => {
+        const fullUrl = this.getFullImageUrl(img);
+        this.previewUrls.push(fullUrl);
+        this.existingImageUrls.push(img); // keep original filename
+      });
+    }
+
+    // ✅ GST MUST BE SET MANUALLY ON EDIT
+    const selectedSub = this.subCategories.find(
+      sc => sc.categoryId === p.category
+    );
+
+    if (selectedSub?.hsnCode) {
+      this.productService
+        .getGstByHsn(selectedSub.hsnCode)
+        .subscribe(gst => {
+          this.productForm.patchValue({ gst });
+        });
+    }
   }
 
   // ==============================================
@@ -134,17 +180,31 @@ export class ProductsComponent {
 
   loadProducts(distributorId: string) {
     this.inventoryService.getStock(distributorId).subscribe({
-      next: (data: any[]) => {
-        const map = new Map<string, any>();
+      next: (inventoryList: any[]) => {
 
-        data.forEach(p => {
-          map.set(p.productId, p); // 🔥 overwrite duplicates
+        if (!inventoryList || inventoryList.length === 0) {
+          this.products = [];
+          this.filteredProducts = [];
+          return;
+        }
+
+        const requests = inventoryList.map(inv =>
+          this.productService.getById(inv.productId)
+        );
+
+        forkJoin(requests).subscribe({
+          next: (products) => {
+            this.products = products.map((p, i) => ({
+              ...p,
+              currentStock: inventoryList[i].currentStock
+            }));
+
+            this.filteredProducts = [...this.products];
+          },
+          error: err => console.error('Product load error', err)
         });
-
-        this.products = Array.from(map.values());
-        this.filteredProducts = [...this.products];
       },
-      error: err => console.error(err)
+      error: err => console.error('Inventory load error', err)
     });
   }
 
@@ -282,27 +342,51 @@ export class ProductsComponent {
     const productData = this.productForm.getRawValue();
     const initialStock = Number(productData.stock || 0);
 
+    // ✅ CREATE FORM DATA FIRST
     const formData = new FormData();
 
+    // ✅ APPEND ALL PRODUCT FIELDS (except stock)
     Object.keys(productData).forEach(key => {
-      if (key !== 'stock' && productData[key] !== null && productData[key] !== undefined) {
-        formData.append(key, productData[key].toString());
+      if (key === 'stock') return;
+
+      const value = productData[key];
+      if (value !== null && value !== undefined) {
+        formData.append(key, value.toString());
       }
     });
 
+    // ✅ APPEND DISTRIBUTOR
     const distributorId = this.distributorId!;
     formData.append('DistributorId', distributorId);
 
-    for (let file of this.selectedFiles) {
-      formData.append('Images', file);
+    // ✅ IMAGE HANDLING (CRITICAL FIX)
+    if (this.isEdit) {
+      if (this.selectedFiles.length > 0) {
+        // replace images
+        for (let file of this.selectedFiles) {
+          formData.append('Images', file);
+        }
+      } else {
+        // preserve existing images
+        this.existingImageUrls.forEach(img =>
+          formData.append('ExistingImages', img)
+        );
+      }
+    } else {
+      // create mode
+      for (let file of this.selectedFiles) {
+        formData.append('Images', file);
+      }
     }
 
+    // =========================
+    // UPDATE
+    // =========================
     if (this.isEdit && this.selectedProductId) {
-      // ✅ UPDATE
       this.productService.update(this.selectedProductId, formData).subscribe({
         next: () => {
           this.toastr.success('Product updated successfully');
-          // this.loadProducts(distributorId);
+
           this.productService.getById(this.selectedProductId!)
             .subscribe(updated => {
               const index = this.products.findIndex(p => p.productId === updated.productId);
@@ -320,12 +404,13 @@ export class ProductsComponent {
         },
         error: () => this.toastr.error('Failed to update product')
       });
-    } else {
-      // ✅ CREATE
+    }
+    // =========================
+    // CREATE
+    // =========================
+    else {
       this.productService.create(formData).subscribe({
         next: (createdProduct: any) => {
-
-          // 🔥 Initial stock goes to inventory ONLY on create
           if (initialStock > 0) {
             this.inventoryService.stockIn({
               productId: createdProduct.productId,
@@ -348,27 +433,57 @@ export class ProductsComponent {
     }
   }
 
+
   editProduct(product: Product) {
     this.formSubmitted = false;
     this.isEdit = true;
     this.selectedProductId = product.productId!;
     this.selectedProduct = product;
 
-    this.productForm.reset(); // reset first
-    this.productForm.patchValue({
-      ...product,
-      stock: 0 // ❗ NEVER allow stock edit during update
+    // 🔥 RESET FIRST
+    this.productForm.reset({
+      discount: 0,
+      stock: 0,
+      gst: 0
     });
 
-    this.previewUrls = [];
-    this.previewUrl = product.imageUrls?.length
-      ? this.getFullImageUrl(product.imageUrls[0])
-      : null;
+    // 🔥 FETCH FULL PRODUCT (NOT inventory data)
+    this.productService.getById(product.productId!).subscribe(full => {
+
+      // 🔥 Fetch ALL main categories first
+      this.productService.getMainCategories().subscribe(mains => {
+        this.mainCategories = mains;
+
+        // 🔥 Find parent mainCategory using subcategory
+        const parentMain = mains.find((mc: any) =>
+          mc.subCategories?.some((sc: any) => sc.categoryId === full.category)
+        );
+
+        if (!parentMain) {
+          this.patchEditForm(full);
+          return;
+        }
+
+        // 🔥 Load subcategories of that main category
+        this.productService.getSubCategories(parentMain.categoryId)
+          .subscribe(subs => {
+            this.subCategories = subs;
+
+            // 🔥 Patch with derived mainCategory
+            this.patchEditForm({
+              ...full,
+              mainCategory: parentMain.categoryId
+            });
+          });
+      });
+    });
+
 
     const modalEl = document.getElementById('productModal');
     this.modalRef = new bootstrap.Modal(modalEl!);
     this.modalRef.show();
   }
+
 
 
   // deleteProduct(id: string) {
@@ -600,6 +715,10 @@ export class ProductsComponent {
     this.isEdit = false;
     this.selectedProductId = null;
     this.selectedProduct = null;
+    this.selectedFiles = [];
+    this.existingImageUrls = [];
+    this.previewUrls = [];
+
 
     this.productForm.reset({
       discount: 0,

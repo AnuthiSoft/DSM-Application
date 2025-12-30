@@ -3,6 +3,7 @@ using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -411,6 +412,7 @@ namespace DSM_Application.Server.Controllers
         // ============================================================
         // UPDATE ORDER STATUS
         // ============================================================
+        [Authorize(Roles = "Employee")]
         [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(string orderId, [FromBody] EmployeeUpdateStatusDto dto)
         {

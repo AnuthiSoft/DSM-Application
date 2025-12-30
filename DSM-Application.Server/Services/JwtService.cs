@@ -101,23 +101,54 @@ namespace DistributorManagementSystem.Server.Services
         {
             var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
-        new Claim("UserId", user.Id ?? ""),
-        new Claim("Role", user.Role ?? "User"),
-        new Claim(ClaimTypes.Role, user.Role ?? "User"),
-          //new Claim("employeeId", user.EmployeeId ?? ""), // ✅ ADD THIS
+        new Claim(ClaimTypes.Name, user.Email ?? ""),
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim(ClaimTypes.Role, user.Role),   // 🔥 THIS IS REQUIRED
+        new Claim("EmployeeId", user.EmployeeId ?? ""),
+        new Claim("DistributorId", user.DistributorId ?? "")
     };
 
-            // Distributor — always include the claim
-            if (user.Role == "Distributor")
-                claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+            );
 
-            // ✅ Include EmployeeId if this is an Employee
-            if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
-                claims.Add(new Claim("EmployeeId", user.EmployeeId));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            return BuildToken(claims);
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(8),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+
+
+
+        //    public string GenerateToken(User user)
+        //    {
+        //        var claims = new List<Claim>
+        //{
+        //    new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
+        //    new Claim("UserId", user.Id ?? ""),
+        //    new Claim(ClaimTypes.Role, user.Role ?? ""),
+        //    new Claim(ClaimTypes.Role, user.Role ?? "User"),
+        //      //new Claim("employeeId", user.EmployeeId ?? ""), // ✅ ADD THIS
+        //};
+
+        //        // Distributor — always include the claim
+        //        if (user.Role == "Distributor")
+        //            claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
+
+        //        // ✅ Include EmployeeId if this is an Employee
+        //        if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
+        //            claims.Add(new Claim("EmployeeId", user.EmployeeId));
+
+        //        return BuildToken(claims);
+        //    }
 
 
 
@@ -161,5 +192,22 @@ namespace DistributorManagementSystem.Server.Services
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
         }
+
+        public string GenerateTokenWithClaims(List<Claim> claims)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(8),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
     }
 }

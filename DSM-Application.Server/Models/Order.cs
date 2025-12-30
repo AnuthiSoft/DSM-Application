@@ -52,14 +52,24 @@ namespace DSM_Application.Server.Models
 
         // NEW FIELD → Required for your "Ordered Date" in UI
         public DateTime OrderedDate { get; set; }
+        // ✅ ADD THIS LINE
+        public DateTime? UpdatedAt { get; set; }
 
         // NEW FIELD → Retailer dropdown
         //public string RetailerId { get; set; }
 
         // NEW FIELD → Expected Delivery Date
         public DateTime ExpectedDeliveryDate { get; set; }
-
-
         public decimal RemainingAmount { get; set; }
+
+        // Helps tracking full return state
+        public bool HasReturn { get; set; } = false;
+
+        // Helps accounting clarity
+        public decimal ReturnedAmount { get; set; } = 0;
+
+        
+
+
     }
 }

@@ -41,6 +41,10 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<DistributorCategoryMap> DistributorCategoryMaps => _db.GetCollection<DistributorCategoryMap>("DistributorCategoryMap");
         public IMongoCollection<Category> Categories => _db.GetCollection<Category>("Categories");
 
+        public IMongoCollection<ReturnRequest> ReturnRequests =>
+    _db.GetCollection<ReturnRequest>("ReturnRequests");
+
+
         public IMongoCollection<TemporaryAssignment> TemporaryAssignments =>
     _db.GetCollection<TemporaryAssignment>("temporaryAssignments");
         public IMongoCollection<EmployeeAvailability> EmployeeAvailability =>
@@ -57,6 +61,10 @@ namespace DistributorManagementSystem.Server.Services
 
         public IMongoCollection<InventoryItem> InventoryItems =>
     _db.GetCollection<InventoryItem>("InventoryItems");
+
+        public IMongoCollection<InventoryItem> Inventory =>
+    _db.GetCollection<InventoryItem>("InventoryItems");
+
 
     }
 

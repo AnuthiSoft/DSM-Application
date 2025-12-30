@@ -14,6 +14,7 @@ using YourApp.Models;
 
 namespace DSM_Application.Server.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrdersController : ControllerBase
@@ -483,6 +484,7 @@ namespace DSM_Application.Server.Controllers
 
         // Distributor-only endpoint to update status.
         // It ensures the logged-in distributor owns the order.
+        [AllowAnonymous]
         [Authorize(Roles = "Distributor")]
         [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateStatus(string orderId, [FromBody] UpdateStatusDto body)

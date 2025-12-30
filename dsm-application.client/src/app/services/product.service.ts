@@ -12,7 +12,7 @@ export interface Category {
   description?: string;
   distributorId: string;
 
- 
+
 }
 
 @Injectable({
@@ -20,9 +20,9 @@ export interface Category {
 })
 export class ProductService {
   private readonly endpoint = 'products';
-private baseUrl = environment.apiUrl + '/products';
+  private baseUrl = environment.apiUrl + '/products';
 
-  constructor(private api: ApiService,private http: HttpClient) {}
+  constructor(private api: ApiService, private http: HttpClient) { }
 
   // -------------------- CRUD --------------------
   getAll(): Observable<Product[]> {
@@ -31,7 +31,7 @@ private baseUrl = environment.apiUrl + '/products';
 
 
   // Load ALL products (no distributor needed)
- 
+
 
 
   getById(id: string): Observable<Product> {
@@ -50,8 +50,8 @@ private baseUrl = environment.apiUrl + '/products';
     return this.api.delete<Product>(`${this.endpoint}/${id}`);
   }
   getMeasures(): Observable<string[]> {
-  return this.api.get<string[]>(`${this.endpoint}/measures`);
-}
+    return this.api.get<string[]>(`${this.endpoint}/measures`);
+  }
 
   // -------------------- Distributor --------------------
   getCategoriesByDistributor(distributorId: string): Observable<string[]> {
@@ -90,33 +90,33 @@ private baseUrl = environment.apiUrl + '/products';
   }
 
   // 🔍 Justdial-style distributor search
-searchDistributorsByProduct(keyword: string) {
-  return this.api.get<any[]>(
-    `search/distributors`,
-    { params: { keyword } }
-  );
-}
+  searchDistributorsByProduct(keyword: string) {
+    return this.api.get<any[]>(
+      `search/distributors`,
+      { params: { keyword } }
+    );
+  }
 
   getMainCategories() {
-  return this.api.get<any[]>('categories/main');
-}
+    return this.api.get<any[]>('categories/main');
+  }
 
-getSubCategories(parentId: string) {
-  return this.api.get<any[]>(`categories/sub/${parentId}`);
-}
+  getSubCategories(parentId: string) {
+    return this.api.get<any[]>(`categories/sub/${parentId}`);
+  }
 
-getGstByHsn(hsnCode: string) {
-  return this.api.get<number>(`categories/gst/${hsnCode}`);
-}
-increaseStock(productId: string, quantity: number): Observable<any> {
-  return this.api.put(
-    `${this.endpoint}/${productId}/increase-stock`,
-    null,
-    {
-      params: { quantity }
-    }
-  );
-}
+  getGstByHsn(hsnCode: string) {
+    return this.api.get<number>(`categories/gst/${hsnCode}`);
+  }
+  increaseStock(productId: string, quantity: number): Observable<any> {
+    return this.api.put(
+      `${this.endpoint}/${productId}/increase-stock`,
+      null,
+      {
+        params: { quantity }
+      }
+    );
+  }
 
 
 

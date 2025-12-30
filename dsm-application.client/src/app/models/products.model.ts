@@ -2,18 +2,18 @@ export interface Product {
   color?: any;
   // Color: any;
   productColor: any;
-  colorFilter : any;       
+  colorFilter: any;
   minPriceFilter?: number;
   maxPriceFilter?: number;
   productId?: string;
   productName: string;
   productCode: string;
- category?: string;
+  category?: string;
   description: string;
- measure: string;
+  measure: string;
   price: number;
-  OrderedDate:Date;
-  ExpectedDeliveryDate:Date;
+  OrderedDate: Date;
+  ExpectedDeliveryDate: Date;
   costPrice?: number;
   discount: number;
   gst: number;
@@ -25,11 +25,13 @@ export interface Product {
   createdBy?: string;
   updatedBy?: string;
   brand?: string;
-  imageUrls: string[]; 
-    distributorId?: string;
-    distributorName?: string; // Add this
-     currentStock: number;
-
+  imageUrls: string[];
+  distributorId?: string;
+  distributorName?: string; // Add this
+  currentStock: number;
+  // ✅ ADD THIS
+  mainCategory: string;   // parent category ID
+    
 }
 // export interface Product {
 // //   productId?: string;

@@ -116,9 +116,33 @@
             </div>
 
             <div class="detail-item">
-              <span class="detail-label">Total Amount:</span>
-              <span class="detail-value amount">{{ order.totalAmount | currency:'USD':'symbol' }}</span>
+              <span class="detail-label">Subtotal:</span>
+              <span class="detail-value">
+                ₹{{ order.subtotal }}
+              </span>
             </div>
+
+            <div class="detail-item">
+              <span class="detail-label">Product Discount:</span>
+              <span class="detail-value text-success">
+                - ₹{{ order.totalDiscount }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label">General Discount:</span>
+              <span class="detail-value text-success">
+                - ₹{{ order.generalDiscount || 0 }}
+              </span>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-label fw-bold">Total Amount:</span>
+              <span class="detail-value amount fw-bold">
+                ₹{{ order.totalAmount }}
+              </span>
+            </div>
+
 
           </div>
 
@@ -170,9 +194,29 @@
       <h3 class="mb-3">Order Summary</h3>
       <hr>
 
-      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+      <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
       <p><strong>Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
-      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
+      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p> -->
+
+      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
+
+      <p class="text-success">
+        <strong>Product Discount:</strong>
+        - ₹{{ selectedOrder.totalDiscount }}
+      </p>
+
+      <p class="text-success">
+        <strong>General Discount:</strong>
+        - ₹{{ selectedOrder.generalDiscount || 0 }}
+      </p>
+
+      <hr>
+
+      <p class="fw-bold">
+        <strong>Total Amount:</strong>
+        ₹{{ selectedOrder.totalAmount }}
+      </p>
+
 
       <hr>
 

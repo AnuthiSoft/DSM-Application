@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import {  ProductService } from '../../services/product.service';
+import { Component, EventEmitter, Input, OnInit, OnChanges, SimpleChanges, Output } from '@angular/core';
+import { ProductService } from '../../services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Product } from '../../models/products.model';
@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './products-by-dist.component.html',
   styleUrl: './products-by-dist.component.css'
 })
-export class ProductsByDistComponent implements OnInit {
+export class ProductsByDistComponent implements OnInit, OnChanges {
   apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
 
 
@@ -57,7 +57,7 @@ export class ProductsByDistComponent implements OnInit {
   filterProducts: Product[] = [];
 
   distributorFilter: string = '';
-distributors: string[] = [];
+  distributors: string[] = [];
 
 
 
@@ -66,87 +66,112 @@ distributors: string[] = [];
 
 
 
-   constructor(
-     private route: ActivatedRoute,
-      private productService: ProductService,
-      private fb: FormBuilder,
-      private orderService: OrderService,
-      private router: Router
-    ) {
-      // Build product form
-      this.productForm = this.fb.group({
-        productName: ['', Validators.required],
-        productCode: ['', Validators.required],
-        color:['', Validators.required],
-        category: ['', Validators.required],
-        description: [''],
-        unit: ['', Validators.required],
-        price: [0, [Validators.required, Validators.min(0)]],
-        costPrice: [0, [Validators.required, Validators.min(0)]],
-        discount: [0, [Validators.min(0)]],
-        gst: [0, [Validators.min(0)]],
-        stock: [0, [Validators.min(0)]],
-        reorderLevel: [0, [Validators.min(0)]],
-        brand: [''],
-        imageUrls: [''],
-      });
-    }
+  constructor(
+    private route: ActivatedRoute,
+    private productService: ProductService,
+    private fb: FormBuilder,
+    private orderService: OrderService,
+    private router: Router
+  ) {
+    // Build product form
+    this.productForm = this.fb.group({
+      productName: ['', Validators.required],
+      productCode: ['', Validators.required],
+      color: ['', Validators.required],
+      category: ['', Validators.required],
+      description: [''],
+      unit: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      costPrice: [0, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.min(0)]],
+      gst: [0, [Validators.min(0)]],
+      stock: [0, [Validators.min(0)]],
+      reorderLevel: [0, [Validators.min(0)]],
+      brand: [''],
+      imageUrls: [''],
+    });
+  }
+  // ngOnChanges(changes: SimpleChanges): void {
+
+
+
+  //   this.extractDistributors();
+
+
+  //   this.customerId = localStorage.getItem('CustomerId') || '';
+
+  //   // ✅ Load existing cart from localStorage
+  //   const savedCart = localStorage.getItem('cart');
+  //   if (savedCart) {
+  //     this.cart = JSON.parse(savedCart);
+  //   }
+
+  //   this.cart = JSON.parse(localStorage.getItem('cart') ?? '[]');
+  //   // existing code
+
+  //   if (changes['products'] && this.products && this.products.length > 0) {
+  //     console.log('Products received in child:', this.products);
+
+  //     this.filterProducts = [...this.products];
+  //     this.extractCategories();
+  //     this.extractDistributors();
+  //     this.loading = false;
+  //   } else {
+  //     this.distributorId = this.route.snapshot.paramMap.get('distributorId')!;
+  //     this.loadProducts();
+  //   }
+
+
+  // }
+
+  ngOnChanges(changes: SimpleChanges): void {
+  if (changes['products'] && this.products && this.products.length > 0) {
+    console.log('Products received in child:', this.products);
+
+    this.filterProducts = [...this.products];
+    this.extractCategories();
+    this.extractDistributors();
+    this.loading = false;
+  }
+}
+
   ngOnInit(): void {
-
-  
-
-this.extractDistributors();
-
-
+    // keep this minimal
     this.customerId = localStorage.getItem('CustomerId') || '';
 
-  // ✅ Load existing cart from localStorage
-  const savedCart = localStorage.getItem('cart');
-  if (savedCart) {
-    this.cart = JSON.parse(savedCart);
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      this.cart = JSON.parse(savedCart);
+    }
   }
 
-   this.cart = JSON.parse(localStorage.getItem('cart') ?? '[]');
-  // existing code
-  if (this.products && this.products.length > 0) {
-    this.loading = false;
-    this.filterProducts = this.products;
-    this.extractCategories();
-  } else {
-    this.distributorId = this.route.snapshot.paramMap.get('distributorId')!;
-    this.loadProducts();
+
+  extractDistributors() {
+    this.distributors = Array.from(
+      new Set(
+        this.products
+          .map(p => p.distributorName)
+          .filter(d => !!d) as string[]      // 👈 force cast
+      )
+    );
   }
 
-  
-}
 
 
-extractDistributors() {
-  this.distributors = Array.from(
-    new Set(
-      this.products
-        .map(p => p.distributorName)
-        .filter(d => !!d) as string[]      // 👈 force cast
-    )
-  );
-}
+  onDistributorChange(distributor: string) {
 
+    this.distributorFilter = distributor;
 
+    if (!distributor || distributor.trim() === '') {
+      this.filterProducts = [...this.products];
+      return;
+    }
 
-onDistributorChange(distributor: string) {
-  
-  this.distributorFilter = distributor;
-
-  if (!distributor || distributor.trim() === '') {
-    this.filterProducts = [...this.products];
-    return;
+    // Filter locally
+    this.filterProducts = this.products.filter(
+      p => p.distributorName?.toLowerCase() === distributor.toLowerCase()
+    );
   }
-
-  // Filter locally
-  this.filterProducts = this.products.filter(
-    p => p.distributorName?.toLowerCase() === distributor.toLowerCase()
-  );
-}
 
 
 
@@ -160,14 +185,14 @@ onDistributorChange(distributor: string) {
 
 
         // 🔥 Normalize imageUrls so template never breaks
-      data = data.map(p => ({
-        ...p,
-        imageUrls: Array.isArray(p.imageUrls)
-          ? p.imageUrls
-          : p.imageUrls
-          ? [p.imageUrls]  // convert string → array
-          : []             // no images
-      }));
+        data = data.map(p => ({
+          ...p,
+          imageUrls: Array.isArray(p.imageUrls)
+            ? p.imageUrls
+            : p.imageUrls
+              ? [p.imageUrls]  // convert string → array
+              : []             // no images
+        }));
 
 
         this.products = data;
@@ -183,70 +208,70 @@ onDistributorChange(distributor: string) {
   }
 
 
- getImageUrl(imageUrls: string[] | string | null | undefined): string {
-  if (!imageUrls) return 'assets/no-image.png';
+  getImageUrl(imageUrls: string[] | string | null | undefined): string {
+    if (!imageUrls) return 'assets/no-image.png';
 
-  if (typeof imageUrls === 'string') {
-    return this.apiBaseUrl + imageUrls;
+    if (typeof imageUrls === 'string') {
+      return this.apiBaseUrl + imageUrls;
+    }
+
+    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
+      return this.apiBaseUrl + imageUrls[0];
+    }
+
+    return 'assets/no-image.png';
   }
-
-  if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-    return this.apiBaseUrl + imageUrls[0];
-  }
-
-  return 'assets/no-image.png';
-}
 
 
 
   openAddToCart(product: Product) {
-  this.addToCartClicked.emit(product);
+    this.addToCartClicked.emit(product);
 
 
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-  // Check if product exists
-  const existing = cart.find((c: any) => c.product.productId === product.productId);
+    // Check if product exists
+    const existing = cart.find((c: any) => c.product.productId === product.productId);
 
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ product, quantity: 1 });
+    if (existing) {
+      existing.quantity++;
+    } else {
+      cart.push({ product, quantity: 1 });
+    }
+
+    // Save updated cart
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    localStorage.setItem("selectedProduct", JSON.stringify(product));
+
+    // Navigate to Add-to-Cart page
+    this.router.navigate(['/customer/add-to-cart']);
   }
 
-  // Save updated cart
-  localStorage.setItem('cart', JSON.stringify(cart));
 
-   localStorage.setItem("selectedProduct", JSON.stringify(product));
+  AddtoCart(product: Product) {
 
-  // Navigate to Add-to-Cart page
- this.router.navigate(['/customer/add-to-cart']);
-}
+    // Load existing cart
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
+    // Check if product exists
+    const existing = cart.find((c: any) => c.product.productId === product.productId);
 
-AddtoCart(product: Product) {
+    if (existing) {
+      existing.quantity++;
+    } else {
+      cart.push({ product, quantity: 1 });
+    }
 
-  // Load existing cart
-  let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // Save updated cart
+    localStorage.setItem('cart', JSON.stringify(cart));
 
-  // Check if product exists
-  const existing = cart.find((c: any) => c.product.productId === product.productId);
-
-  if (existing) {
-    existing.quantity++;
-  } else {
-    cart.push({ product, quantity: 1 });
+    // Navigate to Add-to-Cart page
+    this.router.navigate(['/customer/add-to-cart']);
   }
 
-  // Save updated cart
-  localStorage.setItem('cart', JSON.stringify(cart));
-
-  // Navigate to Add-to-Cart page
-   this.router.navigate(['/customer/add-to-cart']);
-}
 
 
-  
   extractCategories() {
     this.categories = Array.from(
       new Set(
@@ -304,8 +329,8 @@ AddtoCart(product: Product) {
 
       // Stock keyword detection
       const stockMatch =
-        (term.includes("in stock") && p.stock > 0) ||
-        (term.includes("out of stock") && p.stock === 0) ||
+        (term.includes("in stock") && p.currentStock > 0) ||
+        (term.includes("out of stock") && p.currentStock === 0) ||
         (!term.includes("stock") && true);
 
       return (
@@ -355,9 +380,9 @@ AddtoCart(product: Product) {
       const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
 
       let matchesStock = true;
-      if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
-      else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
-      else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
+      if (this.stockFilter === 'inStock') matchesStock = p.currentStock > 10;
+      else if (this.stockFilter === 'lowStock') matchesStock = p.currentStock > 0 && p.currentStock <= 10;
+      else if (this.stockFilter === 'outOfStock') matchesStock = p.currentStock === 0;
 
       const matchesColor =
         !this.color || p.color.toLowerCase().includes(this.color.toLowerCase());
@@ -390,11 +415,11 @@ AddtoCart(product: Product) {
 
       const matchesStock =
         this.stockFilter === 'inStock'
-          ? p.stock > 10
+          ? p.currentStock > 10
           : this.stockFilter === 'lowStock'
-            ? p.stock > 0 && p.stock <= 10
+            ? p.currentStock > 0 && p.currentStock <= 10
             : this.stockFilter === 'outOfStock'
-              ? p.stock === 0
+              ? p.currentStock === 0
               : true;
 
       const matchesPrice =
@@ -416,22 +441,22 @@ AddtoCart(product: Product) {
   // ✅ Confirm add to cart
   confirmAddToCart() {
 
-    
-  if (!this.selectedProduct) return;
+
+    if (!this.selectedProduct) return;
 
     const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
 
-  if (existing) {
-    existing.quantity += this.selectedQuantity;
-  } else {
-    this.cart.push({
-      product: this.selectedProduct,
-      quantity: this.selectedQuantity
-    });
-  }
-console.log("Add to cart clicked");
-  // ✅ save updated cart
-  localStorage.setItem('cart', JSON.stringify(this.cart));
+    if (existing) {
+      existing.quantity += this.selectedQuantity;
+    } else {
+      this.cart.push({
+        product: this.selectedProduct,
+        quantity: this.selectedQuantity
+      });
+    }
+    console.log("Add to cart clicked");
+    // ✅ save updated cart
+    localStorage.setItem('cart', JSON.stringify(this.cart));
 
     this.showPopup = false;
     this.selectedProduct = null;

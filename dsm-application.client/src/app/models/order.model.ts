@@ -69,6 +69,7 @@ export interface Order {
   subtotal: number;
   totalDiscount: number;
   totalAmount: number;
+  generalDiscount: number;
   orderDate: Date;
   deliveredOn?: Date;
   products: OrderProduct[];

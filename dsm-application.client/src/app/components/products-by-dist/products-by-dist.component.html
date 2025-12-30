@@ -19,11 +19,11 @@
 
 
     <!-- Category Filter -->
-    <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)"
+    <!-- <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)"
       style="width: 180px;">
       <option value="">All Categories</option>
       <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-    </select>
+    </select> -->
 
 
 
@@ -56,7 +56,8 @@
     <span>Loading products...</span>
   </div>
 
-  <div *ngIf="!loading && products.length === 0" class="no-products">
+  <div *ngIf="!loading && filterProducts.length === 0" class="no-products">
+
     <i class="fas fa-box-open"></i>
     <h3>No Products Available</h3>
     <p>There are no products available from this distributor at the moment.</p>
@@ -65,6 +66,7 @@
   <div *ngIf="!loading && filterProducts.length > 0" class="products-content">
     <div class="products-grid">
       <div class="product-card" *ngFor="let prod of filterProducts">
+
 
         <!-- <img
             *ngIf="prod.imageUrls"
@@ -131,14 +133,15 @@
             <p>
               <strong>Stock:</strong>
               <span [class]="
-                  prod.stock > 10
-                    ? 'stock-high'
-                    : prod.stock > 0
-                    ? 'stock-low'
-                    : 'stock-out'
-                ">
-                {{ prod.stock > 0 ? prod.stock + ' available' : 'Out of stock' }}
+  prod.currentStock > 10
+    ? 'stock-high'
+    : prod.currentStock > 0
+    ? 'stock-low'
+    : 'stock-out'
+">
+                {{ prod.currentStock > 0 ? prod.currentStock + ' available' : 'Out of stock' }}
               </span>
+
             </p>
             <p><strong>Brand:</strong> {{ prod.brand }}</p>
             <!-- <p><strong>Category:</strong> {{ prod.category }}</p> -->
@@ -146,10 +149,11 @@
 
           </div>
 
-          <button class="btn btn-primary add-to-cart-btn" (click)="openAddToCart(prod)" [disabled]="prod.stock === 0">
-            <i class="fas fa-cart-plus"></i>
-            {{ prod.stock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+          <button class="btn btn-primary add-to-cart-btn" (click)="openAddToCart(prod)"
+            [disabled]="prod.currentStock === 0">
+            {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
           </button>
+
 
         </div>
       </div>

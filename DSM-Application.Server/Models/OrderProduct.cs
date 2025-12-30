@@ -12,7 +12,11 @@ namespace DSM_Application.Server.Models
         [BsonElement("unitPrice")]
         public decimal? UnitPrice { get; set; }
 
-        // ORDERED QTY
+        [BsonElement("ReturnedQty")]
+        public int ReturnedQty { get; set; } = 0;
+
+        //public int Quantity { get; set; }
+        [BsonElement("Quantity")]
         public int Quantity { get; set; }
 
         // 🆕 REQUIRED FOR RETURNS

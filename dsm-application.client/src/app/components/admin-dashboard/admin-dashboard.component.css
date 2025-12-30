@@ -196,6 +196,54 @@ footer {
   padding: 20px;
   margin-top: auto;
 }
+/* Wrapper behaves like a normal input */
+.phone-group {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #cfd7e3;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Focus = single blue border (NO double lines) */
+.phone-group:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* +91 prefix */
+.phone-prefix {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  color: #374151;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+/* Input */
+.phone-input {
+  border: none;
+  outline: none;
+  padding: 8px 10px;
+  flex: 1;
+  font-size: 14px;
+  background: transparent;
+}
+
+/* Remove default focus styles */
+.phone-input:focus {
+  box-shadow: none;
+}
+
+/* Placeholder style */
+.phone-input::placeholder {
+  color: #9aa4b2;
+}
+
+
 
 @media (max-width: 768px) {
 
@@ -261,7 +309,6 @@ footer {
     min-width: 700px;
   }
 }
-
 
 @media (max-width: 992px) {
 

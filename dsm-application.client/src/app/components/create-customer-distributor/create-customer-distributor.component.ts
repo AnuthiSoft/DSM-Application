@@ -206,36 +206,57 @@ savePermanentEmployee() {
   }
 
   editCustomer(c: Customer) {
-    this.customer = { ...c };
-    this.isEdit = true;
-    this.showModal = true;
-  }
+  this.customer = {
+    ...c,
+    phoneNumber: c.phoneNumber?.startsWith('+91')
+      ? c.phoneNumber.slice(3)   // remove +91
+      : c.phoneNumber
+  };
+
+  this.isEdit = true;
+  this.showModal = true;
+}
+
 
   closeModal() {
     this.showModal = false;
   }
 
   saveCustomer() {
-    this.isEdit ? this.updateCustomer() : this.createCustomer();
-  }
+  const payload: Customer = {
+    ...this.customer,
+    phoneNumber: '+91' + this.customer.phoneNumber
+  };
+
+  this.isEdit ? this.updateCustomer(payload) : this.createCustomer(payload);
+}
+
 
   /* ----------------------------- CREATE ------------------------------ */
 
   restrictPhoneInput(event: any) {
-  const input = event.target.value;
+  let value = event.target.value;
 
-  // Allow unlimited characters for email,
-  // but restrict pure numbers to max 10 digits.
-  if (/^[0-9]+$/.test(input)) {
-    event.target.value = input.substring(0, 10);
-    this.email = event.target.value;
+  // allow digits only
+  value = value.replace(/\D/g, '');
+
+  // max 10 digits
+  value = value.slice(0, 10);
+
+  // first digit must be 6–9
+  if (value.length === 1 && !/^[6-9]$/.test(value)) {
+    value = '';
   }
+
+  event.target.value = value;
+  this.customer.phoneNumber = value;
 }
 
 
-  createCustomer() {
-  this.customerService.createByDistributor(this.customer).subscribe({
-    next: (res: any) => {
+
+  createCustomer(customer: Customer) {
+  this.customerService.createByDistributor(customer).subscribe({
+    next: () => {
       this.toastr.success('Customer created successfully', 'Success');
       this.closeModal();
       this.loadCustomers();
@@ -246,13 +267,12 @@ savePermanentEmployee() {
   });
 }
 
-
   /* ----------------------------- UPDATE ------------------------------ */
 
-  updateCustomer() {
-  if (!this.customer.customerId) return;
+  updateCustomer(customer: Customer) {
+  if (!customer.customerId) return;
 
-  this.customerService.updateCustomer(this.customer.customerId, this.customer).subscribe({
+  this.customerService.updateCustomer(customer.customerId, customer).subscribe({
     next: () => {
       this.toastr.success('Customer updated successfully', 'Updated');
       this.closeModal();
@@ -263,6 +283,7 @@ savePermanentEmployee() {
     }
   });
 }
+
 deleteCustomer(customerId: string) {
 
   // FIRST CLICK → SHOW CONFIRMATION TOAST

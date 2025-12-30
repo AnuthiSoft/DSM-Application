@@ -113,5 +113,17 @@ export class EmployeeOrdersComponent implements OnInit {
   });
 }
 
+getDiscount(order: DistributorOrder): number {
+  if (order.totalDiscount && order.totalDiscount > 0) {
+    return order.totalDiscount;
+  }
+
+  if (order.subtotal && order.totalAmount) {
+    return Math.max(order.subtotal - order.totalAmount, 0);
+  }
+
+  return 0;
+}
+
   
 }

@@ -304,7 +304,9 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
-      <h3><i class="fas fa-box"></i> Product Details</h3>
+      <h3><i class="fas fa-box">
+
+      </i> Product Details</h3>
       <button class="modal-close" (click)="closeProductPopup()">
         <i class="fas fa-times"></i>
       </button>
@@ -326,11 +328,30 @@
           <!-- <p><strong>Category:</strong> {{ item.category }}</p> -->
           <p><strong>Price:</strong> ₹{{ item.price }}</p>
           <p><strong>Quantity:</strong> {{ item.quantity }}</p>
-          <p><strong>Total:</strong> ₹{{ item.price * item.quantity }}</p>
+          <!-- <p><strong>Item Total:</strong> ₹{{ item.price * item.quantity }}</p> -->
         </div>
 
       </div>
 
+    
+
+  <!-- 🧾 ORDER SUMMARY -->
+  <div class="order-summary">
+    <p>
+      <strong>Subtotal:</strong>
+      ₹{{ getOrderSubtotal(selectedOrder) }}
+    </p>
+
+    <p *ngIf="getOrderDiscount(selectedOrder) > 0" class="text-danger">
+      <strong>Discount:</strong>
+      - ₹{{ getOrderDiscount(selectedOrder) }}
+    </p>
+
+    <h5 class="text-success">
+      <strong>Total Amount:</strong>
+      ₹{{ getOrderFinalTotal(selectedOrder) }}
+    </h5>
+  </div>
     </div>
 
     <div class="modal-footer">

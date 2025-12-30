@@ -38,6 +38,7 @@ export interface DistributorOrder {
   // ✅ ADD THESE (FROM BACKEND)
   subtotal: number;
   totalDiscount: number;
+  
   // totalAmount: number;
 
   paymentCollectedByEmployee?: boolean;
@@ -65,6 +66,8 @@ export interface Order {
   expectedDeliveryDate: string;
 
   status: string;
+  subtotal: number;
+  totalDiscount: number;
   totalAmount: number;
   orderDate: Date;
   deliveredOn?: Date;

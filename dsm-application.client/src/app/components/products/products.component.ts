@@ -59,6 +59,7 @@ export class ProductsComponent {
   modalRef: any;
   measures: string[] = [];
   inventoryStockMap: Record<string, number> = {};
+  formSubmitted = false;
 
 
   constructor(
@@ -73,21 +74,20 @@ export class ProductsComponent {
       productCode: ['', Validators.required],
       color: ['', Validators.required],
 
-      mainCategory: ['', Validators.required],   // ⭐ NEW FIELD
-      category: ['', Validators.required],       // ⭐ SUBCATEGORY
+      mainCategory: ['', Validators.required],
+      category: ['', Validators.required], // subcategory
 
-      description: [''],
+      description: ['', Validators.required],
       measure: ['', Validators.required],
-      price: [0, [Validators.required, Validators.min(0)]],
-      costPrice: [0, [Validators.required, Validators.min(0)]],
-      discount: [0, [Validators.min(0)]],
-      gst: [0, [Validators.min(0)]],
-      stock: [0, [Validators.min(0)]],
-      reorderLevel: [0, [Validators.min(0)]],
-      brand: [''],
+      price: [null, [Validators.required, Validators.min(0)]],
+      costPrice: [null, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.required, Validators.min(0)]],
+      gst: [{ value: 0, disabled: true }],
+      stock: [0, [Validators.required, Validators.min(0)]],
+
+      brand: ['', Validators.required],
       imageUrls: [''],
     });
-
   }
 
   // ==============================================
@@ -101,52 +101,54 @@ export class ProductsComponent {
       this.loadCategories(distributorId);
       this.loadMeasures();
       this.loadMainCategories();
-      
+
     }
   }
   loadMainCategories() {
-  this.productService.getMainCategories().subscribe(res => this.mainCategories = res);
-}
-onMainCategoryChange(event: Event) {
-  const select = event.target as HTMLSelectElement;
-  const value = select.value;
-  this.productForm.patchValue({ mainCategory: value });
-  this.productService.getSubCategories(value).subscribe(res => this.subCategories = res);
-}
-onSubCategoryChange(event: Event) {
-  const select = event.target as HTMLSelectElement;
-  const subCategoryId = select.value;
+    this.productService.getMainCategories().subscribe(res => this.mainCategories = res);
+  }
+  onMainCategoryChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+    this.productForm.patchValue({ mainCategory: value });
+    this.productService.getSubCategories(value).subscribe(res => this.subCategories = res);
+  }
+  onSubCategoryChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const subCategoryId = select.value;
 
-  const selectedSub = this.subCategories.find(sc => sc.categoryId === subCategoryId);
-  if (!selectedSub) return;
+    const selectedSub = this.subCategories.find(sc => sc.categoryId === subCategoryId);
+    if (!selectedSub) return;
 
-  // 1️⃣ set subcategory
-  this.productForm.patchValue({
-    category: subCategoryId
-  });
-
-  // 2️⃣ fetch GST using HSN
-  this.productService.getGstByHsn(selectedSub.hsnCode)
-    .subscribe(gst => {
-      this.productForm.patchValue({ gst });
+    // 1️⃣ set subcategory
+    this.productForm.patchValue({
+      category: subCategoryId
     });
-}
+
+    // 2️⃣ fetch GST using HSN
+    this.productService.getGstByHsn(selectedSub.hsnCode)
+      .subscribe(gst => {
+        this.productForm.patchValue({ gst });
+      });
+  }
 
   loadProducts(distributorId: string) {
-  this.productService.getProductsByDistributor(distributorId).subscribe({
-    next: (data) => {
-      this.products = data;
-      this.filteredProducts = [...data];
+    this.inventoryService.getStock(distributorId).subscribe({
+      next: (data: any[]) => {
+        const map = new Map<string, any>();
 
-      // ✅ NOW merge inventory stock
-      // this.loadInventoryStock(distributorId);
-    },
-    error: (err) => console.error('Error loading products:', err)
-  });
-}
+        data.forEach(p => {
+          map.set(p.productId, p); // 🔥 overwrite duplicates
+        });
+
+        this.products = Array.from(map.values());
+        this.filteredProducts = [...this.products];
+      },
+      error: err => console.error(err)
+    });
+  }
 
 
-  
   loadMeasures() {
     this.productService.getMeasures().subscribe({
       next: (data) => (this.measures = data),
@@ -164,61 +166,210 @@ onSubCategoryChange(event: Event) {
   // ==============================================
   // CRUD
   // ==============================================
+  // submitForm() {
+  //   this.formSubmitted = true;
+  //   if (this.productForm.invalid) {
+  //     this.toastr.error('Please fill all required fields');
+  //     return;
+  //   }
+
+  //   const product = this.productForm.value;
+  //   const formData = new FormData();
+
+  //   Object.keys(product).forEach(key => {
+  //     const value = product[key as keyof Product];
+  //     if (value !== null && value !== undefined) {
+  //       formData.append(key, value.toString());
+  //     }
+  //   });
+  //   const distributorId = localStorage.getItem('DistributorId');
+  //   if (distributorId) formData.append('DistributorId', distributorId);
+
+  //   if (this.selectedFiles.length > 0) {
+  //     for (let file of this.selectedFiles) {
+  //       formData.append("Images", file);  // MUST MATCH C# DTO PROPERTY NAME
+  //     }
+  //   }
+
+
+  //   if (this.isEdit && this.selectedProductId) {
+  //     this.productService.update(this.selectedProductId, formData).subscribe({
+  //       next: () => {
+  //         if (distributorId) this.loadProducts(distributorId);
+  //         this.closeModal();
+  //         this.resetForm();
+  //       },
+  //       error: (err) => console.error('Error updating product:', err)
+  //     });
+  //   } else {
+  //     this.productService.create(formData).subscribe({
+  //       next: () => {
+  //         if (distributorId) this.loadProducts(distributorId);
+  //         this.closeModal();
+  //         this.resetForm();
+  //       },
+  //       error: (err) => console.error('Error creating product:', err)
+  //     });
+  //   }
+  // }
+
+
+  // submitForm() {
+  //   this.formSubmitted = true;
+  //   this.productForm.markAllAsTouched();
+
+  //   if (this.productForm.invalid) {
+  //     this.toastr.error('Please fill all required fields');
+  //     return;
+  //   }
+
+  //   const formData = new FormData();
+
+  //   // ✅ Use getRawValue to include disabled GST
+  //   const product = this.productForm.getRawValue();
+
+  //   Object.keys(product).forEach(key => {
+  //     const value = product[key];
+  //     if (value !== null && value !== undefined) {
+  //       formData.append(key, value.toString());
+  //     }
+  //   });
+
+  //   const distributorId = localStorage.getItem('DistributorId');
+  //   if (distributorId) {
+  //     formData.append('DistributorId', distributorId);
+  //   }
+
+  //   for (let file of this.selectedFiles) {
+  //     formData.append('Images', file);
+  //   }
+
+  //   this.productService.create(formData).subscribe({
+  //     next: (createdProduct: any) => {
+
+  //       // 🔥 create inventory row with 0 stock
+  //       this.inventoryService.stockIn({
+  //         productId: createdProduct.productId,
+  //         distributorId: this.distributorId!,
+  //         quantity: 0,
+  //         reason: 'Auto inventory init'
+  //       }).subscribe(() => {
+  //         this.loadProducts(this.distributorId!);
+  //       });
+
+  //       this.toastr.success('Product saved successfully');
+  //       this.closeModal();
+  //       this.resetForm();
+  //     },
+  //     error: () => this.toastr.error('Failed to save product')
+  //   });
+  // }
+
   submitForm() {
-
-    if (this.productForm.invalid) return;
-
-    const product = this.productForm.value;
-    const formData = new FormData();
-
-    Object.keys(product).forEach(key => {
-      const value = product[key as keyof Product];
-      if (value !== null && value !== undefined) {
-        formData.append(key, value.toString());
-      }
-    });
-    const distributorId = localStorage.getItem('DistributorId');
-    if (distributorId) formData.append('DistributorId', distributorId);
-
-    if (this.selectedFiles.length > 0) {
-      for (let file of this.selectedFiles) {
-        formData.append("Images", file);  // MUST MATCH C# DTO PROPERTY NAME
-      }
+    if (this.isEdit && !this.selectedProductId) {
+      this.toastr.error('Invalid product update');
+      return;
     }
 
+    this.formSubmitted = true;
+    this.productForm.markAllAsTouched();
+
+    if (this.productForm.invalid) {
+      this.toastr.error('Please fill all required fields');
+      return;
+    }
+
+    const productData = this.productForm.getRawValue();
+    const initialStock = Number(productData.stock || 0);
+
+    const formData = new FormData();
+
+    Object.keys(productData).forEach(key => {
+      if (key !== 'stock' && productData[key] !== null && productData[key] !== undefined) {
+        formData.append(key, productData[key].toString());
+      }
+    });
+
+    const distributorId = this.distributorId!;
+    formData.append('DistributorId', distributorId);
+
+    for (let file of this.selectedFiles) {
+      formData.append('Images', file);
+    }
 
     if (this.isEdit && this.selectedProductId) {
+      // ✅ UPDATE
       this.productService.update(this.selectedProductId, formData).subscribe({
         next: () => {
-          if (distributorId) this.loadProducts(distributorId);
+          this.toastr.success('Product updated successfully');
+          // this.loadProducts(distributorId);
+          this.productService.getById(this.selectedProductId!)
+            .subscribe(updated => {
+              const index = this.products.findIndex(p => p.productId === updated.productId);
+              if (index > -1) {
+                this.products[index] = {
+                  ...updated,
+                  currentStock: this.products[index].currentStock
+                };
+                this.filteredProducts = [...this.products];
+              }
+            });
+
           this.closeModal();
           this.resetForm();
         },
-        error: (err) => console.error('Error updating product:', err)
+        error: () => this.toastr.error('Failed to update product')
       });
     } else {
+      // ✅ CREATE
       this.productService.create(formData).subscribe({
-        next: () => {
-          if (distributorId) this.loadProducts(distributorId);
+        next: (createdProduct: any) => {
+
+          // 🔥 Initial stock goes to inventory ONLY on create
+          if (initialStock > 0) {
+            this.inventoryService.stockIn({
+              productId: createdProduct.productId,
+              distributorId,
+              quantity: initialStock,
+              reason: 'Initial stock on product creation'
+            }).subscribe(() => {
+              this.loadProducts(distributorId);
+            });
+          } else {
+            this.loadProducts(distributorId);
+          }
+
+          this.toastr.success('Product saved successfully');
           this.closeModal();
           this.resetForm();
         },
-        error: (err) => console.error('Error creating product:', err)
+        error: () => this.toastr.error('Failed to save product')
       });
     }
   }
 
   editProduct(product: Product) {
+    this.formSubmitted = false;
     this.isEdit = true;
-    this.selectedProductId = product.productId || null;
-    this.productForm.patchValue(product);
+    this.selectedProductId = product.productId!;
+    this.selectedProduct = product;
 
+    this.productForm.reset(); // reset first
+    this.productForm.patchValue({
+      ...product,
+      stock: 0 // ❗ NEVER allow stock edit during update
+    });
+
+    this.previewUrls = [];
     this.previewUrl = product.imageUrls?.length
       ? this.getFullImageUrl(product.imageUrls[0])
       : null;
 
-    this.openModal(true, product);
+    const modalEl = document.getElementById('productModal');
+    this.modalRef = new bootstrap.Modal(modalEl!);
+    this.modalRef.show();
   }
+
 
   // deleteProduct(id: string) {
   //   if (confirm('Are you sure you want to delete this product?')) {
@@ -386,8 +537,8 @@ onSubCategoryChange(event: Event) {
 
       // Stock keyword detection
       const stockMatch =
-        (term.includes("in stock") && p.stock > 0) ||
-        (term.includes("out of stock") && p.stock === 0) ||
+        (term.includes("in stock") && p.currentStock > 0) ||
+        (term.includes("out of stock") && p.currentStock === 0) ||
         (!term.includes("stock") && true);
 
       return (
@@ -409,9 +560,10 @@ onSubCategoryChange(event: Event) {
       const matchesCategory = !this.categoryFilter || p.category === this.categoryFilter;
 
       let matchesStock = true;
-      if (this.stockFilter === 'inStock') matchesStock = p.stock > 10;
-      else if (this.stockFilter === 'lowStock') matchesStock = p.stock > 0 && p.stock <= 10;
-      else if (this.stockFilter === 'outOfStock') matchesStock = p.stock === 0;
+      if (this.stockFilter === 'inStock') matchesStock = p.currentStock > 10;
+
+      else if (this.stockFilter === 'lowStock') matchesStock = p.currentStock > 0 && p.currentStock <= 10;
+      else if (this.stockFilter === 'outOfStock') matchesStock = p.currentStock === 0;
 
       const matchesColor =
         !this.color || p.color.toLowerCase().includes(this.color.toLowerCase());
@@ -437,35 +589,32 @@ onSubCategoryChange(event: Event) {
     return { class: 'out-of-stock', text: 'Out of Stock' };
   }
 
-  
+
 
 
   // ==============================================
   // MODAL HANDLING
   // ==============================================
-  openModal(isEdit = false, product?: Product) {
-    this.isEdit = isEdit;
+  openModal() {
+    this.formSubmitted = false;
+    this.isEdit = false;
+    this.selectedProductId = null;
+    this.selectedProduct = null;
 
-    if (isEdit && product) {
-      this.selectedProduct = product;
+    this.productForm.reset({
+      discount: 0,
+      stock: 0,
+      gst: 0
+    });
 
-      this.productForm.patchValue(product);
-      this.previewUrl = product.imageUrls?.length? this.getFullImageUrl(product.imageUrls[0]): null;
-        this.previewUrls = [];  
-    } else {
-      this.selectedProduct = null;
-      this.resetForm();
-      if (isEdit && product) {
-        this.productForm.patchValue(product);
-      }
-    }
+    this.previewUrls = [];
+    this.previewUrl = null;
 
     const modalEl = document.getElementById('productModal');
-    if (modalEl) {
-      this.modalRef = new bootstrap.Modal(modalEl);
-      this.modalRef.show();
-    }
+    this.modalRef = new bootstrap.Modal(modalEl!);
+    this.modalRef.show();
   }
+
 
   closeModal() {
     if (this.modalRef) this.modalRef.hide();
@@ -473,69 +622,80 @@ onSubCategoryChange(event: Event) {
 
   getFullImageUrl(img: string) {
     if (!img) return 'assets/no-image.png';
-  
+
     // 🔥 ALWAYS go through backend image API
     return `${environment.apiUrl}/images/${img}`;
   }
   increaseStock(productId: string) {
-  const qty = prompt('Enter quantity to add:');
-  if (!qty) return;
+    const qty = prompt('Enter quantity to add:');
+    if (!qty) return;
 
-  const quantity = Number(qty);
-  if (quantity <= 0) {
-    this.toastr.error('Invalid quantity');
-    return;
+    const quantity = Number(qty);
+    if (quantity <= 0) {
+      this.toastr.error('Invalid quantity');
+      return;
+    }
+
+    //   this.productService.increaseStock(productId, quantity).subscribe({
+    //     next: () => {
+    //       this.toastr.success('Stock increased');
+
+    //       const distributorId = localStorage.getItem('DistributorId');
+    //       if (distributorId) {
+    //         // this.loadInventoryStock(distributorId); // ✅ ONLY inventory
+    //       }
+    //     },
+    //     error: () => this.toastr.error('Failed to increase stock')
+    //   });
+    // }
+
+
+    this.inventoryService.stockIn({
+      productId,
+      distributorId: this.distributorId!,
+      quantity,
+      reason: 'Manual add'
+    }).subscribe(() => {
+      this.toastr.success('Stock increased');
+      this.loadProducts(this.distributorId!); // 🔥 reload from inventory
+    });
+
+    // loadInventoryStock(distributorId: string) {
+    //   this.inventoryService.getStock(distributorId).subscribe({
+    //     next: (stock) => {
+    //       this.inventoryStockMap = {};
+    //       stock.forEach((s: any) => {
+    //         this.inventoryStockMap[s.productId] = s.currentStock;
+    //       });
+
+    //       this.mergeInventoryStock();
+    //     },
+    //     error: (err) => console.error('Error loading inventory stock', err)
+    //   });
+    // }
+
+    // mergeInventoryStock() {
+    //   this.products = this.products.map(p => ({
+    //     ...p,
+    //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
+    //   }));
+
+    //   this.filteredProducts = this.filteredProducts.map(p => ({
+    //     ...p,
+    //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
+    //   }));
+    // }
+  }
+  toggleTheme() {
+    const body = document.body;
+    const current = body.getAttribute('data-theme');
+
+    body.setAttribute(
+      'data-theme',
+      current === 'dark' ? 'light' : 'dark'
+    );
   }
 
-  this.productService.increaseStock(productId, quantity).subscribe({
-    next: () => {
-      this.toastr.success('Stock increased');
 
-      const distributorId = localStorage.getItem('DistributorId');
-      if (distributorId) {
-        this.loadInventoryStock(distributorId); // ✅ ONLY inventory
-      }
-    },
-    error: () => this.toastr.error('Failed to increase stock')
-  });
-}
-
-loadInventoryStock(distributorId: string) {
-  this.inventoryService.getStock(distributorId).subscribe({
-    next: (stock) => {
-      this.inventoryStockMap = {};
-      stock.forEach((s: any) => {
-        this.inventoryStockMap[s.productId] = s.currentStock;
-      });
-
-      this.mergeInventoryStock();
-    },
-    error: (err) => console.error('Error loading inventory stock', err)
-  });
-}
-
-mergeInventoryStock() {
-  this.products = this.products.map(p => ({
-    ...p,
-    stock: this.inventoryStockMap[p.productId!] ?? p.stock
-  }));
-
-  this.filteredProducts = this.filteredProducts.map(p => ({
-    ...p,
-    stock: this.inventoryStockMap[p.productId!] ?? p.stock
-  }));
-}
-
-toggleTheme() {
-  const body = document.body;
-  const current = body.getAttribute('data-theme');
-
-  body.setAttribute(
-    'data-theme',
-    current === 'dark' ? 'light' : 'dark'
-  );
-}
- 
- 
 }
 

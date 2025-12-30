@@ -71,6 +71,8 @@ export class AdminDashboardComponent implements OnInit {
   activeDistributors = 0;
   inactiveDistributors = 0;
   premiumDistributors = 0;
+  formSubmitted = false;
+  pendingDeleteId: string | null = null;
 
   private distributorModal: bootstrap.Modal | null = null;
 
@@ -80,11 +82,11 @@ export class AdminDashboardComponent implements OnInit {
     private auth: AuthService,
     private categoryService: CategoryService,
     private toastr: ToastrService,
-    
+
   ) { }
 
 
-  
+
   ngOnInit(): void {
     this.loadDistributors();
     this.initForm();
@@ -92,12 +94,18 @@ export class AdminDashboardComponent implements OnInit {
     this.loadCategories();
     this.loadPendingCategories();
 
-    // ✅ Initialize modal instance
+    // 🔴 Clear phone duplicate error on change
+    this.distributorForm.get('phoneNumber')?.valueChanges.subscribe(() => {
+      this.distributorForm.get('phoneNumber')?.setErrors(null);
+    });
+
+    // 🔵 Initialize modal instance (UI only)
     const modalEl = document.getElementById('distributorModal');
     if (modalEl) {
       this.distributorModal = new bootstrap.Modal(modalEl);
     }
   }
+
 
   loadCategories() {
     this.categoryService.getAll().subscribe(res => {
@@ -146,59 +154,63 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   initForm(): void {
-  this.distributorForm = this.fb.group({
-    distributorId: [''],
+    this.distributorForm = this.fb.group({
+      distributorId: [''],
 
-    companyName: [
-    '',
-    [
-      Validators.required,
-      firstLetterCapitalValidator   // 👈 ADD HERE
-    ]
-  ],
+      companyName: [
+        '',
+        [
+          Validators.required,
+          firstLetterCapitalValidator   // 👈 ADD HERE
+        ]
+      ],
 
-    name: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(3),
-        firstLetterCapital   // ✅ Capital letter check
-      ]
-    ],
+      name: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(3),
+          firstLetterCapital   // ✅ Capital letter check
+        ]
+      ],
 
-    email: [
-      '',
-      [Validators.required, Validators.email]
-    ],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(254)
+        ]
+      ],
 
-    phoneNumber: [
-      '',
-      [
-        Validators.required,
-        Validators.pattern(/^[0-9]{10}$/) // ✅ 10 digits only
-      ]
-    ],
+      phoneNumber: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[6-9]\d{9}$/)
+        ]
+      ],
 
-    gst: [
-      '',
-      [
-        Validators.required,
-        gstValidator // ✅ Proper GST validation
-      ]
-    ],
+      gst: [
+        '',
+        [
+          Validators.required,
+          gstValidator // ✅ Proper GST validation
+        ]
+      ],
 
-    address: [
-      '',
-      [
-        Validators.required,
-        Validators.minLength(10) // ✅ Address length
-      ]
-    ],
+      address: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(10) // ✅ Address length
+        ]
+      ],
 
-    isPremium: [false],
-    isActive: [true]
-  });
-}
+      isPremium: [false],
+      isActive: [false, Validators.requiredTrue]
+    });
+  }
 
 
 
@@ -243,99 +255,172 @@ export class AdminDashboardComponent implements OnInit {
   openEdit(d: Distributor): void {
     this.isEdit = true;
     this.selectedDistributor = d;
-    this.distributorForm.patchValue(d);
+    this.formSubmitted = false;
+
+    this.distributorForm.reset();
+
+    this.distributorForm.patchValue({
+      distributorId: d.distributorId,
+      companyName: d.companyName,
+      name: d.name,
+      email: d.email,
+
+      // 🔥 REMOVE +91 IF PRESENT
+      phoneNumber: d.phoneNumber?.replace(/^(\+91)/, ''),
+
+      gst: d.gst,
+      address: d.address,
+      isActive: d.isActive,
+      isPremium: d.isPremium
+    });
+
     this.distributorModal?.show();
   }
 
+
+  // saveDistributor(): void {
+  //   if (this.distributorForm.invalid) {
+  //     this.distributorForm.markAllAsTouched();
+  //     return;
+  //   }
+
+  //   const dist = this.distributorForm.value;
+  //   console.log("Submitting distributor:", dist);
+  //   // if (dist.categories.includes('Others') && dist.customCategory.trim()) {
+  //   //   dist.categories = dist.categories
+  //   //     .filter((c: string) => c !== 'Others')
+  //   //     .concat(dist.customCategory.trim());
+  //   // }
+  //   // delete dist.customCategory; // ✅ remove before sending to API
+
+  //   if (this.isEdit && this.selectedDistributor) {
+  //     this.adminService.updateDistributor(this.selectedDistributor!.distributorId, dist).subscribe({
+  //       next: () => {
+  //         this.toastr.success('Distributor updated successfully', 'Updated');
+  //         this.loadDistributors();
+  //         this.distributorModal?.hide();
+  //       },
+  //       error: () => {
+  //         this.toastr.error('Update failed', 'Error');
+  //       }
+  //     });
+
+  //   } else {
+  //     this.adminService.addDistributor(dist).subscribe({
+  //       next: () => {
+  //         this.toastr.success('Distributor added successfully', 'Success');
+  //         this.loadDistributors();
+  //         this.distributorModal?.hide();
+  //       },
+  //       error: () => {
+  //         this.toastr.error('Failed to add distributor', 'Error');
+  //       }
+  //     });
+  //   }
+  // }
+
   saveDistributor(): void {
+    this.formSubmitted = true;   // ✅ ADD THIS
+
     if (this.distributorForm.invalid) {
       this.distributorForm.markAllAsTouched();
       return;
     }
 
-    const dist = this.distributorForm.value;
-    console.log("Submitting distributor:", dist);
-    // if (dist.categories.includes('Others') && dist.customCategory.trim()) {
-    //   dist.categories = dist.categories
-    //     .filter((c: string) => c !== 'Others')
-    //     .concat(dist.customCategory.trim());
-    // }
-    // delete dist.customCategory; // ✅ remove before sending to API
+    const dist = { ...this.distributorForm.value };
+
+    // 🇮🇳 Auto add +91
+    dist.phoneNumber = '+91' + dist.phoneNumber;
 
     if (this.isEdit && this.selectedDistributor) {
-      this.adminService.updateDistributor(this.selectedDistributor!.distributorId, dist).subscribe({
-        next: () => {
-          this.toastr.success('Distributor updated successfully', 'Updated');
+      this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist)
+        .subscribe(() => {
+          this.toastr.success('Distributor updated successfully');
           this.loadDistributors();
           this.distributorModal?.hide();
-        },
-        error: () => {
-          this.toastr.error('Update failed', 'Error');
-        }
-      });
-
+        });
     } else {
       this.adminService.addDistributor(dist).subscribe({
         next: () => {
-          this.toastr.success('Distributor added successfully', 'Success');
+          this.toastr.success('Distributor added successfully');
           this.loadDistributors();
           this.distributorModal?.hide();
         },
-        error: () => {
-          this.toastr.error('Failed to add distributor', 'Error');
+        error: (err) => {
+          const msg = err.error;
+
+          if (typeof msg === 'string') {
+            if (msg.toLowerCase().includes('email')) {
+              const emailCtrl = this.distributorForm.get('email');
+              emailCtrl?.setErrors({ exists: true });
+              emailCtrl?.markAsTouched();
+              return;
+            }
+
+            if (msg.toLowerCase().includes('phone')) {
+              const phoneCtrl = this.distributorForm.get('phoneNumber');
+              phoneCtrl?.setErrors({ exists: true });
+              phoneCtrl?.markAsTouched();
+              return;
+            }
+          }
+
+          this.toastr.error(msg || 'Failed to add distributor');
         }
       });
     }
   }
 
   deactivate(id: string): void {
-  this.adminService.deactivateDistributor(id).subscribe({
-    next: () => {
-      this.toastr.warning('Distributor deactivated', 'Status');
-      this.loadDistributors();
-    },
-    error: () => this.toastr.error('Action failed', 'Error')
-  });
-}
+    this.adminService.deactivateDistributor(id).subscribe({
+      next: () => {
+        this.toastr.warning('Distributor deactivated', 'Status');
+        this.loadDistributors();
+      },
+      error: () => this.toastr.error('Action failed', 'Error')
+    });
+  }
 
   reactivate(id: string): void {
-  this.adminService.reactivateDistributor(id).subscribe({
-    next: () => {
-      this.toastr.success('Distributor reactivated', 'Status');
-      this.loadDistributors();
-    },
-    error: () => this.toastr.error('Action failed', 'Error')
-  });
-}
+    this.adminService.reactivateDistributor(id).subscribe({
+      next: () => {
+        this.toastr.success('Distributor reactivated', 'Status');
+        this.loadDistributors();
+      },
+      error: () => this.toastr.error('Action failed', 'Error')
+    });
+  }
 
 
   delete(id: string): void {
-  if (!confirm('Are you sure to delete?')) return;
+    if (!confirm('Are you sure to delete?')) return;
 
-  this.adminService.deleteDistributor(id).subscribe({
-    next: (msg: string) => {
-      this.toastr.success(msg, 'Success');
-      this.loadDistributors();
-    },
-    error: err => {
-      const message =
-        typeof err.error === 'string'
-          ? err.error
-          : 'Failed to delete distributor';
+    this.adminService.deleteDistributor(id).subscribe({
+      next: (res: any) => {
+        const message = res?.message || 'Distributor deleted successfully';
+        this.toastr.success(message, 'Success');
+        this.loadDistributors();
+      },
 
-      this.toastr.error(message, 'Error');
-    }
-  });
-}
+      error: err => {
+        const message =
+          typeof err.error === 'string'
+            ? err.error
+            : 'Failed to delete distributor';
+
+        this.toastr.error(message, 'Error');
+      }
+    });
+  }
 
 
 
 
   logout(): void {
-  this.auth.logout();
-  this.toastr.info('Logged out successfully');
-  window.location.href = '/distributor-login';
-}
+    this.auth.logout();
+    this.toastr.info('Logged out successfully');
+    window.location.href = '/distributor-login';
+  }
 
 
   applyFilter(): void {
@@ -349,5 +434,52 @@ export class AdminDashboardComponent implements OnInit {
       d.email.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
+
+  onPhoneInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    // remove non-digits
+    let value = input.value.replace(/\D/g, '');
+
+    // first digit must be 6–9
+    if (value.length === 1 && !/^[6-9]/.test(value)) {
+      value = '';
+    }
+
+    // limit to 10 digits
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+
+    this.distributorForm.get('phoneNumber')?.setValue(value, {
+      emitEvent: false
+    });
+  }
+
+
+  checkEmailExists() {
+    const email = this.distributorForm.get('email')?.value;
+    if (!email) return;
+
+    this.adminService.checkEmailExists(email)
+      .subscribe((exists: boolean) => {
+        if (exists) {
+          this.distributorForm.get('email')?.setErrors({ exists: true });
+        }
+      });
+  }
+
+  checkPhoneExists() {
+    const phoneCtrl = this.distributorForm.get('phoneNumber');
+    if (!phoneCtrl || phoneCtrl.invalid) return;
+
+    this.adminService.checkPhoneExists(phoneCtrl.value).subscribe(exists => {
+      if (exists) {
+        phoneCtrl.setErrors({ exists: true });
+        phoneCtrl.markAsTouched(); // 🔥 IMPORTANT
+      }
+    });
+  }
+
 
 }

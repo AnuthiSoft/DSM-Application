@@ -853,6 +853,31 @@ namespace DSM_Application.Server.Controllers
             return Ok(result);
         }
 
+        [HttpGet("check-email/{email}")]
+        public async Task<IActionResult> CheckEmailExists(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return Ok(false);
+
+            var exists = await _customersCollection
+                .Find(c => c.Email.ToLower() == email.ToLower())
+                .AnyAsync();
+
+            return Ok(exists);
+        }
+
+        [HttpGet("check-phone/{phone}")]
+        public async Task<IActionResult> CheckPhoneExists(string phone)
+        {
+            if (string.IsNullOrEmpty(phone))
+                return Ok(false);
+
+            var exists = await _customersCollection
+                .Find(c => c.PhoneNumber == phone)
+                .AnyAsync();
+
+            return Ok(exists);
+        }
 
         public class ConnectRequest
         {

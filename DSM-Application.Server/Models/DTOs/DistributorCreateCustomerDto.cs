@@ -8,6 +8,8 @@ namespace DSM_Application.Server.Models.DTOs
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
+        [EmailAddress]
+        [StringLength(254)]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Phone Number is required")]

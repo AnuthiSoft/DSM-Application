@@ -805,6 +805,65 @@ textarea.form-control {
   width: 100%;
   max-width: 100%;
 }
+/* Wrapper for +91 and input */
+.phone-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Focus effect */
+.phone-wrapper:focus-within {
+  border-color: #4c6fff;
+  box-shadow: 0 0 0 2px rgba(76, 111, 255, 0.15);
+}
+
+/* +91 prefix */
+.phone-prefix {
+  padding: 10px 12px;
+  background-color: #f3f4f6;
+  border-right: 1px solid #dcdfe6;
+  font-size: 14px;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* Input field */
+.phone-input {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  padding: 10px 12px;
+  font-size: 14px;
+  flex: 1;
+}
+
+/* Placeholder styling */
+.phone-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Error state */
+.phone-wrapper.ng-invalid.ng-touched {
+  border-color: #dc3545;
+}
+
+/* Label styling */
+.form-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+/* Error message */
+.text-danger {
+  font-size: 12px;
+  margin-top: 4px;
+}
 
 
 

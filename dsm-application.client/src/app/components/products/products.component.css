@@ -175,6 +175,15 @@
   white-space: nowrap;
 }
 
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  display: block;
+  font-size: 0.8rem;
+}
+
 /* =========================
    📱 RESPONSIVE
 ========================= */

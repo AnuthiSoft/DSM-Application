@@ -79,5 +79,14 @@ deleteDistributor(id: string): Observable<string> {
   );
 }
 
+checkPhoneExists(phone: string): Observable<boolean> {
+  return this.api.get<boolean>(`admin/phone-exists/${phone}`);
+}
+
+checkEmailExists(email: string): Observable<boolean> {
+  return this.api.get<boolean>(`admin/email-exists/${email}`);
+}
+
+
 
 }

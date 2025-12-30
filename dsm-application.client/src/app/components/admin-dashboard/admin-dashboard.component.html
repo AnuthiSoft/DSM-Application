@@ -282,7 +282,8 @@
                     <input type="text" class="form-control" formControlName="companyName"
                       [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
 
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']">
                       Name must start with a capital letter
                     </div>
                   </div>
@@ -300,39 +301,56 @@
               </div>
 
               <div class="row">
+                <!-- EMAIL -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Email *</label>
-                    <input type="email" class="form-control" formControlName="email"
-                      [class.is-invalid]="distributorForm.get('email')?.invalid && distributorForm.get('email')?.touched">
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('email')?.errors?.['required'] && distributorForm.get('email')?.touched">
+                    <input type="email" class="form-control" formControlName="email" maxlength="254" [class.is-invalid]="distributorForm.get('email')?.invalid 
+          && (distributorForm.get('email')?.touched || formSubmitted)" (blur)="checkEmailExists()" />
+
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required']">
                       Email is required
                     </div>
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('email')?.errors?.['email'] && distributorForm.get('email')?.touched">
-                      Please enter a valid email
+
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email']">
+                      Enter a valid email address
+                    </div>
+
+                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['exists']">
+                      This email already exists
                     </div>
                   </div>
                 </div>
+
+                <!-- PHONE -->
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">Phone Number *</label>
-                    <input type="text" class="form-control" formControlName="phoneNumber"
-                      [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('phoneNumber')?.errors?.['pattern']">
-                      Phone number must be exactly 10 digits
+
+                    <div class="input-group phone-group">
+                      <span class="input-group-text phone-prefix">+91</span>
+
+                      <input type="text" class="form-control phone-input" placeholder="Enter 10-digit mobile"
+                        maxlength="10" placeholder="Enter 10-digit mobile" (input)="onPhoneInput($event)"
+                        (blur)="checkPhoneExists()" [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && 
+                        (distributorForm.get('phoneNumber')?.touched || formSubmitted)" />
                     </div>
 
+                    <div class="invalid-feedback d-block"
+                      *ngIf="distributorForm.get('phoneNumber')?.errors?.['exists']">
+                      This phone number already exists
+                    </div>
                   </div>
                 </div>
+
               </div>
+
 
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
                     <label class="form-label">GST Number *</label>
-                    <input type="text" class="form-control" formControlName="gst"
+                    <input type="text" class="form-control" formControlName="gst" maxlength="15"
                       [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
                     <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.errors?.['invalidGST']">
                       Enter a valid 15-digit GST number
@@ -380,14 +398,21 @@
               </div> -->
 
               <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
-                      <label class="form-check-label" for="isActive">
-                        Active Distributor
-                      </label>
-                    </div>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive"
+                      [class.is-invalid]="distributorForm.get('isActive')?.invalid 
+        && (distributorForm.get('isActive')?.touched || formSubmitted)" />
+
+                    <label class="form-check-label" for="isActive">
+                      Active Distributor
+                    </label>
+                  </div>
+
+                  <!-- 🔴 INLINE ERROR -->
+                  <div class="text-danger small mt-1" *ngIf="distributorForm.get('isActive')?.errors?.['requiredTrue']
+              && (distributorForm.get('isActive')?.touched || formSubmitted)">
+                    Active Distributor must be enabled
                   </div>
                 </div>
                 <div class="col-md-6">

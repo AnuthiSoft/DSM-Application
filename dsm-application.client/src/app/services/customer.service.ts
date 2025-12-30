@@ -143,6 +143,19 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
     );
   }
 
+  checkEmailExists(email: string): Observable<boolean> {
+  return this.api.get<boolean>(
+    `customers/check-email/${email}`
+  );
+}
+
+checkPhoneExists(phoneNumber: string): Observable<boolean> {
+  return this.api.get<boolean>(
+    `customers/check-phone/${phoneNumber}`
+  );
+}
+
+
 }
 
 

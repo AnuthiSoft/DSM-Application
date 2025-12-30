@@ -34,23 +34,31 @@ namespace DSM_Application.Server.Services
 
             foreach (var product in products)
             {
-                var item = inventory.FirstOrDefault(i => i.ProductId == product.ProductId);
+                var productInventory = inventory
+                    .Where(i => i.ProductId == product.ProductId)
+                    .ToList();
 
-
+                var currentStock = productInventory.Sum(i =>
+                    i.CurrentStock > 0
+                        ? i.CurrentStock
+                        : i.AvailableQuantity
+                );
 
                 result.Add(new
                 {
                     productId = product.ProductId,
                     productName = product.ProductName,
                     productCode = product.ProductCode,
+                    color = product.Color,          // ✅ FIX
+                    brand = product.Brand,
                     measure = product.Measure,
-                    costPrice = product.CostPrice,
-                    currentStock = item?.CurrentStock ?? product.Stock,
-
+                    currentStock = currentStock,
+                    price = product.Price,
                     sellingPrice = product.Price,
-
                     reorderLevel = product.ReorderLevel,
-                    updatedAt = item?.UpdatedAt ?? product.UpdatedDate
+                    updatedAt = productInventory.Any()
+                        ? productInventory.Max(i => i.UpdatedAt)
+                        : product.UpdatedDate
                 });
             }
 

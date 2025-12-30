@@ -432,28 +432,49 @@
                   <i class="fas fa-envelope"></i>
                   Email Address
                 </label>
-                <input type="email" class="form-control" formControlName="email" placeholder="Enter email address" />
-                <div *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.invalid"
-                  class="text-danger">
-                  Enter a valid email address
+                <input type="email" class="form-control" formControlName="email" placeholder="Enter email address"
+                  (blur)="checkEmployeeEmailExists()" />
+                <div class="text-danger" *ngIf="employeeForm.get('email')?.touched">
+                  <div *ngIf="employeeForm.get('email')?.errors?.['required']">
+                    Email is required
+                  </div>
+                  <div *ngIf="employeeForm.get('email')?.errors?.['email']">
+                    Enter a valid email address
+                  </div>
+                  <div class="text-danger" *ngIf="employeeForm.get('email')?.errors?.['exists']">
+                    This email already exists
+                  </div>
+
                 </div>
+
 
               </div>
 
               <div class="form-group">
                 <label class="form-label">
-                  <i class="fas fa-phone"></i>
-                  Phone Number
+                  <i class="fas fa-phone"></i> Phone Number
                 </label>
-                <input type="text" class="form-control" formControlName="phoneNumber" placeholder="Enter phone number"
-                  (input)="restrictPhoneInput($event)" />
-                <div *ngIf="employeeForm.get('phoneNumber')?.touched && employeeForm.get('phoneNumber')?.invalid"
-                  class="text-danger">
-                  Phone number must be 10 digits
+                <div class="phone-wrapper">
+                  <span class="phone-prefix">+91</span>
+
+                  <input type="text" class="form-control phone-input" formControlName="phoneNumber" maxlength="10"
+                    placeholder="Enter phone number" (input)="restrictPhoneInput($event)"
+                    (blur)="checkEmployeePhoneExists()" />
                 </div>
 
-              </div>
+                <div class="text-danger" *ngIf="employeeForm.get('phoneNumber')?.touched">
+                  <div *ngIf="employeeForm.get('phoneNumber')?.errors?.['required']">
+                    Phone number is required
+                  </div>
+                  <!-- <div *ngIf="employeeForm.get('phoneNumber')?.errors?.['pattern']">
+                  Enter valid 10-digit Indian mobile number
+                </div> -->
+                  <div class="text-danger" *ngIf="employeeForm.get('phoneNumber')?.errors?.['exists']">
+                    This phone number already exists
+                  </div>
 
+                </div>
+              </div>
               <div class="form-group">
                 <label class="form-label">
                   <i class="fas fa-briefcase"></i>
@@ -480,7 +501,7 @@
                   <i class="fas fa-user-tag"></i>
                   Role
                 </label>
-                <input type="text" class="form-control" formControlName="role" placeholder="Enter role" />
+                <input type="text" class="form-control" formControlName="role" />
                 <div *ngIf="employeeForm.get('role')?.touched && employeeForm.get('role')?.invalid" class="text-danger">
                   Role is required
                 </div>
@@ -512,12 +533,12 @@
               <button type="submit" class="btn btn-primary">
                 <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
                 {{ isEdit ? 'Update Employee' : 'Save Employee' }}
-              </button> 
-            
+              </button>
+
             </div>
           </form>
         </div>
       </div>
     </div>
   </div>
-  </div>
+</div>

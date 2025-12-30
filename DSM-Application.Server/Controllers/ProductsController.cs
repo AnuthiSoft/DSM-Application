@@ -129,7 +129,7 @@ namespace DSM_Application.Server.Controllers
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
                 GST = gst,
-                Stock = dto.Stock,
+                
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
                 DistributorId = dto.DistributorId,
@@ -212,7 +212,7 @@ namespace DSM_Application.Server.Controllers
             existing.CostPrice = dto.CostPrice;
             existing.Discount = dto.Discount;
             existing.GST = existing.GST;
-            existing.Stock = dto.Stock;
+       
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
             existing.Category = dto.Category;

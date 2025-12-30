@@ -167,4 +167,18 @@ getProfileImage() {
     );
   }
 
+  // ✅ CHECK EMPLOYEE EMAIL EXISTS
+checkEmailExists(email: string): Observable<boolean> {
+  return this.http.get<boolean>(
+    `${this.baseUrl}/email-exists/${encodeURIComponent(email)}`
+  );
+}
+
+// ✅ CHECK EMPLOYEE PHONE EXISTS
+checkPhoneExists(phone: string): Observable<boolean> {
+  return this.http.get<boolean>(
+    `${this.baseUrl}/phone-exists/${phone}`
+  );
+}
+
 }

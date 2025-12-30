@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace DistributorManagementSystem.Server.Models
 {
@@ -21,7 +22,11 @@ namespace DistributorManagementSystem.Server.Models
 
         public string Name { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
-        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        [StringLength(254)]
+        public string Email { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string ProfileImageUrl { get; set; }
         public byte[]? ProfileImageData { get; set; }

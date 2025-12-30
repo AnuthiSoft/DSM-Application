@@ -3,7 +3,7 @@
     <!-- 🧱 PAGE HEADER -->
     <div class="page-header d-flex justify-content-between align-items-center mb-4">
       <h2><i class="fas fa-box me-2"></i>Product Management</h2>
-      <button class="btn btn-primary" (click)="openModal(false)">
+      <button class="btn btn-primary" (click)="openModal()">
         <i class="fas fa-plus me-2"></i>Add New Product
       </button>
     </div>
@@ -45,7 +45,7 @@
         <i class="fas fa-box-open fa-3x mb-3 text-secondary"></i>
         <h4>No products found</h4>
         <p>Try adjusting your search or filters.</p>
-        <button class="btn btn-primary mt-2" (click)="openModal(false)">
+        <button class="btn btn-primary mt-2" (click)="openModal()">
           <i class="fas fa-plus me-2"></i>Add New Product
         </button>
       </div>
@@ -78,47 +78,41 @@
                     <!-- <img [src]="apiBaseUrl + img"
                class="d-block w-100 rounded"
                style="max-height: 180px; object-fit: contain;" /> -->
- 
-               <img [src]="getFullImageUrl(img)"
 
-               class="d-block w-100 rounded"
-          
-               style="max-height:180px; object-fit:contain;">
-          
-           
- 
-        </div>
- 
-      </div>
- 
-      <!-- Prev -->
-      <button class="carousel-control-prev" type="button"
-              [attr.data-bs-target]="'#carousel-' + product.productId"
-              data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-      </button>
- 
-      <!-- Next -->
-      <button class="carousel-control-next" type="button"
-              [attr.data-bs-target]="'#carousel-' + product.productId"
-              data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-      </button>
-    </div>
- 
-  </div>
- 
-  <!-- If no images -->
-  <div *ngIf="!product.imageUrls || product.imageUrls.length === 0">
-    <img src="assets/no-image.png"
-         class="img-fluid rounded"
-         style="max-height: 180px; object-fit: contain;" />
-  </div>
- 
-</div>
- 
- 
- 
+                    <img [src]="getFullImageUrl(img)" class="d-block w-100 rounded"
+                      style="max-height:180px; object-fit:contain;">
+
+
+
+                  </div>
+
+                </div>
+
+                <!-- Prev -->
+                <button class="carousel-control-prev" type="button"
+                  [attr.data-bs-target]="'#carousel-' + product.productId" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon"></span>
+                </button>
+
+                <!-- Next -->
+                <button class="carousel-control-next" type="button"
+                  [attr.data-bs-target]="'#carousel-' + product.productId" data-bs-slide="next">
+                  <span class="carousel-control-next-icon"></span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- If no images -->
+            <div *ngIf="!product.imageUrls || product.imageUrls.length === 0">
+              <img src="assets/no-image.png" class="img-fluid rounded"
+                style="max-height: 180px; object-fit: contain;" />
+            </div>
+
+          </div>
+
+
+
           <div class="product-info p-3">
 
             <!-- Product Name & Price -->
@@ -138,13 +132,15 @@
             <div class="small text-muted">
               <div><strong>Code:</strong> {{ product.productCode }}</div>
               <div><strong>Color:</strong> {{ product.color }}</div>
-              <div><strong>Stock:</strong> {{ product.stock }} {{ product.measure }}</div>
+              <!-- <div><strong>Stock:</strong> {{ product.stock }} {{ product.measure }}</div> -->
+              <div><strong>Stock:</strong> {{ product.currentStock }} {{ product.measure }}</div>
+
             </div>
 
             <!-- Stock Status Badge -->
             <div class="mt-2">
-              <span class="badge" [ngClass]="getStockStatus(product.stock).class">
-                {{ getStockStatus(product.stock).text }}
+              <span class="badge" [ngClass]="getStockStatus(product.currentStock).class">
+                {{ getStockStatus(product.currentStock).text }}
               </span>
 
 
@@ -156,7 +152,7 @@
           <div class="product-actions">
 
 
-            <button class="btn btn-sm btn-outline-primary" (click)="openModal(true, product)">
+            <button class="btn btn-sm btn-outline-primary" (click)="editProduct(product)">
               <i class="fas fa-edit me-1"></i>Edit
             </button>
 
@@ -189,47 +185,91 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Product Name</label>
-                  <input type="text" class="form-control" formControlName="productName" />
+                  <input type="text" class="form-control" formControlName="productName"
+                    [class.is-invalid]="formSubmitted && productForm.get('productName')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('productName')?.invalid">
+                    Product name is required
+                  </div>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Product Code</label>
-                  <input type="text" class="form-control" formControlName="productCode" />
+                  <input type="text" class="form-control" formControlName="productCode"
+                    [class.is-invalid]="formSubmitted && productForm.get('productCode')?.invalid">
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('productCode')?.invalid">
+                    Product Code is required
+                  </div>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Color</label>
-                  <input type="text" class="form-control" formControlName="color" />
+                  <input type="text" class="form-control" formControlName="color"
+                    [class.is-invalid]="formSubmitted && productForm.get('color')?.invalid">
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('color')?.invalid">
+                    Color is required
+                  </div>
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Price ($)</label>
-                  <input type="number" class="form-control" formControlName="price" />
+                  <input type="number" class="form-control" formControlName="price"
+                    [class.is-invalid]="formSubmitted && productForm.get('price')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('price')?.invalid">
+                    Price is required and must be valid
+                  </div>
+
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Cost Price ($)</label>
-                  <input type="number" class="form-control" formControlName="costPrice" />
+                  <input type="number" class="form-control" formControlName="costPrice"
+                    [class.is-invalid]="formSubmitted && productForm.get('costPrice')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('costPrice')?.invalid">
+                    Cost Price is required
+                  </div>
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Stock</label>
-                  <input type="number" class="form-control" formControlName="stock" />
+                  <input type="number" class="form-control" formControlName="stock"
+                    [class.is-invalid]="formSubmitted && productForm.get('stock')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('stock')?.invalid">
+                    Stock is required
+                  </div>
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Discount (%)</label>
-                  <input type="number" class="form-control" formControlName="discount" />
+                  <input type="number" class="form-control" formControlName="discount"
+                    [class.is-invalid]="formSubmitted && productForm.get('discount')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('discount')?.invalid">
+                    Discount is required
+                  </div>
                 </div>
+                <!-- <div class="col-md-4 mb-3">
+                  <label class="form-label">GST (%)</label>
+                  <input type="number" class="form-control" formControlName="gst"
+                    [class.is-invalid]="formSubmitted && productForm.get('gst')?.invalid" readonly>
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('gst')?.invalid">
+                    GST is required
+                  </div>
+                </div> -->
+
                 <div class="col-md-4 mb-3">
                   <label class="form-label">GST (%)</label>
-                  <input
-  type="number"
-  class="form-control"
-  formControlName="gst"
-  readonly
-/>
+
+                  <input type="number" class="form-control" formControlName="gst" readonly>
+
+
+
                 </div>
+
               </div>
 
               <div class="row">
@@ -242,29 +282,49 @@
                       {{ mc.name }}
                     </option>
                   </select>
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('mainCategory')?.invalid">
+                    Main category is required
+                  </div>
+
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Subcategory</label>
-                  <select class="form-select" formControlName="subcategory" (change)="onSubCategoryChange($event)">
+                  <select class="form-select" formControlName="category" (change)="onSubCategoryChange($event)"
+                    [class.is-invalid]="formSubmitted && productForm.get('category')?.invalid">
                     <option value="">Select Subcategory</option>
                     <option *ngFor="let sc of subCategories" [value]="sc.categoryId">
                       {{ sc.name }}
                     </option>
                   </select>
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('category')?.invalid">
+                    Sub category is required
+                  </div>
+
                 </div>
 
                 <div class="col-md-3 mb-3">
                   <label class="form-label">Brand</label>
-                  <input type="text" class="form-control" formControlName="brand" />
+                  <input type="text" class="form-control" formControlName="brand"
+                    [class.is-invalid]="formSubmitted && productForm.get('brand')?.invalid">
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('brand')?.invalid">
+                    Brand is required
+                  </div>
                 </div>
                 <div class="col-md-3 mb-3">
                   <label class="form-label">Measure</label>
-                  <select class="form-select" formControlName="measure">
+                  <select class="form-select" formControlName="measure"
+                    [class.is-invalid]="formSubmitted && productForm.get('measure')?.invalid">
                     <option value="">Select Measure</option>
-                    <option *ngFor="let m of measures" [value]="m">
-                      {{ m }}
-                    </option>
+                    <option *ngFor="let m of measures" [value]="m">{{ m }}</option>
                   </select>
+
+                  <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('measure')?.invalid">
+                    Measure is required
+                  </div>
+
                 </div>
               </div>
 
@@ -277,19 +337,29 @@
                   <img [src]="previewUrl" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
                 </div> -->
 
+                <!-- <div *ngIf="previewUrls.length > 0" class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
+                  <img *ngIf="selectedProduct?.imageUrls?.length" [src]="getFullImageUrl(selectedProduct.imageUrls[0])"
+                    class="img-fluid rounded" style="max-height: 180px; object-fit: contain;" />
+                </div> -->
+
                 <div *ngIf="previewUrls.length > 0" class="mt-3 d-flex gap-2 flex-wrap justify-content-center">
-<img *ngIf="selectedProduct?.imageUrls?.length"
-     [src]="getFullImageUrl(selectedProduct.imageUrls[0])"
-     class="img-fluid rounded"
-     style="max-height: 180px; object-fit: contain;" />
-</div>
- 
+
+                  <img *ngFor="let img of previewUrls" [src]="img" class="img-fluid rounded"
+                    style="max-height: 180px; object-fit: contain;" />
+                </div>
+
+
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                <textarea class="form-control" rows="3" formControlName="description"
+                  [class.is-invalid]="formSubmitted && productForm.get('description')?.invalid">
 
+                <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('description')?.invalid">
+                  Description is required
+                </div>
+                </textarea>
               </div>
             </form>
           </div>

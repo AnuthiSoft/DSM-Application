@@ -31,6 +31,9 @@ export class EmployeesComponent {
   email = '';
   showModal = false;
   // isEdit = false;
+  emailExists = false;
+  phoneExists = false;
+
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
@@ -49,11 +52,12 @@ export class EmployeesComponent {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [
         Validators.required,
-        Validators.pattern(/^[0-9]{10}$/)
+        Validators.pattern(/^[6-9]\d{9}$/)
+
       ]],
-      role: ['', Validators.required],
+      role: [{ value: 'Employee', disabled: true }],
       designation: ['', Validators.required],
-      isActive: [true, Validators.requiredTrue] // ensures value exists
+      isActive: [true] // ensures value exists
     });
 
 
@@ -80,9 +84,46 @@ export class EmployeesComponent {
   // ✅ Add / Update employee
   onSubmit() {
     if (this.employeeForm.invalid) return;
+    this.emailExists = false;
+    this.phoneExists = false;
+
+    if (this.employeeForm.invalid) {
+      this.employeeForm.markAllAsTouched();
+      this.toastr.error('Please fill all required fields', 'Validation Error');
+      return;
+    }
+
+    const email = this.employeeForm.value.email.trim().toLowerCase();
+    const phone = '+91' + this.employeeForm.value.phoneNumber;
+
+    // 🔍 DUPLICATE CHECK
+    const emailDuplicate = this.employees.some(e =>
+      e.email.toLowerCase() === email &&
+      (!this.isEdit || e.employeeId !== this.selectedEmployee?.employeeId)
+    );
+
+    const phoneDuplicate = this.employees.some(e =>
+      e.phoneNumber === phone &&
+      (!this.isEdit || e.employeeId !== this.selectedEmployee?.employeeId)
+    );
+
+    if (emailDuplicate) {
+      this.employeeForm.get('email')?.setErrors({ exists: true });
+      this.employeeForm.get('email')?.markAsTouched();
+      return;
+    }
+
+    if (phoneDuplicate) {
+      this.employeeForm.get('phoneNumber')?.setErrors({ exists: true });
+      this.employeeForm.get('phoneNumber')?.markAsTouched();
+      return;
+    }
+
 
     const emp: Employee = {
-      ...this.employeeForm.value,
+      ...this.employeeForm.getRawValue(),
+      phoneNumber: '+91' + this.employeeForm.get('phoneNumber')?.value,
+
       distributorId: this.distributorId,
       isRegistered: false
     };
@@ -97,8 +138,28 @@ export class EmployeesComponent {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Failed to update employee.');
+
+          const msg = typeof err.error === 'string'
+            ? err.error.toLowerCase()
+            : '';
+
+          if (msg.includes('email')) {
+            const emailCtrl = this.employeeForm.get('email');
+            emailCtrl?.setErrors({ exists: true });
+            emailCtrl?.markAsTouched();
+            return;
+          }
+
+          if (msg.includes('phone')) {
+            const phoneCtrl = this.employeeForm.get('phoneNumber');
+            phoneCtrl?.setErrors({ exists: true });
+            phoneCtrl?.markAsTouched();
+            return;
+          }
+
+          this.toastr.error('Failed to update employee');
         }
+
       });
     } else {
       this.employeeService.addEmployee(this.distributorId, emp).subscribe({
@@ -110,32 +171,66 @@ export class EmployeesComponent {
         },
         error: (err) => {
           console.error(err);
-          this.toastr.error('Failed to add employee.');
+
+          const msg = typeof err.error === 'string'
+            ? err.error.toLowerCase()
+            : '';
+
+          if (msg.includes('email')) {
+            const emailCtrl = this.employeeForm.get('email');
+            emailCtrl?.setErrors({ exists: true });
+            emailCtrl?.markAsTouched();
+            return;
+          }
+
+          if (msg.includes('phone')) {
+            const phoneCtrl = this.employeeForm.get('phoneNumber');
+            phoneCtrl?.setErrors({ exists: true });
+            phoneCtrl?.markAsTouched();
+            return;
+          }
+
+          this.toastr.error('Failed to add employee');
         }
+
       });
     }
   }
 
-
-
   restrictPhoneInput(event: any) {
-    const input = event.target.value;
+  let value = event.target.value;
 
-    // Allow unlimited characters for email,
-    // but restrict pure numbers to max 10 digits.
-    if (/^[0-9]+$/.test(input)) {
-      event.target.value = input.substring(0, 10);
-      this.email = event.target.value;
-    }
+  // Allow only digits
+  value = value.replace(/\D/g, '');
+
+  // Max 10 digits
+  value = value.slice(0, 10);
+
+  // First digit must be 6–9
+  if (value.length === 1 && !/^[6-9]$/.test(value)) {
+    value = '';
   }
+
+  event.target.value = value;
+  this.employeeForm.get('phoneNumber')?.setValue(value, { emitEvent: false });
+}
+
 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
     this.isEdit = true;
-    this.employeeForm.patchValue(emp);
-    this.showModal = true; // ✅ this opens the modal automatically
-    this.selectedEmployee = emp; // ✅ Add this line
+
+    this.employeeForm.patchValue({
+      ...emp,
+      phoneNumber: emp.phoneNumber?.startsWith('+91')
+        ? emp.phoneNumber.slice(3) // remove +91
+        : emp.phoneNumber
+    });
+
+    this.selectedEmployee = emp;
+    this.showModal = true;
   }
+
 
   // // ✅ Delete employee
   // deleteEmployee(emp: Employee) {
@@ -212,6 +307,18 @@ export class EmployeesComponent {
   openEmployeeModal(): void {
     this.isEdit = false;
     this.employeeForm.reset();
+    this.emailExists = false;
+    this.phoneExists = false;
+
+    this.employeeForm.reset({
+      name: '',
+      email: '',
+      phoneNumber: '',
+      role: 'Employee',
+      designation: '',
+      isActive: true
+    });
+
     this.showModal = true;
   }
 
@@ -256,6 +363,56 @@ export class EmployeesComponent {
       });
   }
 
+  checkEmployeeEmailExists() {
+    const ctrl = this.employeeForm.get('email');
+    const email = ctrl?.value;
+
+    if (!ctrl || ctrl.invalid) {
+      this.emailExists = false;
+      return;
+    }
+
+    this.employeeService.checkEmailExists(email).subscribe(exists => {
+      if (exists) {
+        this.emailExists = true;
+        ctrl.setErrors({ ...(ctrl.errors || {}), exists: true });
+        ctrl.markAsTouched();
+      } else {
+        this.emailExists = false;
+        this.removeSpecificError(ctrl, 'exists');
+      }
+    });
+  }
+
+  checkEmployeePhoneExists() {
+    const ctrl = this.employeeForm.get('phoneNumber');
+    const phone = ctrl?.value;
+
+    if (!ctrl || ctrl.invalid) {
+      this.phoneExists = false;
+      return;
+    }
+
+    this.employeeService.checkPhoneExists(phone).subscribe(exists => {
+      if (exists) {
+        this.phoneExists = true;
+        ctrl.setErrors({ ...(ctrl.errors || {}), exists: true });
+        ctrl.markAsTouched();
+      } else {
+        this.phoneExists = false;
+        this.removeSpecificError(ctrl, 'exists');
+      }
+    });
+  }
+
+  removeSpecificError(control: any, errorKey: string) {
+    if (!control?.errors) return;
+
+    const errors = { ...control.errors };
+    delete errors[errorKey];
+
+    control.setErrors(Object.keys(errors).length ? errors : null);
+  }
 
 }
 

@@ -40,35 +40,32 @@
       <div class="distributor-card" *ngFor="let d of distributors">
         <div class="distributor-header">
           <h4>{{ d.companyName }}</h4>
-      <span class="status-badge" [class]="(d.status || '').toLowerCase()">
+          <span class="status-badge" [class]="(d.status || '').toLowerCase()">
 
             {{ d.status || 'Available' }}
           </span>
         </div>
-        
-      <div class="distributor-info">
-  <p><i class="fas fa-user"></i> {{ d.name }}</p>
-  <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
-  <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
-  <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
-  <p><i class="fas fa-tags"></i> {{ d.categories }}</p>
 
-  <!-- ⭐ Average Rating Block -->
-  <div class="rating-stars" *ngIf="d.averageRating !== undefined">
-    <span *ngFor="let star of getStars(d.averageRating)">
-      <i
-        class="fas"
-        [class.fa-star]="star <= d.averageRating"
-        [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
-        [class.fa-star-o]="star > d.averageRating"
-      ></i>
-    </span>
+        <div class="distributor-info">
+          <p><i class="fas fa-user"></i> {{ d.name }}</p>
+          <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+          <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
+          <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
+          <p><i class="fas fa-tags"></i> {{ d.categories }}</p>
 
-    <span class="rating-value">
-      {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
-    </span>
-  </div>
-</div>
+          <!-- ⭐ Average Rating Block -->
+          <div class="rating-stars" *ngIf="d.averageRating !== undefined">
+            <span *ngFor="let star of getStars(d.averageRating)">
+              <i class="fas" [class.fa-star]="star <= d.averageRating"
+                [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
+                [class.fa-star-o]="star > d.averageRating"></i>
+            </span>
+
+            <span class="rating-value">
+              {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
+            </span>
+          </div>
+        </div>
 
         <div class="distributor-actions">
           <!-- View Products Button -->
@@ -90,47 +87,43 @@
               : 'Connect' }}
           </button> -->
 
-              <!-- Connect Button -->
-          <button class="btn btn-primary"
-        *ngIf="dashboardType === 'global'"
-        [disabled]="!d.canConnect || d.status === 'Pending' || d.status === 'Accepted'"
-        (click)="connectDistributor(d.distributorId)">
+          <!-- Connect Button -->
+          <button class="btn btn-primary" *ngIf="dashboardType === 'global'"
+            [disabled]="!d.canConnect || d.status === 'Pending' || d.status === 'Accepted'"
+            (click)="connectDistributor(d.distributorId)">
 
-    {{ 
-  !d.canConnect
-    ? 'Connected'
-    : d.status === 'Pending'
-      ? 'Pending'
-      : d.status === 'Accepted'
-        ? 'Connected'
-        : 'Connect'
-}}
+            {{
+            !d.canConnect
+            ? 'Connected'
+            : d.status === 'Pending'
+            ? 'Pending'
+            : d.status === 'Accepted'
+            ? 'Connected'
+            : 'Connect'
+            }}
 
           </button>
-           <!-- ⭐ REPORT FRAUD BUTTON (FOR CUSTOMER REPORTING DISTRIBUTOR) -->
-          <button class="btn btn-danger mt-2"
-                  [routerLink]="[
+          <!-- ⭐ REPORT FRAUD BUTTON (FOR CUSTOMER REPORTING DISTRIBUTOR) -->
+          <button class="btn btn-danger mt-2" [routerLink]="[
                     '/report-fraud',
                     'distributor',
                     d.distributorId
                   ]">
             <i class="fas fa-flag"></i> Report
           </button>
-          <button class="btn btn-warning mt-2"
-        [routerLink]="[
+          <button class="btn btn-warning mt-2" [routerLink]="[
           '/review',
           'Distributor',
           d.distributorId
         ]">
-  <i class="fas fa-star"></i> Review
-</button>
+            <i class="fas fa-star"></i> Review
+          </button>
 
 
-<button class="btn-view-products mt-2"
-        *ngIf="d.status === 'Accepted' || !d.canConnect"
-        (click)="openProducts(d.distributorId)">
-  <i class="fas fa-box"></i> View Products
-</button>
+          <button class="btn-view-products mt-2" *ngIf="d.status === 'Accepted' || !d.canConnect"
+            (click)="openProducts(d.distributorId)">
+            <i class="fas fa-box"></i> View Products
+          </button>
 
 
 

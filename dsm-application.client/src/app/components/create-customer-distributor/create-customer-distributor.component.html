@@ -46,61 +46,61 @@
     </div>
 
     <div class="table-container">
-    <table class="directory-table" *ngIf="filteredCustomers.length > 0">
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Address</th>
-          <th>Status</th>
-          <th>Permanent Employee</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+      <table class="directory-table" *ngIf="filteredCustomers.length > 0">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Permanent Employee</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-      <tbody>
-        <tr *ngFor="let c of filteredCustomers">
+        <tbody>
+          <tr *ngFor="let c of filteredCustomers">
 
-          <td>
-            <div class="avatar-name">
-              <div class="avatar"><i class="fas fa-user"></i></div>
-              <span>{{ c.name }}</span>
-            </div>
-          </td>
+            <td>
+              <div class="avatar-name">
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <span>{{ c.name }}</span>
+              </div>
+            </td>
 
-          <td>{{ c.email }}</td>
-          <td>{{ c.phoneNumber || '-' }}</td>
-          <td>{{ c.address || '-' }}</td>
+            <td>{{ c.email }}</td>
+            <td>{{ c.phoneNumber || '-' }}</td>
+            <td>{{ c.address || '-' }}</td>
 
-          <td>
-            <span class="status-badge" [class.registered]="c.isRegistered" [class.unregistered]="!c.isRegistered">
-              {{ c.isRegistered ? 'Registered' : 'Not Registered' }}
-            </span>
-          </td>
-          <td>
-            {{ c.permanentEmployeeName || 'Not Assigned' }}
+            <td>
+              <span class="status-badge" [class.registered]="c.isRegistered" [class.unregistered]="!c.isRegistered">
+                {{ c.isRegistered ? 'Registered' : 'Not Registered' }}
+              </span>
+            </td>
+            <td>
+              {{ c.permanentEmployeeName || 'Not Assigned' }}
 
-            <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
-              <i class="fas fa-user-check"></i> Assign
-            </button>
-          </td>
+              <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
+                <i class="fas fa-user-check"></i> Assign
+              </button>
+            </td>
 
-          <td class="table-actions">
-            <button class="btn btn-outline-primary btn-sm" (click)="editCustomer(c)">
-              <i class="fas fa-edit"></i> Edit
-            </button>
+            <td class="table-actions">
+              <button class="btn btn-outline-primary btn-sm" (click)="editCustomer(c)">
+                <i class="fas fa-edit"></i> Edit
+              </button>
 
-            <button class="btn btn-outline-danger btn-sm" (click)="deleteCustomer(c.customerId!)">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </td>
+              <button class="btn btn-outline-danger btn-sm" (click)="deleteCustomer(c.customerId!)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </td>
 
 
-        </tr>
+          </tr>
 
-      </tbody>
-    </table>
+        </tbody>
+      </table>
     </div>
 
     <div *ngIf="filteredCustomers.length === 0" class="empty-state">
@@ -114,7 +114,7 @@
     <div class="customer-modal">
 
       <div class="modal-header">
-        <h3><i class="fas fa-user-plus"></i> 
+        <h3><i class="fas fa-user-plus"></i>
           {{ isEdit ? 'Update Customer' : 'Add Customer' }}</h3>
         <i class="fas fa-times close-icon" (click)="closeModal()"></i>
       </div>
@@ -124,9 +124,15 @@
 
           <div class="form-group">
             <label><i class="fas fa-user"></i> Full Name</label>
-            <input class="form-control" type="text" [(ngModel)]="customer.name" name="name" required #name="ngModel" />
-            <div class="text-danger" *ngIf="name.invalid && name.touched">
-              Name is required
+            <input class="form-control" type="text" [(ngModel)]="customer.name" name="name" required
+              pattern="^[A-Z][a-zA-Z ]*$" #name="ngModel" />
+            <div class="text-danger" *ngIf="name.touched && name.errors">
+              <div *ngIf="name.errors['required']">
+                Name is required
+              </div>
+              <div *ngIf="name.errors['pattern']">
+                Name must start with a capital letter
+              </div>
             </div>
           </div>
 
@@ -144,16 +150,25 @@
               <i class="fas fa-phone"></i>
               Phone Number
             </label>
-            <!-- <input type="text" class="form-control" placeholder="Enter phone number" [(ngModel)]="customer.phoneNumber"
-              name="phoneNumber" (input)="restrictPhoneInput($event)"> -->
-            <input class="form-control" type="text" [(ngModel)]="customer.phoneNumber" name="phoneNumber" required
-              pattern="^[0-9]{10}$" (input)="restrictPhoneInput($event)" #phone="ngModel" />
 
-            <div class="text-danger" *ngIf="phone.invalid && phone.touched">
-              Phone number must be 10 digits
+            <div class="phone-wrapper">
+              <span class="phone-prefix">+91</span>
+
+              <input class="form-control phone-input" type="text" [(ngModel)]="customer.phoneNumber" name="phoneNumber"
+                required pattern="^[6-9]\d{9}$" maxlength="10" placeholder="Enter phone number"
+                (input)="restrictPhoneInput($event)" #phone="ngModel" />
             </div>
 
+            <div class="text-danger" *ngIf="phone.touched && phone.errors">
+              <div *ngIf="phone.errors['required']">
+                Phone number is required
+              </div>
+              <div *ngIf="phone.errors['pattern']">
+                Phone number must start with 6–9 and contain 10 digits
+              </div>
+            </div>
           </div>
+
 
           <div class="form-group full-width">
             <label class="form-label">
@@ -177,42 +192,42 @@
           <textarea class="form-control" [(ngModel)]="customer.address"></textarea>
         </div> -->
 
-      
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create
+          Customer'}}</button>
+      </div>
+
     </div>
 
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-      <button class="btn btn-primary" (click)="saveCustomer()">{{ isEdit ? 'Update Customer' : 'Create Customer'
-        }}</button>
-    </div>
 
   </div>
+  <!-- Permanent Employee Modal -->
+  <div class="modal-backdrop" *ngIf="showAssignModal">
+    <div class="customer-modal">
 
+      <div class="modal-header">
+        <h3><i class="fas fa-user-tie"></i> Assign Permanent Employee</h3>
+        <i class="fas fa-times close-icon" (click)="closeAssignModal()"></i>
+      </div>
 
-</div>
-<!-- Permanent Employee Modal -->
-<div class="modal-backdrop" *ngIf="showAssignModal">
-  <div class="customer-modal">
+      <div class="modal-body">
+        <label>Select Employee</label>
+        <select class="form-control" [(ngModel)]="selectedEmployeeId">
+          <option value="">-- Select Employee --</option>
+          <option *ngFor="let emp of employees" [value]="emp.employeeId">
+            {{ emp.name }}
+          </option>
+        </select>
+      </div>
 
-    <div class="modal-header">
-      <h3><i class="fas fa-user-tie"></i> Assign Permanent Employee</h3>
-      <i class="fas fa-times close-icon" (click)="closeAssignModal()"></i>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAssignModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="savePermanentEmployee()">Save</button>
+      </div>
+
     </div>
-
-    <div class="modal-body">
-      <label>Select Employee</label>
-      <select class="form-control" [(ngModel)]="selectedEmployeeId">
-        <option value="">-- Select Employee --</option>
-        <option *ngFor="let emp of employees" [value]="emp.employeeId">
-          {{ emp.name }}
-        </option>
-      </select>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeAssignModal()">Cancel</button>
-      <button class="btn btn-primary" (click)="savePermanentEmployee()">Save</button>
-    </div>
-
   </div>
-</div>

@@ -5,6 +5,10 @@ namespace DSM_Application.Server.Models.DTOs
     public class CustomerRegisterRequest
     {
         public string Name { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [StringLength(254)]
         public string Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string Password { get; set; }

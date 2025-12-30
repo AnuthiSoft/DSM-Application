@@ -540,5 +540,26 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(deliveryBoys);
         }
+
+        [HttpGet("email-exists/{email}")]
+        public async Task<IActionResult> EmailExists(string email)
+        {
+            var exists = await _db.Employees
+                .Find(e => e.Email == email)
+                .AnyAsync();
+
+            return Ok(exists);
+        }
+
+        [HttpGet("phone-exists/{phone}")]
+        public async Task<IActionResult> PhoneExists(string phone)
+        {
+            var exists = await _db.Employees
+                .Find(e => e.PhoneNumber == phone)
+                .AnyAsync();
+
+            return Ok(exists);
+        }
+
     }
 }

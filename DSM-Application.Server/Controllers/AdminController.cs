@@ -1,11 +1,12 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using DistributorManagementSystem.Server.Models;
+﻿using DistributorManagementSystem.Server.Models;
 using DistributorManagementSystem.Server.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SkiaSharp;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DistributorManagementSystem.Server.Controllers
 {
@@ -30,6 +31,25 @@ namespace DistributorManagementSystem.Server.Controllers
         [HttpPost("distributors")]
         public async Task<IActionResult> AddDistributor([FromBody] Distributor distributor)
         {
+            // 🔐 Email validation
+            if (string.IsNullOrWhiteSpace(distributor.Email))
+                return BadRequest("Email is required.");
+
+            distributor.Email = distributor.Email.Trim().ToLower();
+
+            if (distributor.Email.Length > 254)
+                return BadRequest("Email cannot exceed 254 characters.");
+
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(distributor.Email);
+                if (addr.Address != distributor.Email)
+                    return BadRequest("Invalid email format.");
+            }
+            catch
+            {
+                return BadRequest("Invalid email format.");
+            }
 
             // ✅ Check for duplicate email or phone number
             var existingDistributor = await _db.Distributors
@@ -76,7 +96,7 @@ namespace DistributorManagementSystem.Server.Controllers
                 Email = distributor.Email,
                 PhoneNumber = distributor.PhoneNumber,
                 IsRegistered = false,
-                
+
             };
             await _db.Users.InsertOneAsync(user);
 
@@ -94,6 +114,24 @@ namespace DistributorManagementSystem.Server.Controllers
         [HttpPut("distributors/{id}")]
         public async Task<IActionResult> UpdateDistributor(string id, [FromBody] Distributor update)
         {
+            if (string.IsNullOrWhiteSpace(update.Email))
+                return BadRequest("Email is required.");
+
+            update.Email = update.Email.Trim().ToLower();
+
+            if (update.Email.Length > 254)
+                return BadRequest("Email cannot exceed 254 characters.");
+
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(update.Email);
+                if (addr.Address != update.Email)
+                    return BadRequest("Invalid email format.");
+            }
+            catch
+            {
+                return BadRequest("Invalid email format.");
+            }
 
             var existing = await _db.Distributors.Find(d => d.DistributorId == id).FirstOrDefaultAsync();
             if (existing == null)
@@ -211,5 +249,26 @@ namespace DistributorManagementSystem.Server.Controllers
 
             return Ok(new { distributorId = id, isPremium = false });
         }
+
+        [HttpGet("phone-exists/{phone}")]
+        public async Task<IActionResult> PhoneExists(string phone)
+        {
+            var exists = await _db.Distributors
+                .Find(d => d.PhoneNumber == phone)
+                .AnyAsync();
+
+            return Ok(exists);
+        }
+
+        [HttpGet("email-exists/{email}")]
+        public async Task<IActionResult> EmailExists(string email)
+        {
+            var exists = await _db.Distributors
+                .Find(d => d.Email == email)
+                .AnyAsync();
+
+            return Ok(exists);
+        }
+
     }
 }

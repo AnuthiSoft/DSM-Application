@@ -41,7 +41,7 @@
             <td>{{ p.quantity }}</td>
             <td>{{ p.price | currency:'INR' }}</td>
             <!-- <td>{{ p.price * p.quantity | currency:'INR' }}</td> -->
-             <td>{{ o.totalAmount | currency:'INR' }}</td>
+            <td>{{ p.price * p.quantity | currency:'INR' }}</td>
 
           </tr>
         </tbody>
@@ -50,14 +50,23 @@
         <strong>Subtotal:</strong> {{ subtotal(o) | currency:'INR' }}
       </div> -->
       <div class="text-end">
-  <div><strong>Subtotal:</strong> {{ o.subtotal | currency:'INR' }}</div>
-  <div><strong>Discount:</strong> -{{ o.totalDiscount | currency:'INR' }}</div>
-  <hr />
-  <div class="fs-5">
-    <strong>Amount to Collect:</strong>
-    {{ o.totalAmount | currency:'INR' }}
-  </div>
-</div>
+        <div><strong>Subtotal:</strong> {{ o.subtotal | currency:'INR' }}</div>
+        <div *ngIf="getDiscount(o) > 0">
+          <strong>Discount:</strong>
+          -{{ getDiscount(o) | currency:'INR' }}
+        </div>
+
+        <div *ngIf="getDiscount(o) === 0">
+          <strong>Discount:</strong> -
+        </div>
+
+
+        <hr />
+        <div class="fs-5">
+          <strong>Amount to Collect:</strong>
+          {{ o.totalAmount | currency:'INR' }}
+        </div>
+      </div>
 
     </div>
   </div>
@@ -73,7 +82,7 @@
       </div>
       <div class="modal-body">
         <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p> -->
-         <p><strong>Amount to Collect:</strong> {{ selectedOrder?.totalAmount | currency:'INR' }}</p>
+        <p><strong>Amount to Collect:</strong> {{ selectedOrder?.totalAmount | currency:'INR' }}</p>
 
 
         <div class="mb-3">

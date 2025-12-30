@@ -110,221 +110,220 @@
       </div>
 
     </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="dashboard-main">
-      <router-outlet></router-outlet>
-      <!-- Dashboard Tab -->
-      <div class="tab-content active" *ngIf="isActive('dashboard')">
-        <div class="welcome-header">
-          <h2>Employee Dashboard</h2>
-          <div class="user-welcome">Welcome, {{employeeName}}!</div>
-        </div>
-
-        <div class="stats-grid">
-
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-            <div class="stat-value">{{orderStats.assigned || 0}}</div>
-            <div class="stat-label">Assigned Orders</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-value">{{orderStats.completed || 0}}</div>
-            <div class="stat-label">Completed</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-            <div class="stat-value">{{orderStats.pending || 0}}</div>
-            <div class="stat-label">Pending</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-star"></i></div>
-            <div class="stat-value">{{performanceRating || '4.5'}}</div>
-            <div class="stat-label">Performance</div>
-          </div>
-          <!-- Employee Availability Section -->
-          <div class="dashboard-card" style="margin-top: 20px;">
-            <div class="card-header">
-              <h3><i class="fas fa-user-check"></i> Availability for Today</h3>
-            </div>
-
-            <div class="availability-status">
-              <p *ngIf="availabilityStatus === 'available'" class="status available">
-                🟢 You are marked as <strong>Available</strong> today.
-              </p>
-
-              <p *ngIf="availabilityStatus === 'not-available'" class="status not-available">
-                🔴 You are marked as <strong>Not Available</strong> today.
-                <br />
-                <small>Reason: {{ availabilityReason }}</small>
-              </p>
-
-              <p *ngIf="availabilityStatus === 'unknown'" class="status unknown">
-                ⚪ No availability marked for today.
-              </p>
-            </div>
-
-            <div class="availability-actions">
-              <button class="btn btn-success" (click)="markAvailability(true)">
-                <i class="fas fa-check"></i> Mark Available
-              </button>
-
-              <button class="btn btn-danger" (click)="markAvailability(false)">
-                <i class="fas fa-times"></i> Mark Not Available
-              </button>
-            </div>
-
-            <!-- Reason Popup -->
-            <div *ngIf="showReasonInput" class="reason-popup mt-3 p-3"
-              style="border:1px solid #ccc; border-radius:8px;">
-              <label><strong>Reason for unavailability:</strong></label>
-              <textarea [(ngModel)]="reasonText" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
-
-              <div class="mt-2">
-                <button class="btn btn-danger" (click)="submitReason()">Submit</button>
-                <button class="btn btn-secondary ms-2" (click)="cancelReason()">Cancel</button>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="dashboard-grid">
-          <!-- Recent Orders -->
-          <div class="dashboard-card">
-            <div class="card-header">
-              <h3>Recent Orders</h3>
-              <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('orders')">
-                View All
-              </button>
-            </div>
-            <div *ngIf="recentOrders?.length; else noRecentOrders">
-              <div class="order-item" *ngFor="let order of recentOrders">
-                <div class="order-info">
-                  <strong>Order #{{ order.id }}</strong>
-                  <span class="order-date">{{ order.orderDate | date:'short' }}</span>
-                </div>
-                <div class="order-status" [class]="order.status.toLowerCase()">
-                  {{ order.status }}
-                </div>
-              </div>
-            </div>
-            <ng-template #noRecentOrders>
-              <p class="no-data">No recent orders assigned.</p>
-            </ng-template>
-          </div>
-          <!-- <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders> -->
-
-          <!-- Tasks -->
-          <div class="dashboard-card">
-            <div class="card-header">
-              <h3>Today's Tasks</h3>
-              <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('tasks')">
-                View All
-              </button>
-            </div>
-            <div *ngIf="todayTasks?.length; else noTasks">
-              <div class="task-item" *ngFor="let task of todayTasks">
-                <div class="task-info">
-                  <span class="task-title">{{ task.title }}</span>
-                  <span class="task-time">{{ task.dueTime }}</span>
-                </div>
-                <div class="task-priority" [class]="task.priority.toLowerCase()">
-                  {{ task.priority }}
-                </div>
-              </div>
-            </div>
-            <ng-template #noTasks>
-              <p class="no-data">No tasks for today.</p>
-            </ng-template>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="dashboard-card">
-            <h3>Quick Actions</h3>
-            <div class="quick-actions">
-              <button class="action-btn" (click)="setActiveTab('orders')">
-                <i class="fas fa-list"></i>
-                <span>View Orders</span>
-              </button>
-              <button class="action-btn" (click)="updateStatus()">
-                <i class="fas fa-edit"></i>
-                <span>Update Status</span>
-              </button>
-              <button class="action-btn" (click)="setActiveTab('profile')">
-                <i class="fas fa-user-cog"></i>
-                <span>Profile Settings</span>
-              </button>
-              <button class="action-btn" (click)="viewSchedule()">
-                <i class="fas fa-calendar"></i>
-                <span>View Schedule</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Performance Metrics -->
-          <div class="dashboard-card">
-            <h3>Performance Metrics</h3>
-            <div class="metrics-grid">
-              <div class="metric-item">
-                <span class="metric-label">On-time Delivery</span>
-                <div class="metric-value">92%</div>
-              </div>
-              <div class="metric-item">
-                <span class="metric-label">Customer Rating</span>
-                <div class="metric-value">4.7/5</div>
-              </div>
-              <div class="metric-item">
-                <span class="metric-label">Tasks Completed</span>
-                <div class="metric-value">45/50</div>
-              </div>
-              <div class="metric-item">
-                <span class="metric-label">Efficiency</span>
-                <div class="metric-value">88%</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <app-cash-collection *ngIf="activeTab === 'cash-collection'"></app-cash-collection>
-      <app-cash-summary *ngIf="activeTab === 'cash-summary'"></app-cash-summary>
-      <app-collector-reports *ngIf="isActive('handover')"></app-collector-reports>
-      <app-customer-payment-status *ngIf="isActive('customer-status')"></app-customer-payment-status>
-
-
-      <!-- Orders Tab -->
-
-      <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders>
-      <!-- Invoices Tab -->
-      <div *ngIf="activeTab === 'invoices'">
-        <app-employee-invoices></app-employee-invoices>
-      </div>
-
-
-
-      <!-- Tasks Tab -->
-      <div class="tab-content" *ngIf="isActive('tasks')">
-        <div class="welcome-header">
-          <h2>My Tasks</h2>
-          <button class="btn btn-primary" (click)="refreshTasks()">
-            <i class="fas fa-sync-alt"></i> Refresh </button>
-        </div>
-        <div class="tasks-content">
-          <p>Task management content will be implemented here...</p>
-        </div>
-      </div>
-
-
-
-      <!-- Profile Tab -->
-
-      <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
-
-
-
-
-    </div>
   </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <router-outlet></router-outlet>
+    <!-- Dashboard Tab -->
+    <div class="tab-content active" *ngIf="isActive('dashboard')">
+      <div class="welcome-header">
+        <h2>Employee Dashboard</h2>
+        <div class="user-welcome">Welcome, {{employeeName}}!</div>
+      </div>
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+          <div class="stat-value">{{orderStats.assigned || 0}}</div>
+          <div class="stat-label">Assigned Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-value">{{orderStats.completed || 0}}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-value">{{orderStats.pending || 0}}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div class="stat-value">{{performanceRating || '4.5'}}</div>
+          <div class="stat-label">Performance</div>
+        </div>
+        <!-- Employee Availability Section -->
+        <div class="dashboard-card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3><i class="fas fa-user-check"></i> Availability for Today</h3>
+          </div>
+
+          <div class="availability-status">
+            <p *ngIf="availabilityStatus === 'available'" class="status available">
+              🟢 You are marked as <strong>Available</strong> today.
+            </p>
+
+            <p *ngIf="availabilityStatus === 'not-available'" class="status not-available">
+              🔴 You are marked as <strong>Not Available</strong> today.
+              <br />
+              <small>Reason: {{ availabilityReason }}</small>
+            </p>
+
+            <p *ngIf="availabilityStatus === 'unknown'" class="status unknown">
+              ⚪ No availability marked for today.
+            </p>
+          </div>
+
+          <div class="availability-actions">
+            <button class="btn btn-success" (click)="markAvailability(true)">
+              <i class="fas fa-check"></i> Mark Available
+            </button>
+
+            <button class="btn btn-danger" (click)="markAvailability(false)">
+              <i class="fas fa-times"></i> Mark Not Available
+            </button>
+          </div>
+
+          <!-- Reason Popup -->
+          <div *ngIf="showReasonInput" class="reason-popup mt-3 p-3" style="border:1px solid #ccc; border-radius:8px;">
+            <label><strong>Reason for unavailability:</strong></label>
+            <textarea [(ngModel)]="reasonText" class="form-control" rows="3" placeholder="Enter reason..."></textarea>
+
+            <div class="mt-2">
+              <button class="btn btn-danger" (click)="submitReason()">Submit</button>
+              <button class="btn btn-secondary ms-2" (click)="cancelReason()">Cancel</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Recent Orders -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Recent Orders</h3>
+            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('orders')">
+              View All
+            </button>
+          </div>
+          <div *ngIf="recentOrders?.length; else noRecentOrders">
+            <div class="order-item" *ngFor="let order of recentOrders">
+              <div class="order-info">
+                <strong>Order #{{ order.id }}</strong>
+                <span class="order-date">{{ order.orderDate | date:'short' }}</span>
+              </div>
+              <div class="order-status" [class]="order.status.toLowerCase()">
+                {{ order.status }}
+              </div>
+            </div>
+          </div>
+          <ng-template #noRecentOrders>
+            <p class="no-data">No recent orders assigned.</p>
+          </ng-template>
+        </div>
+        <!-- <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders> -->
+
+        <!-- Tasks -->
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3>Today's Tasks</h3>
+            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('tasks')">
+              View All
+            </button>
+          </div>
+          <div *ngIf="todayTasks?.length; else noTasks">
+            <div class="task-item" *ngFor="let task of todayTasks">
+              <div class="task-info">
+                <span class="task-title">{{ task.title }}</span>
+                <span class="task-time">{{ task.dueTime }}</span>
+              </div>
+              <div class="task-priority" [class]="task.priority.toLowerCase()">
+                {{ task.priority }}
+              </div>
+            </div>
+          </div>
+          <ng-template #noTasks>
+            <p class="no-data">No tasks for today.</p>
+          </ng-template>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="action-btn" (click)="setActiveTab('orders')">
+              <i class="fas fa-list"></i>
+              <span>View Orders</span>
+            </button>
+            <button class="action-btn" (click)="updateStatus()">
+              <i class="fas fa-edit"></i>
+              <span>Update Status</span>
+            </button>
+            <button class="action-btn" (click)="setActiveTab('profile')">
+              <i class="fas fa-user-cog"></i>
+              <span>Profile Settings</span>
+            </button>
+            <button class="action-btn" (click)="viewSchedule()">
+              <i class="fas fa-calendar"></i>
+              <span>View Schedule</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="dashboard-card">
+          <h3>Performance Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <span class="metric-label">On-time Delivery</span>
+              <div class="metric-value">92%</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Customer Rating</span>
+              <div class="metric-value">4.7/5</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Tasks Completed</span>
+              <div class="metric-value">45/50</div>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Efficiency</span>
+              <div class="metric-value">88%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <app-cash-collection *ngIf="activeTab === 'cash-collection'"></app-cash-collection>
+    <app-cash-summary *ngIf="activeTab === 'cash-summary'"></app-cash-summary>
+    <app-collector-reports *ngIf="isActive('handover')"></app-collector-reports>
+    <app-customer-payment-status *ngIf="isActive('customer-status')"></app-customer-payment-status>
+
+
+    <!-- Orders Tab -->
+
+    <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders>
+    <!-- Invoices Tab -->
+    <div *ngIf="activeTab === 'invoices'">
+      <app-employee-invoices></app-employee-invoices>
+    </div>
+
+
+
+    <!-- Tasks Tab -->
+    <div class="tab-content" *ngIf="isActive('tasks')">
+      <div class="welcome-header">
+        <h2>My Tasks</h2>
+        <button class="btn btn-primary" (click)="refreshTasks()">
+          <i class="fas fa-sync-alt"></i> Refresh </button>
+      </div>
+      <div class="tasks-content">
+        <p>Task management content will be implemented here...</p>
+      </div>
+    </div>
+
+
+
+    <!-- Profile Tab -->
+
+    <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
+
+
+
+
+  </div>
+</div>

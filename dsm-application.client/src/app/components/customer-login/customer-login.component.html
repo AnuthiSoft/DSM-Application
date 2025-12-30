@@ -1,5 +1,3 @@
-
-
 <div class="body">
   <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-light">
@@ -29,35 +27,18 @@
             <!-- Body -->
             <div class="login-body">
               <form (ngSubmit)="login()">
-               <div class="mb-3">
-  <label for="identifier" class="form-label">Email or Phone</label>
-  <input
-    [(ngModel)]="request.email " 
-    name="identifier"
-    type="text"
-    class="form-control"
-    placeholder="Enter email or phone number"
-    required
-    (input)="restrictPhoneInput($event)" 
-  />
-</div>
+                <div class="mb-3">
+                  <label for="identifier" class="form-label">Email or Phone</label>
+                  <input [(ngModel)]="request.email " name="identifier" type="text" class="form-control"
+                    placeholder="Enter email or phone number" required (input)="restrictPhoneInput($event)" />
+                </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
                   <div class="password-container">
-                    <input
-                      [(ngModel)]="request.password"
-                      name="password"
-                      [type]="showPassword ? 'text' : 'password'"
-                      class="form-control"
-                      id="password"
-                      placeholder="Enter your password"
-                      required
-                    />
+                    <input [(ngModel)]="request.password" name="password" [type]="showPassword ? 'text' : 'password'"
+                      class="form-control" id="password" placeholder="Enter your password" required />
                     <span class="password-toggle" (click)="togglePassword()">
-                      <i
-                        class="far"
-                        [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-                      ></i>
+                      <i class="far" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                     </span>
                   </div>
                 </div>
@@ -104,7 +85,7 @@
               <div>
                 <h5>Easy Reordering</h5>
                 <p class="text-muted mb-0">
-                 Quickly repurchase your favorite items with a single click
+                  Quickly repurchase your favorite items with a single click
                 </p>
               </div>
             </div>
@@ -126,7 +107,7 @@
               <div>
                 <h5>24/7 Access</h5>
                 <p class="text-muted mb-0">
-                 Manage your account and shop on your schedule, anytime
+                  Manage your account and shop on your schedule, anytime
                 </p>
               </div>
             </div>

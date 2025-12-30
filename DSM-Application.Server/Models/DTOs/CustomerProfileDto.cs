@@ -1,10 +1,16 @@
-﻿namespace DSM_Application.Server.Models.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DSM_Application.Server.Models.DTOs
 {
     public class CustomerProfileDto
     {
         // Basic
         public string CustomerId { get; set; }   // for responses only
         public string Name { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [StringLength(254)]
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
 

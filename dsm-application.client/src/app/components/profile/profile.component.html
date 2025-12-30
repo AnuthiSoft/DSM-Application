@@ -65,47 +65,88 @@
 
       <!-- Avatar Section -->
       <div class="profile-header">
-        <div class="profile-avatar" >
+        <div class="profile-avatar">
           <img *ngIf="previewImage" [src]="previewImage" class="avatar-img" />
           <i *ngIf="!previewImage" class="fas fa-user avatar-placeholder"></i>
-         <!-- ✏️ Instagram-style corner edit button -->
-  <div class="edit-icon" (click)="triggerFileInput()">
-    <i class="fas fa-pencil-alt"></i>
-  </div>
-  <input type="file"
-         #fileInput
-         accept="image/*"
-         (change)="onFileSelected($event)"
-         style="display:none;">
+          <!-- ✏️ Instagram-style corner edit button -->
+          <div class="edit-icon" (click)="triggerFileInput()">
+            <i class="fas fa-pencil-alt"></i>
+          </div>
+          <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" style="display:none;">
         </div>
 
         <!-- ⭐ Profile Info (Name, Email, Role) -->
-  <div class="profile-info">
-    <h3>{{ customer.name }}</h3>
-    <p class="profile-email">{{ customer.email }}</p>
-    <span class="profile-badge">{{ customer.role || 'Customer' }}</span>
-  </div>
+        <div class="profile-info">
+          <h3>{{ customer.name }}</h3>
+          <p class="profile-email">{{ customer.email }}</p>
+          <span class="profile-badge">{{ customer.role || 'Customer' }}</span>
+        </div>
       </div>
 
-      
 
-      <form (ngSubmit)="saveProfile()" class="profile-form">
+
+      <form #profileForm="ngForm" (ngSubmit)="saveProfile()" class="profile-form">
+
 
         <div class="form-grid">
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-user"></i> Full Name</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required />
+            <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required
+              pattern="^[A-Z][a-zA-Z ]*$" #name="ngModel" />
+
+            <div class="text-danger" *ngIf="name.touched && name.errors">
+              <div *ngIf="name.errors['required']">
+                Name is required
+              </div>
+              <div *ngIf="name.errors['pattern']">
+                Name must start with a capital letter
+              </div>
+            </div>
+
           </div>
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-            <input type="email" class="form-control" [(ngModel)]="customer.email" name="email" readonly />
+            <input type="email" class="form-control" [(ngModel)]="customer.email" name="email" required email
+              (blur)="checkEmailExists()" #email="ngModel" />
+
+            <div class="text-danger" *ngIf="email.touched && email.errors">
+              <div *ngIf="email.errors['required']">
+                Email is required
+              </div>
+              <div *ngIf="email.errors['email']">
+                Enter a valid email
+              </div>
+              <div *ngIf="email.errors['exists']">
+                This email already exists
+              </div>
+            </div>
+
           </div>
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-phone"></i> Phone</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.phoneNumber" name="phone" />
+            <div class="phone-wrapper">
+              <span class="phone-prefix">+91</span>
+
+              <input type="text" class="form-control phone-input" [(ngModel)]="customer.phoneNumber" name="phone"
+                required pattern="^[6-9]\d{9}$" maxlength="10" (input)="restrictPhoneInput($event)"
+                (blur)="checkPhoneExists()" #phone="ngModel" />
+            </div>
+
+            <div class="text-danger" *ngIf="phone.touched && phone.errors">
+              <div *ngIf="phone.errors['required']">
+                Phone number is required
+              </div>
+              <div *ngIf="phone.errors['pattern']">
+                Phone must start with 6–9 and be 10 digits
+              </div>
+              <div *ngIf="phone.errors['exists']">
+                This phone number already exists
+              </div>
+            </div>
+
           </div>
 
           <div class="form-group full-width">
@@ -115,7 +156,12 @@
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-city"></i> City</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" />
+            <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" required #city="ngModel" />
+
+            <div class="text-danger" *ngIf="city.touched && city.invalid">
+              City is required
+            </div>
+
           </div>
 
           <div class="form-group">
@@ -125,7 +171,14 @@
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-hashtag"></i> Pincode</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.pincode" name="pincode" />
+            <input type="text" class="form-control" [(ngModel)]="customer.pincode" name="pincode" required
+              pattern="^[0-9]{6}$" maxlength="6" #pincode="ngModel" />
+
+            <div class="text-danger" *ngIf="pincode.touched && pincode.errors">
+              <div *ngIf="pincode.errors['required']">Pincode is required</div>
+              <div *ngIf="pincode.errors['pattern']">Enter valid 6-digit pincode</div>
+            </div>
+
           </div>
 
           <div class="form-group">
@@ -141,35 +194,31 @@
             {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>
 
-          <button class="btn btn-outline-secondary"
-                  type="button"
-                  (click)="cancelEdit()"
-                  *ngIf="hasChanges()">Cancel</button>
+          <button class="btn btn-outline-secondary" type="button" (click)="cancelEdit()"
+            *ngIf="hasChanges()">Cancel</button>
         </div>
 
       </form>
     </div>
 
     <div class="modal fade" id="profileUpdatedModal" tabindex="-1">
-  <div class="modal-dialog custom-success-modal">
-    <div class="modal-content custom-success-content">
+      <div class="modal-dialog custom-success-modal">
+        <div class="modal-content custom-success-content">
 
-      <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
+          <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+
+          <h2 class="success-title">Profile Updated</h2>
+          <p class="success-message">Your profile has been updated successfully!</p>
+
+          <button type="button" class="btn btn-primary success-btn" data-bs-dismiss="modal">
+            OK
+          </button>
+
+        </div>
       </div>
-
-      <h2 class="success-title">Profile Updated</h2>
-      <p class="success-message">Your profile has been updated successfully!</p>
-
-      <button type="button"
-              class="btn btn-primary success-btn"
-              data-bs-dismiss="modal">
-        OK
-      </button>
-
     </div>
-  </div>
-</div>
 
     <!-- Info Card -->
     <div class="info-card">

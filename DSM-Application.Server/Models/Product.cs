@@ -51,8 +51,8 @@ namespace DSM_Application.Server.Models
         [BsonElement("GST")]
         public decimal GST { get; set; }
 
-        [BsonElement("Stock")]
-        public int Stock { get; set; }
+        //[BsonElement("Stock")]
+        //public int Stock { get; set; }
 
         [BsonElement("Color")]
         public string Color { get; set; }

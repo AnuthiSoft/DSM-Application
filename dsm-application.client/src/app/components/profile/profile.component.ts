@@ -138,7 +138,7 @@
 //       }
 //     });
 //   }
-  
+
 
 //   onFileSelected(event: any) {
 //     this.selectedFile = event.target.files[0];
@@ -200,6 +200,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ProfileService } from '../../services/profile.service';
 import { CustomerProfileDto } from '../../models/customer.model';
 import { ToastrService } from 'ngx-toastr';
+import { CustomerService } from '../../services/customer.service';
 
 @Component({
   selector: 'app-profile',
@@ -217,10 +218,15 @@ export class ProfileComponent implements OnInit {
   isSaving = false;
   isLoading = false;
   errorMessage = '';
+  emailExists = false;
+  phoneExists = false;
+
 
   @ViewChild('fileInput') fileInput: any;// removed any and replaced this with !
 
-  constructor(private profileService: ProfileService, private toastr:ToastrService) {}
+  constructor(private profileService: ProfileService,
+    private toastr: ToastrService,
+    private customerService: CustomerService) { }
 
   ngOnInit(): void {
     this.loadProfile();
@@ -232,7 +238,13 @@ export class ProfileComponent implements OnInit {
 
     this.profileService.getProfile().subscribe({
       next: (res) => {
-        this.customer = res;
+        this.customer = {
+          ...res,
+          phoneNumber: res.phoneNumber?.startsWith('+91')
+            ? res.phoneNumber.substring(3)
+            : res.phoneNumber
+        };
+
         this.originalCustomer = { ...res };
 
         this.previewImage = res.profileImageUrl
@@ -273,11 +285,25 @@ export class ProfileComponent implements OnInit {
   // Save profile info + image
   saveProfile(): void {
     this.isSaving = true;
+    if (!this.customer.name ||
+      !/^[A-Z]/.test(this.customer.name) ||
+      !/^[6-9]\d{9}$/.test(this.customer.phoneNumber || '') ||
+      !this.customer.pincode) {
+
+      this.toastr.error('Please fill all required fields correctly', 'Validation Error');
+      return;
+    }
 
     const formData = new FormData();
 
     formData.append("name", this.customer.name || "");
-    formData.append("phoneNumber", this.customer.phoneNumber || "");
+    formData.append(
+      "phoneNumber",
+      this.customer.phoneNumber
+        ? '+91' + this.customer.phoneNumber
+        : ''
+    );
+
     formData.append("email", this.customer.email || "");  // ✅ FIX ADDED
     formData.append("street", this.customer.street || "");
     formData.append("city", this.customer.city || "");
@@ -291,7 +317,7 @@ export class ProfileComponent implements OnInit {
 
     this.profileService.updateProfile(formData).subscribe({
       next: () => {
-         this.toastr.success('Your profile has been updated successfully!', 'Profile Updated');
+        this.toastr.success('Your profile has been updated successfully!', 'Profile Updated');
 
         this.selectedFile = null;
         this.loadProfile();
@@ -318,8 +344,39 @@ export class ProfileComponent implements OnInit {
 
   hasChanges(): boolean {
     return JSON.stringify(this.customer) !== JSON.stringify(this.originalCustomer) ||
-           this.selectedFile !== null;
+      this.selectedFile !== null;
   }
 
-  
+  checkEmailExists() {
+    if (!this.customer.email) return;
+
+    this.customerService.checkEmailExists(this.customer.email).subscribe(exists => {
+      this.emailExists = exists;
+    });
+  }
+
+
+  restrictPhoneInput(event: any) {
+    let value = event.target.value.replace(/\D/g, '');
+    value = value.slice(0, 10);
+
+    if (value.length === 1 && !/^[6-9]$/.test(value)) {
+      value = '';
+    }
+
+    event.target.value = value;
+    this.customer.phoneNumber = value;
+  }
+
+  checkPhoneExists() {
+    if (!this.customer.phoneNumber) return;
+
+    const phone = '+91' + this.customer.phoneNumber;
+
+    this.customerService.checkPhoneExists(phone)
+      .subscribe((exists: boolean) => {
+        this.phoneExists = exists;
+      });
+  }
+
 }

@@ -10,9 +10,7 @@ export interface Product {
   productCode: string;
  category?: string;
   description: string;
- measure
- 
- : string;
+ measure: string;
   price: number;
   OrderedDate:Date;
   ExpectedDeliveryDate:Date;

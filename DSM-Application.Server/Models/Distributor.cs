@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace DistributorManagementSystem.Server.Models
 {
@@ -15,7 +16,10 @@ namespace DistributorManagementSystem.Server.Models
         public string Address { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty; // Primary contact name
-        public string Email { get; set; } = string.Empty; // Primary contact email
+        [Required]
+        [EmailAddress]
+        [StringLength(254)]
+        public string Email { get; set; } // Primary contact email
         public bool IsPremium { get; set; } = false;
         public bool IsActive { get; set; } = false; // For deactivate/reactivate.
                                                     
@@ -33,7 +37,7 @@ namespace DistributorManagementSystem.Server.Models
         [BsonElement("ServicePincodes")]
         public List<string> ServicePincodes { get; set; } = new();
 
-        public string City { get; set; }
+        public string? City { get; set; }
         public int YearsInBusiness { get; set; }
         public double Rating { get; set; }
     }

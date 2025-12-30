@@ -466,6 +466,30 @@ savePermanentEmployee() {
   this.nextAction = "";   // 🔥 prevents unwanted opening
 }
 
+// 🧮 Subtotal (before discount)
+getOrderSubtotal(order: any): number {
+  if (!order?.products?.length) return 0;
+
+  return order.products.reduce((sum: number, p: any) => {
+    const price = Number(p.price ?? p.unitPrice ?? 0);
+    const qty = Number(p.quantity ?? 1);
+    return sum + price * qty;
+  }, 0);
+}
+
+// 💸 Discount
+getOrderDiscount(order: any): number {
+  return Number(order.discount ?? order.totalDiscount ?? 0);
+}
+
+// ✅ Final Total
+getOrderFinalTotal(order: any): number {
+  return Math.max(
+    this.getOrderSubtotal(order) - this.getOrderDiscount(order),
+    0
+  );
+}
+
 toggleTheme() {
   document.body.classList.toggle('dark');
 }

@@ -6,10 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Twilio;
-using Twilio.Rest.Api.V2010.Account;
-using Twilio.Types;
-
 namespace DSM_Application.Server.Controllers
 {
     [Route("api/[controller]")]

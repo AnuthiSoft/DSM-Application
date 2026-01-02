@@ -29,8 +29,11 @@ namespace DSM_Application.Server.Controllers
 
         private readonly InventoryService _inventoryService;
 
+        private readonly OrderService _orderService;
+       
 
-        public OrdersController(MongoDbService mongo, DiscountService discountService)
+
+        public OrdersController(MongoDbService mongo, DiscountService discountService, OrderService orderService, InventoryService inventoryService)
 
         {
 
@@ -42,6 +45,9 @@ namespace DSM_Application.Server.Controllers
 
             _discountService = discountService;
 
+            _orderService = orderService;
+
+            _inventoryService = inventoryService;
         }
 
 
@@ -930,6 +936,116 @@ namespace DSM_Application.Server.Controllers
             return Ok("Order placed successfully");
         }
 
+
+        [Authorize(Roles = "CashCollector,Employee")]
+        [HttpPost("create-by-collector")]
+        public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+          ?? User.FindFirst("UserId")?.Value;
+            //var userId = User.FindFirst("id")?.Value;
+            var role = User.FindFirst("role")?.Value;
+
+            var order = await _orderService.CreateByCollector(dto, userId, role);
+
+            return Ok(order);
+        }
+
+        //[Authorize(Roles = "CashCollector,Employee")]
+        //[HttpPost("create-by-collector")]
+        //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+        //{
+        //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        //    if (string.IsNullOrEmpty(role))
+        //        return Unauthorized("Role missing in token");
+
+        //    if (role != "CashCollector" && role != "Employee")
+        //        return Forbid("Only CashCollector or Employee can perform this action");
+
+        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
+        //        return BadRequest("Invalid order data");
+
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    //var userId = User.FindFirst("UserId")?.Value;
+        //    if (string.IsNullOrEmpty(userId))
+        //        return Unauthorized("Invalid user");
+
+        //    var orderProducts = new List<OrderProduct>();
+        //    decimal subTotal = 0;
+        //    decimal totalDiscount = 0;
+
+        //    foreach (var item in dto.Products)
+        //    {
+        //        var product = await _mongo.Products
+        //        .Find(p => p.ProductId == item.ProductId)
+        //        .FirstOrDefaultAsync();
+
+        //        if (product == null)
+        //            return BadRequest($"Product not found: {item.ProductId}");
+
+        //        var itemSubtotal = product.Price * item.Quantity;
+        //        var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
+        //        var finalPrice = itemSubtotal - discountAmount;
+
+        //        orderProducts.Add(new OrderProduct
+        //        {
+        //            ProductId = product.ProductId,
+        //            ProductName = product.ProductName,
+        //            Price = product.Price,
+        //            Quantity = item.Quantity,
+        //            Subtotal = itemSubtotal,
+        //            DiscountAmount = discountAmount,
+        //            FinalPrice = finalPrice
+        //        });
+
+        //        subTotal += itemSubtotal;
+        //        totalDiscount += discountAmount;
+        //    }
+
+        //    var order = new Order
+        //    {
+        //        CustomerId = dto.CustomerId,
+        //        DistributorId = dto.DistributorId,
+        //        Products = orderProducts,
+
+        //        Subtotal = subTotal,
+        //        TotalDiscount = totalDiscount,
+        //        TotalAmount = subTotal - totalDiscount,
+
+        //        CreatedByUserId = userId,
+        //        CreatedByRole = "CashCollector",
+        //        OrderSource = "CASH_COLLECTOR",
+
+        //        OrderDate = DateTime.UtcNow,
+        //        ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1),
+        //        Status = "Pending"
+        //    };
+
+        //    await _orders.InsertOneAsync(order);
+
+        //    return Ok(order);
+        //}
+
+        //[Authorize(Roles = "CashCollector,Employee")]
+        //[HttpPost("create-by-collector")]
+        //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+        //{
+        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+        //    if (string.IsNullOrEmpty(userId))
+        //        return Unauthorized("Invalid user");
+
+        //    if (role != "CashCollector" && role != "Employee")
+        //        return Forbid("Only CashCollector or Employee can create orders");
+
+        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
+        //        return BadRequest("Invalid order data");
+
+        //    var order = await _orderService.CreateByCollector(dto, userId, role);
+        //    return Ok(order);
+        //}
 
 
     }

@@ -54,6 +54,22 @@ namespace DSM_Application.Server.Controllers
         }
 
         // 4️⃣ COMPLETE RETURN
+        //[Authorize(Roles = "Distributor")]
+        //[HttpPut("complete/{returnId}")]
+        //public async Task<IActionResult> CompleteReturn(string returnId)
+        //{
+        //    // 🔐 Get DistributorId from JWT
+        //    var distributorId = User.FindFirst("DistributorId")?.Value;
+
+        //    if (string.IsNullOrEmpty(distributorId))
+        //        return Unauthorized("Invalid distributor");
+
+        //    // ✅ Pass distributorId to service
+        //    await _returnService.CompleteReturnAsync(returnId, distributorId);
+
+        //    return Ok("Return completed");
+        //}
+
         [Authorize(Roles = "Distributor")]
         [HttpPut("complete/{returnId}")]
         public async Task<IActionResult> CompleteReturn(string returnId)

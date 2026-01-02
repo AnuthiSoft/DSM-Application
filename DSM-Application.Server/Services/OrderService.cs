@@ -47,6 +47,8 @@
 //}
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
+using DSM_Application.Server.Services;
 using MongoDB.Driver;
 
 public class OrderService
@@ -55,13 +57,15 @@ public class OrderService
     private readonly IMongoCollection<Customer> _customers;
     private readonly TemporaryAssignmentService _tempService;
     private readonly IMongoCollection<CustomerDistributorConnection> _connections;
+    private readonly MongoDbService _mongo;
 
-    public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService)
+    public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo)
     {
         _orders = db.GetCollection<Order>("orders");
         _customers = db.GetCollection<Customer>("customers");
         _tempService = tempService;
         _connections = db.GetCollection<CustomerDistributorConnection>("connections");
+        _mongo = mongo;
     }
 
     public async Task CreateOrderAsync(Order order)
@@ -111,4 +115,92 @@ public class OrderService
 
         await _orders.InsertOneAsync(order);
     }
+
+    public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
+    {
+        if (string.IsNullOrEmpty(userId))
+            throw new Exception("Invalid user");
+
+        if (dto == null || dto.Products == null || !dto.Products.Any())
+            throw new Exception("Invalid order data");
+
+        var orderProducts = new List<OrderProduct>();
+        decimal subTotal = 0;
+        decimal totalDiscount = 0;
+
+        foreach (var item in dto.Products)
+        {
+            var product = await _mongo.Products
+                .Find(p => p.ProductId == item.ProductId)
+                .FirstOrDefaultAsync();
+
+            if (product == null)
+                throw new Exception($"Product not found: {item.ProductId}");
+
+            var itemSubtotal = product.Price * item.Quantity;
+            var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
+            var finalPrice = itemSubtotal - discountAmount;
+
+            orderProducts.Add(new OrderProduct
+            {
+                ProductId = product.ProductId,
+                ProductName = product.ProductName,
+                Price = product.Price,
+                Quantity = item.Quantity,
+                Subtotal = itemSubtotal,
+                DiscountAmount = discountAmount,
+                FinalPrice = finalPrice
+            });
+
+            subTotal += itemSubtotal;
+            totalDiscount += discountAmount;
+        }
+
+        var order = new Order
+        {
+            CustomerId = dto.CustomerId,
+            DistributorId = dto.DistributorId,
+            Products = orderProducts,
+            Subtotal = subTotal,
+            TotalDiscount = totalDiscount,
+            TotalAmount = subTotal - totalDiscount,
+
+            CreatedByUserId = userId,
+            CreatedByRole = role,
+            OrderSource = "CASH_COLLECTOR",
+            OrderDate = DateTime.UtcNow,
+            ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1)
+        };
+
+        await _orders.InsertOneAsync(order);
+        return order;
+    }
+
+
+    //public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
+    //{
+    //    var order = new Order
+    //    {
+    //        CustomerId = dto.CustomerId,
+    //        DistributorId = dto.DistributorId,
+    //        CreatedByUserId = userId,
+    //        CreatedByRole = role,
+    //        OrderSource = "CASH_COLLECTOR",
+    //        CreatedAt = DateTime.UtcNow,
+
+    //        // ✅ THIS IS THE FIX
+    //        Products = dto.Products.Select(p => new OrderProduct
+    //        {
+    //            ProductId = p.ProductId,
+    //            Quantity = p.Quantity
+    //        }).ToList(),
+
+    //        Status = "Pending"
+    //    };
+
+    //    await _orders.InsertOneAsync(order);
+    //    return order;
+    //}
+
+
 }

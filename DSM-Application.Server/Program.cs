@@ -149,6 +149,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());// me added
 });
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddSingleton<EmployeeService>();
@@ -160,6 +161,8 @@ builder.Services.AddScoped<TemporaryAssignmentService>();
 //builder.Services.AddSingleton<RetailerService>();  // Add this
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddScoped<OrderService>();
+
 
 
 builder.Services.AddScoped<FraudService>();

@@ -18,10 +18,6 @@ namespace DSM_Application.Server.Models
         //public int Quantity { get; set; }
         [BsonElement("Quantity")]
         public int Quantity { get; set; }
-
-        // 🆕 REQUIRED FOR RETURNS
-        public int ReturnedQty { get; set; } = 0;
-
         public string DistributorId { get; set; }
         public decimal Subtotal { get; set; }
 

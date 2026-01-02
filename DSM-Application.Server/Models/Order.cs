@@ -68,7 +68,11 @@ namespace DSM_Application.Server.Models
         // Helps accounting clarity
         public decimal ReturnedAmount { get; set; } = 0;
 
-        
+        public string CreatedByUserId { get; set; }   // Cash Collector ID
+        public string CreatedByRole { get; set; }     // "CashCollector"
+
+        public string OrderSource { get; set; }       // "RETAILER" or "CASH_COLLECTOR"
+
 
 
     }

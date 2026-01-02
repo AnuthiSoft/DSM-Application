@@ -103,7 +103,12 @@ namespace DSM_Application.Server.Services
 
             var item = await _inventory.Find(filter).FirstOrDefaultAsync();
 
-            if (item == null || item.CurrentStock < quantity)
+            // ✅ ADD THIS CHECK HERE
+            if (item == null)
+                throw new Exception("Inventory record not found");
+
+            // ✅ THEN CHECK STOCK
+            if (item.CurrentStock < quantity)
                 throw new Exception("Out of stock");
 
             await _inventory.UpdateOneAsync(
@@ -151,6 +156,7 @@ namespace DSM_Application.Server.Services
             {
                 var update = Builders<InventoryItem>.Update
                     .Set(i => i.CurrentStock, newStock)
+                    .Set(i => i.AvailableQuantity, newStock)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow);
 
                 await _inventory.UpdateOneAsync(filter, update);
@@ -172,11 +178,25 @@ namespace DSM_Application.Server.Services
 
         public async Task AddInventoryAsync(AddInventoryDto dto)
         {
+            var product = await _products.Find(p => p.ProductId == dto.ProductId).FirstOrDefaultAsync();
+
+            if (product == null)
+                throw new Exception("Product not found");
+
             var item = new InventoryItem
             {
-                ProductId = dto.ProductId,
-                //DistributorId = dto.DistributorId,   // include if needed
-                AvailableQuantity = dto.Quantity,
+                ProductId = product.ProductId,
+                DistributorId = product.DistributorId,
+                ProductName = product.ProductName,
+                ProductCode = product.ProductCode,
+
+                CostPrice = product.CostPrice?? 0,
+                SellingPrice = product.Price,
+
+                CurrentStock = dto.Quantity,
+                AvailableQuantity = dto.Quantity,  // ✅ MUST SET
+                ReorderLevel = product.ReorderLevel,
+
                 ManufactureDate = dto.ManufactureDate,
                 ExpiryDate = dto.ExpiryDate,
                 CreatedAt = DateTime.UtcNow
@@ -184,6 +204,7 @@ namespace DSM_Application.Server.Services
 
             await _inventory.InsertOneAsync(item);
         }
+
 
         public async Task<List<InventoryItem>> GetBatchesByProduct(string productId)
         {
@@ -229,6 +250,50 @@ namespace DSM_Application.Server.Services
             if (remaining > 0)
                 throw new Exception("Insufficient stock");
         }
+
+        public async Task<InventoryItem> GetInventoryByProductId(string productId)
+        {
+            return await _inventory
+                .Find(i => i.ProductId == productId)
+                .FirstOrDefaultAsync();
+        }
+
+
+        public async Task<List<InventoryProductDto>> GetByDistributorAsync(string distributorId)
+        {
+            var inventory = await _inventory
+                .Find(i => i.DistributorId == distributorId && i.CurrentStock > 0)
+                .ToListAsync();
+
+            var products = await _products
+                .Find(p => inventory.Select(i => i.ProductId).Contains(p.ProductId))
+                .ToListAsync();
+
+            return inventory.Select(i =>
+            {
+                var product = products.FirstOrDefault(p => p.ProductId == i.ProductId);
+
+                return new InventoryProductDto
+                {
+                     ProductId = i.ProductId,
+                     ProductName = product.ProductName,
+                     Price = product.Price,
+                     Stock = i.AvailableQuantity, // IMPORTANT
+                     Brand = product.Brand
+                };
+
+                //return new InventoryProductDto
+                //{
+                //    ProductId = i.ProductId,
+                //    ProductName = product?.ProductName,
+                //    Price = i.SellingPrice,
+                //    Stock = i.CurrentStock,
+                //    Brand = product?.Brand,
+                //    Image = product?.ImageUrls?.FirstOrDefault()
+                //};
+            }).ToList();
+        }
+
 
     }
 }

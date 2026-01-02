@@ -5,7 +5,6 @@ using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using LoginRequest = DistributorManagementSystem.Server.Models.LoginRequest;
@@ -148,61 +147,103 @@ namespace DistributorManagementSystem.Server.Controllers
         // ============================================================
         // DISTRIBUTOR / ADMIN LOGIN (Unique email/phone)
         // ============================================================
-
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromQuery] string portal = null)
         {
-            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
-                return BadRequest("Email or Phone required");
+            if (request == null || (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.PhoneNumber)))
+                return BadRequest("Email or PhoneNumber required.");
 
+            const string adminEmail = "admin@gmail.com";
+            const string adminPassword = "admin123";
+
+            portal = (portal ?? "distributor").Trim().ToLower();
+
+            // -------- ADMIN LOGIN --------
+            if (!string.IsNullOrWhiteSpace(request.Email) &&
+                request.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                if (request.Password != adminPassword)
+                    return Unauthorized("Invalid password");
+
+                var admin = new User
+                {
+                    Email = adminEmail,
+                    Role = "Admin",
+                    IsRegistered = true,
+                    Username = "Admin",
+                    DistributorId = ""
+                };
+
+                var tokenAdmin = _jwt.GenerateToken(admin);
+                var refreshTokenAdmin = _jwt.GenerateRefreshToken();
+
+                await _db.RefreshTokens.InsertOneAsync(new RefreshToken
+                {
+                    UserId = admin.Email,
+                    Token = refreshTokenAdmin,
+                    ExpiryDate = DateTime.UtcNow.AddDays(7)
+                });
+
+                return Ok(new { token = tokenAdmin, refreshToken = refreshTokenAdmin, role = "Admin" });
+            }
+
+            // -------- NORMAL USER LOGIN --------
             var user = await _db.Users
-                .Find(u =>
-                    (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
-                    (!string.IsNullOrEmpty(request.PhoneNumber) && u.PhoneNumber == request.PhoneNumber))
-                .FirstOrDefaultAsync();
+       .Find(u =>
+           (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
+           (!string.IsNullOrEmpty(request.PhoneNumber) && u.PhoneNumber == request.PhoneNumber)
+       )
+       .SortByDescending(u => u.CreatedAt)
+       .FirstOrDefaultAsync();
+
+
+            //var user = await _db.Users
+            //    .Find(u => u.Email == lookup || u.PhoneNumber == lookup)
+            //    .SortByDescending(u => u.CreatedAt)
+            //    .FirstOrDefaultAsync();
 
             if (user == null)
                 return Unauthorized("User not found");
 
-            if (!user.IsRegistered)
-                return Unauthorized("User not registered");
+            // Employee protection
+            if (user.Role == "Employee" && portal != "employee")
+                return Unauthorized("Employees must login using employee portal.");
+
+            // Distributor active check
+            if (user.Role == "Distributor")
+            {
+                var dist = await _db.Distributors
+                    .Find(d => d.Email == user.Email || d.PhoneNumber == user.PhoneNumber)
+                    .FirstOrDefaultAsync();
+
+                if (dist == null)
+                    return Unauthorized("Distributor record not found.");
+
+                if (!dist.IsActive)
+                    return Unauthorized("Distributor account is deactivated.");
+            }
+
+            if (!user.IsRegistered || string.IsNullOrEmpty(user.PasswordHash))
+                return Unauthorized("Please sign up to create your password.");
+
 
             if (user.PasswordHash != ComputeHash(request.Password))
                 return Unauthorized("Invalid password");
 
-            // 🔐 ROLE BASED VALIDATION
-            if (user.Role == "Employee")
+            // Assign employee ID if missing
+            if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
             {
-                var employee = await _db.Employees
-                    .Find(e => e.EmployeeId == user.EmployeeId)
-                    .FirstOrDefaultAsync();
+                user.EmployeeId = ObjectId.GenerateNewId().ToString();
+                await _db.Users.UpdateOneAsync(
+                    u => u.Id == user.Id,
+                    Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
 
-                if (employee == null)
-                    return Unauthorized("Employee record not found");
+                await _db.Employees.UpdateOneAsync(
+                    e => e.Email == user.Email,
+                    Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId));
             }
 
-            if (user.Role == "Distributor")
-            {
-                var distributor = await _db.Distributors
-                    .Find(d => d.Email == user.Email)
-                    .FirstOrDefaultAsync();
-
-                if (distributor == null)
-                    return Unauthorized("Distributor record not found");
-            }
-
-            // CUSTOMER needs no extra check ✅
-
-            // ===== JWT TOKEN =====
-            var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id),
-        new Claim(ClaimTypes.Role, user.Role),
-        new Claim("EmployeeId", user.EmployeeId ?? ""),
-        new Claim("DistributorId", user.DistributorId ?? "")
-    };
-
-            var token = _jwt.GenerateTokenWithClaims(claims);
+            var token = _jwt.GenerateToken(user);
             var refreshToken = _jwt.GenerateRefreshToken();
 
             await _db.RefreshTokens.InsertOneAsync(new RefreshToken
@@ -216,137 +257,11 @@ namespace DistributorManagementSystem.Server.Controllers
             {
                 token,
                 refreshToken,
-                role = user.Role,
-                userId = user.Id
+                user.Role,
+                user.DistributorId,
+                user.EmployeeId
             });
         }
-
-
-        // [HttpPost("login")]
-        // public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromQuery] string portal = null)
-        // {
-        //     if (request == null || (string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.PhoneNumber)))
-        //         return BadRequest("Email or PhoneNumber required.");
-
-        //     const string adminEmail = "admin@gmail.com";
-        //     const string adminPassword = "admin123";
-
-        //     portal = (portal ?? "distributor").Trim().ToLower();
-
-        //     // -------- ADMIN LOGIN --------
-        //     if (!string.IsNullOrWhiteSpace(request.Email) &&
-        //         request.Email.Equals(adminEmail, StringComparison.OrdinalIgnoreCase))
-        //     {
-        //         if (request.Password != adminPassword)
-        //             return Unauthorized("Invalid password");
-
-        //         var admin = new User
-        //         {
-        //             Email = adminEmail,
-        //             Role = "Admin",
-        //             IsRegistered = true,
-        //             Username = "Admin",
-        //             DistributorId = ""
-        //         };
-
-        //         var tokenAdmin = _jwt.GenerateToken(admin);
-        //         var refreshTokenAdmin = _jwt.GenerateRefreshToken();
-
-        //         await _db.RefreshTokens.InsertOneAsync(new RefreshToken
-        //         {
-        //             UserId = admin.Email,
-        //             Token = refreshTokenAdmin,
-        //             ExpiryDate = DateTime.UtcNow.AddDays(7)
-        //         });
-
-        //         return Ok(new { token = tokenAdmin, refreshToken = refreshTokenAdmin, role = "Admin" });
-        //     }
-
-        //     // -------- NORMAL USER LOGIN --------
-        //     var user = await _db.Users
-        //.Find(u =>
-        //    (!string.IsNullOrEmpty(request.Email) && u.Email == request.Email) ||
-        //    (!string.IsNullOrEmpty(request.PhoneNumber) && u.PhoneNumber == request.PhoneNumber)
-        //)
-        //.SortByDescending(u => u.CreatedAt)
-        //.FirstOrDefaultAsync();
-
-
-        //     //var user = await _db.Users
-        //     //    .Find(u => u.Email == lookup || u.PhoneNumber == lookup)
-        //     //    .SortByDescending(u => u.CreatedAt)
-        //     //    .FirstOrDefaultAsync();
-
-        //     if (user == null)
-        //         return Unauthorized("User not found");
-
-        //     // Employee protection
-        //     if (user.Role == "Employee" && portal != "employee")
-        //         return Unauthorized("Employees must login using employee portal.");
-
-        //     // Distributor active check
-        //     if (user.Role == "Distributor")
-        //     {
-        //         var dist = await _db.Distributors
-        //             .Find(d => d.Email == user.Email || d.PhoneNumber == user.PhoneNumber)
-        //             .FirstOrDefaultAsync();
-
-        //         if (dist == null)
-        //             return Unauthorized("Distributor record not found.");
-
-        //         if (!dist.IsActive)
-        //             return Unauthorized("Distributor account is deactivated.");
-        //     }
-
-        //     if (!user.IsRegistered || string.IsNullOrEmpty(user.PasswordHash))
-        //         return Unauthorized("Please sign up to create your password.");
-
-
-        //     if (user.PasswordHash != ComputeHash(request.Password))
-        //         return Unauthorized("Invalid password");
-
-        //     // Assign employee ID if missing
-        //     if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
-        //     {
-        //         user.EmployeeId = ObjectId.GenerateNewId().ToString();
-        //         await _db.Users.UpdateOneAsync(
-        //             u => u.Id == user.Id,
-        //             Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
-
-        //         await _db.Employees.UpdateOneAsync(
-        //             e => e.Email == user.Email,
-        //             Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId));
-        //     }
-
-        //     var claims = new List<Claim>
-        //     {
-        //         new Claim(ClaimTypes.NameIdentifier, user.Id),
-        //         new Claim(ClaimTypes.Role, user.Role),
-        //         new Claim("EmployeeId", user.EmployeeId ?? ""),
-        //         new Claim("DistributorId", user.DistributorId ?? "")
-        //     };
-
-        //      var token = _jwt.GenerateTokenWithClaims(claims);
-
-        //     //var token = _jwt.GenerateToken(user);
-        //     var refreshToken = _jwt.GenerateRefreshToken();
-
-        //     await _db.RefreshTokens.InsertOneAsync(new RefreshToken
-        //     {
-        //         UserId = user.Id,
-        //         Token = refreshToken,
-        //         ExpiryDate = DateTime.UtcNow.AddDays(7)
-        //     });
-
-        //     return Ok(new
-        //     {
-        //         token,
-        //         refreshToken,
-        //         user.Role,
-        //         user.DistributorId,
-        //         user.EmployeeId
-        //     });
-        // }
 
         // ============================================================
         // SIGN UP (Allow duplicate emails ONLY for EMPLOYEES)

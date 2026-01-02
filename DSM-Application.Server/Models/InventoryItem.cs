@@ -7,6 +7,9 @@ namespace DSM_Application.Server.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+
+
+        //public string Id { get; set; }
         public string InventoryId { get; set; }
 
         public string ProductId { get; set; }
@@ -24,8 +27,10 @@ namespace DSM_Application.Server.Models
 
         public DateTime UpdatedAt { get; set; }
 
+        // ✅ Auto-calculated (DO NOT STORE IN DB)
         public int AvailableQuantity { get; set; }
-
+        public int DamagedQty { get; set; }     // ❌ damaged items
+        public int ReturnedQty { get; set; }    // ↩ returned items
         public DateTime ManufactureDate { get; set; }
         public DateTime ExpiryDate { get; set; }
 

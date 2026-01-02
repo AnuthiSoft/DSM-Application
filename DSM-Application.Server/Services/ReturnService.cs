@@ -13,13 +13,16 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<ReturnRequest> _returns;
         private readonly IMongoCollection<InventoryItem> _inventory;
         private readonly InventoryService _inventoryService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ReturnService(MongoDbService db, InventoryService inventoryService)
+
+        public ReturnService(MongoDbService db, InventoryService inventoryService, IHttpContextAccessor httpContextAccessor)
         {
             _orders = db.Orders;
             _returns = db.ReturnRequests;
             _inventory = db.Inventory;   // ✅ ADD THIS
             _inventoryService = inventoryService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // 1️⃣ CREATE RETURN (ONLY AFTER DELIVERY)
@@ -83,34 +86,123 @@ namespace DSM_Application.Server.Services
         // 4️⃣ COMPLETE RETURN (INVENTORY + ORDER)
         public async Task CompleteReturnAsync(string returnId)
         {
+            // 1️⃣ Get distributorId from JWT
+            var distributorId = _httpContextAccessor.HttpContext?
+                .User?.FindFirst("DistributorId")?.Value;
+
+            if (string.IsNullOrEmpty(distributorId))
+                throw new Exception("Unauthorized: Distributor not found");
+
+            // 2️⃣ Get return
             var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
             if (ret == null)
                 throw new Exception("Return not found");
 
-            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
-            if (order == null)
-                throw new Exception("Order not found");
+            // 3️⃣ Get order and validate ownership
+            var order = await _orders.Find(o =>
+                o.Id == ret.OrderId &&
+                o.DistributorId == distributorId
+            ).FirstOrDefaultAsync();
 
+            if (order == null)
+                throw new Exception("Unauthorized access to this order");
+
+            // 4️⃣ Get inventory for this distributor
             var inventory = await _inventory.Find(i =>
                 i.ProductId == ret.ProductId &&
-                i.DistributorId == order.DistributorId
+                i.DistributorId == distributorId
             ).FirstOrDefaultAsync();
 
             if (inventory == null)
                 throw new Exception("Inventory not found");
 
+            // 5️⃣ Update stock
             inventory.CurrentStock += ret.ReturnQty;
-            inventory.AvailableQuantity += ret.ReturnQty;
-            inventory.ReturnedQty = (inventory.ReturnedQty) + ret.ReturnQty;
+            //inventory.AvailableQuantity += ret.ReturnQty;
+            inventory.ReturnedQty += ret.ReturnQty;
             inventory.UpdatedAt = DateTime.UtcNow;
 
-            await _inventory.ReplaceOneAsync(i => i.Id == inventory.Id, inventory);
+            await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
+            // 6️⃣ Update return status
             ret.Status = "Completed";
             ret.CompletedAt = DateTime.UtcNow;
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
         }
+
+
+        //public async Task CompleteReturnAsync(string returnId
+        //{
+        //    var distributorId = GetDistributorId();
+
+        //    if (string.IsNullOrEmpty(distributorId))
+        //        throw new Exception("Unauthorized distributor");
+
+        //    var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
+        //    if (ret == null)
+        //        throw new Exception("Return not found");
+
+        //    var order = await _orders.Find(o =>
+        //        o.Id == ret.OrderId &&
+        //        o.DistributorId == distributorId
+        //    ).FirstOrDefaultAsync();
+
+        //    if (order == null)
+        //        throw new Exception("Order does not belong to this distributor");
+
+        //    var inventory = await _inventory.Find(i =>
+        //        i.ProductId == ret.ProductId &&
+        //        i.DistributorId == distributorId
+        //    ).FirstOrDefaultAsync();
+
+        //    if (inventory == null)
+        //        throw new Exception("Inventory not found");
+
+        //    // Update stock
+        //    inventory.CurrentStock += ret.ReturnQty;
+        //    inventory.AvailableQuantity += ret.ReturnQty;
+        //    inventory.ReturnedQty += ret.ReturnQty;
+        //    inventory.UpdatedAt = DateTime.UtcNow;
+
+        //    await _inventory.ReplaceOneAsync(i => i.Id == inventory.Id, inventory);
+
+        //    ret.Status = "Completed";
+        //    ret.CompletedAt = DateTime.UtcNow;
+
+        //    await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
+        //}
+
+        //public async Task CompleteReturnAsync(string returnId)
+        //{
+        //    var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
+        //    if (ret == null)
+        //        throw new Exception("Return not found");
+
+        //    var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
+        //    if (order == null)
+        //        throw new Exception("Order not found");
+
+        //    var inventory = await _inventory.Find(i =>
+        //        i.ProductId == ret.ProductId &&
+        //        i.DistributorId == order.DistributorId
+        //    ).FirstOrDefaultAsync();
+
+        //    if (inventory == null)
+        //        throw new Exception("Inventory not found");
+
+        //    inventory.CurrentStock += ret.ReturnQty;
+        //    inventory.AvailableQuantity += ret.ReturnQty;
+        //    inventory.ReturnedQty = (inventory.ReturnedQty) + ret.ReturnQty;
+        //    inventory.UpdatedAt = DateTime.UtcNow;
+
+        //    await _inventory.ReplaceOneAsync(i => i.Id == inventory.Id, inventory);
+
+        //    ret.Status = "Completed";
+        //    ret.CompletedAt = DateTime.UtcNow;
+
+        //    await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
+        //}
 
 
 
@@ -171,6 +263,12 @@ namespace DSM_Application.Server.Services
                 .ToListAsync();
         }
 
+
+        private string GetDistributorId()
+        {
+            return _httpContextAccessor.HttpContext?.User?
+                .FindFirst("DistributorId")?.Value;
+        }
 
     }
 }

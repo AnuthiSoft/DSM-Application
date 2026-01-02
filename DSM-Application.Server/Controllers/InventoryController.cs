@@ -76,6 +76,17 @@ namespace DSM_Application.Server.Controllers
             return Ok(batches);
         }
 
+        // GET: api/inventory/{productId}
+        [HttpGet("{productId}")]
+        public async Task<IActionResult> GetInventoryByProduct(string productId)
+        {
+            var inventory = await _inventoryService.GetInventoryByProductId(productId);
+
+            if (inventory == null)
+                return NotFound("Inventory not found");
+
+            return Ok(inventory);
+        }
 
 
     }

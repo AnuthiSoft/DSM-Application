@@ -53,7 +53,10 @@ namespace DSM_Application.Server.Controllers
                 return Unauthorized("DistributorId not found in token");
 
             // ✅ Fetch only that distributor’s active products
-            var products = await _productService.GetAllByDistributorAsync(distributorId);
+            // ✅ FIX: Fetch inventory, NOT products
+            //var inventoryItems = await _inventoryService.GetByDistributorAsync(distributorId);
+            //var products = await _productService.GetAllByDistributorAsync(distributorId);
+            var products = await _inventoryService.GetByDistributorAsync(distributorId);
 
             if (products == null || products.Count == 0)
                 return NotFound("No products available for this distributor.");

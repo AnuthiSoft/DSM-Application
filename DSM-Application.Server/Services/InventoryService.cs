@@ -1,5 +1,6 @@
 ﻿using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 
@@ -8,57 +9,72 @@ namespace DSM_Application.Server.Services
     public class InventoryService
     {
         private readonly IMongoCollection<InventoryItem> _inventory;
-        private readonly IMongoCollection<StockMovement> _movements;
+
         private readonly IMongoCollection<Product> _products;
+        private readonly IMongoCollection<InventoryBatch> _inventoryBatches;
+        private readonly IMongoCollection<InventoryBatch> _batches;
+        private readonly IMongoCollection<StockMovement> _movements;
+
 
 
         public InventoryService(IMongoDatabase db)
         {
-            _inventory = db.GetCollection<InventoryItem>("Inventory");
+            //_inventory = db.GetCollection<InventoryItem>("Inventory");
+            _inventory = db.GetCollection<InventoryItem>("InventoryItems");
             _movements = db.GetCollection<StockMovement>("StockMovements");
             _products = db.GetCollection<Product>("Products");
+            _batches = db.GetCollection<InventoryBatch>("InventoryBatches");
+            _movements = db.GetCollection<StockMovement>("StockMovements");
         }
 
         // 🔥 FIXED: Always return products + inventory merged
-        public async Task<List<object>> GetAllStock(string distributorId)
+        public async Task<List<InventoryProductDto>> GetAllStock(string distributorId)
         {
-            var products = await _products
-                .Find(p => p.DistributorId == distributorId && p.IsActive && !p.IsDeleted)
-                .ToListAsync();
-
+            // 1️⃣ Inventory ONLY for this distributor
             var inventory = await _inventory
-                .Find(i => i.DistributorId == distributorId)
+                .Find(i =>
+                    i.DistributorId == distributorId &&
+                    i.CurrentStock > 0
+                )
                 .ToListAsync();
 
-            var result = new List<object>();
+            if (!inventory.Any())
+                return new List<InventoryProductDto>();
 
-            foreach (var product in products)
+            var productIds = inventory.Select(i => i.ProductId).Distinct().ToList();
+
+            // 2️⃣ Products ONLY for this distributor
+            var products = await _products
+                .Find(p =>
+                    productIds.Contains(p.ProductId) &&
+                    p.DistributorId == distributorId &&
+                    p.IsActive &&
+                    !p.IsDeleted
+                )
+                .ToListAsync();
+
+            // 3️⃣ STRICT merge (skip orphan inventory)
+            var result = new List<InventoryProductDto>();
+
+            foreach (var inv in inventory)
             {
-                var productInventory = inventory
-                    .Where(i => i.ProductId == product.ProductId)
-                    .ToList();
+                var product = products.FirstOrDefault(p => p.ProductId == inv.ProductId);
 
-                var currentStock = productInventory.Sum(i =>
-                    i.CurrentStock > 0
-                        ? i.CurrentStock
-                        : i.AvailableQuantity
-                );
+                // 🚫 Skip inventory without valid product
+                if (product == null)
+                    continue;
 
-                result.Add(new
+                result.Add(new InventoryProductDto
                 {
-                    productId = product.ProductId,
-                    productName = product.ProductName,
-                    productCode = product.ProductCode,
-                    color = product.Color,          // ✅ FIX
-                    brand = product.Brand,
-                    measure = product.Measure,
-                    currentStock = currentStock,
-                    price = product.Price,
-                    sellingPrice = product.Price,
-                    reorderLevel = product.ReorderLevel,
-                    updatedAt = productInventory.Any()
-                        ? productInventory.Max(i => i.UpdatedAt)
-                        : product.UpdatedDate
+                    ProductId = product.ProductId,
+                    ProductName = product.ProductName,
+                    ProductCode = product.ProductCode,
+                    Brand = product.Brand,
+                    Measure = product.Measure,
+                    Price = product.Price,
+                    CurrentStock = inv.CurrentStock,
+                    ReorderLevel = product.ReorderLevel,
+                    UpdatedAt = inv.UpdatedAt
                 });
             }
 
@@ -70,12 +86,38 @@ namespace DSM_Application.Server.Services
 
 
 
+
+
+
+
+
+
         // 🔥 Stock In
         public async Task AddStockAsync(string productId, string distributorId, int quantity, string reason)
         {
+            // ⚠️ No expiry info → create batch with safe expiry
+            var batch = new InventoryBatch
+            {
+                ProductId = productId,
+                DistributorId = distributorId,
+                QuantityInitial = quantity,
+                QuantityAvailable = quantity,
+                ManufactureDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddMonths(6), // default
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _batches.InsertOneAsync(batch);
+
+            // UPDATE SUMMARY
             await _inventory.UpdateOneAsync(
                 i => i.ProductId == productId && i.DistributorId == distributorId,
                 Builders<InventoryItem>.Update
+                    .SetOnInsert(i => i.InventoryId, ObjectId.GenerateNewId().ToString())
+                    .SetOnInsert(i => i.ProductId, productId)
+                    .SetOnInsert(i => i.DistributorId, distributorId)
+                    .SetOnInsert(i => i.CreatedAt, DateTime.UtcNow)
                     .Inc(i => i.CurrentStock, quantity)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow),
                 new UpdateOptions { IsUpsert = true }
@@ -85,49 +127,92 @@ namespace DSM_Application.Server.Services
             {
                 ProductId = productId,
                 DistributorId = distributorId,
-                Date = DateTime.UtcNow,
+                BatchId = batch.BatchId,
                 Quantity = quantity,
                 Type = "IN",
-                Reason = reason
+                Reason = reason,
+                Date = DateTime.UtcNow
             });
         }
 
 
+        //public async Task AddStockAsync(string productId, string distributorId, int quantity, string reason)
+        //{
+        //    await _inventory.UpdateOneAsync(
+        //        i => i.ProductId == productId && i.DistributorId == distributorId,
+        //        Builders<InventoryItem>.Update
+        //            .Inc(i => i.CurrentStock, quantity)
+        //            .Set(i => i.UpdatedAt, DateTime.UtcNow),
+        //        new UpdateOptions { IsUpsert = true }
+        //    );
+
+        //    await _movements.InsertOneAsync(new StockMovement
+        //    {
+        //        ProductId = productId,
+        //        DistributorId = distributorId,
+        //        Date = DateTime.UtcNow,
+        //        Quantity = quantity,
+        //        Type = "IN",
+        //        Reason = reason
+        //    });
+        //}
+
+
         // 🔥 Stock Out
-        public async Task RemoveStockAsync(string productId, string distributorId, int quantity, string reason)
+        public async Task RemoveStockAsync(
+       string productId,
+       string distributorId,
+       int quantity,
+       string reason)
         {
-            var filter = Builders<InventoryItem>.Filter.And(
-                Builders<InventoryItem>.Filter.Eq(i => i.ProductId, productId),
-                Builders<InventoryItem>.Filter.Eq(i => i.DistributorId, distributorId)
-            );
+            var batches = await _batches.Find(b =>
+                b.ProductId == productId &&
+                b.DistributorId == distributorId &&
+                b.QuantityAvailable > 0 &&
+                b.ExpiryDate > DateTime.UtcNow   // 🔥 BLOCK expired
+            )
+            .SortBy(b => b.ExpiryDate) // 🔥 FEFO (earliest expiry first)
+            .ToListAsync();
 
-            var item = await _inventory.Find(filter).FirstOrDefaultAsync();
+            int remaining = quantity;
 
-            // ✅ ADD THIS CHECK HERE
-            if (item == null)
-                throw new Exception("Inventory record not found");
+            foreach (var batch in batches)
+            {
+                if (remaining <= 0) break;
 
-            // ✅ THEN CHECK STOCK
-            if (item.CurrentStock < quantity)
-                throw new Exception("Out of stock");
+                int deduct = Math.Min(batch.QuantityAvailable, remaining);
+                batch.QuantityAvailable -= deduct;
+                remaining -= deduct;
 
+                await _batches.ReplaceOneAsync(
+                    b => b.BatchId == batch.BatchId,
+                    batch
+                );
+
+                await _movements.InsertOneAsync(new StockMovement
+                {
+                    ProductId = productId,
+                    DistributorId = distributorId,
+                    BatchId = batch.BatchId,
+                    Quantity = deduct,
+                    Type = "OUT",
+                    Reason = reason,
+                    Date = DateTime.UtcNow
+                });
+            }
+
+            if (remaining > 0)
+                throw new Exception("Not enough non-expired stock available");
+
+            // Update summary inventory
             await _inventory.UpdateOneAsync(
-                filter,
+                i => i.ProductId == productId && i.DistributorId == distributorId,
                 Builders<InventoryItem>.Update
                     .Inc(i => i.CurrentStock, -quantity)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow)
             );
-
-            await _movements.InsertOneAsync(new StockMovement
-            {
-                ProductId = productId,
-                DistributorId = distributorId,
-                Date = DateTime.UtcNow,
-                Quantity = quantity,
-                Type = "OUT",
-                Reason = reason
-            });
         }
+
 
 
 
@@ -143,12 +228,14 @@ namespace DSM_Application.Server.Services
 
             if (item == null)
             {
+                // ✅ Create inventory if missing
                 await _inventory.InsertOneAsync(new InventoryItem
                 {
                     ProductId = productId,
                     DistributorId = distributorId,
                     CurrentStock = newStock,
                     ReorderLevel = 0,
+                    CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
             }
@@ -163,6 +250,37 @@ namespace DSM_Application.Server.Services
             }
         }
 
+        //public async Task UpdateStockAfterProductEdit(string productId, string distributorId, int newStock)
+        //{
+        //    var filter = Builders<InventoryItem>.Filter.And(
+        //        Builders<InventoryItem>.Filter.Eq(i => i.ProductId, productId),
+        //        Builders<InventoryItem>.Filter.Eq(i => i.DistributorId, distributorId)
+        //    );
+
+        //    var item = await _inventory.Find(filter).FirstOrDefaultAsync();
+
+        //    if (item == null)
+        //    {
+        //        await _inventory.InsertOneAsync(new InventoryItem
+        //        {
+        //            ProductId = productId,
+        //            DistributorId = distributorId,
+        //            CurrentStock = newStock,
+        //            ReorderLevel = 0,
+        //            UpdatedAt = DateTime.UtcNow
+        //        });
+        //    }
+        //    else
+        //    {
+        //        var update = Builders<InventoryItem>.Update
+        //            .Set(i => i.CurrentStock, newStock)
+        //            //.Set(i => i.AvailableQuantity, newStock)
+        //            .Set(i => i.UpdatedAt, DateTime.UtcNow);
+
+        //        await _inventory.UpdateOneAsync(filter, update);
+        //    }
+        //}
+
         public async Task DeleteInventoryByProductId(string productId)
         {
             await _inventory.DeleteManyAsync(i => i.ProductId == productId);
@@ -176,34 +294,55 @@ namespace DSM_Application.Server.Services
         }
 
 
-        public async Task AddInventoryAsync(AddInventoryDto dto)
+        public async Task AddInventoryAsync(AddInventoryDto dto, string distributorId)
         {
-            var product = await _products.Find(p => p.ProductId == dto.ProductId).FirstOrDefaultAsync();
+            if (dto.ExpiryDate <= dto.ManufactureDate)
+                throw new Exception("Expiry date must be after manufacture date");
 
-            if (product == null)
-                throw new Exception("Product not found");
-
-            var item = new InventoryItem
+            // 1️⃣ Create batch
+            var batch = new InventoryBatch
             {
-                ProductId = product.ProductId,
-                DistributorId = product.DistributorId,
-                ProductName = product.ProductName,
-                ProductCode = product.ProductCode,
-
-                CostPrice = product.CostPrice?? 0,
-                SellingPrice = product.Price,
-
-                CurrentStock = dto.Quantity,
-                AvailableQuantity = dto.Quantity,  // ✅ MUST SET
-                ReorderLevel = product.ReorderLevel,
-
+                ProductId = dto.ProductId,
+                DistributorId = distributorId,
+                QuantityInitial = dto.Quantity,
+                QuantityAvailable = dto.Quantity,
                 ManufactureDate = dto.ManufactureDate,
                 ExpiryDate = dto.ExpiryDate,
+                IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _inventory.InsertOneAsync(item);
+            await _batches.InsertOneAsync(batch);
+
+            // 2️⃣ UPDATE SUMMARY INVENTORY
+            await _inventory.UpdateOneAsync(
+                i => i.ProductId == dto.ProductId && i.DistributorId == distributorId,
+                Builders<InventoryItem>.Update
+                    .SetOnInsert(i => i.InventoryId, ObjectId.GenerateNewId().ToString())
+                    .SetOnInsert(i => i.ProductId, dto.ProductId)
+                    .SetOnInsert(i => i.DistributorId, distributorId)
+                    .SetOnInsert(i => i.CreatedAt, DateTime.UtcNow)
+                    .Inc(i => i.CurrentStock, dto.Quantity)
+                    .Set(i => i.UpdatedAt, DateTime.UtcNow),
+                new UpdateOptions { IsUpsert = true }
+            );
+
+            // 3️⃣ Movement
+            await _movements.InsertOneAsync(new StockMovement
+            {
+                ProductId = dto.ProductId,
+                DistributorId = distributorId,
+                BatchId = batch.BatchId,
+                Quantity = dto.Quantity,
+                Type = "IN",
+                Reason = "Batch stock added",
+                Date = DateTime.UtcNow
+            });
         }
+
+
+
+
 
 
         public async Task<List<InventoryItem>> GetBatchesByProduct(string productId)
@@ -214,42 +353,18 @@ namespace DSM_Application.Server.Services
                 .ToListAsync();
         }
 
-        public async Task DeductStockFIFO(string productId, int orderQty)
+        public async Task DeductStock(string productId, int quantity)
         {
-            var batches = await _inventory
-                .Find(i => i.ProductId == productId
-                        && i.AvailableQuantity > 0
-                        && i.ExpiryDate > DateTime.UtcNow)
-                .SortBy(i => i.CreatedAt) // FIFO
-                .ToListAsync();
+            var item = await _inventory.Find(i => i.ProductId == productId).FirstOrDefaultAsync();
 
-            if (!batches.Any())
-                throw new Exception("No valid stock available");
+            if (item == null || item.CurrentStock < quantity)
+                throw new Exception("Not enough stock");
 
-            int remaining = orderQty;
+            item.CurrentStock -= quantity;
 
-            foreach (var batch in batches)
-            {
-                if (remaining <= 0)
-                    break;
-
-                if (batch.AvailableQuantity >= remaining)
-                {
-                    batch.AvailableQuantity -= remaining;
-                    remaining = 0;
-                }
-                else
-                {
-                    remaining -= batch.AvailableQuantity;
-                    batch.AvailableQuantity = 0;
-                }
-
-                await _inventory.ReplaceOneAsync(i => i.ProductId == batch.ProductId, batch);
-            }
-
-            if (remaining > 0)
-                throw new Exception("Insufficient stock");
+            await _inventory.ReplaceOneAsync(i => i.ProductId == productId, item);
         }
+
 
         public async Task<InventoryItem> GetInventoryByProductId(string productId)
         {
@@ -258,39 +373,47 @@ namespace DSM_Application.Server.Services
                 .FirstOrDefaultAsync();
         }
 
-
-        public async Task<List<InventoryProductDto>> GetByDistributorAsync(string distributorId)
+        public async Task<List<InventoryBatch>> GetBatchDetailsByProduct(string productId)
         {
-            var inventory = await _inventory
-                .Find(i => i.DistributorId == distributorId && i.CurrentStock > 0)
+            return await _batches
+                .Find(b => b.ProductId == productId)
+                .SortBy(b => b.ExpiryDate)
                 .ToListAsync();
+        }
+
+        public async Task<List<ExpiringStockDto>> GetExpiringStock(
+    string distributorId,
+    int days = 30)
+        {
+            var today = DateTime.UtcNow;
+            var alertDate = today.AddDays(days);
+
+            var batches = await _batches.Find(b =>
+                b.DistributorId == distributorId &&
+                b.QuantityAvailable > 0 &&
+                b.ExpiryDate <= alertDate
+            ).ToListAsync();
+
+            var productIds = batches.Select(b => b.ProductId).Distinct().ToList();
 
             var products = await _products
-                .Find(p => inventory.Select(i => i.ProductId).Contains(p.ProductId))
+                .Find(p => productIds.Contains(p.ProductId))
                 .ToListAsync();
 
-            return inventory.Select(i =>
+            return batches.Select(b =>
             {
-                var product = products.FirstOrDefault(p => p.ProductId == i.ProductId);
+                var product = products.FirstOrDefault(p => p.ProductId == b.ProductId);
 
-                return new InventoryProductDto
+                return new ExpiringStockDto
                 {
-                     ProductId = i.ProductId,
-                     ProductName = product.ProductName,
-                     Price = product.Price,
-                     Stock = i.AvailableQuantity, // IMPORTANT
-                     Brand = product.Brand
+                    ProductId = b.ProductId,
+                    ProductName = product?.ProductName,
+                    BatchId = b.BatchId,
+                    QuantityAvailable = b.QuantityAvailable,
+                    ExpiryDate = b.ExpiryDate,
+                    DaysToExpire = (b.ExpiryDate - today).Days,
+                    Status = b.ExpiryDate < today ? "Expired" : "ExpiringSoon"
                 };
-
-                //return new InventoryProductDto
-                //{
-                //    ProductId = i.ProductId,
-                //    ProductName = product?.ProductName,
-                //    Price = i.SellingPrice,
-                //    Stock = i.CurrentStock,
-                //    Brand = product?.Brand,
-                //    Image = product?.ImageUrls?.FirstOrDefault()
-                //};
             }).ToList();
         }
 
@@ -298,4 +421,3 @@ namespace DSM_Application.Server.Services
     }
 }
 
-    

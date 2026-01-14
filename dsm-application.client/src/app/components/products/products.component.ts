@@ -3,10 +3,11 @@ import { Category, ProductService } from '../../services/product.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as bootstrap from 'bootstrap';
 import { Product } from '../../models/products.model';
-import { environment } from '../../../environments/environment.prod';
-// import { environment } from '../../../environments/environment';
+
 import { ToastrService } from 'ngx-toastr';
 import { InventoryService } from '../../services/inventory.service';
+// import { environment } from '../../../environments/environment.prod';
+import { environment } from '../../../environments/environment';
 import { forkJoin } from 'rxjs';
 
 
@@ -31,7 +32,16 @@ export class ProductsComponent {
   distributorId: string | null = null;
   mainCategories: any[] = [];
   subCategories: any[] = [];
+// ===== Sorting =====
+sortBy: string = 'name';
 
+// ===== Pagination =====
+currentPage = 1;
+pageSize = 8;
+totalPages = 1;
+
+// ===== Modal =====
+showModal = false;
 
   // ==============================================
   // FORM & STATE
@@ -45,7 +55,8 @@ export class ProductsComponent {
   previewUrls: string[] = [];
   selectedProduct: any = null;
   selectedFiles: File[] = [];
-
+imageIndexMap: Record<string, number> = {};
+imageIntervals: Record<string, any> = {};
   // ==============================================
   // FILTERS
   // ==============================================
@@ -178,35 +189,31 @@ export class ProductsComponent {
       });
   }
 
-  loadProducts(distributorId: string) {
-    this.inventoryService.getStock(distributorId).subscribe({
-      next: (inventoryList: any[]) => {
+loadProducts(_: string) {
+  this.productService.getMyProducts().subscribe({
+    next: (products) => {
+      this.products = products;
+      this.filteredProducts = [...products];
 
-        if (!inventoryList || inventoryList.length === 0) {
-          this.products = [];
-          this.filteredProducts = [];
-          return;
-        }
+      // 🔥 init slider
+      products.forEach(p => {
+        this.imageIndexMap[p.productId!] = 0;
+        this.startAutoSlide(p);
+      });
+    },
+    error: (err) => console.error(err)
 
-        const requests = inventoryList.map(inv =>
-          this.productService.getById(inv.productId)
-        );
+  });
+}
+startAutoSlide(product: any) {
+  if (!product.imageUrls || product.imageUrls.length <= 1) return;
 
-        forkJoin(requests).subscribe({
-          next: (products) => {
-            this.products = products.map((p, i) => ({
-              ...p,
-              currentStock: inventoryList[i].currentStock
-            }));
-
-            this.filteredProducts = [...this.products];
-          },
-          error: err => console.error('Product load error', err)
-        });
-      },
-      error: err => console.error('Inventory load error', err)
-    });
-  }
+  this.imageIntervals[product.productId] = setInterval(() => {
+    const current = this.imageIndexMap[product.productId] || 0;
+    this.imageIndexMap[product.productId] =
+      (current + 1) % product.imageUrls.length;
+  }, 3000); // ⏱ 3 sec
+}
 
 
   loadMeasures() {
@@ -439,6 +446,7 @@ export class ProductsComponent {
     this.isEdit = true;
     this.selectedProductId = product.productId!;
     this.selectedProduct = product;
+    this.showModal = true;
 
     // 🔥 RESET FIRST
     this.productForm.reset({
@@ -710,35 +718,29 @@ export class ProductsComponent {
   // ==============================================
   // MODAL HANDLING
   // ==============================================
-  openModal() {
-    this.formSubmitted = false;
-    this.isEdit = false;
-    this.selectedProductId = null;
-    this.selectedProduct = null;
-    this.selectedFiles = [];
-    this.existingImageUrls = [];
-    this.previewUrls = [];
+ openModal() {
+  this.formSubmitted = false;
+  this.isEdit = false;
+  this.selectedProductId = null;
+  this.selectedProduct = null;
 
+  this.selectedFiles = [];
+  this.existingImageUrls = [];
+  this.previewUrls = [];
 
-    this.productForm.reset({
-      discount: 0,
-      stock: 0,
-      gst: 0
-    });
+  this.productForm.reset({
+    discount: 0,
+    stock: 0,
+    gst: 0
+  });
 
-    this.previewUrls = [];
-    this.previewUrl = null;
-
-    const modalEl = document.getElementById('productModal');
-    this.modalRef = new bootstrap.Modal(modalEl!);
-    this.modalRef.show();
-  }
-
+  // ✅ THIS IS THE KEY
+  this.showModal = true;
+}
 
   closeModal() {
-    if (this.modalRef) this.modalRef.hide();
-  }
-
+  this.showModal = false;
+}
   getFullImageUrl(img: string) {
     if (!img) return 'assets/no-image.png';
 
@@ -814,7 +816,117 @@ export class ProductsComponent {
       current === 'dark' ? 'light' : 'dark'
     );
   }
+clearSearch() {
+  this.searchTerm = '';
+  this.filteredProducts = [...this.products];
+}
 
+hasActiveFilters(): boolean {
+  return !!(
+    this.searchTerm ||
+    this.categoryFilter ||
+    this.stockFilter ||
+    this.color ||
+    this.minPriceFilter ||
+    this.maxPriceFilter
+  );
+}
+
+clearCategoryFilter() {
+  this.categoryFilter = '';
+  this.filteredProducts = [...this.products];
+}
+
+clearStockFilter() {
+  this.stockFilter = '';
+  this.filteredProducts = [...this.products];
+}
+
+clearAllFilters() {
+  this.searchTerm = '';
+  this.categoryFilter = '';
+  this.stockFilter = '';
+  this.color = '';
+  this.minPriceFilter = undefined;
+  this.maxPriceFilter = undefined;
+  this.filteredProducts = [...this.products];
+}
+
+getStockFilterLabel(filter: string) {
+  if (filter === 'inStock') return 'In Stock';
+  if (filter === 'lowStock') return 'Low Stock';
+  if (filter === 'outOfStock') return 'Out of Stock';
+  return 'All';
+}
+
+applySort() {
+  if (this.sortBy === 'name') {
+    this.filteredProducts.sort((a, b) =>
+      a.productName.localeCompare(b.productName)
+    );
+  }
+
+  if (this.sortBy === 'priceLow') {
+    this.filteredProducts.sort((a, b) => a.price - b.price);
+  }
+
+  if (this.sortBy === 'priceHigh') {
+    this.filteredProducts.sort((a, b) => b.price - a.price);
+  }
+
+  if (this.sortBy === 'stock') {
+    this.filteredProducts.sort(
+      (a, b) => (b.currentStock || 0) - (a.currentStock || 0)
+    );
+  }
+}
+getInStockCount() {
+  return this.products.filter(p => p.currentStock > 10).length;
+}
+
+getLowStockCount() {
+  return this.products.filter(p => p.currentStock > 0 && p.currentStock <= 10).length;
+}
+
+getTotalStockValue() {
+  return this.products.reduce(
+    (sum, p) => sum + (p.currentStock || 0) * p.price,
+    0
+  );
+}
+getStockPercentage(current: number, max = 100): number {
+  if (!current || current <= 0) return 0;
+  return Math.min(100, (current / max) * 100);
+}
+updatePagination() {
+  this.totalPages = Math.ceil(this.filteredProducts.length / this.pageSize);
+  if (this.currentPage > this.totalPages) {
+    this.currentPage = 1;
+  }
+}
+
+getPageNumbers(): number[] {
+  return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+}
+
+goToPage(page: number) {
+  this.currentPage = page;
+}
+
+prevPage() {
+  if (this.currentPage > 1) this.currentPage--;
+}
+
+nextPage() {
+  if (this.currentPage < this.totalPages) this.currentPage++;
+}
+removePreview(img: string) {
+  this.previewUrls = this.previewUrls.filter(i => i !== img);
+}
+
+removeExistingImage(img: string) {
+  this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
+}
 
 }
 

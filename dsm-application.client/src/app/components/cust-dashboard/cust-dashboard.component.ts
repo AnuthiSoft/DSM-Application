@@ -82,14 +82,14 @@ export class CustDashboardComponent {
   pincodes?: string[];
 
 
-  @Output() viewProductsClicked = new EventEmitter<string>();
+  // @Output() viewProductsClicked = new EventEmitter<string>();
   dashboardType: 'global' | 'local' = 'global';
   getStars(rating: number): number[] {
     return [1, 2, 3, 4, 5];
   }
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private customerService: CustomerService,  private router: Router) {}
 
   ngOnInit(): void {
     this.customerId = localStorage.getItem('customerId') || '';
@@ -97,52 +97,69 @@ export class CustDashboardComponent {
   }
 
 
-  // openProducts(distributorId: string) {
-  //   this.viewProductsClicked.emit(distributorId);
-  // }
+// openProducts(distributorId: string) {
+//   this.viewProductsClicked.emit(distributorId);
+// }
+openProducts(distributorId: string) {
+  this.router.navigate(['/products', distributorId]);
+}
 
+loadDistributors() {
+  this.loading = true;
 
-  loadDistributors() {
-    this.loading = true;
+  this.customerService
+    .getCustomerDashboard(this.customerId)
+    .subscribe({
+      next: (res: DashboardResponse) => {
+        console.log('Dashboard response:', res);
 
-    this.http
-      .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-      .subscribe({
-        next: (res) => {
-          if (res.isGlobal && res.distributors?.length) {
-            this.dashboardType = 'global';
-            this.distributors = res.distributors.map(d => ({
-              ...d.distributor,
-              canConnect: d.canConnect
-            }));
-          } else {
-            this.distributors = [];
-          }
-          this.loading = false;
-        },
-        error: () => this.loading = false
-      });
-  }
+        if (res.isGlobal && res.distributors?.length) {
+          this.dashboardType = 'global';
+          this.distributors = res.distributors.map(d => ({
+            ...d.distributor,
+            canConnect: d.canConnect
+          }));
+        } 
+        else if (!res.isGlobal && res.distributor) {
+          this.dashboardType = 'local';
+          this.distributors = [res.distributor];
+        } 
+        else {
+          this.distributors = [];
+        }
 
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading distributors:', err);
+        this.loading = false;
+      }
+    });
+}
 
 
   connectDistributor(distributorId: string) {
-    const body = { customerId: this.customerId, distributorId };
+  this.customerService
+    .connectDistributor(this.customerId, distributorId)
+    .subscribe({
+      next: (res: any) => {
+        alert(res.message);
 
-    this.http
-      .post<{ message: string }>(
-        'http://localhost:5164/api/customers/connect-distributor',
-        body
-      )
-      .subscribe({
-        next: (res) => {
-          alert(res.message);
-          this.loadDistributors(); // 🔥 SOURCE OF TRUTH
-        },
-        error: (err) => {
-          alert('Error connecting: ' + err.message);
-        },
-      });
-  }
+        const distributor = this.distributors.find(
+          d => d.distributorId === distributorId
+        );
+
+        if (distributor) {
+          distributor.status = res.status;
+          distributor.canConnect = false;
+        }
+      },
+      error: (err) => {
+        alert('Error connecting: ' + err.message);
+      }
+    });
+}
+
+
 }
 

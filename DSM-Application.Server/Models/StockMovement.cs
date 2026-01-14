@@ -12,11 +12,17 @@ namespace DSM_Application.Server.Models
         public string ProductId { get; set; }
         public string DistributorId { get; set; }
 
+        // ✅ Batch reference
+        public string BatchId { get; set; }
+
+        // IN / OUT
+        public string Type { get; set; }
+
         public int Quantity { get; set; }
-        public string Type { get; set; }   // IN / OUT
+
         public string Reason { get; set; }
-        public DateTime Date { get; set; }
-        public int PreviousStock { get; set; }
-        public int NewStock { get; set; }
+
+        // ✅ ADD THIS (THIS FIXES YOUR ERROR)
+        public DateTime Date { get; set; } = DateTime.UtcNow;
     }
 }

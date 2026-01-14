@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface EmployeeLocation {
   id: string;
@@ -13,7 +14,7 @@ export interface EmployeeLocation {
 
 @Injectable({ providedIn: 'root' })
 export class TrackingService {
-  private apiUrl = 'http://localhost:5164/api/Tracking';
+ private apiUrl = `${environment.apiUrl}/Tracking`;
 
   constructor(private http: HttpClient) {}
 

@@ -19,21 +19,42 @@ export class PaymentService {
   }
 
   // 2️⃣ Cashier Daily Summary
-  getCashierSummary(cashierId: string, date: string): Observable<any> {
-    return this.api.get(`${this.endpoint}/cashier-summary/${cashierId}`, {
-      params: { date }
-    });
-  }
-
+ getCashierCustomerSummary(
+  cashierId: string,
+  date: string
+): Observable<any> {
+  return this.api.get(
+    `${this.endpoint}/cashier-customer-summary/${cashierId}`,
+    { params: { date } }
+  );
+}
+getReceiptsForHandover(
+  cashierId: string,
+  date: string
+): Observable<any[]> {
+  return this.api.get(
+    `${this.endpoint}/receipts-for-handover`,
+    { params: { cashierId, date } }
+  );
+}
   // 3️⃣ Customer Payment Status
   getCustomerPaymentHistory(orderId: string): Observable<any> {
     return this.api.get(`${this.endpoint}/customer-payment-history/${orderId}`);
   }
 
   // 4️⃣ Create Handover
-  createHandover(dto: any): Observable<any> {
-    return this.api.post(`${this.endpoint}/create-handover`, dto);
-  }
+ createHandover(dto: {
+  cashierId: string;
+  distributorId: string;
+  receiptIds: string[];          // ✅ CHANGED
+  cashAmountSubmitted: number;
+  totalAmountSubmitted: number;
+  date: string;
+  notes?: string;
+}): Observable<any> {
+  return this.api.post(`${this.endpoint}/create-handover`, dto);
+}
+
 
   // 5️⃣ Distributor Summary
   getDistributorSummary(distributorId: string, date: string): Observable<any> {
@@ -119,6 +140,23 @@ getCustomerReceipts(
   return this.api.get<any[]>(
     'payment/customer-receipts',
     { params: { customerId, distributorId } }
+  );
+}
+getCustomerWiseReport(
+  distributorId: string,
+  fromDate: string,
+  toDate: string
+) {
+  return this.api.get<any[]>(
+    'payment/customer-wise-report',
+    { params: { distributorId, fromDate, toDate } }
+  );
+}
+// 🔥 Get distributor scanner QR
+getDistributorScanner(distributorId: string) {
+  return this.api.get<any>(
+    'payment/distributor-scanner',
+    { params: { distributorId } }
   );
 }
 

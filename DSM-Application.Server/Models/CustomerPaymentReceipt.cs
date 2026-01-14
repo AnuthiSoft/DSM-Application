@@ -18,6 +18,9 @@
         public DateTime PaidOn { get; set; }
 
         // Optional but powerful
+        public bool IsSubmittedForHandover { get; set; }
+        public string? HandoverStatus { get; set; }   // Pending / Accepted / Rejected
+        public string? RejectReason { get; set; }
         public List<OrderPaymentSplit> Orders { get; set; } = new();
     }
 

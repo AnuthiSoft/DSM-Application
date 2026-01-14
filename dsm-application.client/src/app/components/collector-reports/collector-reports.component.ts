@@ -10,14 +10,15 @@ import { Payment } from '../../models/payment.model';
 })
 export class CollectorReportsComponent implements OnInit {
 
-  unhandedPayments: any[] = [];
+
 
   // Selected payment objects
-  selectedPayments: any[] = [];
+ 
   showHandoverModal = false;
 showSuccessToast = false;
 pendingPayments: any[] = [];
-
+unhandedReceipts: any[] = [];
+selectedReceipts: any[] = [];
 
   // Extra required fields for HTML template
   todayDate: string = new Date().toISOString().split("T")[0];
@@ -25,15 +26,15 @@ pendingPayments: any[] = [];
   distributors: any[] = []; // If needed later
   notes: string = "";
 
-  form = {
-    cashierId: localStorage.getItem('employeeId') || '',
-    distributorId: localStorage.getItem('distributorId') || '',
-    cashAmountSubmitted: 0,
-    totalAmountSubmitted: 0,
-    paymentIds: [] as string[],
-    date: new Date().toISOString().split('T')[0],
-    notes: ""
-  };
+form = {
+  cashierId: localStorage.getItem('employeeId') || '',
+  distributorId: localStorage.getItem('distributorId') || '',
+  receiptIds: [] as string[],        // ✅ CHANGED
+  cashAmountSubmitted: 0,
+  totalAmountSubmitted: 0,
+  date: new Date().toISOString().split('T')[0],
+  notes: ''
+};
 
   response: any;
 
@@ -53,79 +54,90 @@ goToPendingPayments() {
 loadPendingPayments() {
   const cashierId = localStorage.getItem('employeeId')!;
   const selectedDate = this.form.date;
-  const rejected = this.unhandedPayments.filter(p => p.handoverStatus === 'Rejected');
+  const rejected = this.unhandedReceipts.filter(p => p.handoverStatus === 'Rejected');
 
 if (rejected.length > 0) {
   alert(`⚠️ ${rejected.length} payment(s) were rejected by distributor. Please check the reason.`);
 }
 
 
-  this.paymentService.getCashierSummary(cashierId, selectedDate).subscribe(res => {
-this.unhandedPayments = res.payments.filter(
-  (p: Payment) =>
-    p.isHandedOver === false
-);
-
-  });
+  this.paymentService
+    .getReceiptsForHandover(cashierId, selectedDate)
+    .subscribe(receipts => {
+      this.unhandedReceipts = receipts;
+    });
 }
 
 
   // ---- SELECTION FEATURES ---- //
 
-  isSelected(payment: any) {
-    return this.selectedPayments.includes(payment);
+isSelected(receipt: any) {
+  return this.selectedReceipts.includes(receipt);
+}
+
+toggleReceiptSelection(receipt: any, checked: boolean) {
+    // ⛔ HARD BLOCK
+  if (receipt.handoverStatus === 'Pending') {
+    return;
   }
+  if (checked) {
+    this.selectedReceipts.push(receipt);
+    this.form.receiptIds.push(receipt.receiptId);
 
-  togglePaymentSelection(payment: any, checked: boolean) {
-    if (checked) {
-      this.selectedPayments.push(payment);
+    this.form.totalAmountSubmitted += receipt.amountPaid;
 
-      this.form.paymentIds.push(payment.paymentId);
-      this.form.totalAmountSubmitted += payment.amountPaidToday;
+    if (receipt.paymentMode === 'cash') {
+      this.form.cashAmountSubmitted += receipt.amountPaid;
+    }
 
-      if (payment.paymentMode === "cash") {
-        this.form.cashAmountSubmitted += payment.amountPaidToday;
-      }
+  } else {
+    this.selectedReceipts = this.selectedReceipts.filter(r => r !== receipt);
+    this.form.receiptIds = this.form.receiptIds.filter(
+      id => id !== receipt.receiptId
+    );
 
-    } else {
-      this.selectedPayments = this.selectedPayments.filter(p => p !== payment);
+    this.form.totalAmountSubmitted -= receipt.amountPaid;
 
-      this.form.paymentIds = this.form.paymentIds.filter(id => id !== payment.paymentId);
-      this.form.totalAmountSubmitted -= payment.amountPaidToday;
-
-      if (payment.paymentMode === "cash") {
-        this.form.cashAmountSubmitted -= payment.amountPaidToday;
-      }
+    if (receipt.paymentMode === 'cash') {
+      this.form.cashAmountSubmitted -= receipt.amountPaid;
     }
   }
+}
+
 
   isAllSelected() {
-    return this.selectedPayments.length === this.unhandedPayments.length;
+    return this.selectedReceipts.length === this.unhandedReceipts.length;
   }
+toggleSelectAll(checked: boolean) {
+  if (checked) {
+    this.selectedReceipts = [...this.unhandedReceipts];
+    this.form.receiptIds = this.unhandedReceipts.map(r => r.receiptId);
 
-  toggleSelectAll(checked: boolean) {
-    if (checked) {
-      this.selectedPayments = [...this.unhandedPayments];
-      this.form.paymentIds = this.unhandedPayments.map(p => p.paymentId);
+    this.form.totalAmountSubmitted = this.unhandedReceipts.reduce(
+      (sum, r) => sum + r.amountPaid, 0
+    );
 
-      this.form.totalAmountSubmitted = this.unhandedPayments.reduce(
-        (sum, p) => sum + p.amountPaidToday, 0);
+    this.form.cashAmountSubmitted = this.unhandedReceipts
+      .filter(r => r.paymentMode === 'cash')
+      .reduce((sum, r) => sum + r.amountPaid, 0);
 
-      this.form.cashAmountSubmitted = this.unhandedPayments
-        .filter(p => p.paymentMode === 'cash')
-        .reduce((sum, p) => sum + p.amountPaidToday, 0);
-
-    } else {
-      this.clearSelection();
-    }
+  } else {
+    this.clearSelection();
   }
+}
+hasPendingReceipts(): boolean {
+  return this.unhandedReceipts.some(
+    r => r.handoverStatus === 'Pending'
+  );
+}
 
-  clearSelection() {
-    this.selectedPayments = [];
-    this.form.paymentIds = [];
-    this.form.cashAmountSubmitted = 0;
-    this.form.totalAmountSubmitted = 0;
-  }
+clearSelection() {
+  this.selectedReceipts = [];
+  this.form.receiptIds = [];
+  this.form.cashAmountSubmitted = 0;
+  this.form.totalAmountSubmitted = 0;
+}
+
 
   // ---- ICON FOR PAYMENT MODE ---- //
   getPaymentModeIcon(mode: string) {
@@ -139,40 +151,39 @@ this.unhandedPayments = res.payments.filter(
   }
 
   // ---- PAYMENT STATS ---- //
-  getCashPaymentCount() {
-    return this.selectedPayments.filter(p => p.paymentMode === 'cash').length;
-  }
+getCashPaymentCount() {
+  return this.selectedReceipts.filter(r => r.paymentMode === 'cash').length;
+}
 
-  getOnlinePaymentCount() {
-    return this.selectedPayments.filter(
-      p => p.paymentMode === 'online' || p.paymentMode === 'upi'
-    ).length;
-  }
-
+getOnlinePaymentCount() {
+  return this.selectedReceipts.filter(
+    r => r.paymentMode === 'online' || r.paymentMode === 'upi'
+  ).length;
+}
   // ---- VALIDATION ---- //
   canSubmit() {
-    return this.selectedPayments.length > 0;
+    return this.selectedReceipts.length > 0;
   }
 
   // ---- SUBMIT HANDOVER ---- //
   submit() {
-    if (!this.canSubmit()) {
-      alert("Please select at least one payment.");
-      return;
-    }
-
-    this.form.notes = this.notes;
-
-    this.paymentService.createHandover(this.form).subscribe({
-      next: res => {
-        this.response = res;
-      alert("Handover submitted! Waiting for distributor approval.");
-        this.clearSelection();
-        this.loadPendingPayments();
-      },
-      error: err => {
-        alert(err.error?.error || "Handover Failed");
-      }
-    });
+  if (this.selectedReceipts.length === 0) {
+    alert('Please select at least one receipt.');
+    return;
   }
+
+  this.form.notes = this.notes;
+
+  this.paymentService.createHandover(this.form).subscribe({
+    next: () => {
+      alert('Handover submitted! Waiting for distributor approval.');
+      this.clearSelection();
+      this.loadPendingPayments();
+    },
+    error: err => {
+      alert(err.error?.error || 'Handover Failed');
+    }
+  });
+}
+
 }

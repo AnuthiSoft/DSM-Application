@@ -5,6 +5,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { DistributorService } from '../../services/distributor.service';
 import { ToastrService } from 'ngx-toastr';
 import { ProductService } from '../../services/product.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-distributor-orders',
@@ -14,6 +15,7 @@ import { ProductService } from '../../services/product.service';
 export class DistributorOrdersComponent implements OnInit {
   distributorId = localStorage.getItem('distributorId') || '';
   empId = localStorage.getItem('employeeId') || '';
+  apiBaseUrl = environment.apiUrl.replace('/api', '');
 
   orders: DistributorOrder[] = [];
   employees: Employee[] = [];
@@ -208,9 +210,9 @@ getTempEmployees(order: DistributorOrder): Employee[] {
       this.productService.getById(item.productId).subscribe((p: any) => {
         item.brand = p.brand;
         item.category = p.category;
-        item.imageUrl = p.imageUrls?.length
-          ? `http://localhost:5164${p.imageUrls[0]}`
-          : 'assets/no-image.png';
+       item.imageUrl = p.imageUrls?.length
+  ? `${this.apiBaseUrl}${p.imageUrls[0]}`
+  : 'assets/no-image.png';
       });
     });
 
@@ -548,6 +550,16 @@ getOrderFinalTotal(order: any): number {
 
 toggleTheme() {
   document.body.classList.toggle('dark');
+}
+viewReceipt(blobName: string) {
+  if (!blobName) {
+    this.toastr.warning('Receipt not available');
+    return;
+  }
+
+  // ✅ ALWAYS go through backend (secured)
+  const receiptUrl = `${environment.apiUrl}/orders/receipt/${blobName}`;
+  window.open(receiptUrl, '_blank');
 }
 
 }

@@ -32,6 +32,12 @@ namespace DistributorManagementSystem.Server.Models
         public int FraudCount { get; set; } = 0;
       
         public string? Status { get; set; } // Pending / Accepted / Rejected / null
+
+
+
+
+
+
                                             // 👇 serves multiple pincodes
 
         [BsonElement("ServicePincodes")]
@@ -40,5 +46,7 @@ namespace DistributorManagementSystem.Server.Models
         public string? City { get; set; }
         public int YearsInBusiness { get; set; }
         public double Rating { get; set; }
+        // ✅ QR CODE IMAGE (Azure / S3 / CDN / local)
+        public string? ScannerQrUrl { get; set; }
     }
 }

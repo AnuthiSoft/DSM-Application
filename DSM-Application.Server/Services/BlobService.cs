@@ -28,7 +28,8 @@ namespace DSM_Application.Server.Services
             });
 
             // ✅ FULL URL
-            return blobClient.Uri.ToString();
+            //return blobClient.Uri.ToString();
+            return blobName;
         }
         public async Task<byte[]?> DownloadAsync(string blobName)
         {

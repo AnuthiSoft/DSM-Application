@@ -54,10 +54,10 @@ reject(h: any) {
 viewDetails(h: any) {
   this.paymentService.getHandoverDetails(h.handoverId)
     .subscribe(res => {
-      console.log(res);
       this.selectedDetails = res;
-      this.showModal = true;  // if using popup
+      this.showModal = true;
     });
 }
+
 
 }

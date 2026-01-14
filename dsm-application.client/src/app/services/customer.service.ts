@@ -67,10 +67,15 @@ getCustomerId(): string {
   updateCustomer(customerId: string, customer: Customer): Observable<any> {
     return this.api.put(`customers/update-customer/${customerId}`, customer);
   }
+getMyCustomersForCustomer() {
+  return this.http.get<any[]>(
+    `${environment.apiUrl}/customers/my-customers-for-customer`
+  );
+}
 
 
   getCustomerById(customerId: string) {
-  return this.http.get<any>(`http://localhost:5164/api/customers/get-customer/${customerId}`);
+  return this.api.get<any>(`customers/get-customer/${customerId}`);
 }
 
 
@@ -109,6 +114,7 @@ getCustomerId(): string {
   return this.api.post(`customers/upload-profile-picture`, formData, {
     headers: { Authorization: `Bearer ${token}` }
   });
+
 }
 
 
@@ -169,7 +175,17 @@ checkPhoneExists(phoneNumber: string): Observable<boolean> {
     `customers/check-phone/${phoneNumber}`
   );
 }
+  getCustomerDashboard(customerId: string): Observable<any> {
+    return this.api.get(`customers/dashboard/${customerId}`);
+  }
 
+  // ✅ Connect distributor
+  connectDistributor(customerId: string, distributorId: string): Observable<any> {
+    return this.api.post(`customers/connect-distributor`, {
+      customerId,
+      distributorId
+    });
+  }
 
 }
 

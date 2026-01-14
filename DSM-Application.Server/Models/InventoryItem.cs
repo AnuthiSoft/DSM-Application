@@ -3,6 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class InventoryItem
     {
         [BsonId]
@@ -28,10 +29,19 @@ namespace DSM_Application.Server.Models
         public DateTime UpdatedAt { get; set; }
 
         // ✅ Auto-calculated (DO NOT STORE IN DB)
-        public int AvailableQuantity { get; set; }
-        public int DamagedQty { get; set; }     // ❌ damaged items
-        public int ReturnedQty { get; set; }    // ↩ returned items
+
+        [BsonIgnore] // 🔥 VERY IMPORTANT
+
+        public int? AvailableQuantity { get; set; }
+
+
+        public int DamagedQty { get; set; } = 0;    // ❌ damaged items
+
+
+
         public DateTime ManufactureDate { get; set; }
+        [BsonElement("ReturnedQty")]
+        public int? ReturnedQty { get; set; } = 0;
         public DateTime ExpiryDate { get; set; }
 
         // FIFO key

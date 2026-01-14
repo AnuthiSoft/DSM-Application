@@ -81,9 +81,9 @@ applyStatusFilter() {
     this.showPaymentModal = true;
   }
 
-  placeOrder(orderData: any) {
-  return this.http.post('http://localhost:5164/api/orders/place', orderData);
-}
+//   placeOrder(orderData: any) {
+//   return this.http.post('http://localhost:5164/api/orders/place', orderData);
+// }
   closePaymentModal() {
     this.showPaymentModal = false;
     this.selectedOrder = null;
@@ -143,6 +143,46 @@ getDiscount(order: DistributorOrder): number {
 
   return 0;
 }
+openReceiptUpload(order: DistributorOrder) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
 
-  
+  input.onchange = (event: any) => {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadReceiptFile(order.id, file);
+    }
+  };
+
+  input.click();
+}
+
+uploadReceiptFile(orderId: string, file: File) {
+  const formData = new FormData();
+  formData.append('receipt', file);
+
+  this.orderService.uploadDeliveryReceipt(orderId, formData)
+    .subscribe({
+      next: () => {
+        this.toastr.success('Receipt uploaded. Order delivered 🚚');
+        this.loadOrders();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toastr.error(err.error?.message || 'Upload failed');
+      }
+    });
+}
+
+  onReceiptSelected(event: any, order: DistributorOrder) {
+  const file: File = event.target.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  this.uploadReceiptFile(order.id, file);
+}
 }

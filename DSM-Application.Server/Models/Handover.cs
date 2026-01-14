@@ -2,6 +2,7 @@
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements] // ⭐ REQUIRED
     public class Handover
     {
         [BsonId]
@@ -13,7 +14,7 @@ namespace DSM_Application.Server.Models
         public string CashierId { get; set; }
         public string DistributorId { get; set; }
 
-        public List<string> PaymentIds { get; set; }
+        public List<string> ReceiptIds { get; set; }   // ⭐ CUSTOMER RECEIPTS
 
 
         public decimal CashAmountSubmitted { get; set; }

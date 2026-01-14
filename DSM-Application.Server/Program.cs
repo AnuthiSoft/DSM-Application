@@ -50,7 +50,7 @@ builder.Services.AddScoped<HsnService>();
 builder.Services.AddScoped<BlobService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<ReturnService>();
-
+builder.Services.AddScoped<OrderService>();
 
 
 builder.Services.AddScoped<EwayBillService>();
@@ -114,6 +114,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
             "https://dsm-application.web.app",
    
+
             "https://dsm-application.onrender.com" ,
                 "http://localhost:58555",
                 "http://localhost:4200"

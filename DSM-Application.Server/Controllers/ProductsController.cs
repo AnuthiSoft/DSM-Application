@@ -24,7 +24,7 @@ namespace DSM_Application.Server.Controllers
         private readonly BlobService _blobService;
         private readonly InventoryService _inventoryService;
 
-        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService , BlobService blobService)
+        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService, BlobService blobService)
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -41,26 +41,16 @@ namespace DSM_Application.Server.Controllers
         //    var products = await _productService.GetAllActiveAsync();
         //    return Ok(products);
         //}
-
         [Authorize(Roles = "Distributor")]
-        [HttpGet]
+        [HttpGet("my")]
         public async Task<IActionResult> GetAll()
         {
-            // ✅ Extract distributor ID from token
             var distributorId = User.FindFirst("DistributorId")?.Value;
 
             if (string.IsNullOrEmpty(distributorId))
-                return Unauthorized("DistributorId not found in token");
+                return Unauthorized("DistributorId not found");
 
-            // ✅ Fetch only that distributor’s active products
-            // ✅ FIX: Fetch inventory, NOT products
-            //var inventoryItems = await _inventoryService.GetByDistributorAsync(distributorId);
-            //var products = await _productService.GetAllByDistributorAsync(distributorId);
-            var products = await _inventoryService.GetByDistributorAsync(distributorId);
-
-            if (products == null || products.Count == 0)
-                return NotFound("No products available for this distributor.");
-
+            var products = await _productService.GetInventoryProductsAsync(distributorId);
             return Ok(products);
         }
 
@@ -101,12 +91,14 @@ namespace DSM_Application.Server.Controllers
         //    var products = await _productService.GetAllByDistributorAsync(distributorId);
         //    return Ok(products);
         //}
-
+        [AllowAnonymous]
         [HttpGet("{id:length(24)}")]
         public async Task<IActionResult> GetById(string id)
         {
             var product = await _productService.GetByIdAsync(id);
-            if (product == null) return NotFound();
+            if (product == null)
+                return NotFound();
+
             return Ok(product);
         }
 
@@ -118,13 +110,13 @@ namespace DSM_Application.Server.Controllers
                 return NotFound("Distributor not found");
 
             var imageUrls = new List<string>();
-
             if (dto.Images != null && dto.Images.Any())
             {
                 foreach (var file in dto.Images)
                 {
-                    var blobUrl = await _blobService.UploadAsync(file);
-                    var blobName = Path.GetFileName(new Uri(blobUrl).LocalPath);
+                    var blobName = await _blobService.UploadAsync(file);
+
+                    // ✅ DIRECTLY SAVE BLOB NAME
                     imageUrls.Add(blobName);
                 }
             }
@@ -141,7 +133,7 @@ namespace DSM_Application.Server.Controllers
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
                 GST = gst,
-                
+
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
                 DistributorId = dto.DistributorId,
@@ -199,10 +191,8 @@ namespace DSM_Application.Server.Controllers
 
                 foreach (var file in dto.Images)
                 {
-                    var blobUrl = await _blobService.UploadAsync(file);
-                    var blobName = Path.GetFileName(new Uri(blobUrl).LocalPath);
+                    var blobName = await _blobService.UploadAsync(file);
                     newUrls.Add(blobName);
-
                 }
 
                 existing.ImageUrls = newUrls;
@@ -224,7 +214,7 @@ namespace DSM_Application.Server.Controllers
             existing.CostPrice = dto.CostPrice;
             existing.Discount = dto.Discount;
             existing.GST = existing.GST;
-       
+
             existing.ReorderLevel = dto.ReorderLevel;
             existing.Brand = dto.Brand;
             existing.Category = dto.Category;
@@ -386,12 +376,12 @@ namespace DSM_Application.Server.Controllers
         }
 
 
-        }
-
-
-
-
     }
+
+
+
+
+}
 
 
 

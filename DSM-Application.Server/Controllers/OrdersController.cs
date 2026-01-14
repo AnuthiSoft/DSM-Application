@@ -30,10 +30,11 @@ namespace DSM_Application.Server.Controllers
         private readonly InventoryService _inventoryService;
 
         private readonly OrderService _orderService;
-       
+        private readonly BlobService _blobService;
 
 
-        public OrdersController(MongoDbService mongo, DiscountService discountService, OrderService orderService, InventoryService inventoryService)
+
+        public OrdersController(MongoDbService mongo, DiscountService discountService, OrderService orderService, InventoryService inventoryService, BlobService blobService)
 
         {
 
@@ -48,6 +49,7 @@ namespace DSM_Application.Server.Controllers
             _orderService = orderService;
 
             _inventoryService = inventoryService;
+            _blobService = blobService;
         }
 
 
@@ -221,7 +223,14 @@ namespace DSM_Application.Server.Controllers
                 EmployeeId = assignedEmployeeId,
                 RemainingAmount = totalFinalAmount, // ⭐ MUST ADD
             };
-
+            // 🔥 DEDUCT STOCK FOR EACH PRODUCT
+foreach (var item in orderProducts)
+{
+    await _inventoryService.DeductStock(
+        item.ProductId,
+        item.Quantity
+    );
+}
 
             await _orders.InsertOneAsync(order);
 
@@ -356,8 +365,9 @@ namespace DSM_Application.Server.Controllers
                     PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
                     CollectedAmount = o.CollectedAmount,
                     PaymentMethod = o.PaymentMethod,
-                    CollectedOn = o.CollectedOn
-
+                    CollectedOn = o.CollectedOn,
+                    DeliveryReceiptUrl = o.DeliveryReceiptUrl,
+                    DeliveredOn = o.DeliveredOn,
                     // ✅ Include these two fields
 
                 });
@@ -409,7 +419,7 @@ namespace DSM_Application.Server.Controllers
                         quantity = p.Quantity
                     }),
                     subtotal = order.Subtotal,
-                    discount = order.TotalDiscount,     
+                    discount = order.TotalDiscount,
                     payableAmount = order.TotalAmount,
                     totalAmount = order.TotalAmount,
                     status = order.Status,
@@ -500,35 +510,41 @@ namespace DSM_Application.Server.Controllers
         }
 
         // Distributor-only endpoint to update status.
-        // It ensures the logged-in distributor owns the order.
-        [AllowAnonymous]
         [Authorize(Roles = "Distributor")]
         [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateStatus(string orderId, [FromBody] UpdateStatusDto body)
         {
-            var requestedStatus = (body?.Status ?? string.Empty).Trim();
+            var requestedStatus = body?.Status?.Trim();
             if (string.IsNullOrEmpty(requestedStatus))
                 return BadRequest("Status required");
 
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (string.IsNullOrEmpty(distributorId))
-                return Unauthorized("DistributorId missing from token");
+                return Unauthorized();
 
             var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order == null)
                 return NotFound("Order not found");
 
             if (order.DistributorId != distributorId)
-                return Unauthorized("Not authorized for this order");
+                return Unauthorized("Not your order");
 
-            // ✅ ONLY UPDATE STATUS (NO STOCK)
-            // ✅ When order is DELIVERED → update product stock
-            
-            
+            // 🔥 ADD STOCK BACK IF REJECTED
+            if (requestedStatus == "Rejected" && order.Status != "Rejected")
+            {
+                foreach (var item in order.Products)
+                {
+                    await _inventoryService.AddStockAsync(
+     item.ProductId,
+     order.DistributorId,
+     item.Quantity,
+     "ORDER_REJECTED"
+ );
+                }
+            }
 
-            // ✅ Update order status
             order.Status = requestedStatus;
-            order.DeliveredOn = DateTime.UtcNow;
+            order.UpdatedOn = DateTime.UtcNow;
 
             await _mongo.Orders.ReplaceOneAsync(o => o.Id == orderId, order);
 
@@ -537,9 +553,9 @@ namespace DSM_Application.Server.Controllers
                 message = "Order status updated",
                 status = requestedStatus
             });
-
         }
-            [HttpPut("{orderId}/assign")]
+
+        [HttpPut("{orderId}/assign")]
         public async Task<IActionResult> AssignOrder(string orderId, [FromBody] AssignOrderDto dto)
         {
             var order = await _orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
@@ -880,7 +896,7 @@ namespace DSM_Application.Server.Controllers
             return Ok(result);
         }
 
-     
+
 
 
         [HttpGet("distributor-payment-summary/{distributorId}")]
@@ -928,13 +944,6 @@ namespace DSM_Application.Server.Controllers
             return Ok(history);
         }
 
-
-        [HttpPost("place")]
-        public async Task<IActionResult> PlaceOrder(OrderRequestDto dto)
-        {
-            await _inventoryService.DeductStockFIFO(dto.ProductId, dto.Quantity);
-            return Ok("Order placed successfully");
-        }
 
 
         [Authorize(Roles = "CashCollector,Employee")]
@@ -1046,7 +1055,52 @@ namespace DSM_Application.Server.Controllers
         //    var order = await _orderService.CreateByCollector(dto, userId, role);
         //    return Ok(order);
         //}
+        [Authorize(Roles = "Employee")]
+        [HttpPost("{orderId}/upload-receipt")]
+        public async Task<IActionResult> UploadDeliveryReceipt(
+            string orderId,
+            IFormFile receipt)
+        {
+            if (receipt == null || receipt.Length == 0)
+                return BadRequest("Receipt image is required");
 
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing");
+
+            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+            if (order == null)
+                return NotFound("Order not found");
+
+            if (order.EmployeeId != employeeId)
+                return Unauthorized("Not your assigned order");
+
+            // ✅ Upload to Azure Blob (FULL URL)
+            var blobName = await _blobService.UploadAsync(receipt);
+
+            var update = Builders<Order>.Update
+                .Set(o => o.DeliveryReceiptUrl, blobName)
+                            .Set(o => o.Status, "Delivered")
+                .Set(o => o.DeliveredOn, DateTime.UtcNow);
+
+            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+
+            return Ok(new
+            {
+                message = "Receipt uploaded & order delivered",
+                deliveryReceiptUrl = blobName
+            });
+        }
+        [AllowAnonymous]
+        [HttpGet("receipt/{blobName}")]
+        public async Task<IActionResult> GetReceipt(string blobName)
+        {
+            var data = await _blobService.DownloadAsync(blobName);
+            if (data == null)
+                return NotFound();
+
+            return File(data, "image/jpeg");
+        }
 
     }
 }

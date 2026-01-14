@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { InvoiceUploadService } from '../../services/invoice-upload.service';
 import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/admin.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-employees',
@@ -40,6 +41,7 @@ otpVerified = false;
 otpFailed = false;
 otpCode = '';
 phoneVerifiedUI = false;
+apiUrl = environment.apiUrl;
 // isEdit = false;
   constructor(
     private employeeService: EmployeeService,
@@ -397,7 +399,7 @@ phoneVerifiedUI = false;
     formData.append("file", this.selectedFile);
     formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
 
-    this.http.post("http://localhost:5164/api/invoice-upload/upload", formData)
+   this.http.post(`${this.apiUrl}/invoice-upload/upload`, formData)
       .subscribe({
         next: (res: any) => {
           this.toastr.success("Invoice uploaded successfully!");

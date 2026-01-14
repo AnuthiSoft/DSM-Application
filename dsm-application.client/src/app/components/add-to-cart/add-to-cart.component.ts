@@ -676,9 +676,9 @@ export class AddToCartComponent implements OnInit, OnChanges {
     }
 
     if (this.categoryFilter) list = list.filter(p => p.category === this.categoryFilter);
-    if (this.stockFilter === 'inStock') list = list.filter(p => p.stock > 10);
-    else if (this.stockFilter === 'lowStock') list = list.filter(p => p.stock > 0 && p.stock <= 10);
-    else if (this.stockFilter === 'outOfStock') list = list.filter(p => p.stock === 0);
+    if (this.stockFilter === 'inStock') list = list.filter(p => p.currentStock > 10);
+    else if (this.stockFilter === 'lowStock') list = list.filter(p => p.currentStock > 0 && p.currentStock <= 10);
+    else if (this.stockFilter === 'outOfStock') list = list.filter(p => p.currentStock=== 0);
 
 
     return list;
@@ -719,7 +719,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
 
   increaseQty() {
     if (!this.selectedProduct) return;
-    if (this.selectedQuantity < this.selectedProduct.stock) this.selectedQuantity++;
+    if (this.selectedQuantity < this.selectedProduct.currentStock) this.selectedQuantity++;
   }
 
   decreaseQty() {

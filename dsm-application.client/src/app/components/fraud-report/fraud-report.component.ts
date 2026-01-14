@@ -41,6 +41,7 @@ export class FraudReportComponent {
     // Auto-fill target data from route
     this.model.targetId = this.route.snapshot.paramMap.get('targetId') || '';
     this.model.targetType = this.route.snapshot.paramMap.get('targetType') || '';
+    
   }
 
   // ⭐ Needed by HTML to color badges

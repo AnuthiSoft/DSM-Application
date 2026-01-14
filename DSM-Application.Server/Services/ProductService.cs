@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Xml.Linq;
 using DSM_Application.Server.Models;
+using DSM_Application.Server.Models.DTOs;
 
 
 namespace DSM_Application.Server.Services
@@ -326,6 +327,35 @@ namespace DSM_Application.Server.Services
 
         //    return result.ModifiedCount > 0;
         //}
+        public async Task<List<InventoryProductDto>> GetInventoryProductsAsync(string distributorId)
+        {
+            var products = await _products
+                .Find(p => p.DistributorId == distributorId && p.IsActive)
+                .ToListAsync();
+
+            var inventoryItems = await _inventory
+                .Find(i => i.DistributorId == distributorId)
+                .ToListAsync();
+
+            return products.Select(p =>
+            {
+                var stock = inventoryItems
+                    .FirstOrDefault(i => i.ProductId == p.ProductId); // ✅ FIX HERE
+
+                return new InventoryProductDto
+                {
+                    ProductId = p.ProductId,
+                    ProductName = p.ProductName,
+                    ProductCode = p.ProductCode,
+                    Price = p.Price,
+                    Brand = p.Brand,
+                    Color = p.Color,
+                    Measure = p.Measure,
+                    ImageUrls = p.ImageUrls,
+                    CurrentStock = stock?.CurrentStock ?? 0
+                };
+            }).ToList();
+        }
 
 
     }

@@ -1,14 +1,110 @@
 <div class="main-box">
   <div class="invoice-box">
-    <h2>My Invoices</h2>
-    <hr>
-    <div *ngFor="let inv of invoices" class="invoice-item">
-      <p><strong>Uploaded On:</strong> {{ inv.uploadedOn | date:'medium' }}</p>
-
-      <a [href]="inv.pdfUrl" target="_blank" class="pdf-link">
-        View PDF
-      </a>
+    <div class="invoice-header">
+      <h2><i class="fas fa-file-invoice"></i> My Invoices</h2>
+      <div class="invoice-summary">
+        <span class="total-invoices">
+          <i class="fas fa-file-alt"></i> Total: {{invoices?.length || 0}}
+        </span>
+      </div>
     </div>
-
+    
+    <div *ngIf="invoices?.length; else noInvoices" class="table-container">
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th class="text-center">
+              <i class="fas fa-hashtag"></i> #
+            </th>
+            <th>
+              <i class="fas fa-calendar"></i> Upload Date
+            </th>
+            <th>
+              <i class="fas fa-clock"></i> Upload Time
+            </th>
+            <th>
+              <i class="fas fa-file-pdf"></i> Invoice Details
+            </th>
+            <th class="text-center">
+              <i class="fas fa-cog"></i> Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of invoices; let i = index" class="invoice-row">
+            <td class="text-center serial-number">
+              <span class="number-badge">{{i + 1}}</span>
+            </td>
+            <td class="date-cell">
+              <div class="date-info">
+                <i class="fas fa-calendar-day"></i>
+                <span>{{ inv.uploadedOn | date:'fullDate' }}</span>
+              </div>
+            </td>
+            <td class="time-cell">
+              <div class="time-info">
+                <i class="fas fa-clock"></i>
+                <span>{{ inv.uploadedOn | date:'shortTime' }}</span>
+              </div>
+            </td>
+            <td class="details-cell">
+              <div class="invoice-details">
+                <div class="invoice-title">
+                  <i class="fas fa-receipt"></i>
+                  <strong>Invoice Document</strong>
+                </div>
+                <div class="invoice-meta">
+                  <span class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    Uploaded: {{ inv.uploadedOn | date:'MMM d, yyyy' }}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <a [href]="inv.pdfUrl" target="_blank" class="action-btn view-btn">
+                  <i class="fas fa-eye"></i>
+                  <span>View</span>
+                </a>
+                <a [href]="inv.pdfUrl" download class="action-btn download-btn">
+                  <i class="fas fa-download"></i>
+                  <span>Download</span>
+                </a>
+                <!-- <button class="action-btn share-btn" (click)="shareInvoice(inv)">
+                  <i class="fas fa-share-alt"></i>
+                  <span>Share</span>
+                </button> -->
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- Table Footer -->
+      <div class="table-footer">
+        <div class="footer-info">
+          <i class="fas fa-info-circle"></i>
+          Showing {{invoices?.length || 0}} invoices
+        </div>
+        <div class="footer-actions">
+          <button class="footer-btn export-btn" (click)="exportAll()">
+            <i class="fas fa-file-export"></i> Export All
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <ng-template #noInvoices>
+      <div class="no-invoices">
+        <div class="empty-state">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <h3>No Invoices Found</h3>
+          <p>You don't have any invoices assigned yet.</p>
+          <p class="sub-text">Invoices will appear here once they are generated and assigned to you.</p>
+        </div>
+      </div>
+    </ng-template>
+    
   </div>
 </div>

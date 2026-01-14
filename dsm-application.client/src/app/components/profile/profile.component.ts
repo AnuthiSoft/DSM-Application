@@ -201,6 +201,7 @@ import { ProfileService } from '../../services/profile.service';
 import { CustomerProfileDto } from '../../models/customer.model';
 import { ToastrService } from 'ngx-toastr';
 import { CustomerService } from '../../services/customer.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -220,6 +221,7 @@ export class ProfileComponent implements OnInit {
   errorMessage = '';
   emailExists = false;
   phoneExists = false;
+  apiBaseUrl = environment.apiUrl.replace('/api', '');
 
 
   @ViewChild('fileInput') fileInput: any;// removed any and replaced this with !
@@ -247,9 +249,9 @@ export class ProfileComponent implements OnInit {
 
         this.originalCustomer = { ...res };
 
-        this.previewImage = res.profileImageUrl
-          ? 'http://localhost:5164' + res.profileImageUrl
-          : 'assets/default-user.png';
+       this.previewImage = res.profileImageUrl
+  ? this.apiBaseUrl + res.profileImageUrl
+  : 'assets/default-user.png';
 
         this.isLoading = false;
       },
@@ -335,10 +337,9 @@ export class ProfileComponent implements OnInit {
 
   cancelEdit() {
     this.customer = { ...this.originalCustomer };
-    this.previewImage = this.originalCustomer.profileImageUrl
-      ? 'http://localhost:5164' + this.originalCustomer.profileImageUrl
-      : 'assets/default-user.png';
-
+   this.previewImage = this.originalCustomer.profileImageUrl
+  ? this.apiBaseUrl + this.originalCustomer.profileImageUrl
+  : 'assets/default-user.png';
     this.selectedFile = null;
   }
 

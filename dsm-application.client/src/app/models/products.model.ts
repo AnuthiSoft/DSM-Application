@@ -17,7 +17,7 @@ export interface Product {
   costPrice?: number;
   discount: number;
   gst: number;
-  stock: number;
+  // stock: number;
   reorderLevel: number;
   isActive?: boolean;
   createdDate?: Date;
@@ -29,9 +29,14 @@ export interface Product {
   distributorId?: string;
   distributorName?: string; // Add this
   currentStock: number;
+  
   // ✅ ADD THIS
   mainCategory: string;   // parent category ID
-    
+     // ✅ UI-only / optional fields (FIXES ALL ERRORS)
+  featured?: boolean;
+  distributorVerified?: boolean;
+  oldPrice?: number;
+  maxStock?: number;
 }
 // export interface Product {
 // //   productId?: string;

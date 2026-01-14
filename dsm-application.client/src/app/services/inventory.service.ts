@@ -34,4 +34,9 @@ export class InventoryService {
   addInventoryBatch(data: any) {
     return this.api.post(`${this.endpoint}/add`, data);
   }
+  getExpiringStock(distributorId: string, days: number = 30) {
+  return this.api.get<any[]>(
+    `${this.endpoint}/expiring/${distributorId}?days=${days}`
+  );
+}
 }

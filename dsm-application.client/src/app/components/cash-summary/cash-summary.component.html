@@ -3,170 +3,199 @@
     <h3><i class="fas fa-file-alt"></i> My Daily Summary</h3>
   </div>
 
-  <!-- Date Selection -->
-  <div class="section-header">
-    <h4><i class="fas fa-calendar-alt"></i> Select Date</h4>
+  <!-- DATE SELECTION -->
+  <div class="summary-controls">
+    <label>Select Date</label>
+    <input type="date"
+           class="form-input"
+           [(ngModel)]="date"
+           (change)="onDateChange()">
+    <button class="btn btn-primary" (click)="load()">Load Summary</button>
   </div>
 
-  <div class="summary-controls">
-    <div class="form-group">
-      <label><i class="fas fa-calendar-day"></i> Select Date</label>
-      <div class="date-input-container">
-        <i class="fas fa-calendar"></i>
-        <input type="date" 
-               class="form-input date-input"
-               [(ngModel)]="date"
-               (change)="onDateChange()">
-      </div>
-      <button class="btn btn-primary load-btn" (click)="load()">
-        <i class="fas fa-sync-alt"></i> Load Summary
-      </button>
+  <!-- SUMMARY TOTALS -->
+  <div *ngIf="summary" class="summary-totals-card">
+    <div class="totals-grid">
+      <div class="total-card">Cash ₹{{ summary.totalCash }}</div>
+      <div class="total-card">Online ₹{{ summary.totalOnline }}</div>
+      <div class="total-card">Scanner ₹{{ summary.totalScanner }}</div>
+      <div class="total-card highlight">Total ₹{{ summary.totalCollected }}</div>
     </div>
   </div>
 
-  <!-- Summary Totals -->
-  <div *ngIf="summary" class="summary-totals-card">
-    <div class="section-header">
-      <h4><i class="fas fa-chart-pie"></i> Daily Totals</h4>
+  <!-- CUSTOMER-WISE TRANSACTIONS -->
+  <div class="transactions-section">
+    <h4>Customer Payments</h4>
+
+    <table *ngIf="customerSummaries.length > 0" class="transactions-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Total Paid</th>
+          <th>Payment Mode</th>
+          <th>Status</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of customerSummaries">
+          <td data-label="Customer">{{ c.customerName }}</td>
+          <td data-label="Total Paid">₹{{ c.totalPaid | number:'1.2-2' }}</td>
+          <td data-label="Payment Mode">
+            <i [class]="getPaymentModeIcon(c.paymentMode)"></i>
+            {{ c.paymentMode | titlecase }}
+          </td>
+          <td data-label="Status">
+            <span class="status-badge success">Collected</span>
+          </td>
+          <td data-label="Details">
+            <button class="btn btn-sm btn-outline-primary"
+                    (click)="openDetailsModal(c)">
+              View Details
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="customerSummaries.length === 0" class="no-payments-message">
+      No transactions found for {{ date | date:'fullDate' }}
+    </div>
+  </div>
+</div>
+
+<!-- MODAL POPUP -->
+<!-- MODAL POPUP -->
+<div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-file-invoice"></i>
+        Order Details - {{ selectedCustomer?.customerName }}
+      </h3>
+      <button class="btn-close" (click)="closeModal()" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
     
-    <div class="totals-grid">
-      <div class="total-card">
-        <div class="total-icon cash-icon">
-          <i class="fas fa-money-bill-wave"></i>
+    <div class="modal-body">
+      <!-- Section 1: Order-wise Pending Details -->
+      <div class="modal-section">
+        <div class="section-header">
+          <h4>
+            <i class="fas fa-clock"></i>
+            Order-wise Pending Details
+          </h4>
+          <div class="total-pending">
+            <span class="label">Total Pending:</span>
+            <span class="amount">₹{{ getTotalPending() | number:'1.2-2' }}</span>
+          </div>
         </div>
-        <div class="total-content">
-          <div class="total-label">Total Cash</div>
-          <div class="total-value">₹{{ summary.totalCash | number:'1.2-2' }}</div>
-        </div>
+        
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Total Amount</th>
+              <th>Paid Amount</th>
+              <th>Remaining Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of selectedCustomer?.orders; let i = index">
+              <td class="order-id">{{ o.orderId }}</td>
+              <td class="total-amount">₹{{ o.orderTotal | number:'1.2-2' }}</td>
+              <td class="paid-amount">₹{{ o.paid | number:'1.2-2' }}</td>
+              <td class="remaining-amount">₹{{ o.pending | number:'1.2-2' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(o)">
+                  {{ getStatusText(o) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="total-card">
-        <div class="total-icon online-icon">
-          <i class="fas fa-globe"></i>
+      <!-- Section 2: Customer Payment History -->
+      <div class="modal-section">
+        <div class="section-header">
+          <h4>
+            <i class="fas fa-history"></i>
+            Customer Payment History
+          </h4>
         </div>
-        <div class="total-content">
-          <div class="total-label">Total Online</div>
-          <div class="total-value">₹{{ summary.totalOnline | number:'1.2-2' }}</div>
-        </div>
-      </div>
+        
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Receipt</th>
+              <th>Amount Paid</th>
+              <th>Mode</th>
+            </tr>
+          </thead>
+          <tbody>
+  <tr *ngFor="let receipt of customerReceipts">
+    <td class="date">
+      {{ receipt.paidOn | date:'dd-MMM-yyyy hh:mm a' }}
+    </td>
+    <td class="receipt">
+      {{ receipt.receiptId }}
+    </td>
+    <td class="paid-amount">
+      ₹{{ receipt.amountPaid | number:'1.2-2' }}
+    </td>
+    <td>
+      <span class="payment-mode" [ngClass]="receipt.paymentMode">
+        <i [class]="getPaymentModeIcon(receipt.paymentMode)"></i>
+        {{ receipt.paymentMode | uppercase }}
+      </span>
+    </td>
+  </tr>
 
-      <div class="total-card">
-        <div class="total-icon scanner-icon">
-          <i class="fas fa-qrcode"></i>
-        </div>
-        <div class="total-content">
-          <div class="total-label">Total Scanner</div>
-          <div class="total-value">₹{{ summary.totalScanner | number:'1.2-2' }}</div>
-        </div>
-      </div>
+  <tr *ngIf="customerReceipts.length === 0">
+    <td colspan="4" class="no-data">No payment history available</td>
+  </tr>
+</tbody>
 
-      <div class="total-card">
-        <div class="total-icon total-icon">
-          <i class="fas fa-hand-holding-usd"></i>
+        </table>
+      </div>
+      
+      <!-- Summary Card -->
+      <div class="summary-card">
+        <div class="summary-row">
+          <div class="summary-item">
+            <span class="label">Total Amount:</span>
+            <span class="amount">₹{{ getTotalAmount() | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Total Paid:</span>
+            <span class="amount paid">₹{{ getTotalPaid() | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Total Pending:</span>
+            <span class="amount pending">₹{{ getTotalPending() | number:'1.2-2' }}</span>
+          </div>
         </div>
-        <div class="total-content">
-          <div class="total-label">Total Collected</div>
-          <div class="total-value highlight">₹{{ summary.totalCollected | number:'1.2-2' }}</div>
-        </div>
+        <!-- <div class="summary-row">
+          <div class="summary-item grand-total">
+            <span class="label">Grand Total:</span>
+            <span class="amount">₹{{ getTotalAmount() | number:'1.2-2' }}</span>
+          </div>
+        </div> -->
       </div>
     </div>
-  </div>
-
-  <!-- Payment Transactions -->
-  <div class="transactions-section">
-    <div class="section-header">
-      <h4><i class="fas fa-list-alt"></i> Payment Transactions</h4>
-      <div *ngIf="payments.length > 0" class="transactions-count">
-        <span class="count-badge">{{ payments.length }}</span> transactions
-      </div>
-    </div>
-
-    <div *ngIf="payments.length > 0; else noPayments" class="transactions-table-container">
-      <table class="transactions-table">
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Amount</th>
-            <th>Date & Time</th>
-            <th>Payment Mode</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of payments" class="transaction-row">
-            <td>
-              <span class="order-id">#{{ row.orderId }}</span>
-            </td>
-            <td>
-              <div class="customer-info">
-                <div class="customer-name">{{ row.customerName }}</div>
-                <div *ngIf="row.customerPhone" class="customer-phone">
-                  <i class="fas fa-phone"></i> {{ row.customerPhone }}
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="amount-badge">₹{{ row.amountPaidToday | number:'1.2-2' }}</span>
-            </td>
-            <td>
-              <div class="date-time">
-                <div class="date">{{ row.paymentDate | date:'dd/MM/yyyy' }}</div>
-                <div class="time">{{ row.paymentDate | date:'hh:mm a' }}</div>
-              </div>
-            </td>
-            <td>
-              <span class="payment-mode-badge" [class]="row.paymentMode">
-                <i [class]="getPaymentModeIcon(row.paymentMode)"></i>
-                {{ row.paymentMode | titlecase }}
-              </span>
-            </td>
-            <td>
-              <span class="status-badge success">
-                <i class="fas fa-check-circle"></i> Collected
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ng-template #noPayments>
-      <div class="no-payments-message">
-        <div class="message-content">
-          <i class="fas fa-file-invoice-dollar"></i>
-          <h4>No Transactions Found</h4>
-          <p>No payment records found for {{ date | date:'fullDate' }}</p>
-          <button class="btn btn-outline-primary" (click)="loadYesterday()">
-            <i class="fas fa-history"></i> Check Yesterday's Summary
-          </button>
-        </div>
-      </div>
-    </ng-template>
-  </div>
-
-  <!-- Quick Actions -->
-  <div *ngIf="payments.length > 0" class="quick-actions-section">
-    <div class="section-header">
-      <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
-    </div>
-    <div class="quick-actions-grid">
-      <button class="quick-action-btn" (click)="exportToExcel()">
-        <i class="fas fa-file-excel"></i>
-        <span>Export to Excel</span>
+    
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="printDetails()">
+        <i class="fas fa-print"></i> Print
       </button>
-      <button class="quick-action-btn" (click)="printSummary()">
-        <i class="fas fa-print"></i>
-        <span>Print Summary</span>
-      </button>
-      <button class="quick-action-btn" (click)="shareSummary()">
-        <i class="fas fa-share-alt"></i>
-        <span>Share Report</span>
-      </button>
-      <button class="quick-action-btn" (click)="downloadPDF()">
-        <i class="fas fa-file-pdf"></i>
-        <span>Download PDF</span>
+      <button class="btn btn-primary" (click)="closeModal()">
+        <i class="fas fa-check"></i> Close
       </button>
     </div>
   </div>

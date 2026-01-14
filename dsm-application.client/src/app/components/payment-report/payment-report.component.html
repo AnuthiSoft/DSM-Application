@@ -15,9 +15,7 @@
         <label><i class="fas fa-calendar"></i> From Date</label>
         <div class="date-input-container">
           <i class="fas fa-calendar-day"></i>
-          <input type="date"
-                 class="form-input date-input"
-                 [(ngModel)]="fromDate">
+          <input type="date" class="form-input date-input" [(ngModel)]="fromDate">
         </div>
       </div>
 
@@ -26,9 +24,7 @@
         <label><i class="fas fa-calendar-alt"></i> To Date</label>
         <div class="date-input-container">
           <i class="fas fa-calendar-check"></i>
-          <input type="date"
-                 class="form-input date-input"
-                 [(ngModel)]="toDate">
+          <input type="date" class="form-input date-input" [(ngModel)]="toDate">
         </div>
       </div>
 
@@ -60,22 +56,20 @@
           <i class="fas fa-search"></i> Load Report
         </button>
 
-        <button class="btn btn-outline-secondary" (click)="clearFilters()">
-          <i class="fas fa-times"></i> Clear Filters
-        </button>
+
       </div>
     </div>
   </div>
 
   <!-- Summary Stats -->
-  <div *ngIf="!loading && reports.length > 0" class="report-summary-stats">
+  <div *ngIf="!loading && customerReports.length > 0" class="report-summary-stats">
     <div class="summary-stat-card">
       <div class="stat-icon">
         <i class="fas fa-receipt"></i>
       </div>
       <div class="stat-content">
         <div class="stat-label">Total Payments</div>
-        <div class="stat-value">{{ reports.length }}</div>
+        <div class="stat-value">{{ customerReports.length }}</div>
       </div>
     </div>
 
@@ -134,7 +128,7 @@
   </div>
 
   <!-- Report Table -->
-  <div *ngIf="!loading && reports.length > 0" class="report-section">
+  <div *ngIf="!loading && customerReports.length > 0" class="report-section">
     <div class="section-header">
       <h4><i class="fas fa-list-alt"></i> Payment Details</h4>
       <div class="report-actions">
@@ -151,76 +145,32 @@
       <table class="report-table">
         <thead>
           <tr>
-            <th>Payment ID</th>
-            <th>Order ID</th>
             <th>Customer</th>
-            <th>Amount</th>
-            <th>Mode</th>
-            <th>Date & Time</th>
-            <th>Cashier</th>
-            <th>Handed Over</th>
+            <th>Total Collected</th>
+            <th>Cash</th>
+            <th>Online</th>
+            <th>Scanner</th>
+            <th>Last Payment</th>
             <th>Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          <tr *ngFor="let r of reports" class="report-row">
+          <tr *ngFor="let c of customerReports">
+            <td>{{ c.customerName }}</td>
+            <td>{{ c.totalCollected }}</td>
+            <td>{{ c.cashAmount }}</td>
+            <td>{{ c.onlineAmount }}</td>
+            <td>{{ c.scannerAmount }}</td>
+            <td>{{ c.lastPaymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>
-              <span class="payment-id">#{{ r.paymentId }}</span>
-            </td>
-            <td>
-              <span class="order-id">#{{ r.orderId }}</span>
-            </td>
-            <td>
-              <div class="customer-info">
-                <div class="customer-name">{{ r.customerName }}</div>
-                <div *ngIf="r.customerPhone" class="customer-phone">
-                  <i class="fas fa-phone"></i> {{ r.customerPhone }}
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="amount-badge">₹{{ r.amountPaidToday | number:'1.2-2' }}</span>
-            </td>
-            <td>
-              <span class="payment-mode-badge" [class]="r.paymentMode?.toLowerCase()">
-                <i [class]="getPaymentModeIcon(r.paymentMode)"></i>
-                {{ r.paymentMode | titlecase }}
-              </span>
-            </td>
-            <td>
-              <div class="date-time">
-                <div class="date">{{ r.paymentDate | date:'dd/MM/yyyy' }}</div>
-                <div class="time">{{ r.paymentDate | date:'hh:mm a' }}</div>
-              </div>
-            </td>
-            <td>
-              <span class="cashier-badge" *ngIf="r.cashierId">
-                <i class="fas fa-user-tie"></i>
-                {{ r.cashierId }}
-              </span>
-              <span class="no-cashier" *ngIf="!r.cashierId">-</span>
-            </td>
-            <td>
-              <span class="handover-status" [class]="r.isHandedOver ? 'handed-over' : 'pending-handover'">
-                <i [class]="r.isHandedOver ? 'fas fa-check-circle' : 'fas fa-clock'"></i>
-                {{ r.isHandedOver ? 'Yes' : 'No' }}
-              </span>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button class="btn-icon" title="View Details" (click)="viewDetails(r)">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn-icon" title="Download Receipt" (click)="downloadReceipt(r)">
-                  <i class="fas fa-download"></i>
-                </button>
-              </div>
+              <button (click)="viewDetails(c)">View</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
 
     <!-- Pagination -->
     <div class="pagination-container" *ngIf="totalPages > 1">
@@ -232,10 +182,8 @@
           <i class="fas fa-chevron-left"></i> Previous
         </button>
         <div class="page-numbers">
-          <span *ngFor="let page of getPageNumbers()" 
-                class="page-number"
-                [class.active]="page === currentPage"
-                (click)="goToPage(page)">
+          <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
             {{ page }}
           </span>
         </div>
@@ -247,7 +195,7 @@
   </div>
 
   <!-- No Data -->
-  <div *ngIf="!loading && reports.length === 0" class="no-data-message">
+  <div *ngIf="!loading && customerReports.length === 0" class="no-data-message">
     <div class="message-content">
       <i class="fas fa-file-invoice-dollar"></i>
       <h4>No Payment Records Found</h4>
@@ -257,4 +205,72 @@
       </button>
     </div>
   </div>
+<div class="modal" *ngIf="showCustomerModal">
+  <div class="modal-content">
+
+    <h4>
+      {{ selectedCustomer.customerName }} – Order Details
+    </h4>
+
+    <table class="details-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Order Total</th>
+          <th>Paid</th>
+          <th>Pending</th>
+          <th>Payment Date</th>
+           <th>Cashier Name</th>
+          <th>Handed Over</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let o of selectedCustomer.orders">
+          <td>{{ o.orderId }}</td>
+          <td>₹{{ o.orderTotalAmount }}</td>
+          <td>₹{{ o.amountPaidToday }}</td>
+          <td>
+            <span *ngIf="o.pendingAmount === 0" class="badge badge-success">
+              Paid
+            </span>
+            <span *ngIf="o.pendingAmount > 0" class="badge badge-warning">
+              ₹{{ o.pendingAmount }}
+            </span>
+          </td>
+          <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+           <td> {{ o.cashierName }}</td>
+          <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
+          <td>
+            <span
+              class="badge"
+              [ngClass]="{
+                'badge-success': o.handoverStatus === 'Accepted',
+                'badge-danger': o.handoverStatus === 'Rejected',
+                'badge-secondary': !o.handoverStatus
+              }">
+              {{ o.handoverStatus || 'Pending' }}
+            </span>
+
+            <div
+              *ngIf="o.handoverStatus === 'Rejected'"
+              class="text-danger small mt-1">
+              Reason: {{ o.rejectReason }}
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
 </div>

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 export interface ConnectionRequestDto {
   connectionId: string;
   customerId: string;
@@ -29,7 +30,7 @@ export interface CustomerEmployeeStatus {
 })
 export class DistributorService {
 
-
+private apiUrl = environment.apiUrl;
     constructor(private api: ApiService,private http: HttpClient) {}
       getAcceptedCustomers(distributorId?: string): Observable<ConnectionRequestDto[]> {
     const url = `distributor/accepted-customers${distributorId ? '?distributorId='+distributorId : ''}`;
@@ -38,12 +39,13 @@ export class DistributorService {
 
 
 
- disconnectCustomer(payload: { customerId: string; distributorId: string }) {
+disconnectCustomer(payload: { customerId: string; distributorId: string }) {
   return this.http.post(
-    'http://localhost:5164/api/distributor/disconnect-customer',
+    `${this.apiUrl}/distributor/disconnect-customer`,
     payload
   );
 }
+
 
 
 
@@ -92,4 +94,37 @@ export class DistributorService {
     return this.api.get(`distributor/customers-with-employee?distributorId=${distributorId}`);
   }
 
+// getScannerQr(distributorId: string) {
+//   return this.api.get<any>(
+//     `distributor/scanner-qr/${distributorId}`
+//   );
+// }
+getScannerQr(distributorId: string) {
+  return this.api.get<any>(
+    `distributor/scanner-qr/${distributorId}`
+  );
+}
+uploadScannerQr(distributorId: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('distributorId', distributorId);
+
+  return this.api.post<any>(
+    'distributor/upload-scanner-qr',
+    formData
+  );
+}
+
+  // ✅ Load customer dashboard (global / local distributors)
+  getCustomerDashboard(customerId: string): Observable<any> {
+    return this.api.get(`customers/dashboard/${customerId}`);
+  }
+
+  // ✅ Connect distributor
+  connectDistributor(customerId: string, distributorId: string): Observable<any> {
+    return this.api.post(`customers/connect-distributor`, {
+      customerId,
+      distributorId
+    });
+  }
 }

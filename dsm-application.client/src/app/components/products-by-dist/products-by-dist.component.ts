@@ -3,13 +3,15 @@ import { ProductService } from '../../services/product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Product } from '../../models/products.model';
-import { environment } from '../../../environments/environment.prod';
+
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AfterViewInit } from '@angular/core';
 import * as bootstrap from 'bootstrap';
 import { CustomerApiService } from '../../services/customer-api.service';
+import { environment } from '../../../environments/environment';
+import { CartService } from '../../services/cart.service';
 
 // import { environment } from '../../../environments/environment';
 // import { Product } from '../../services/customer-api.service';
@@ -19,20 +21,11 @@ import { CustomerApiService } from '../../services/customer-api.service';
   templateUrl: './products-by-dist.component.html',
   styleUrl: './products-by-dist.component.css'
 })
-export class ProductsByDistComponent implements OnInit, OnChanges {
-  apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+export class ProductsByDistComponent implements OnInit, OnChanges ,AfterViewInit{
+  apiBaseUrl = environment.apiUrl.replace('/api', ''); 
 
 
-  // ⭐ FIX IMAGE PATH FOR CUSTOMER SIDE
-  getFullImageUrl(img: string) {
-    if (!img) return "assets/no-image.png";
-
-    if (img.startsWith("http://") || img.startsWith("https://")) {
-      return img;
-    }
-
-    return this.apiBaseUrl + img;
-  }
+  
   @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];
@@ -44,7 +37,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges {
   selectedProductId: string | null = null;
   
 
-
+sortBy: string = '';
 
   cart: { product: Product; quantity: number }[] = [];
   // customerId = localStorage.getItem('customerId') || '';
@@ -78,7 +71,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges {
       private fb: FormBuilder,
       private orderService: OrderService,
       private router: Router,
-      private customerApiService: CustomerApiService
+      private customerApiService: CustomerApiService,private cartService : CartService
     ) {
       // Build product form
       this.productForm = this.fb.group({
@@ -99,12 +92,48 @@ export class ProductsByDistComponent implements OnInit, OnChanges {
       });
     }
 ngOnInit(): void {
-  this.loading = false;
-  this.filterProducts = [...this.products];
-  this.extractCategories();
+  
    this.extractConnectedDistributors(); 
 
 }
+ngAfterViewInit(): void {
+  this.initCarousels();
+}
+
+
+ngOnChanges(changes: SimpleChanges): void {
+  if (changes['products']) {
+
+    this.products = this.products.map(p => ({
+      ...p,
+      imageUrls: Array.isArray(p.imageUrls)
+        ? p.imageUrls
+        : p.imageUrls ? [p.imageUrls] : []
+    }));
+
+    this.filterProducts = [...this.products];
+    this.loading = false;
+
+    // 🔥 IMPORTANT
+    setTimeout(() => this.initCarousels(), 0);
+  }
+
+  this.extractCategories();
+}
+initCarousels(): void {
+  const elements = document.querySelectorAll('.carousel');
+
+  elements.forEach(el => {
+    bootstrap.Carousel.getOrCreateInstance(el, {
+      interval: 3000,
+      ride: 'carousel',
+      pause: 'hover',
+      wrap: true
+    });
+  });
+}
+
+
 
 
   // this.productService.getAllProducts().subscribe({
@@ -116,11 +145,11 @@ ngOnInit(): void {
   //         : p.imageUrls ? [p.imageUrls] : []
   //     }));
 
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      this.cart = JSON.parse(savedCart);
-    }
-  }
+  //   const savedCart = localStorage.getItem('cart');
+  //   if (savedCart) {
+  //     this.cart = JSON.parse(savedCart);
+  //   }
+  // }
 
 
   extractDistributors() {
@@ -185,14 +214,14 @@ extractConnectedDistributors() {
 
 
         // 🔥 Normalize imageUrls so template never breaks
-        data = data.map(p => ({
-          ...p,
-          imageUrls: Array.isArray(p.imageUrls)
-            ? p.imageUrls
-            : p.imageUrls
-              ? [p.imageUrls]  // convert string → array
-              : []             // no images
-        }));
+        // data = data.map(p => ({
+        //   ...p,
+        //   imageUrls: Array.isArray(p.imageUrls)
+        //     ? p.imageUrls
+        //     : p.imageUrls
+        //       ? [p.imageUrls]  // convert string → array
+        //       : []             // no images
+        // }));
 
 
 //         this.products = data;
@@ -208,19 +237,15 @@ extractConnectedDistributors() {
 //   }
 
 
-  getImageUrl(imageUrls: string[] | string | null | undefined): string {
-    if (!imageUrls) return 'assets/no-image.png';
 
-    if (typeof imageUrls === 'string') {
-      return this.apiBaseUrl + imageUrls;
-    }
+  getFullImageUrl(img: string) {
+    if (!img) return 'assets/no-image.png';
 
-    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-      return this.apiBaseUrl + imageUrls[0];
-    }
-
-    return 'assets/no-image.png';
+    // 🔥 ALWAYS go through backend image API
+    return `${environment.apiUrl}/images/${img}`;
   }
+
+
 
 
 
@@ -437,28 +462,28 @@ onColorChange(color: string) {
   //   else this.cart.push({ product, quantity: 1 });
   // }
   // ✅ Confirm add to cart
-  confirmAddToCart() {
+  // confirmAddToCart() {
 
 
-    if (!this.selectedProduct) return;
+  //   if (!this.selectedProduct) return;
 
-    const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
+  //   const existing = this.cart.find(c => c.product.productId === this.selectedProduct?.productId);
 
-    if (existing) {
-      existing.quantity += this.selectedQuantity;
-    } else {
-      this.cart.push({
-        product: this.selectedProduct,
-        quantity: this.selectedQuantity
-      });
-    }
-    console.log("Add to cart clicked");
-    // ✅ save updated cart
-    localStorage.setItem('cart', JSON.stringify(this.cart));
+  //   if (existing) {
+  //     existing.quantity += this.selectedQuantity;
+  //   } else {
+  //     this.cart.push({
+  //       product: this.selectedProduct,
+  //       quantity: this.selectedQuantity
+  //     });
+  //   }
+  //   console.log("Add to cart clicked");
+  //   // ✅ save updated cart
+  //   localStorage.setItem('cart', JSON.stringify(this.cart));
 
-    this.showPopup = false;
-    this.selectedProduct = null;
-  }
+  //   this.showPopup = false;
+  //   this.selectedProduct = null;
+  // }
 
 
   // ❌ Cancel popup
@@ -474,5 +499,141 @@ onColorChange(color: string) {
   }
 
 
+
+
+
+
+openAddPopup(product: Product) {
+  this.selectedProduct = product;
+  this.selectedQuantity = 1;
+  this.showPopup = true;
+}
+
+popupIncrease() {
+  if (!this.selectedProduct) return;
+  if (this.selectedQuantity < this.selectedProduct.currentStock) {
+    this.selectedQuantity++;
+  }
+}
+
+popupDecrease() {
+  if (this.selectedQuantity > 1) {
+    this.selectedQuantity--;
+  }
+}
+
+confirmAddToCart() {
+  if (!this.selectedProduct) return;
+
+  this.cartService.addWithQuantity(
+    this.selectedProduct,
+    this.selectedQuantity
+  );
+
+  this.showPopup = false;
+  this.selectedProduct = null;
+}
+
+/* Helper function for TypeScript/JavaScript */
+/* Add this to your component TypeScript file if needed */
+getStockClass(stock: number): string {
+  if (stock > 10) return 'stock-high';
+  if (stock > 0) return 'stock-low';
+  return 'stock-out';
+}
+clearSearch() {
+  this.searchTerm = '';
+  this.filterProducts = [...this.products];
+}
+applySort() {
+  switch (this.sortBy) {
+    case 'priceLow':
+      this.filterProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'priceHigh':
+      this.filterProducts.sort((a, b) => b.price - a.price);
+      break;
+    case 'name':
+      this.filterProducts.sort((a, b) =>
+        a.productName.localeCompare(b.productName)
+      );
+      break;
+    case 'stock':
+      this.filterProducts.sort((a, b) =>
+        (b.currentStock ?? 0) - (a.currentStock ?? 0)
+      );
+      break;
+  }
+}
+hasActiveFilters(): boolean {
+  return !!(
+    this.searchTerm ||
+    this.categoryFilter ||
+    this.stockFilter ||
+    this.color ||
+    this.distributorFilter ||
+    this.minPriceFilter ||
+    this.maxPriceFilter
+  );
+}
+
+clearAllFilters() {
+  this.searchTerm = '';
+  this.categoryFilter = '';
+  this.stockFilter = '';
+  this.color = '';
+  this.distributorFilter = '';
+  this.minPriceFilter = undefined;
+  this.maxPriceFilter = undefined;
+  this.filterProducts = [...this.products];
+}
+getDistributorName(id: string): string {
+  return this.connectedDistributors.find(d => d.distributorId === id)?.name || '';
+}
+
+clearDistributorFilter() {
+  this.distributorFilter = '';
+}
+getStockFilterLabel(stock: string) {
+  return stock === 'inStock'
+    ? 'In Stock'
+    : stock === 'lowStock'
+    ? 'Low Stock'
+    : stock === 'outOfStock'
+    ? 'Out of Stock'
+    : '';
+}
+
+clearStockFilter() {
+  this.stockFilter = '';
+}
+
+getStockText(stock: number) {
+  return stock > 10 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock';
+}
+
+getStockPercentage(current: number, max: number = 100) {
+  return Math.min(100, (current / max) * 100);
+}
+get totalStock(): number {
+  return this.products.reduce((sum, p) => sum + (p.currentStock || 0), 0);
+}
+handleImageError(event: Event) {
+  (event.target as HTMLImageElement).src = 'assets/no-image.png';
+}
+getCartQty(prod: Product): number {
+  const item = this.cart.find(c => c.product.productId === prod.productId);
+  return item ? item.quantity : 1;
+}
+
+increaseQty(prod: Product) {
+  const item = this.cart.find(c => c.product.productId === prod.productId);
+  if (item && item.quantity < prod.currentStock) item.quantity++;
+}
+
+decreaseQty(prod: Product) {
+  const item = this.cart.find(c => c.product.productId === prod.productId);
+  if (item && item.quantity > 1) item.quantity--;
+}
 
 }

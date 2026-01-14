@@ -24,6 +24,7 @@ namespace DSM_Application.Server.Controllers
         private readonly IMongoCollection<Customer> _customersCollection;
         private readonly TemporaryAssignmentService _tempService;
         private readonly IMongoCollection<Employee> _employees;
+        private readonly IMongoCollection<InventoryItem> _inventory;
 
         public CustomersController(MongoDbService db, JwtService jwt, ProductService productService, TemporaryAssignmentService tempService)
         {
@@ -33,6 +34,7 @@ namespace DSM_Application.Server.Controllers
             _tempService = tempService;
             _customersCollection = db.Customers;
             _employees = _db.Employees;
+            _inventory = db.InventoryItems;
 
         }
 
@@ -264,6 +266,43 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(result);
         }
+        [Authorize(Roles = "Customer")]
+        [HttpGet("my-customers-for-customer")]
+        public async Task<IActionResult> GetCustomersForCustomer()
+        {
+            // 1️⃣ Logged-in customer
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized("Customer ID not found");
+
+            // 2️⃣ Load customer
+            var customer = await _db.Customers
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            // 3️⃣ Get distributor who owns this customer
+            var distributorId = customer.AddedByDistributorId;
+            if (string.IsNullOrEmpty(distributorId))
+                return Ok(new List<object>());
+
+            // 4️⃣ Load all customers under same distributor
+            var customers = await _db.Customers
+                .Find(c => c.AddedByDistributorId == distributorId)
+                .ToListAsync();
+
+            // 5️⃣ SAME RESPONSE SHAPE AS DISTRIBUTOR API
+            return Ok(customers.Select(c => new
+            {
+                customerId = c.CustomerId,
+                customerName = c.Name,
+                email = c.Email,
+                phoneNumber = c.PhoneNumber
+            }));
+        }
+
         [HttpPut("update-customer/{customerId}")]
         public async Task<IActionResult> UpdateCustomer(string customerId, [FromBody] Customer updatedCustomer)
         {
@@ -433,29 +472,63 @@ namespace DSM_Application.Server.Controllers
             foreach (var dist in allDistributors)
             {
                 var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
-                bool isCreator = customer.AddedByDistributorId == dist.DistributorId;
 
-                // Status logic (keep as-is)
+                // Set status
                 if (conn != null)
-                {
-                    dist.Status = conn.Status.ToString(); // Pending / Accepted / Disconnected
-                }
+                    dist.Status = conn.Status.ToString(); // Accepted / Pending / Disconnected
                 else
-                {
                     dist.Status = "Available";
+
+                // ✅ LOAD PRODUCTS CONDITIONALLY
+                List<object> products = new();
+
+                if (
+                    customer.AddedByDistributorId == dist.DistributorId ||
+                    (conn != null && conn.Status == ConnectionStatus.Accepted)
+                )
+                {
+                    // 1️⃣ Load products
+                    var distributorProducts =
+                        await _productService.GetProductsByDistributorAsync(dist.DistributorId);
+
+                    // 2️⃣ Load inventory
+                    var inventoryItems = await _inventory
+                        .Find(i => i.DistributorId == dist.DistributorId)
+                        .ToListAsync();
+
+                    // 3️⃣ Merge product + stock
+                    products = distributorProducts.Select(p =>
+                    {
+                        var stock = inventoryItems
+                            .FirstOrDefault(i => i.ProductId == p.ProductId);
+
+                        return new
+                        {
+                            p.ProductId,
+                            p.ProductName,
+                            p.ProductCode,
+                            p.Price,
+                            p.Measure,
+                            p.ImageUrls,
+                            p.Brand,
+                            p.Color,
+                            p.DistributorId,
+                            p.DistributorName,
+
+                            // 🔥 THIS IS THE FIX
+                            currentStock = stock?.CurrentStock ?? 0
+                        };
+                    })
+                    // OPTIONAL (recommended)
+                    //.Where(p => p.currentStock > 0)
+                    .ToList<object>();
                 }
 
 
-                // 🔥 ALWAYS LOAD PRODUCTS (GLOBAL)
-                var products = await _productService
-                    .GetProductsByDistributorAsync(dist.DistributorId);
                 bool canConnect =
-     conn == null ||
-     conn.Status == ConnectionStatus.Disconnected ||
-     conn.Status == ConnectionStatus.Rejected;
-
-
-
+                    conn == null ||
+                    conn.Status == ConnectionStatus.Disconnected ||
+                    conn.Status == ConnectionStatus.Rejected;
 
                 distributorsWithProducts.Add(new
                 {
@@ -464,6 +537,7 @@ namespace DSM_Application.Server.Controllers
                     canConnect = canConnect
                 });
             }
+
 
 
             //foreach (var dist in allDistributors)
@@ -800,7 +874,7 @@ namespace DSM_Application.Server.Controllers
 
 
 
-        [HttpGet("connected/{customerId}")]
+        [HttpGet("{customerId}/connected-distributors")]
         public async Task<IActionResult> GetConnectedDistributors(string customerId)
         {
             var customer = await _db.Customers

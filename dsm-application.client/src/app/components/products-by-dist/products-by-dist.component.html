@@ -1,167 +1,299 @@
 <div class="products-section">
   <div class="welcome-header">
     <h2>Distributor Products</h2>
-  </div>
-
-  <!-- 🔍 UNIFIED SEARCH SECTION -->
-  <div class="search-section d-flex flex-wrap align-items-center gap-3 mb-4">
-
-    <!-- Search Box -->
-    <div class="search-box">
-      <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
-        (input)="onSmartSearch()" />
-      <button class="search-btn" (click)="onSmartSearch()">
-        <i class="fas fa-search"></i>
-      </button>
-
+    <div class="header-badge">
+      <span class="badge">{{ filterProducts.length }} Products</span>
     </div>
-
-
-
-    <!-- Category Filter -->
-    <!-- <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)"
-      style="width: 180px;">
-      <option value="">All Categories</option>
-      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-    </select> -->
-
-
-
-    <!-- Distributor Filter -->
-    <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
-      style="width: 180px;">
-      <option value="">All Distributors</option>
-<option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
-  {{ d.name }}
-</option>
-    </select>
-
-
-
-
-
-    <!-- Stock Filter -->
-    <select class="form-select" [(ngModel)]="stockFilter" (change)="filteredProducts()" style="width: 160px;">
-      <option value="">All Stock</option>
-      <option value="inStock">In Stock</option>
-      <option value="lowStock">Low Stock</option>
-      <option value="outOfStock">Out of Stock</option>
-    </select>
-
   </div>
 
+  <!-- Search and Filters Section -->
+  <div class="filter-section">
+    <div class="filter-row">
+      <!-- Search Input -->
+      <div class="search-container">
+        <div class="input-group">
+          <span class="input-icon">
+            <i class="fas fa-search"></i>
+          </span>
+          <input type="text" 
+                 class="form-control" 
+                 placeholder="Search products..." 
+                 [(ngModel)]="searchTerm"
+                 (input)="onSmartSearch()">
+          <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
 
-
-  <!-- Rest of your component remains unchanged -->
-  <div *ngIf="loading" class="loading-state">
-    <i class="fas fa-spinner fa-spin"></i>
-    <span>Loading products...</span>
-  </div>
-
-  <div *ngIf="!loading && filterProducts.length === 0" class="no-products">
-    <i class="fas fa-box-open"></i>
-    <h3>No Products Available</h3>
-    <p>There are no products available from this distributor at the moment.</p>
-  </div>
-
-  <div *ngIf="!loading && filterProducts.length > 0" class="products-content">
-    <div class="products-grid">
-      <div class="product-card" *ngFor="let prod of filterProducts">
-
-
-        <!-- <img
-            *ngIf="prod.imageUrls"
-            [src]="apiBaseUrl + prod.imageUrls"
-            [alt]="prod.productName"
-          />
-          <div *ngIf="!prod.imageUrls" class="product-image-placeholder">
-            <i class="fas fa-box"></i>
-          </div> -->
-
-
-        <!-- <img
-    *ngIf="prod?.imageUrls?.length"
-    [src]="getFullImageUrl(prod.imageUrls![0])"
-    [alt]="prod.productName"
-  />
-
-  <div *ngIf="!prod?.imageUrls?.length" class="product-image-placeholder">
-    <i class="fas fa-box"></i>
-  </div> -->
-
-        <div class="product-image">
-
-          <!-- Multiple Images → Slider -->
-          <div *ngIf="prod.imageUrls && prod.imageUrls.length > 1" id="carousel{{prod.productId}}"
-            class="carousel slide" data-bs-ride="false" data-bs-interval="false">
-
-
-            <div class="carousel-inner">
-              <div *ngFor="let img of prod.imageUrls; let i = index" class="carousel-item" [class.active]="i === 0">
-                <img [src]="getFullImageUrl(img)" class="d-block w-100" />
-              </div>
-            </div>
-
-            <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
-              data-bs-slide="prev">
-              <span class="carousel-control-prev-icon"></span>
-            </button>
-
-            <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
-              data-bs-slide="next">
-              <span class="carousel-control-next-icon"></span>
-            </button>
-          </div>
-
-          <!-- One Image -->
-          <img *ngIf="prod.imageUrls && prod.imageUrls.length === 1" [src]="getFullImageUrl(prod.imageUrls[0])"
-            class="single-product-image" />
-
-          <!-- No Image -->
-          <div *ngIf="!prod.imageUrls || prod.imageUrls.length === 0" class="product-image-placeholder">
-            <i class="fas fa-box"></i>
-          </div>
-
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="fas fa-truck"></i> Distributor
+          </label>
+          <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)">
+            <option value="">All Distributors</option>
+            <option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
+              {{ d.name }}
+            </option>
+          </select>
         </div>
 
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="fas fa-box"></i> Stock Status
+          </label>
+          <select class="form-select" [(ngModel)]="stockFilter" (change)="filteredProducts()">
+            <option value="">All Stock</option>
+            <option value="inStock">In Stock</option>
+            <option value="lowStock">Low Stock</option>
+            <option value="outOfStock">Out of Stock</option>
+          </select>
+        </div>
 
-        <div class="product-body">
-          <p>Distributor: {{ prod.distributorName }}</p>
-          <h4 class="product-title">{{ prod.productName }}</h4>
-          <div class="product-details">
-            <p><strong>Code:</strong> {{ prod.productCode }}</p>
-            <p class="product-price">₹{{ prod.price }}</p>
-            <p>
-              <strong>Stock:</strong>
-              <span [class]="
-  prod.currentStock > 10
-    ? 'stock-high'
-    : prod.currentStock > 0
-    ? 'stock-low'
-    : 'stock-out'
-">
-                {{ prod.currentStock > 0 ? prod.currentStock + ' available' : 'Out of stock' }}
-              </span>
-
-            </p>
-            <p><strong>Brand:</strong> {{ prod.brand }}</p>
-            <!-- <p><strong>Category:</strong> {{ prod.category }}</p> -->
-            <!-- <p><strong>Color:</strong>{{prod.color}}</p> -->
-
-          </div>
-
-          <button class="btn btn-primary add-to-cart-btn" (click)="openAddToCart(prod)"
-            [disabled]="prod.currentStock === 0">
-            {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
-          </button>
-
-
+        <div class="filter-group">
+          <label class="filter-label">
+            <i class="fas fa-sort"></i> Sort By
+          </label>
+          <select class="form-select" [(ngModel)]="sortBy" (change)="applySort()">
+            <option value="name">Name (A-Z)</option>
+            <option value="priceLow">Price: Low to High</option>
+            <option value="priceHigh">Price: High to Low</option>
+            <option value="stock">Stock: High to Low</option>
+          </select>
         </div>
       </div>
     </div>
 
+    <!-- Active Filters Display -->
+    <div class="active-filters" *ngIf="hasActiveFilters()">
+      <div class="active-filters-title">
+        <i class="fas fa-filter"></i> Active Filters:
+      </div>
+      <div class="filter-tags">
+        <span class="filter-tag" *ngIf="searchTerm">
+          Search: "{{ searchTerm }}"
+          <button class="tag-remove" (click)="clearSearch()">×</button>
+        </span>
+        <span class="filter-tag" *ngIf="distributorFilter">
+          Distributor: {{ getDistributorName(distributorFilter) }}
+          <button class="tag-remove" (click)="clearDistributorFilter()">×</button>
+        </span>
+        <span class="filter-tag" *ngIf="stockFilter">
+          Stock: {{ getStockFilterLabel(stockFilter) }}
+          <button class="tag-remove" (click)="clearStockFilter()">×</button>
+        </span>
+        <button class="clear-all" (click)="clearAllFilters()">
+          <i class="fas fa-times"></i> Clear All
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i>
+    </div>
+    <p>Loading products...</p>
+  </div>
 
+  <!-- No Products State -->
+  <div *ngIf="!loading && filterProducts.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
+    </div>
+    <h4>No Products Found</h4>
+    <p *ngIf="hasActiveFilters()">
+      No products match your current filters. Try adjusting your search criteria.
+    </p>
+    <p *ngIf="!hasActiveFilters()">
+      No products available from your distributors at the moment.
+    </p>
+    <button class="btn btn-outline-primary" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+      <i class="fas fa-redo"></i> Reset Filters
+    </button>
+  </div>
 
+  <!-- Products Grid -->
+  <div *ngIf="!loading && filterProducts.length > 0" class="products-grid">
+    <div class="grid-header">
+      <div class="grid-info">
+        <span><strong>{{ filterProducts.length }}</strong> products found</span>
+        <span class="text-muted">({{ totalStock }} total units available)</span>
+      </div>
+    </div>
+
+    <div class="products-cards">
+      <div class="product-card" *ngFor="let prod of filterProducts">
+        <!-- Product Image -->
+        <div class="product-image">
+        <div class="product-image">
+
+  <!-- 🔁 Image Carousel -->
+  <div *ngIf="prod.imageUrls?.length"
+       id="carousel-{{ prod.productId }}"
+       class="carousel slide"
+       data-bs-ride="carousel"
+       data-bs-interval="2500">
+
+    <div class="carousel-inner">
+      <div class="carousel-item"
+           *ngFor="let img of prod.imageUrls; let i = index"
+           [class.active]="i === 0">
+
+        <img
+          [src]="getFullImageUrl(img)"
+          class="d-block w-100 product-img"
+          (error)="handleImageError($event)">
+      </div>
+    </div>
 
   </div>
+
+  <!-- ❌ No Image -->
+  <div *ngIf="!prod.imageUrls?.length" class="no-image">
+    <i class="fas fa-box"></i>
+    <span>No Image</span>
+  </div>
+
+</div>
+
+
+          <!-- Stock Badge -->
+          <div class="stock-badge" [class]="getStockClass(prod.currentStock)">
+            {{ getStockText(prod.currentStock) }}
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <div class="product-header">
+            <h5 class="product-title">{{ prod.productName }}</h5>
+            <div class="product-code">{{ prod.productCode }}</div>
+          </div>
+
+          <div class="product-meta">
+            <div class="meta-item">
+              <i class="fas fa-truck"></i>
+              <span>{{ prod.distributorName }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-tag"></i>
+              <span>{{ prod.brand || 'No Brand' }}</span>
+            </div>
+          </div>
+
+          <div class="product-stock">
+            <div class="stock-info">
+              <span class="stock-label">Available Stock:</span>
+              <span class="stock-value">{{ prod.currentStock }} units</span>
+            </div>
+            <div class="stock-bar">
+              <div class="stock-progress" [style.width.%]="getStockPercentage(prod.currentStock, prod.maxStock)"></div>
+            </div>
+          </div>
+
+          <div class="product-price">
+            <div class="price-main">
+              <span class="price-currency">₹</span>
+              <span class="price-amount">{{ prod.price }}</span>
+              <span class="price-unit">/unit</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="product-actions">
+            <div class="quantity-control" *ngIf="prod.currentStock > 0">
+              <button class="qty-btn" (click)="decreaseQty(prod)" [disabled]="getCartQty(prod) <= 1">
+                <i class="fas fa-minus"></i>
+              </button>
+              <span class="qty-value">{{ getCartQty(prod) }}</span>
+              <button class="qty-btn" (click)="increaseQty(prod)" 
+                      [disabled]="getCartQty(prod) >= prod.currentStock">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+
+            <button class="btn btn-primary btn-add" 
+                    (click)="openAddPopup(prod)"
+                    [disabled]="prod.currentStock === 0">
+              <i class="fas fa-cart-plus"></i>
+              {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Add to Cart Popup -->
+  <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h5>Add to Cart</h5>
+        <button class="popup-close" (click)="closePopup()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="popup-body">
+        <div class="popup-product">
+          <div class="popup-image">
+            <img *ngIf="selectedProduct?.imageUrls?.length" 
+                 [src]="getFullImageUrl(selectedProduct!.imageUrls[0])"
+                 [alt]="selectedProduct?.productName">
+            <div *ngIf="!selectedProduct?.imageUrls?.length" class="popup-no-image">
+              <i class="fas fa-box"></i>
+            </div>
+          </div>
+          <div class="popup-details">
+            <h6>{{ selectedProduct?.productName }}</h6>
+            <p class="text-muted">{{ selectedProduct?.productCode }}</p>
+            <p class="distributor">
+              <i class="fas fa-truck"></i> {{ selectedProduct?.distributorName }}
+            </p>
+            <div class="price">
+              <strong>₹{{ selectedProduct?.price }}</strong> per unit
+            </div>
+            <div class="stock">
+              Available: <strong>{{ selectedProduct?.currentStock }}</strong> units
+            </div>
+          </div>
+        </div>
+
+        <div class="quantity-section">
+          <label>Quantity:</label>
+          <div class="quantity-selector">
+            <button class="btn-qty" (click)="popupDecrease()">
+              <i class="fas fa-minus"></i>
+            </button>
+            <span class="qty-display">{{ selectedQuantity }}</span>
+            <button class="btn-qty" (click)="popupIncrease()"
+                    [disabled]="selectedQuantity >= (selectedProduct?.currentStock || 0)">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="total-price">
+            Total: <strong>₹{{ (selectedProduct?.price || 0) * selectedQuantity }}</strong>
+          </div>
+        </div>
+
+       <ng-container *ngIf="selectedProduct as p">
+  <div class="stock-warning" *ngIf="p.currentStock <= 10">
+    <i class="fas fa-exclamation-circle"></i>
+    Only {{ p.currentStock }} units remaining
+  </div>
+</ng-container>
+      </div>
+
+      <div class="popup-footer">
+        <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
+        <button class="btn btn-primary" (click)="confirmAddToCart()">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

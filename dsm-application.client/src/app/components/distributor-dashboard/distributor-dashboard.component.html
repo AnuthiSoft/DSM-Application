@@ -268,6 +268,39 @@
           </button>
  
         </div>
+        <div class="settings-card">
+
+  <h3 class="section-title">Scanner QR Configuration</h3>
+
+  <!-- Upload -->
+  <div class="form-group">
+    <label>Upload Scanner QR</label>
+    <input
+      type="file"
+      accept="image/*"
+      (change)="onQrSelected($event)"
+    />
+  </div>
+
+  <button
+    class="save-btn"
+    (click)="uploadScannerQr()"
+    [disabled]="!selectedQrFile">
+    Upload QR
+  </button>
+
+  <!-- Preview -->
+  <div *ngIf="scannerQrUrl" class="qr-preview">
+    <p>Current Scanner QR</p>
+  <img
+  [src]="getScannerQrUrl(scannerQrUrl)"
+  alt="Scanner QR"
+  style="width:200px;border:1px solid #ccc;padding:10px"
+/>
+  </div>
+
+</div>
+
  
       </div>
     </div>
@@ -279,7 +312,7 @@
     <app-products *ngIf="isActive('products')"></app-products>
     <!-- <app-warehouse *ngIf="isActive('warehouse')"></app-warehouse> -->
     <app-main-inventory *ngIf="isActive('main-inventory')"></app-main-inventory>
-    <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches>
+    <!-- <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches> -->
     <!-- Orders -->
     <!-- <app-order-list *ngIf="isActive('order-list')"></app-order-list> -->
     <app-distributor-orders *ngIf="isActive('order-list')"></app-distributor-orders>

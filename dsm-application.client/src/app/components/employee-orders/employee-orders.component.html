@@ -30,9 +30,18 @@
         <strong>Order #{{ o.id }}</strong> —
         <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
       </div>
-      <button *ngIf="o.status === 'Shipped'" class="btn btn-primary btn-sm" (click)="markDelivered(o)">
-        ✓ Mark Delivered
-      </button>
+  <button *ngIf="o.status === 'Shipped'"
+        class="btn btn-success btn-sm"
+        (click)="openReceiptUpload(o)">
+  📸 Upload Receipt & Deliver
+</button>
+
+<input type="file"
+       accept="image/*"
+       capture="environment"
+       hidden
+       #receiptInput
+ (change)="onReceiptSelected($event, o)" />
 
     </div>
     <div class="card-body">

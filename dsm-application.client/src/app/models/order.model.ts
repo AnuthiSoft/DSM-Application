@@ -46,6 +46,8 @@ export interface DistributorOrder {
   paymentMethod?: string;
   collectedOn?: string; // ISO string
   loading?: boolean;
+    deliveryReceiptUrl?: string;
+  deliveredOn?: Date;
 }
 // export interface OrderProduct {
 //   productId: string;

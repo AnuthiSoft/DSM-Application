@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import Swal from 'sweetalert2';
 import { HttpClient } from '@angular/common/http';
+import { CustomerService } from '../../services/customer.service';
 
 @Component({
   selector: 'app-customer-search',
@@ -18,7 +19,7 @@ export class CustomerSearchComponent {
 
   constructor(
     private productService: ProductService,
-    private http: HttpClient
+   private customerService: CustomerService
   ) {}
 
   search() {
@@ -42,16 +43,10 @@ export class CustomerSearchComponent {
       });
   }
 
-  connect(distributorId: string) {
-    const body = {
-      customerId: this.customerId,
-      distributorId
-    };
-
-    this.http.post(
-      'http://localhost:5164/api/customers/connect-distributor',
-      body
-    ).subscribe({
+connect(distributorId: string) {
+  this.customerService
+    .connectDistributor(this.customerId, distributorId)
+    .subscribe({
       next: () => {
         Swal.fire('Request Sent', 'Connection request sent', 'success');
         this.search(); // refresh status
@@ -60,5 +55,6 @@ export class CustomerSearchComponent {
         Swal.fire('Error', err.error || 'Failed', 'error');
       }
     });
-  }
+}
+
 }

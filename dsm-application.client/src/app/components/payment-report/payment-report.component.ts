@@ -12,12 +12,14 @@ export class PaymentReportComponent implements OnInit {
   fromDate: string = '';
   toDate: string = '';
 
-  reports: any[] = [];
+
   loading = false;
   errorMessage = '';
   paymentMode: string = '';
 handoverStatus: string = '';
-
+customerReports: any[] = [];
+selectedCustomer: any = null;
+showCustomerModal = false;
 totalPages: number = 1;
 totalItems: number = 0;
 currentPage: number = 1;
@@ -31,75 +33,58 @@ currentPage: number = 1;
     if (!this.distributorId) {
       this.errorMessage = "Distributor ID not found. Please login again.";
     }
+     const today = new Date();
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  this.fromDate = firstDay.toISOString().split('T')[0];
+  this.toDate = today.toISOString().split('T')[0];
   }
 
-  loadReport() {
-    this.errorMessage = '';
+loadReport() {
+  this.loading = true;
+  this.errorMessage = '';
 
-    if (!this.distributorId) {
-      this.errorMessage = "Distributor ID missing!";
-      return;
-    }
-
-    this.loading = true;
-
-    this.paymentService
-  .getPaymentReport(this.distributorId, this.fromDate, this.toDate, this.paymentMode, this.handoverStatus)
-  .subscribe({
-    next: (res) => {
-      this.reports = res;
-       this.applyFilters();
-      this.loading = false;
-    },
-    error: () => {
-      this.errorMessage = "Failed to load report";
-      this.loading = false;
-    }
-  });
-
-      
-      
-  }
-  applyFilters() {
-  let filtered = [...this.reports];
-
-  if (this.paymentMode) {
-    filtered = filtered.filter(r => r.paymentMode === this.paymentMode);
-  }
-
-  if (this.handoverStatus) {
-    filtered = filtered.filter(r => 
-      this.handoverStatus === 'handed'
-        ? r.isHandedOver === true
-        : r.isHandedOver === false
-    );
-  }
-
-  this.reports = filtered;
+  this.paymentService
+    .getCustomerWiseReport(this.distributorId, this.fromDate, this.toDate)
+    .subscribe({
+      next: (res) => {
+        this.customerReports = res || [];
+        this.loading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Failed to load report';
+        this.loading = false;
+      }
+    });
 }
 
+ 
 
-  clearFilters() {
-    this.fromDate = '';
-    this.toDate = '';
-    this.reports = [];
-    this.errorMessage = '';
-  }
+ 
 getTotalAmount() {
-  return this.reports.reduce((sum, r) => sum + (r.amountPaidToday || 0), 0);
-}
-getHandedOverCount() {
-  return this.reports.filter(r => r.isHandedOver === true).length;
+  return this.customerReports.reduce(
+    (sum, c) => sum + (c.totalCollected || 0),
+    0
+  );
 }
 
+getHandedOverCount() {
+  return this.customerReports.reduce((count, c) =>
+    count + c.orders.filter((o: any) => o.isHandedOver).length
+  , 0);
+}
 getPendingCount() {
-  return this.reports.filter(r => r.isHandedOver !== true).length;
+  return this.customerReports.reduce((count, c) =>
+    count + c.orders.filter((o: any) => !o.isHandedOver).length
+  , 0);
 }
 // ---------- Error ----------
 clearError() {
   this.errorMessage = '';
 }
-
+closeModal() {
+  this.showCustomerModal = false;
+}
 // ---------- Export ----------
 exportToExcel() {
   console.log("EXPORT EXCEL — to be implemented");
@@ -121,10 +106,10 @@ getPaymentModeIcon(mode: string) {
 }
 
 // ---------- Row Actions ----------
-viewDetails(r: any) {
-  console.log("View details:", r);
+viewDetails(customer: any) {
+  this.selectedCustomer = customer;
+  this.showCustomerModal = true;
 }
-
 downloadReceipt(r: any) {
   console.log("Download receipt:", r);
 }

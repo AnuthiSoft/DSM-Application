@@ -68,5 +68,11 @@ collectPayment(orderId: string, payload: { collectedAmount: number; paymentMetho
   reorder(orderId: string): Observable<any> {
     return this.api.post(`${this.endpoint}/${orderId}/reorder`,{});
   }
+  uploadDeliveryReceipt(orderId: string, formData: FormData): Observable<any> {
+  return this.api.post(
+    `${this.endpoint}/${orderId}/upload-receipt`,
+    formData
+  );
+}
 
 }

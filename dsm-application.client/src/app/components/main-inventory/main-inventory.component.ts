@@ -21,25 +21,52 @@ export class MainInventoryComponent implements OnInit {
     private productService: ProductService
   ) {}
 
-  ngOnInit(): void {
-    const distributorId = localStorage.getItem("DistributorId");
-    if (distributorId) {
-      this.loadStock(distributorId);
-      this.loadProducts(distributorId);
-    }
-  }
+ngOnInit(): void {
+  const distributorId = localStorage.getItem("DistributorId");
+  if (!distributorId) return;
 
-  loadStock(distributorId: string) {
-    this.inventoryService.getStock(distributorId).subscribe({
-      next: (res) => {
-        this.stockList = res;
-        this.filteredStock = res;
-        
+  this.productService.getProductsByDistributor(distributorId).subscribe({
+    next: (products) => {
+      this.products = products;
+
+      // 🔥 load stock AFTER products
+      this.loadStock(distributorId);
+    }
+  });
+}
+
+
+loadStock(distributorId: string) {
+  this.inventoryService.getStock(distributorId).subscribe({
+    next: (stockRes) => {
+
+      // 🔥 MERGE stock with product details
+      this.stockList = stockRes.map((s: any) => {
+        const product = this.products.find(
+          p => p.productId === s.productId
+        );
+
+        return {
+          productId: s.productId,
+          currentStock: s.currentStock,
+
+          // ⬇️ from Products API
+          productName: product?.productName ?? 'N/A',
+          productCode: product?.productCode ?? 'N/A',
+          measure: product?.measure ?? '-',
+          reorderLevel: product?.reorderLevel ?? 0,
+          updatedAt: product?.updatedDate ?? null
+        };
+      });
+
+      this.filteredStock = this.stockList;
+
       this.createPieChart();
       this.createBarChart();
-      }
-    });
-  }
+    }
+  });
+}
+
 
   loadProducts(distributorId: string) {
     this.productService.getProductsByDistributor(distributorId).subscribe({

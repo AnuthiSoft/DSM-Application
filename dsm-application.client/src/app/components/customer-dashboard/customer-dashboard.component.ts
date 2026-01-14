@@ -11,62 +11,10 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { forkJoin } from 'rxjs';
 import { InventoryService } from '../../services/inventory.service';
+import { CustomerApiService, CustomerDashboardResponse } from '../../services/customer-api.service';
+import { Distributor } from '../../services/admin.service';
+import { CartService } from '../../services/cart.service';
 
-interface Distributor {
-  distributorId: string;
-  companyName: string;
-  name?: string;
-  email?: string;
-  phoneNumber?: string;
-  status: string;
-  IsPremium?: boolean;
-  IsActive?: boolean;
-  address?: string;
-  categories?: string[];
-  createdDate?: string;
-
-
-}
-
-// interface Product {
-//   productId: string;
-//   productName: string;
-//   productCode?: string;
-//   distributorId: string;
-//   categoryId?: string | null;
-//   price?: string;
-//   stock?: string;
-//   brand?: string;
-//   imageUrl?: string;
-//   category?: string;
-//    distributorName?: string; // Add this
-
-
-
-
-// }
-interface DistributorWrapper {
-  distributor: Distributor;
-  products?: Product[];
-
-
-}
-
-interface DashboardResponse {
-  isGlobal: boolean;
-  distributors: {
-    distributor: Distributor;
-    products: Product[];
-     canConnect: boolean
-  }[];
-  distributor?: Distributor;
-  products?: Product[];
-  totalOrders?: number;
-  totalProducts?: number;
-  totalDistributors?: number;
-
-
-}
 @Component({
   selector: 'app-customer-dashboard',
   templateUrl: './customer-dashboard.component.html',
@@ -74,12 +22,12 @@ interface DashboardResponse {
 })
 export class CustomerDashboardComponent {
   customerEmail: string | null = '';
-  dashboardData!: DashboardResponse;
+ dashboardData!: CustomerDashboardResponse;
   loading = true;
   status: string = '';
   distributorId: string = '';
   products: Product[] = [];
-
+cartCount = 0;
   expectedDays: number = 1;
 
   orderedDate: string = '';
@@ -109,11 +57,12 @@ connectedDistributors: { distributorId: string; name: string }[] = [];
     private fb: FormBuilder,
     private productService: ProductService,
     private orderService: OrderService,
+    private customerApiService:CustomerApiService,
     private router: Router,
     private http: HttpClient,
     private toastr: ToastrService,
     private productservice: ProductService,
-    private inventoryService: InventoryService) {
+    private inventoryService: InventoryService,private cartService : CartService) {
     this.productForm = this.fb.group({
       productName: [''],
       productCode: [''],
@@ -134,9 +83,14 @@ connectedDistributors: { distributorId: string; name: string }[] = [];
   }
 
   ngOnInit(): void {
+     this.cartService.cartCount$.subscribe(count => {
+    this.cartCount = count; // 🔥 auto updates UI
+  });
+    
     this.customerEmail = localStorage.getItem('customerEmail');
     this.customerId = localStorage.getItem('customerId') || '';
     this.distributorId = localStorage.getItem('distributorId') || '';
+      this.updateCartBadge();
 
 
 
@@ -172,42 +126,35 @@ connectedDistributors: { distributorId: string; name: string }[] = [];
     return date.toISOString().split("T")[0]; // YYYY-MM-DD
   }
 
+
 loadDashboard() {
   this.loading = true;
 
-  this.http
-    .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-    .subscribe({
-      next: (data) => {
-        this.dashboardData = data;
+  this.customerApiService.getDashboard(this.customerId).subscribe({
+    next: (data: CustomerDashboardResponse) => {
+      this.dashboardData = data;
 
-        // ✅ Connected distributors
-        this.connectedDistributors = data.distributors
-          .filter(d => d.distributor.status === 'Accepted')
-          .map(d => ({
-            distributorId: d.distributor.distributorId,
-            name: d.distributor.companyName || d.distributor.name || 'Distributor'
-          }));
+      this.connectedDistributors = data.distributors
+        .filter(d => d.distributor.status === 'Accepted')
+        .map(d => ({
+          distributorId: d.distributor.distributorId,
+          name: d.distributor.companyName || d.distributor.name || 'Distributor'
+        }));
 
-        const connectedDistributorIds = this.connectedDistributors.map(
-          d => d.distributorId
-        );
+      const connectedIds = this.connectedDistributors.map(d => d.distributorId);
 
-        // ✅ ONLY CONNECTED PRODUCTS
-        this.products = data.distributors
-          .filter(d => connectedDistributorIds.includes(d.distributor.distributorId))
-          .flatMap(d => d.products || []);
+      this.products = data.distributors
+        .filter(d => connectedIds.includes(d.distributor.distributorId))
+        .flatMap(d => d.products || []);
 
-        // ✅ Auto-open products tab
-        // this.activeTab = 'products';
-        // this.loading = false;
-      },
-      error: () => (this.loading = false)
-    });
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+      this.toastr.error('Failed to load dashboard');
+    }
+  });
 }
-
-
-
 
 
 
@@ -219,46 +166,39 @@ loadDashboard() {
 
   //   return date.toDateString();  // or format as you like
   // }
-  connectDistributor(distributor: Distributor) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: `Send connection request to ${distributor.companyName}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, send request',
-      cancelButtonText: 'Cancel'
-    }).then((result) => {
-      if (!result.isConfirmed) return;
+connectDistributor(distributor: Distributor) {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: `Send connection request to ${distributor.companyName}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, send request',
+    cancelButtonText: 'Cancel'
+  }).then(result => {
+    if (!result.isConfirmed) return;
 
-      const body = {
-        customerId: this.customerId,
-        distributorId: distributor.distributorId
-      };
+    this.customerApiService
+      .connectDistributor(this.customerId, distributor.distributorId)
+      .subscribe({
+        next: (res: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Request Sent',
+            text: res?.message || 'Connection request sent'
+          });
+          this.loadDashboard();
+        },
+        error: (err) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed',
+            text: err?.error || 'Failed to send request'
+          });
+        }
+      });
+  });
+}
 
-      this.http.post('http://localhost:5164/api/customers/connect-distributor', body)
-        .subscribe({
-          next: (res: any) => {
-            // alert(res);
-            Swal.fire({
-              icon: 'success',
-              title: 'Request Sent',
-              text: res
-            });
-            this.loadDashboard();
-          },
-          error: (err) => {
-            //   console.error('Error connecting distributor', err);
-            //   alert(err.error || 'Failed to send connection request');
-
-            Swal.fire({
-              icon: 'error',
-              title: 'Failed',
-              text: err.error || 'Failed to send request'
-            });
-          }
-        });
-    });
-  }
   viewProducts(distributor: any) {
 
 
@@ -309,10 +249,86 @@ loadDashboard() {
   //   this.activeTab = tab;
   // }
 
-  onAddToCart(product: Product) {
-    this.selectedCartProduct = product;   // store selected product
-    this.activeTab = 'cart';              // switch to Add-to-Cart tab
+// onAddToCart(product: Product) {
+//   let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+//   const existing = cart.find(
+//     (c: any) => c.product.productId === product.productId
+//   );
+
+//   if (existing) {
+//     existing.quantity += 1;   // ✅ increment ONLY when user clicks +
+//   } else {
+//     cart.push({ product, quantity: 1 }); // ✅ FIRST TIME = 1
+//   }
+
+//   localStorage.setItem('cart', JSON.stringify(cart));
+//   this.updateCartBadge();
+// }
+onAddToCart(product: Product) {
+  const raw = localStorage.getItem('cart');
+
+  let cart: any[] = [];
+
+  try {
+    const parsed = raw ? JSON.parse(raw) : [];
+    cart = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    cart = [];
   }
+
+  const existing = cart.find(
+    c => c.product.productId === product.productId
+  );
+
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ product, quantity: 1 });
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  this.updateCartBadge();
+}
+
+
+
+// updateCartBadge() {
+//   const raw = localStorage.getItem('cart');
+
+//   let cart: any[] = [];
+
+//   try {
+//     const parsed = raw ? JSON.parse(raw) : [];
+//     cart = Array.isArray(parsed) ? parsed : [];
+//   } catch {
+//     cart = [];
+//   }
+
+//   this.cartCount = cart.reduce(
+//     (sum: number, c: any) => sum + (c?.quantity || 0),
+//     0
+//   );
+// }
+updateCartBadge() {
+  const raw = localStorage.getItem('cart');
+
+  let cart: any[] = [];
+
+  try {
+    const parsed = raw ? JSON.parse(raw) : [];
+    cart = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    cart = [];
+  }
+
+  this.cartCount = cart.reduce(
+    (sum: number, c: any) => sum + (c?.quantity || 0),
+    0
+  );
+}
+
+
   goToProducts(product: Product) {
     this.selectedCartProduct = product;   // store selected product
     this.activeTab = 'cart';              // switch to Add-to-Cart tab
@@ -358,4 +374,9 @@ loadDashboard() {
     // Call your cart service here
     this.toastr.success(`${product.productName} added successfully`, 'Added to Cart');
   }
+openCart() {
+    this.updateCartBadge();   // 🔥 ADD THIS
+  this.activeTab = 'cart';   // ✅ OPEN CART TAB
+}
+
 }

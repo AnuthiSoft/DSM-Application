@@ -5,6 +5,7 @@ import { CustomerService } from '../../services/customer.service';
 import { HttpClient } from '@angular/common/http';
 
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 
 @Component({
@@ -19,7 +20,8 @@ export class DistributorDashboardComponent  implements OnInit{
   expectedDate: string = '';
   expectedDays: number = 1; // default
   leadTime:number = 1;
-  
+  selectedQrFile: File | null = null;
+scannerQrUrl: string | null = null;
 
   constructor(
 
@@ -74,6 +76,7 @@ ngOnInit() {
   this.expectedDays = stored ? Number(stored) : 1;
        this.loadRetailerCount();
         this.loadEmployees();              // ⬅ added
+        this.loadScannerQr();
   }
   
 loadRetailerCount() {
@@ -86,6 +89,19 @@ loadRetailerCount() {
       this.retailerCount = 0;
     }
   });
+}
+loadScannerQr() {
+  if (!this.distributorId) return;
+
+  this.distributorService.getScannerQr(this.distributorId)
+    .subscribe({
+      next: res => {
+        this.scannerQrUrl = res?.scannerQrUrl || null; // blob name
+      },
+      error: () => {
+        this.scannerQrUrl = null;
+      }
+    });
 }
 
 // ==============================
@@ -244,7 +260,10 @@ saveExpectedDayss() {
 
 
 
-
+getScannerQrUrl(blobName: string | null): string {
+  if (!blobName) return '';
+  return `${environment.apiUrl}/distributor/scanner-qr/view/${blobName}`;
+}
 
 //   saveExpectedDays() {
 //   localStorage.setItem("expectedDays", this.expectedDays.toString());
@@ -325,6 +344,26 @@ saveExpectedDayss() {
 //   // Also clear local route
 //   this.polylinePath = [];
 // }
+onQrSelected(event: any) {
+  this.selectedQrFile = event.target.files[0];
+}
+
+uploadScannerQr() {
+  if (!this.selectedQrFile || !this.distributorId) return;
+
+  this.distributorService
+    .uploadScannerQr(this.distributorId, this.selectedQrFile)
+    .subscribe({
+      next: (res) => {
+        this.scannerQrUrl = res?.scannerQrUrl || null;
+        alert('Scanner QR uploaded successfully');
+        this.selectedQrFile = null;
+      },
+      error: () => {
+        alert('Failed to upload QR');
+      }
+    });
+}
 
 
 }

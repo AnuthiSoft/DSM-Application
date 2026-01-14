@@ -1,4 +1,5 @@
-﻿using DistributorManagementSystem.Server.Services;
+﻿using DistributorManagementSystem.Server.Models;
+using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
@@ -21,12 +22,15 @@ namespace DSM_Application.Server.Controllers
         private readonly TemporaryEmployeeHistoryService _tempHistoryService;
         private readonly IMongoCollection<EmployeeAvailability> _availability;
         private readonly IMongoCollection<Employee> _employees;
+        private readonly MongoDbService _db;
+        private readonly IWebHostEnvironment _env;
+        private readonly BlobService _blobService;
 
 
 
 
 
-        public DistributorController(MongoDbService mongoService, EmailService emailService, TemporaryAssignmentService tempService, TemporaryEmployeeHistoryService tempHistoryService)
+        public DistributorController(MongoDbService mongoService, EmailService emailService, TemporaryAssignmentService tempService, TemporaryEmployeeHistoryService tempHistoryService, MongoDbService db, IWebHostEnvironment env, BlobService blobService)
         {
             _connections = mongoService.Connections;
             _customers = mongoService.Customers;
@@ -35,6 +39,10 @@ namespace DSM_Application.Server.Controllers
             _tempService = tempService;
             _tempHistoryService = tempHistoryService;   // ADD THIS
             _employees = mongoService.Employees;
+
+            _db = db;
+            _env = env;
+            _blobService = blobService;
 
 
 
@@ -91,13 +99,19 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("accepted-customers")]
         public async Task<IActionResult> GetAcceptedCustomers([FromQuery] string distributorId)
         {
-            distributorId = distributorId ?? User.FindFirst("DistributorId")?.Value;
+            distributorId ??= User.FindFirst("DistributorId")?.Value;
+
             if (string.IsNullOrEmpty(distributorId))
                 return BadRequest(new { message = "distributorId is required" });
 
-            var connections = await _connections
-                .Find(c => c.DistributorId == distributorId && c.Status == ConnectionStatus.Accepted)
-                .ToListAsync();
+            var connections = await _connections.Find(c =>
+                c.DistributorId == distributorId &&
+                c.Status == ConnectionStatus.Accepted &&
+                (
+                    c.DisconnectedOn == null ||
+                    c.DisconnectedOn == DateTime.MinValue
+                )
+            ).ToListAsync();
 
             var result = connections.Select(c =>
             {
@@ -116,6 +130,7 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(result);
         }
+
 
         [HttpPost("respond-connection")]
         public async Task<IActionResult> RespondConnection([FromBody] RespondRequest request)
@@ -435,6 +450,74 @@ namespace DSM_Application.Server.Controllers
                 date = d,
                 isAvailable = rec == null ? true : rec.IsAvailable,
                 reason = rec?.Reason
+            });
+        }
+        [HttpPost("upload-scanner-qr")]
+        public async Task<IActionResult> UploadScannerQr(
+      [FromForm] IFormFile file,
+      [FromForm] string distributorId)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("QR image is required");
+
+            // ✅ Upload to Azure Blob → RETURNS FULL URL
+            var blobUrl = await _blobService.UploadAsync(file);
+
+            // ✅ STORE FULL URL (THIS IS THE FIX)
+            await _db.Distributors.UpdateOneAsync(
+                d => d.DistributorId == distributorId,
+                Builders<Distributor>.Update
+                    .Set(d => d.ScannerQrUrl, blobUrl)
+            );
+
+            return Ok(new
+            {
+                scannerQrUrl = blobUrl
+            });
+        }
+
+
+        // =====================================================
+        // 🔥 GET SCANNER QR (FOR CASHIER)
+        // =====================================================
+        //[HttpGet("scanner-qr/{distributorId}")]
+        //public async Task<IActionResult> GetScannerQr(string distributorId)
+        //{
+        //    var distributor = await _db.Distributors
+        //        .Find(d => d.DistributorId == distributorId)
+        //        .FirstOrDefaultAsync();
+
+        //    if (distributor == null || string.IsNullOrEmpty(distributor.ScannerQrUrl))
+        //        return NotFound(new { message = "Scanner QR not uploaded" });
+
+        //    return Ok(new
+        //    {
+        //        scannerQrUrl = distributor.ScannerQrUrl // now FULL URL 🎉
+        //    });
+        //}
+        [HttpGet("scanner-qr/view/{blobName}")]
+        public async Task<IActionResult> ViewScannerQr(string blobName)
+        {
+            var bytes = await _blobService.DownloadAsync(blobName);
+
+            if (bytes == null)
+                return NotFound();
+
+            return File(bytes, "image/png");
+        }
+        [HttpGet("scanner-qr/{distributorId}")]
+        public async Task<IActionResult> GetScannerQr(string distributorId)
+        {
+            var distributor = await _db.Distributors
+                .Find(d => d.DistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            if (distributor == null || string.IsNullOrEmpty(distributor.ScannerQrUrl))
+                return NotFound();
+
+            return Ok(new
+            {
+                scannerQrUrl = distributor.ScannerQrUrl // blob name
             });
         }
 

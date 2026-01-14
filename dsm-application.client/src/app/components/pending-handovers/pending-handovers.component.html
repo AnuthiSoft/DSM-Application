@@ -19,7 +19,7 @@
       <tr *ngFor="let h of handovers">
         <td>{{ h.handoverDate | date:'short' }}</td>
         <td>₹{{ h.totalAmountSubmitted }}</td>
-        <td>{{ h.cashierId }}</td>
+        <td>{{ h.cashierName }}</td>
         <!-- <td>{{ h.notes || '—' }}</td> -->
 
         <td>
@@ -44,33 +44,38 @@
 
     <h3>Handover Details</h3>
 
-    <p><strong>Date:</strong> {{ selectedDetails?.date }}</p>
-    <p><strong>Cashier:</strong> {{ selectedDetails?.cashierId }}</p>
+    <p><strong>Date:</strong> {{ selectedDetails?.date | date:'short' }}</p>
+    <p><strong>Cashier:</strong> {{ selectedDetails?.cashierName }}</p>
     <p><strong>Total Amount:</strong> ₹{{ selectedDetails?.totalAmount }}</p>
 
     <h4>Breakdown</h4>
     <ul>
       <li>Cash: ₹{{ selectedDetails?.cashAmount }}</li>
-      <li>UPI: ₹{{ selectedDetails?.upiAmount}}</li>
+      <li>UPI: ₹{{ selectedDetails?.upiAmount }}</li>
       <li>Scanner: ₹{{ selectedDetails?.scannerAmount }}</li>
     </ul>
 
-    <h4>Payments</h4>
+    <h4>Customer → Order Split</h4>
+
     <table class="payment-table">
       <thead>
         <tr>
+          <th>Customer</th>
+          <th>Receipt</th>
+          <th>Order ID</th>
           <th>Mode</th>
           <th>Amount</th>
-          <th>Order</th>
           <th>Date</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let p of selectedDetails?.payments">
-          <td>{{ p.paymentMode }}</td>
-          <td>₹{{ p.amountPaidToday }}</td>
+          <td>{{ p.customerName }}</td>
+          <td>{{ p.receiptId }}</td>
           <td>{{ p.orderId }}</td>
-          <td>{{ p.paymentDate | date:'short' }}</td>
+          <td>{{ p.paymentMode }}</td>
+          <td>₹{{ p.amountPaid }}</td>
+          <td>{{ p.paidOn | date:'short' }}</td>
         </tr>
       </tbody>
     </table>

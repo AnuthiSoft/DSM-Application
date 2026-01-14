@@ -37,7 +37,7 @@ namespace DSM_Application.Server.Controllers
         // ================================================================
         // 2️⃣ CASHIER DAILY SUMMARY
         // ================================================================
-        [HttpGet("cashier-summary/{cashierId}")]
+        [HttpGet("cashier-customer-summary/{cashierId}")]
         public async Task<IActionResult> GetCashierSummary(string cashierId, [FromQuery] string date)
         {
             var summary = await _paymentService.GetCashierDailySummary(cashierId, date);
@@ -66,6 +66,7 @@ namespace DSM_Application.Server.Controllers
         {
             try
             {
+                // dto.ReceiptIds (customer-wise) is now expected
                 var created = await _paymentService.CreateHandover(dto);
                 return Ok(created);
             }
@@ -74,19 +75,35 @@ namespace DSM_Application.Server.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
-
         [HttpPost("handover-approve/{handoverId}")]
         public async Task<IActionResult> ApproveHandover(string handoverId)
         {
-            var result = await _paymentService.ApproveHandover(handoverId);
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.ApproveHandover(handoverId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
+
         [HttpPost("handover-reject/{handoverId}")]
-        public async Task<IActionResult> RejectHandover(string handoverId, [FromBody] string reason)
+        public async Task<IActionResult> RejectHandover(
+       string handoverId,
+       [FromBody] string reason)
         {
-            var result = await _paymentService.RejectHandover(handoverId, reason);
-            return Ok(result);
+            try
+            {
+                var result = await _paymentService.RejectHandover(handoverId, reason);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpGet("pending-handovers/{distributorId}")]
@@ -94,7 +111,7 @@ namespace DSM_Application.Server.Controllers
         {
             var result = await _paymentService.GetPendingHandovers(distributorId);
             return Ok(result);
-        }
+        } 
         [HttpGet("all-pending-payments")]
         public async Task<IActionResult> GetAllPendingPayments()
         {
@@ -117,9 +134,26 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("handover-details/{handoverId}")]
         public async Task<IActionResult> GetHandoverDetails(string handoverId)
         {
-            var result = await _paymentService.GetHandoverDetails(handoverId);
+            try
+            {
+                var result = await _paymentService.GetHandoverDetails(handoverId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+        [HttpGet("receipts-for-handover")]
+        public async Task<IActionResult> GetReceiptsForHandover(
+    [FromQuery] string cashierId,
+    [FromQuery] string date)
+        {
+            var result = await _paymentService.GetReceiptsForHandover(cashierId, date);
             return Ok(result);
         }
+
+
         [HttpPost("collect-customer-payment")]
         public async Task<IActionResult> CollectCustomerPayment(
        [FromBody] CustomerPaymentDto dto)
@@ -158,13 +192,58 @@ namespace DSM_Application.Server.Controllers
         }
 
 
+        [HttpGet("customer-wise-report")]
+        public async Task<IActionResult> GetCustomerWiseReport(
+            [FromQuery] string distributorId,
+            [FromQuery] DateTime? fromDate,
+            [FromQuery] DateTime? toDate)
+        {
+            if (string.IsNullOrEmpty(distributorId))
+                return BadRequest("DistributorId required");
 
+            // ✅ Default to current month if dates missing
+            DateTime from = fromDate ?? DateTime.UtcNow.AddDays(-30);
+            DateTime to = toDate ?? DateTime.UtcNow;
+
+            var result = await _paymentService
+                .GetCustomerWisePaymentReport(distributorId, from, to);
+
+            return Ok(result);
+        }
+
+        // ================================================================
+        // CUSTOMER RECEIPTS (FOR CASH SUMMARY MODAL)
+        // ================================================================
         [HttpGet("customer-receipts")]
         public async Task<IActionResult> GetCustomerReceipts(
-    [FromQuery] string customerId,
+            [FromQuery] string customerId,
+            [FromQuery] string distributorId)
+        {
+            if (string.IsNullOrWhiteSpace(customerId) ||
+                string.IsNullOrWhiteSpace(distributorId))
+                return BadRequest("customerId and distributorId are required");
+
+            var result = await _paymentService.GetCustomerReceipts(
+                customerId.Trim(),
+                distributorId.Trim()
+            );
+
+            return Ok(result);
+        }
+
+
+        [HttpGet("distributor-scanner")]
+        public async Task<IActionResult> GetDistributorScanner(
     [FromQuery] string distributorId)
         {
-            return Ok(await _paymentService.GetCustomerReceipts(customerId, distributorId));
+            var distributor = await _paymentService.GetDistributorScanner(distributorId);
+            if (distributor == null)
+                return NotFound();
+
+            return Ok(new
+            {
+                scannerQrUrl = distributor.ScannerQrUrl
+            });
         }
 
 

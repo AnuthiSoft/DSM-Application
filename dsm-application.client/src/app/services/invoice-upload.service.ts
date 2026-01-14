@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InvoiceUploadService {
 
-  private apiUrl = 'http://localhost:5164/api/invoice-upload/upload';
+private apiUrl = `${environment.apiUrl}/invoice-upload/upload`;
 
   constructor(private http: HttpClient) {}
 

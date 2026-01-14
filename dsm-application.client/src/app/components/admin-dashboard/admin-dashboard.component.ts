@@ -375,69 +375,48 @@ pendingCategories: any[] = [];
   // }
 
   saveDistributor(): void {
-    this.formSubmitted = true;   // ✅ ADD THIS
+  this.formSubmitted = true;
 
-    if (this.distributorForm.invalid) {
-      this.distributorForm.markAllAsTouched();
-      return;
-    }
+  if (this.distributorForm.invalid) {
+    this.distributorForm.markAllAsTouched();
+    return;
+  }
 
   const dist = { ...this.distributorForm.value };
 
-  // ✅ Normalize pincodes to array
-if (typeof dist.pincodes === 'string') {
-  dist.pincodes = dist.pincodes
-    .split(',')
-    .map((p: string) => p.trim());
+  if (this.isEdit && this.selectedDistributor) {
+    this.adminService
+      .updateDistributor(this.selectedDistributor.distributorId, dist)
+      .subscribe(() => {
+        this.toastr.success('Distributor updated successfully');
+        this.loadDistributors();
+        this.distributorModal?.hide();
+      });
+  } else {
+    this.adminService.addDistributor(dist).subscribe({
+      next: () => {
+        this.toastr.success('Distributor added successfully');
+        this.loadDistributors();
+        this.distributorModal?.hide();
+      },
+      error: (err) => {
+        const msg = err.error;
+        if (typeof msg === 'string') {
+          if (msg.toLowerCase().includes('email')) {
+            this.distributorForm.get('email')?.setErrors({ exists: true });
+            return;
+          }
+          if (msg.toLowerCase().includes('phone')) {
+            this.distributorForm.get('phoneNumber')?.setErrors({ exists: true });
+            return;
+          }
+        }
+        this.toastr.error(msg || 'Failed to add distributor');
+      }
+    });
+  }
 }
 
-
-  if (dist.categories.includes('Others') && dist.customCategory.trim()) {
-    dist.categories = dist.categories
-      .filter((c: string) => c !== 'Others')
-      .concat(dist.customCategory.trim());
-  }
-
-  delete dist.customCategory;
-
-    if (this.isEdit && this.selectedDistributor) {
-      this.adminService.updateDistributor(this.selectedDistributor.distributorId, dist)
-        .subscribe(() => {
-          this.toastr.success('Distributor updated successfully');
-          this.loadDistributors();
-          this.distributorModal?.hide();
-        });
-    } else {
-      this.adminService.addDistributor(dist).subscribe({
-        next: () => {
-          this.toastr.success('Distributor added successfully');
-          this.loadDistributors();
-          this.distributorModal?.hide();
-        },
-        error: (err) => {
-          const msg = err.error;
-
-          if (typeof msg === 'string') {
-            if (msg.toLowerCase().includes('email')) {
-              const emailCtrl = this.distributorForm.get('email');
-              emailCtrl?.setErrors({ exists: true });
-              emailCtrl?.markAsTouched();
-              return;
-            }
-
-            if (msg.toLowerCase().includes('phone')) {
-              const phoneCtrl = this.distributorForm.get('phoneNumber');
-              phoneCtrl?.setErrors({ exists: true });
-              phoneCtrl?.markAsTouched();
-              return;
-            }
-          }
-
-          this.toastr.error(msg || 'Failed to add distributor');
-        }
-      });
-    }
-  }
 
   deactivate(id: string): void {
     this.adminService.deactivateDistributor(id).subscribe({

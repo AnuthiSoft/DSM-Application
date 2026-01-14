@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
+
 using System.Security.Cryptography;
 using System.Text;
 
@@ -165,7 +166,7 @@ namespace DistributorManagementSystem.Server.Controllers
                     return BadRequest("This phone number is already used by another user.");
             }
             update.Categories ??= new List<string>();
-           // update.Pincodes ??= new List<string>();
+            //update.Pincodes ??= new List<string>();
 
 
             var updateDef = Builders<Distributor>.Update

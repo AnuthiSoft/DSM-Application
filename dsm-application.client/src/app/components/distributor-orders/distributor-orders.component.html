@@ -175,12 +175,29 @@
               </div>
             </td>
 
-            <td *ngIf="o.paymentCollectedByEmployee; else notCollected">
-              <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
-              <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
-            </td>
+           <td>
+  <!-- 💰 PAYMENT INFO -->
+  <div *ngIf="o.paymentCollectedByEmployee; else notCollected">
+    <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
+    <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
+  </div>
+
+  <ng-template #notCollected>
+    <!-- <span class="text-warning">Payment not collected</span> -->
+  </ng-template>
+
+  <!-- 🧾 RECEIPT (INDEPENDENT) -->
+  <div *ngIf="o.deliveryReceiptUrl" class="mt-2">
+  <button
+  *ngIf="o.deliveryReceiptUrl"
+  class="btn btn-outline-primary btn-sm"
+  (click)="viewReceipt(o.deliveryReceiptUrl)">
+  <i class="fas fa-receipt"></i> View Receipt
+</button>
+  </div>
+</td>
             <ng-template #notCollected>
-              <span class="text-warning">Payment not collected</span>
+              <!-- <span class="text-warning">Payment not collected</span> -->
             </ng-template>
           </tr>
         </tbody>

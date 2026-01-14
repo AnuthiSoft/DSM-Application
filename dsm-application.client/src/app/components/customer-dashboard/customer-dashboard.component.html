@@ -31,10 +31,10 @@
       </div>
 
 
-      <div class="nav-item" [class.active]="isActive('cart')" (click)="setActiveTab('cart')">
+      <!-- <div class="nav-item" [class.active]="isActive('cart')" (click)="setActiveTab('cart')">
         <i class="fas fa-shopping-cart"></i>
         <span>Add-to-Cart</span>
-      </div>
+      </div> -->
 
       <div class="nav-item" (click)="logout()">
         <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
@@ -44,7 +44,26 @@
 
   <!-- Main Content -->
   <div class="dashboard-main">
+<div class="floating-cart" (click)="openCart()">
+  <i class="fas fa-shopping-cart"></i>
+  <span class="cart-badge" *ngIf="cartCount > 0">
+    {{ cartCount }}
+  </span>
+</div>
+<!-- 🔝 TOP HEADER WITH CART ICON -->
+<!-- <div class="top-header">
+ 
 
+  <div class="header-actions">
+    <div class="cart-icon" (click)="openCart()">
+      <i class="fas fa-shopping-cart"></i>
+
+      <span class="cart-badge" *ngIf="cartCount > 0">
+        {{ cartCount }}
+      </span>
+    </div>
+  </div>
+</div> -->
 
     <!-- Dashboard Tab -->
     <div class="tab-content active" *ngIf="isActive('dashboard')">
@@ -103,8 +122,8 @@
 
 
 
-    <app-cust-dashboard *ngIf="activeTab === 'distributors'" (viewProductsClicked)="openProductsForDistributor($event)">
-    </app-cust-dashboard>
+  <app-cust-dashboard *ngIf="activeTab === 'distributors'">
+</app-cust-dashboard>
 
 
     <!-- <div *ngIf="isActive('returns')">
@@ -181,9 +200,9 @@
     <!-- <app-review-submit *ngIf="activeTab === 'review'"></app-review-submit> -->
 
     <!--search by pincode-->
-    <div class="nav-item" [class.active]="isActive('search')" (click)="setActiveTab('search')">
+    <!-- <div class="nav-item" [class.active]="isActive('search')" (click)="setActiveTab('search')">
       <i class="fas fa-search"></i> <span>Search</span>
-    </div>
-    <app-customer-search *ngIf="activeTab === 'search'"></app-customer-search>
+    </div> -->
+    <!-- <app-customer-search *ngIf="activeTab === 'search'"></app-customer-search> -->
 
   </div>

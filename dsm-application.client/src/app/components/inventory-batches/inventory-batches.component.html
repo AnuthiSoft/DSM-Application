@@ -15,7 +15,7 @@
         (change)="onProductChange()">
         <option value="">Select Product</option>
         <option *ngFor="let p of products" [value]="p.productId">
-          {{ p.name }} ({{ p.productId }})
+          {{ p.productName }}
         </option>
       </select>
     </div>
@@ -23,27 +23,34 @@
 
   <!-- 🔹 Add Inventory Batch -->
   <h5>Add Inventory Batch</h5>
-  <div class="row">
+  <div class="row g-2">
     <div class="col-md-3">
-      <input type="number" class="form-control"
-             placeholder="Quantity"
-             [(ngModel)]="newBatch.quantity">
+      <input
+        type="number"
+        class="form-control"
+        placeholder="Quantity"
+        [(ngModel)]="newBatch.quantity" />
     </div>
 
     <div class="col-md-3">
-      <input type="date" class="form-control"
-             [(ngModel)]="newBatch.manufactureDate">
+      <input
+        type="date"
+        class="form-control"
+        [(ngModel)]="newBatch.manufactureDate" />
     </div>
 
     <div class="col-md-3">
-      <input type="date" class="form-control"
-             [(ngModel)]="newBatch.expiryDate">
+      <input
+        type="date"
+        class="form-control"
+        [(ngModel)]="newBatch.expiryDate" />
     </div>
 
     <div class="col-md-3">
-      <button class="btn btn-primary w-100"
-              (click)="addBatch()"
-              [disabled]="!selectedProductId">
+      <button
+        class="btn btn-primary w-100"
+        (click)="addBatch()"
+        [disabled]="!selectedProductId">
         Add Inventory
       </button>
     </div>
@@ -54,6 +61,7 @@
     <thead class="table-dark">
       <tr>
         <th>#</th>
+        <th>Batch ID</th>
         <th>Quantity</th>
         <th>MFG Date</th>
         <th>EXP Date</th>
@@ -65,7 +73,8 @@
       <tr *ngFor="let b of batches; let i = index"
           [class.table-danger]="isExpired(b.expiryDate)">
         <td>{{ i + 1 }}</td>
-        <td>{{ b.availableQuantity }}</td>
+        <td>{{ b.batchId }}</td>
+        <td>{{ b.quantityAvailable }}</td>
         <td>{{ b.manufactureDate | date:'dd-MMM-yyyy' }}</td>
         <td>{{ b.expiryDate | date:'dd-MMM-yyyy' }}</td>
         <td>
@@ -73,7 +82,7 @@
             class="badge"
             [ngClass]="{
               'bg-danger': getStatus(b.expiryDate) === 'Expired',
-              'bg-warning text-dark': getStatus(b.expiryDate) === 'Near Expiry',
+              'bg-warning text-dark': getStatus(b.expiryDate) === 'Expiring Soon',
               'bg-success': getStatus(b.expiryDate) === 'Valid'
             }">
             {{ getStatus(b.expiryDate) }}
@@ -82,7 +91,7 @@
       </tr>
 
       <tr *ngIf="batches.length === 0">
-        <td colspan="5" class="text-center text-muted">
+        <td colspan="6" class="text-center text-muted">
           No inventory batches available
         </td>
       </tr>
@@ -90,7 +99,7 @@
 
     <tfoot>
       <tr class="fw-bold">
-        <td>Total</td>
+        <td colspan="2">Total</td>
         <td>{{ getTotalStock() }}</td>
         <td colspan="3"></td>
       </tr>

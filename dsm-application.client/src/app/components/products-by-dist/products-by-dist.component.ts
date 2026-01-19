@@ -21,11 +21,11 @@ import { CartService } from '../../services/cart.service';
   templateUrl: './products-by-dist.component.html',
   styleUrl: './products-by-dist.component.css'
 })
-export class ProductsByDistComponent implements OnInit, OnChanges ,AfterViewInit{
-  apiBaseUrl = environment.apiUrl.replace('/api', ''); 
+export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit {
+  apiBaseUrl = environment.apiUrl.replace('/api', '');
 
 
-  
+
   @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];
@@ -35,9 +35,10 @@ export class ProductsByDistComponent implements OnInit, OnChanges ,AfterViewInit
   productForm: FormGroup;
   isEdit = false;
   selectedProductId: string | null = null;
-  
 
-sortBy: string = '';
+
+  sortBy: string = 'name';
+
 
   cart: { product: Product; quantity: number }[] = [];
   // customerId = localStorage.getItem('customerId') || '';
@@ -61,77 +62,77 @@ sortBy: string = '';
 
   @Output() addToCartClicked = new EventEmitter<Product>();
 
-@Input() connectedDistributors: { distributorId: string; name: string }[] = [];
+  @Input() connectedDistributors: { distributorId: string; name: string }[] = [];
 
 
 
-   constructor(
-     private route: ActivatedRoute,
-      private productService: ProductService,
-      private fb: FormBuilder,
-      private orderService: OrderService,
-      private router: Router,
-      private customerApiService: CustomerApiService,private cartService : CartService
-    ) {
-      // Build product form
-      this.productForm = this.fb.group({
-        productName: ['', Validators.required],
-        productCode: ['', Validators.required],
-        color:['', Validators.required],
-        category: ['', Validators.required],
-        description: [''],
-        unit: ['', Validators.required],
-        price: [0, [Validators.required, Validators.min(0)]],
-        costPrice: [0, [Validators.required, Validators.min(0)]],
-        discount: [0, [Validators.min(0)]],
-        gst: [0, [Validators.min(0)]],
-        stock: [0, [Validators.min(0)]],
-        reorderLevel: [0, [Validators.min(0)]],
-        brand: [''],
-        imageUrls: [''],
-      });
-    }
-ngOnInit(): void {
-  
-   this.extractConnectedDistributors(); 
+  constructor(
+    private route: ActivatedRoute,
+    private productService: ProductService,
+    private fb: FormBuilder,
+    private orderService: OrderService,
+    private router: Router,
+    private customerApiService: CustomerApiService, private cartService: CartService
+  ) {
+    // Build product form
+    this.productForm = this.fb.group({
+      productName: ['', Validators.required],
+      productCode: ['', Validators.required],
+      color: ['', Validators.required],
+      category: ['', Validators.required],
+      description: [''],
+      unit: ['', Validators.required],
+      price: [0, [Validators.required, Validators.min(0)]],
+      costPrice: [0, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.min(0)]],
+      gst: [0, [Validators.min(0)]],
+      stock: [0, [Validators.min(0)]],
+      reorderLevel: [0, [Validators.min(0)]],
+      brand: [''],
+      imageUrls: [''],
+    });
+  }
+  ngOnInit(): void {
 
-}
-ngAfterViewInit(): void {
-  this.initCarousels();
-}
+    this.extractConnectedDistributors();
 
-
-ngOnChanges(changes: SimpleChanges): void {
-  if (changes['products']) {
-
-    this.products = this.products.map(p => ({
-      ...p,
-      imageUrls: Array.isArray(p.imageUrls)
-        ? p.imageUrls
-        : p.imageUrls ? [p.imageUrls] : []
-    }));
-
-    this.filterProducts = [...this.products];
-    this.loading = false;
-
-    // 🔥 IMPORTANT
-    setTimeout(() => this.initCarousels(), 0);
+  }
+  ngAfterViewInit(): void {
+    this.initCarousels();
   }
 
-  this.extractCategories();
-}
-initCarousels(): void {
-  const elements = document.querySelectorAll('.carousel');
 
-  elements.forEach(el => {
-    bootstrap.Carousel.getOrCreateInstance(el, {
-      interval: 3000,
-      ride: 'carousel',
-      pause: 'hover',
-      wrap: true
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['products']) {
+
+      this.products = this.products.map(p => ({
+        ...p,
+        imageUrls: Array.isArray(p.imageUrls)
+          ? p.imageUrls
+          : p.imageUrls ? [p.imageUrls] : []
+      }));
+
+      this.filterProducts = [...this.products];
+      this.loading = false;
+
+      // 🔥 IMPORTANT
+      setTimeout(() => this.initCarousels(), 0);
+    }
+
+    this.extractCategories();
+  }
+  initCarousels(): void {
+    const elements = document.querySelectorAll('.carousel');
+
+    elements.forEach(el => {
+      bootstrap.Carousel.getOrCreateInstance(el, {
+        interval: 3000,
+        ride: 'carousel',
+        pause: 'hover',
+        wrap: true
+      });
     });
-  });
-}
+  }
 
 
 
@@ -164,37 +165,39 @@ initCarousels(): void {
 
 
 
-onDistributorChange(distributorId: string) {
-  if (!distributorId) {
-    this.filterProducts = [...this.products];
-    return;
+  onDistributorChange(distributorId: string) {
+    if (!distributorId) {
+      this.filterProducts = [...this.products];
+      return;
+    }
+
+
+
+    this.filterProducts = this.products.filter(
+      p => p.distributorId === distributorId
+    );
+  }
+
+  extractConnectedDistributors() {
+    this.connectedDistributors = Array.from(
+      new Map(
+        this.products
+          .filter(
+            (p): p is Product & { distributorId: string; distributorName: string } =>
+              !!p.distributorId && !!p.distributorName
+          )
+          .map(p => [
+            p.distributorId,
+            {
+              distributorId: p.distributorId,
+              name: p.distributorName
+            }
+          ])
+      ).values()
+    );
   }
 
 
-  
-  this.filterProducts = this.products.filter(
-    p => p.distributorId === distributorId
-  );
-}
-
-extractConnectedDistributors() {
-  this.connectedDistributors = Array.from(
-    new Map(
-      this.products
-        .filter(
-          (p): p is Product & { distributorId: string; distributorName: string } =>
-            !!p.distributorId && !!p.distributorName
-        )
-        .map(p => [
-          p.distributorId,
-          {
-            distributorId: p.distributorId,
-            name: p.distributorName
-          }
-        ])
-    ).values()
-  );
-}
 
 
 
@@ -202,39 +205,37 @@ extractConnectedDistributors() {
 
 
 
+  // call this when you want to fetch products
+  //   loadProducts(): void {
+  //     if (!this.distributorId) return;
+  //     this.loading = true;
+
+  //     this.productService.getProductsByDistributor(this.distributorId).subscribe({
+  //       next: (data: Product[]) => {
 
 
-  // call this when you want to fetch products 
-//   loadProducts(): void {
-//     if (!this.distributorId) return;
-//     this.loading = true;
-
-//     this.productService.getProductsByDistributor(this.distributorId).subscribe({
-//       next: (data: Product[]) => {
-
-
-        // 🔥 Normalize imageUrls so template never breaks
-        // data = data.map(p => ({
-        //   ...p,
-        //   imageUrls: Array.isArray(p.imageUrls)
-        //     ? p.imageUrls
-        //     : p.imageUrls
-        //       ? [p.imageUrls]  // convert string → array
-        //       : []             // no images
-        // }));
+  // 🔥 Normalize imageUrls so template never breaks
+  // data = data.map(p => ({
+  //   ...p,
+  //   imageUrls: Array.isArray(p.imageUrls)
+  //     ? p.imageUrls
+  //     : p.imageUrls
+  //       ? [p.imageUrls]  // convert string → array
+  //       : []             // no images
+  // }));
 
 
-//         this.products = data;
-//         this.filterProducts = data;
-//         this.extractCategories();
-//         this.loading = false;
-//       },
-//       error: (err) => {
-//         console.error('Failed to load products', err);
-//         this.loading = false;
-//       }
-//     });
-//   }
+  //         this.products = data;
+  //         this.filterProducts = data;
+  //         this.extractCategories();
+  //         this.loading = false;
+  //       },
+  //       error: (err) => {
+  //         console.error('Failed to load products', err);
+  //         this.loading = false;
+  //       }
+  //     });
+  //   }
 
 
 
@@ -366,31 +367,31 @@ extractConnectedDistributors() {
     });
   }
 
-onColorChange(color: string) {
-  this.color = color;
+  onColorChange(color: string) {
+    this.color = color;
 
-  if (!color) {
-    this.filterProducts = [...this.products];
-    return;
+    if (!color) {
+      this.filterProducts = [...this.products];
+      return;
+    }
+
+    this.filterProducts = this.products.filter(
+      p => p.color?.toLowerCase().includes(color.toLowerCase())
+    );
   }
 
-  this.filterProducts = this.products.filter(
-    p => p.color?.toLowerCase().includes(color.toLowerCase())
-  );
-}
+  onCategoryChange(category: string) {
+    this.categoryFilter = category;
 
-   onCategoryChange(category: string) {
-  this.categoryFilter = category;
+    if (!category || category.trim() === '') {
+      this.filterProducts = [...this.products];
+      return;
+    }
 
-  if (!category || category.trim() === '') {
-    this.filterProducts = [...this.products];
-    return;
+    this.filterProducts = this.products.filter(
+      p => p.category?.toLowerCase() === category.toLowerCase()
+    );
   }
-
-  this.filterProducts = this.products.filter(
-    p => p.category?.toLowerCase() === category.toLowerCase()
-  );
-}
 
 
 
@@ -503,137 +504,137 @@ onColorChange(color: string) {
 
 
 
-openAddPopup(product: Product) {
-  this.selectedProduct = product;
-  this.selectedQuantity = 1;
-  this.showPopup = true;
-}
-
-popupIncrease() {
-  if (!this.selectedProduct) return;
-  if (this.selectedQuantity < this.selectedProduct.currentStock) {
-    this.selectedQuantity++;
+  openAddPopup(product: Product) {
+    this.selectedProduct = product;
+    this.selectedQuantity = 1;
+    this.showPopup = true;
   }
-}
 
-popupDecrease() {
-  if (this.selectedQuantity > 1) {
-    this.selectedQuantity--;
+  popupIncrease() {
+    if (!this.selectedProduct) return;
+    if (this.selectedQuantity < this.selectedProduct.currentStock) {
+      this.selectedQuantity++;
+    }
   }
-}
 
-confirmAddToCart() {
-  if (!this.selectedProduct) return;
-
-  this.cartService.addWithQuantity(
-    this.selectedProduct,
-    this.selectedQuantity
-  );
-
-  this.showPopup = false;
-  this.selectedProduct = null;
-}
-
-/* Helper function for TypeScript/JavaScript */
-/* Add this to your component TypeScript file if needed */
-getStockClass(stock: number): string {
-  if (stock > 10) return 'stock-high';
-  if (stock > 0) return 'stock-low';
-  return 'stock-out';
-}
-clearSearch() {
-  this.searchTerm = '';
-  this.filterProducts = [...this.products];
-}
-applySort() {
-  switch (this.sortBy) {
-    case 'priceLow':
-      this.filterProducts.sort((a, b) => a.price - b.price);
-      break;
-    case 'priceHigh':
-      this.filterProducts.sort((a, b) => b.price - a.price);
-      break;
-    case 'name':
-      this.filterProducts.sort((a, b) =>
-        a.productName.localeCompare(b.productName)
-      );
-      break;
-    case 'stock':
-      this.filterProducts.sort((a, b) =>
-        (b.currentStock ?? 0) - (a.currentStock ?? 0)
-      );
-      break;
+  popupDecrease() {
+    if (this.selectedQuantity > 1) {
+      this.selectedQuantity--;
+    }
   }
-}
-hasActiveFilters(): boolean {
-  return !!(
-    this.searchTerm ||
-    this.categoryFilter ||
-    this.stockFilter ||
-    this.color ||
-    this.distributorFilter ||
-    this.minPriceFilter ||
-    this.maxPriceFilter
-  );
-}
 
-clearAllFilters() {
-  this.searchTerm = '';
-  this.categoryFilter = '';
-  this.stockFilter = '';
-  this.color = '';
-  this.distributorFilter = '';
-  this.minPriceFilter = undefined;
-  this.maxPriceFilter = undefined;
-  this.filterProducts = [...this.products];
-}
-getDistributorName(id: string): string {
-  return this.connectedDistributors.find(d => d.distributorId === id)?.name || '';
-}
+  confirmAddToCart() {
+    if (!this.selectedProduct) return;
 
-clearDistributorFilter() {
-  this.distributorFilter = '';
-}
-getStockFilterLabel(stock: string) {
-  return stock === 'inStock'
-    ? 'In Stock'
-    : stock === 'lowStock'
-    ? 'Low Stock'
-    : stock === 'outOfStock'
-    ? 'Out of Stock'
-    : '';
-}
+    this.cartService.addWithQuantity(
+      this.selectedProduct,
+      this.selectedQuantity
+    );
 
-clearStockFilter() {
-  this.stockFilter = '';
-}
+    this.showPopup = false;
+    this.selectedProduct = null;
+  }
 
-getStockText(stock: number) {
-  return stock > 10 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock';
-}
+  /* Helper function for TypeScript/JavaScript */
+  /* Add this to your component TypeScript file if needed */
+  getStockClass(stock: number): string {
+    if (stock > 10) return 'stock-high';
+    if (stock > 0) return 'stock-low';
+    return 'stock-out';
+  }
+  clearSearch() {
+    this.searchTerm = '';
+    this.filterProducts = [...this.products];
+  }
+  applySort() {
+    switch (this.sortBy) {
+      case 'priceLow':
+        this.filterProducts.sort((a, b) => a.price - b.price);
+        break;
+      case 'priceHigh':
+        this.filterProducts.sort((a, b) => b.price - a.price);
+        break;
+      case 'name':
+        this.filterProducts.sort((a, b) =>
+          a.productName.localeCompare(b.productName)
+        );
+        break;
+      case 'stock':
+        this.filterProducts.sort((a, b) =>
+          (b.currentStock ?? 0) - (a.currentStock ?? 0)
+        );
+        break;
+    }
+  }
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.categoryFilter ||
+      this.stockFilter ||
+      this.color ||
+      this.distributorFilter ||
+      this.minPriceFilter ||
+      this.maxPriceFilter
+    );
+  }
 
-getStockPercentage(current: number, max: number = 100) {
-  return Math.min(100, (current / max) * 100);
-}
-get totalStock(): number {
-  return this.products.reduce((sum, p) => sum + (p.currentStock || 0), 0);
-}
-handleImageError(event: Event) {
-  (event.target as HTMLImageElement).src = 'assets/no-image.png';
-}
-getCartQty(prod: Product): number {
-  const item = this.cart.find(c => c.product.productId === prod.productId);
-  return item ? item.quantity : 1;
-}
+  clearAllFilters() {
+    this.searchTerm = '';
+    this.categoryFilter = '';
+    this.stockFilter = '';
+    this.color = '';
+    this.distributorFilter = '';
+    this.minPriceFilter = undefined;
+    this.maxPriceFilter = undefined;
+    this.filterProducts = [...this.products];
+  }
+  getDistributorName(id: string): string {
+    return this.connectedDistributors.find(d => d.distributorId === id)?.name || '';
+  }
 
-increaseQty(prod: Product) {
-  const item = this.cart.find(c => c.product.productId === prod.productId);
-  if (item && item.quantity < prod.currentStock) item.quantity++;
-}
+  clearDistributorFilter() {
+    this.distributorFilter = '';
+  }
+  getStockFilterLabel(stock: string) {
+    return stock === 'inStock'
+      ? 'In Stock'
+      : stock === 'lowStock'
+        ? 'Low Stock'
+        : stock === 'outOfStock'
+          ? 'Out of Stock'
+          : '';
+  }
 
-decreaseQty(prod: Product) {
-  const item = this.cart.find(c => c.product.productId === prod.productId);
-  if (item && item.quantity > 1) item.quantity--;
-}
+  clearStockFilter() {
+    this.stockFilter = '';
+  }
+
+  getStockText(stock: number) {
+    return stock > 10 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock';
+  }
+
+  getStockPercentage(current: number, max: number = 100) {
+    return Math.min(100, (current / max) * 100);
+  }
+  get totalStock(): number {
+    return this.products.reduce((sum, p) => sum + (p.currentStock || 0), 0);
+  }
+  handleImageError(event: Event) {
+    (event.target as HTMLImageElement).src = 'assets/no-image.png';
+  }
+  getCartQty(prod: Product): number {
+    const item = this.cart.find(c => c.product.productId === prod.productId);
+    return item ? item.quantity : 1;
+  }
+
+  increaseQty(prod: Product) {
+    const item = this.cart.find(c => c.product.productId === prod.productId);
+    if (item && item.quantity < prod.currentStock) item.quantity++;
+  }
+
+  decreaseQty(prod: Product) {
+    const item = this.cart.find(c => c.product.productId === prod.productId);
+    if (item && item.quantity > 1) item.quantity--;
+  }
 
 }

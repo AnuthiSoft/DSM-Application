@@ -1,67 +1,58 @@
-
-
- 
 <div class="page-wrapper">
-<div class="order-container">
- 
-  <h2>New Order Request</h2>
- 
-  <!-- Ordered Date -->
-  <div class="form-group">
-  <label>Ordered Date *</label>
-  <input type="date" [(ngModel)]="orderedDate" (change)="updateExpectedDate()" />
-</div>
- 
-  <!-- Retailer -->
- 
- 
- 
-  <div class="form-group">
-  <label>Retailer *</label>
- 
-  <div class="customer-box">
- 
-    <!-- Visible Selected Customer -->
-    <div class="customer-display" (click)="toggleCustomerDropdown()">
-      {{ customerDisplay || customerName }}
-      <span class="arrow">▼</span>
+  <div class="order-container">
+
+    <h2>New Order Request</h2>
+
+    <!-- Ordered Date -->
+    <div class="form-group">
+      <label>Ordered Date *</label>
+      <input type="date" [(ngModel)]="orderedDate" (change)="updateExpectedDate()" />
     </div>
- 
-    <!-- DROPDOWN (Appears Inside Same Box at Bottom) -->
-    <div class="customer-dropdown" *ngIf="showCustomerDropdown">
-      <small>ID: {{ customerId}}</small><br>
-        <small>Email: {{ customerEmail }}</small><br>
- 
-      <div
-        class="customer-item"
-       *ngFor="let c of customers"
- 
-        (click)="selectCustomer(c)"
-       
-      >
-        <strong>{{ c.customerName }}</strong><br>
-        <small>ID: {{ c.customerId }}</small><br>
-        <small>Email: {{ c.email }}</small><br>
-        <small>Phone: {{ c.phoneNumber }}</small>
+
+    <!-- Retailer -->
+
+
+
+    <div class="form-group">
+      <label>Retailer *</label>
+
+      <div class="customer-box">
+
+        <!-- Visible Selected Customer -->
+        <div class="customer-display" (click)="toggleCustomerDropdown()">
+          {{ customerDisplay || customerName }}
+          <span class="arrow">▼</span>
+        </div>
+
+        <!-- DROPDOWN (Appears Inside Same Box at Bottom) -->
+        <div class="customer-dropdown" *ngIf="showCustomerDropdown">
+          <small>ID: {{ customerId}}</small><br>
+          <small>Email: {{ customerEmail }}</small><br>
+
+          <div class="customer-item" *ngFor="let c of customers" (click)="selectCustomer(c)">
+            <strong>{{ c.customerName }}</strong><br>
+            <small>ID: {{ c.customerId }}</small><br>
+            <small>Email: {{ c.email }}</small><br>
+            <small>Phone: {{ c.phoneNumber }}</small>
+          </div>
+
+        </div>
+
       </div>
- 
     </div>
- 
-  </div>
-</div>
- 
- 
- 
-  <!-- <div class="form-group">
+
+
+
+    <!-- <div class="form-group">
   <label>Customer *</label> -->
- 
-  <!-- CLICKABLE INPUT -->
- 
- 
- 
- 
- 
-  <!-- <div class="dropdown-container">
+
+    <!-- CLICKABLE INPUT -->
+
+
+
+
+
+    <!-- <div class="dropdown-container">
  
     <input
       type="text"
@@ -74,12 +65,12 @@
     <button class="dropdown-arrow" (click)="toggleCustomerDropdown()">
       ▼
     </button> -->
- 
+
     <!-- CUSTOMER DROPDOWN LIST -->
- 
- 
- 
-   
+
+
+
+
     <!-- <div class="dropdown-list" *ngIf="showCustomerDropdown">
  
       <div
@@ -97,8 +88,8 @@
  
   </div>
 </div> -->
- 
-  <!-- <div class="form-group">
+
+    <!-- <div class="form-group">
   <label>CustomerName*</label>
   <button class="form-group" input type="text" >{{ customerName}}</button>
    <button class="dropdown-arrow" (click)="toggleProductDropdown(customerId)">
@@ -106,129 +97,120 @@
     </button>
  
 </div> -->
- 
-<!-- <span class="form-group" input type="text" >{{ customerName}}</span>
+
+    <!-- <span class="form-group" input type="text" >{{ customerName}}</span>
  
     <button class="dropdown-arrow" (click)="toggleProductDropdown(item.product.productId)">
       ▼
     </button> -->
- 
- 
- 
-  <!-- Expected Delivery Date -->
-   <div class="form-group">
-  <label>Expected Delivery Date *</label>
-  <input type="date" [(ngModel)]="expectedDate" readonly />
-</div>
- 
-  <!-- Products Section -->
-  <h3>Products *</h3>
- 
-  <table class="product-table">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Quantity</th>
- 
-      </tr>
-    </thead>
- 
-     <tbody>
-    <tr *ngFor="let item of orderProducts">
-     <td class="product-cell">
- 
-  <div class="product-box">
-    <span class="product-name">{{ item.product.productName }}</span>
- 
-    <button class="dropdown-arrow" (click)="openProductModal(item.product)">
-      ▼
-    </button>
- 
-    <button class="remove-btn" (click)="removeFromOrder(item.product.productId)">
-      ✖
-    </button>
-  </div>
- 
-  <!-- DROPDOWN UNDER PRODUCT BOX -->
-  <div class="product-dropdown"
-       *ngIf="expandedProduct[item.product.productId]">
-       
-    <div class="drop-img" >
-    <img
-  [src]="getImageUrl(item.product.imageUrl)"
-  (error)="onImgError($event)"
-  [alt]="item.product.productName"
-/>
- 
- 
-      <div class="drop-info">
-        <p><strong>Price: ₹{{ item.product.price }}</strong></p>
-        <p>Stock: {{ item.product.stock }}</p>
-      </div>
+
+
+
+    <!-- Expected Delivery Date -->
+    <div class="form-group">
+      <label>Expected Delivery Date *</label>
+      <input type="date" [(ngModel)]="expectedDate" readonly />
     </div>
- 
+
+    <!-- Products Section -->
+    <h3>Products *</h3>
+
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let item of orderProducts">
+          <td class="product-cell">
+
+            <div class="product-box">
+              <span class="product-name">{{ item.product.productName }}</span>
+
+              <button class="dropdown-arrow" (click)="openProductModal(item.product)">
+                ▼
+              </button>
+
+              <button class="remove-btn" (click)="removeFromOrder(item.product.productId)">
+                ✖
+              </button>
+            </div>
+
+            <!-- DROPDOWN UNDER PRODUCT BOX -->
+            <div class="product-dropdown" *ngIf="expandedProduct[item.product.productId]">
+
+              <div class="drop-img">
+                <img [src]="getImageUrl(item.product.imageUrl)" (error)="onImgError($event)"
+                  [alt]="item.product.productName" />
+
+
+                <div class="drop-info">
+                  <p><strong>Price: ₹{{ item.product.price }}</strong></p>
+                  <p>Stock: {{ item.product.stock }}</p>
+                </div>
+              </div>
+
+            </div>
+
+          </td>
+
+          <!-- FULL-SCREEN POPUP OVERLAY -->
+          <div class="product-modal-overlay" *ngIf="modalProduct">
+            <div class="product-modal">
+
+              <button class="modal-close" (click)="closeProductModal()">✖</button>
+
+              <img [src]="getImageUrl(modalProduct.imageUrls)" (error)="onImgError($event)"
+                [alt]="modalProduct.productName" />
+
+              <h3>{{ modalProduct.productName }}</h3>
+
+              <p><strong>Price:</strong> ₹{{ modalProduct.price }}</p>
+              <p><strong>Stock:</strong> {{ modalProduct.currentStock }}</p>
+              <p><strong>Brand:</strong> {{ modalProduct.brand }}</p>
+              <p><strong>Category:</strong> {{ modalProduct.category }}</p>
+              <p><strong>Distributor:</strong>{{modalProduct.distributorName}}</p>
+              <p><strong>Expected Delivery:</strong>
+                {{ computeDeliveryDate(modalProduct!, orderedDate) }}
+              </p>
+
+            </div>
+          </div>
+
+
+          <td class="quantity-cell">
+
+
+            <input type="number" [(ngModel)]="item.quantity" min="1" />
+          </td>
+
+
+        </tr>
+      </tbody>
+    </table>
+
+    <a class="add-row" (click)="goToProducts()">+ Add New</a>
+
+
+
+
+
+    <!-- Buttons -->
+    <div class="actions">
+      <button class="submit-btn" (click)="placeOrder()">Submit</button>
+      <button class="reset-btn" (click)="resetOrder()">Reset</button>
+    </div>
+
   </div>
- 
-</td>
- 
-<!-- FULL-SCREEN POPUP OVERLAY -->
-<div class="product-modal-overlay" *ngIf="modalProduct">
-  <div class="product-modal">
- 
-    <button class="modal-close" (click)="closeProductModal()">✖</button>
- 
-    <img
-  [src]="getImageUrl(modalProduct.imageUrls)"
-  (error)="onImgError($event)"
-  [alt]="modalProduct.productName"
-/>
- 
-    <h3>{{ modalProduct.productName }}</h3>
- 
-    <p><strong>Price:</strong> ₹{{ modalProduct.price }}</p>
-    <p><strong>Stock:</strong> {{ modalProduct.currentStock }}</p>
-    <p><strong>Brand:</strong> {{ modalProduct.brand }}</p>
-    <p><strong>Category:</strong> {{ modalProduct.category }}</p>
-    <p><strong>Distributor:</strong>{{modalProduct.distributorName}}</p>
-    <p><strong>Expected Delivery:</strong>
-  {{ computeDeliveryDate(modalProduct!, orderedDate) }}
-</p>
- 
-  </div>
-</div>
- 
- 
-      <td class="quantity-cell">
- 
- 
-  <input type="number"
-         [(ngModel)]="item.quantity"
-         min="1" />
-</td>
- 
- 
-    </tr>
-  </tbody>
-  </table>
- 
-<a class="add-row" (click)="goToProducts()">+ Add New</a>
- 
- 
- 
- 
- 
-  <!-- Buttons -->
-  <div class="actions">
-    <button class="submit-btn"   (click)="placeOrder()">Submit</button>
-    <button class="reset-btn" (click)="resetOrder()">Reset</button>
-  </div>
- 
-</div>
- 
- 
- 
- 
-<!--
+
+
+
+
+  <!--
  🛒 Add to Cart Popup Modal
 <div class="popup-overlay" *ngIf="showPopup && selectedProduct">
   <div class="popup-content">
@@ -254,73 +236,64 @@
     </div>
   </div>
 </div> -->
- 
- 
- 
-<!-- 🔴 UNCONNECTED DISTRIBUTOR POPUP -->
-<!-- 🔴 DISTRIBUTOR CONNECTION POPUP -->
-<!-- 🔴 DISTRIBUTOR CONNECTION / PENDING POPUP -->
-<div class="connection-overlay" *ngIf="showConnectionPopup">
-  <div class="connection-popup">
- 
-    <!-- TITLE -->
-    <h3 *ngIf="popupMode === 'connect'" class="popup-title danger">
-      Connection Required
-    </h3>
- 
-    <h3 *ngIf="popupMode === 'pending'" class="popup-title warning">
-      Connection Pending
-    </h3>
- 
-    <!-- MAIN MESSAGE (🔥 IMPORTANT) -->
-    <p class="popup-message">
-      {{ popupMessage }}
-    </p>
- 
-    <!-- DISTRIBUTOR LIST -->
-    <ul class="distributor-list">
-      <li *ngFor="let d of notConnectedDistributors">
-        {{ d.companyName }}
-      </li>
-    </ul>
- 
-    <!-- EXTRA NOTE -->
-    <!-- <p class="popup-note" *ngIf="popupMode === 'pending'">
+
+
+
+  <!-- 🔴 UNCONNECTED DISTRIBUTOR POPUP -->
+  <!-- 🔴 DISTRIBUTOR CONNECTION POPUP -->
+  <!-- 🔴 DISTRIBUTOR CONNECTION / PENDING POPUP -->
+  <div class="connection-overlay" *ngIf="showConnectionPopup">
+    <div class="connection-popup">
+
+      <!-- TITLE -->
+      <h3 *ngIf="popupMode === 'connect'" class="popup-title danger">
+        Connection Required
+      </h3>
+
+      <h3 *ngIf="popupMode === 'pending'" class="popup-title warning">
+        Connection Pending
+      </h3>
+
+      <!-- MAIN MESSAGE (🔥 IMPORTANT) -->
+      <p class="popup-message">
+        {{ popupMessage }}
+      </p>
+
+      <!-- DISTRIBUTOR LIST -->
+      <ul class="distributor-list">
+        <li *ngFor="let d of notConnectedDistributors">
+          {{ d.companyName }}
+        </li>
+      </ul>
+
+      <!-- EXTRA NOTE -->
+      <!-- <p class="popup-note" *ngIf="popupMode === 'pending'">
       Please wait until the distributor approves your connection request.
     </p> -->
- 
-    <!-- ACTION BUTTONS -->
-    <div class="popup-actions">
- 
-      <!-- CONNECT -->
-      <button
-        *ngIf="popupMode === 'connect'"
-        class="btn-primary"
-        (click)="connectAllDistributorsFromCart()">
-        Connect Distributor
-      </button>
- 
-      <!-- PENDING -->
-      <button
-        *ngIf="popupMode === 'pending'"
-        class="btn-warning"
-        disabled>
-        Waiting for Approval
-      </button>
- 
-      <!-- CANCEL -->
-      <button
-        class="btn-secondary"
-        (click)="showConnectionPopup = false">
-        Cancel
-      </button>
- 
+
+      <!-- ACTION BUTTONS -->
+      <div class="popup-actions">
+
+        <!-- CONNECT -->
+        <button *ngIf="popupMode === 'connect'" class="btn-primary" (click)="connectAllDistributorsFromCart()">
+          Connect Distributor
+        </button>
+
+        <!-- PENDING -->
+        <button *ngIf="popupMode === 'pending'" class="btn-warning" disabled>
+          Waiting for Approval
+        </button>
+
+        <!-- CANCEL -->
+        <button class="btn-secondary" (click)="showConnectionPopup = false">
+          Cancel
+        </button>
+
+      </div>
+
     </div>
- 
   </div>
+
+
+
 </div>
- 
- 
- 
-</div>
- 

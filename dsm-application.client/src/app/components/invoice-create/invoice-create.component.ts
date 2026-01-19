@@ -146,7 +146,7 @@ submit(): void {
   this.loading = true;
 
   const payload: Invoice = {
-    distributorId: this.distributorId,   // REQUIRED
+    distributorId: this.distributorId,
     invoiceNo: this.invoiceForm.value.invoiceNo,
     invoiceDate: this.invoiceForm.value.invoiceDate,
     customerId: this.invoiceForm.value.customerId,
@@ -160,26 +160,24 @@ submit(): void {
       this.loading = false;
       this.toastr.success('Invoice created successfully');
 
-      console.log("Response from backend:", res);
-      
+      // ✅ GET INVOICE ID
       const invoiceId = res.id || res.Id || res._id;
 
-
       if (!invoiceId) {
-        console.error("Invoice ID not returned from server!");
-        this.toastr.error("Cannot navigate — invoice ID missing!");
+        this.toastr.error('Invoice ID missing');
         return;
       }
 
+      // 🔥 NAVIGATE TO DETAIL PAGE
       this.router.navigate(['/invoice-detail', invoiceId]);
     },
-    error: (err) => {
+    error: () => {
       this.loading = false;
-      console.error(err);
       this.toastr.error('Failed to create invoice');
     }
   });
 }
+
 
 toggleTheme() {
   document.body.classList.toggle('dark-theme');

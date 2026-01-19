@@ -8,7 +8,7 @@ export class InventoryService {
 
   private endpoint = 'inventory';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   getStock(distributorId: string) {
     return this.api.get<any[]>(`${this.endpoint}/stock/${distributorId}`);
@@ -28,8 +28,11 @@ export class InventoryService {
 
   // 🔥 NEW FIFO / BATCH APIs
   getBatches(productId: string) {
-    return this.api.get<any[]>(`${this.endpoint}/batches/${productId}`);
-  }
+  return this.api.get<any[]>(
+    `${this.endpoint}/batches/${productId}`
+  );
+}
+
 
   addInventoryBatch(data: any) {
     return this.api.post(`${this.endpoint}/add`, data);
@@ -39,4 +42,29 @@ export class InventoryService {
     `${this.endpoint}/expiring/${distributorId}?days=${days}`
   );
 }
+
+  getProductsForInventory(distributorId: string) {
+    return this.api.get<any[]>(
+      `${this.endpoint}/stock/${distributorId}`
+    );
+  }
+
+  getInventoryProducts(distributorId: string) {
+  return this.api.get<any[]>(
+    `${this.endpoint}/distributor/${distributorId}`
+  );
 }
+
+getAllInventoryBatches(distributorId: string) {
+  return this.api.get<any[]>(
+    `${this.endpoint}/batches-by-distributor/${distributorId}`
+  );
+}
+
+
+
+}
+
+
+
+

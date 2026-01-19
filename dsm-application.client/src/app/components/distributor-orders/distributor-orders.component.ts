@@ -23,38 +23,38 @@ export class DistributorOrdersComponent implements OnInit {
   filteredEmployees: Employee[] = [];   // ✅ for search/filter results
   statusFilter = 'All';
   statuses = ['All', 'Pending', 'Confirmed', 'Shipped', 'Delivered', 'Rejected'];
-  nextAction: string="";
+  nextAction: string = "";
   showAssignModal = false;
-assignMode: 'temp' | 'perm' = 'temp';
-activeEmployeeId: string = '';
-activeEmployeeName = '';
-tempEmployeeId = '';
-showTempDropdown = false;  showProductPopup = false;        
+  assignMode: 'temp' | 'perm' = 'temp';
+  activeEmployeeId: string = '';
+  activeEmployeeName = '';
+  tempEmployeeId = '';
+  showTempDropdown = false; showProductPopup = false;
   selectedOrder: any = null;
-  
+
 
   // For assignment modal
   // selectedOrder: DistributorOrder | null = null;
   employeeId = '';
   // selectedOrder: any;
 
-employeeAvailability: {
-  [customerId: string]: {
-    permanentEmployeeId: string | null,
-    permanentEmployeeAvailable: boolean,
-    permanentReason: string | null,
+  employeeAvailability: {
+    [customerId: string]: {
+      permanentEmployeeId: string | null,
+      permanentEmployeeAvailable: boolean,
+      permanentReason: string | null,
 
-    temporaryEmployeeId: string | null,
-    temporaryEmployeeAvailable: boolean,
-    temporaryReason: string | null,
+      temporaryEmployeeId: string | null,
+      temporaryEmployeeAvailable: boolean,
+      temporaryReason: string | null,
 
-    isTemporaryActiveToday: boolean
-  }
-} = {}
+      isTemporaryActiveToday: boolean
+    }
+  } = {}
   constructor(
     private orderService: OrderService,
     private employeeService: EmployeeService,
-    private distService :DistributorService,private cd: ChangeDetectorRef,
+    private distService: DistributorService, private cd: ChangeDetectorRef,
     private toastr: ToastrService,
     private productService: ProductService
   ) { }
@@ -65,34 +65,34 @@ employeeAvailability: {
   }
 
   loadOrders(): void {
-  if (!this.distributorId) return;
+    if (!this.distributorId) return;
 
-  this.loading = true;
-  const status = this.statusFilter === 'All' ? undefined : this.statusFilter;
+    this.loading = true;
+    const status = this.statusFilter === 'All' ? undefined : this.statusFilter;
 
-  this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
-    next: (data) => { 
-      this.orders = data; 
-      this.loading = false;
+    this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
+      next: (data) => {
+        this.orders = data;
+        this.loading = false;
 
-      // 🔥 Load availability for each customer on list load
-      this.orders.forEach(o => {
-        this.loadAvailabilityForCustomer(o.customerId);
-      });
-    },
-    error: (err) => {
-      console.error(err); 
-      this.loading = false; 
-      alert('Failed to load orders'); 
-    }
-  });
-}
-loadAvailabilityForCustomer(customerId: string) {
-  this.distService.getCustomerEmployeeStatus(this.distributorId, customerId)
-    .subscribe(status => {
-      this.employeeAvailability[customerId] = status;
+        // 🔥 Load availability for each customer on list load
+        this.orders.forEach(o => {
+          this.loadAvailabilityForCustomer(o.customerId);
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+        alert('Failed to load orders');
+      }
     });
-}
+  }
+  loadAvailabilityForCustomer(customerId: string) {
+    this.distService.getCustomerEmployeeStatus(this.distributorId, customerId)
+      .subscribe(status => {
+        this.employeeAvailability[customerId] = status;
+      });
+  }
   loadEmployees() {
     if (!this.distributorId) {
       console.error('DistributorId not found in localStorage!');
@@ -104,16 +104,16 @@ loadAvailabilityForCustomer(customerId: string) {
         console.log('✅ Employees loaded:', res);
         // filter only active employees
         this.employees = res
-  .map((e: any) => ({
-    ...e,
-    employeeId: e.employeeId || e.id || e._id
-  }))
-  .filter(e =>
-    e.isActive === true &&
-    e.designation === 'Delivery Boy' &&     // 👈 Only Delivery Boys
-    e.distributorId === this.distributorId  // 👈 Must belong to this distributor
-  );
-      this.filteredEmployees = this.employees;
+          .map((e: any) => ({
+            ...e,
+            employeeId: e.employeeId || e.id || e._id
+          }))
+          .filter(e =>
+            e.isActive === true &&
+            e.designation === 'Delivery Boy' &&     // 👈 Only Delivery Boys
+            e.distributorId === this.distributorId  // 👈 Must belong to this distributor
+          );
+        this.filteredEmployees = this.employees;
       },
       error: (err) => console.error('❌ Failed to load employees:', err)
     });
@@ -141,146 +141,146 @@ loadAvailabilityForCustomer(customerId: string) {
 
   confirmOrderWithCheck(order: DistributorOrder) {
 
-  const availability = this.employeeAvailability[order.customerId];
+    const availability = this.employeeAvailability[order.customerId];
 
-  // 🔥 CASE 1: Permanent employee available → auto ship
-  if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
+    // 🔥 CASE 1: Permanent employee available → auto ship
+    if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
 
-    const emp = this.employees.find(
-      e => e.employeeId === availability.permanentEmployeeId
-    );
+      const emp = this.employees.find(
+        e => e.employeeId === availability.permanentEmployeeId
+      );
 
-    // Assign order
-    this.orderService.assignOrder(order.id, {
-      employeeId: availability.permanentEmployeeId,
-      employeeName: emp?.name || '',
-      note: 'Auto assigned to permanent employee'
-    }).subscribe(() => {
+      // Assign order
+      this.orderService.assignOrder(order.id, {
+        employeeId: availability.permanentEmployeeId,
+        employeeName: emp?.name || '',
+        note: 'Auto assigned to permanent employee'
+      }).subscribe(() => {
 
-      // Move directly to SHIPPED
-      this.orderService.updateStatus(order.id, 'Shipped').subscribe(() => {
-        this.toastr.success(
-          `Order ${order.id} shipped. Delivery in progress 🚚`
-        );
-        this.loadOrders();
+        // Move directly to SHIPPED
+        this.orderService.updateStatus(order.id, 'Shipped').subscribe(() => {
+          this.toastr.success(
+            `Order ${order.id} shipped. Delivery in progress 🚚`
+          );
+          this.loadOrders();
+        });
+
       });
 
+      return;
+    }
+
+    // 🔥 CASE 2: Permanent employee NOT available → normal confirm
+    this.orderService.updateStatus(order.id, 'Confirmed').subscribe(() => {
+      this.toastr.info(
+        `Order ${order.id} confirmed. Please assign employee.`
+      );
+      this.loadOrders();
     });
-
-    return;
   }
 
-  // 🔥 CASE 2: Permanent employee NOT available → normal confirm
-  this.orderService.updateStatus(order.id, 'Confirmed').subscribe(() => {
-    this.toastr.info(
-      `Order ${order.id} confirmed. Please assign employee.`
+  getTempEmployees(order: DistributorOrder): Employee[] {
+    const availability = this.employeeAvailability[order.customerId];
+
+    if (!availability?.permanentEmployeeId) {
+      return this.employees;
+    }
+
+    // 🔥 Remove permanent employee from list
+    return this.employees.filter(
+      e => e.employeeId !== availability.permanentEmployeeId
     );
-    this.loadOrders();
-  });
-}
-
-getTempEmployees(order: DistributorOrder): Employee[] {
-  const availability = this.employeeAvailability[order.customerId];
-
-  if (!availability?.permanentEmployeeId) {
-    return this.employees;
   }
 
-  // 🔥 Remove permanent employee from list
-  return this.employees.filter(
-    e => e.employeeId !== availability.permanentEmployeeId
-  );
-}
 
 
+  openProductDetails(order: any, action: string) {
 
- openProductDetails(order: any, action: string) {
+    // 🔥 CLOSE assign modal if it is open
+    this.showAssignModal = false;
 
-  // 🔥 CLOSE assign modal if it is open
-  this.showAssignModal = false;
+    // small delay so DOM updates cleanly
+    setTimeout(() => {
+      this.selectedOrder = order;
+      this.nextAction = action;
 
-  // small delay so DOM updates cleanly
-  setTimeout(() => {
+      order.products = order.products || [];
+
+      order.products.forEach((item: any) => {
+        this.productService.getById(item.productId).subscribe((p: any) => {
+          item.brand = p.brand;
+          item.category = p.category;
+          item.imageUrl = p.imageUrls?.length
+            ? `${this.apiBaseUrl}${p.imageUrls[0]}`
+            : 'assets/no-image.png';
+        });
+      });
+
+      this.showProductPopup = true;
+    }, 100);
+  }
+
+  continueAction() {
+    this.showProductPopup = false;
+
+    if (this.nextAction === 'confirm') {
+      this.confirmOrder(this.selectedOrder);
+    }
+
+
+    this.nextAction = "";  // clear action
+  }
+
+  // openAssignModal(orderId: string) {
+  //   const modal = document.getElementById('assignModal');
+  //   if (modal) {
+  //     modal.style.display = 'block';
+  //     this.selectedOrder = orderId;
+  //   } else {
+  //     console.warn('assignModal not found in DOM');
+  //   }
+  // }
+  // ✅ Fixed: accepts full order object
+  openAssignModal(order: DistributorOrder) {
     this.selectedOrder = order;
-    this.nextAction = action;
 
-    order.products = order.products || [];
+    // LOAD employees for dropdown
+    this.filteredEmployees = this.employees;
 
-    order.products.forEach((item: any) => {
-      this.productService.getById(item.productId).subscribe((p: any) => {
-        item.brand = p.brand;
-        item.category = p.category;
-       item.imageUrl = p.imageUrls?.length
-  ? `${this.apiBaseUrl}${p.imageUrls[0]}`
-  : 'assets/no-image.png';
-      });
+    // 🔥 Load availability from backend
+    this.distService.getCustomerEmployeeStatus(
+      this.distributorId,
+      order.customerId
+    ).subscribe(status => {
+
+      // Save availability in object for UI
+      this.employeeAvailability[order.customerId] = status;
+
+      // Decide active employee
+      this.activeEmployeeId =
+        status.temporaryEmployeeId ||
+        status.permanentEmployeeId ||
+        '';
+
+      const emp = this.employees.find(e => e.employeeId === this.activeEmployeeId);
+      this.activeEmployeeName = emp ? emp.name : "No employee assigned";
+
+      // Show temp dropdown ONLY if permanent employee exists AND NOT AVAILABLE
+      this.showTempDropdown =
+        !!status.permanentEmployeeId &&
+        status.permanentEmployeeAvailable === false;
+
     });
-
-    this.showProductPopup = true;
-  }, 100);
-}
-
-continueAction() {
-  this.showProductPopup = false;
-
-  if (this.nextAction === 'confirm') {
-    this.confirmOrder(this.selectedOrder);
+    this.showAssignModal = true;   // 🔥 show assign modal
+    this.filteredEmployees = this.employees.filter(e => e.isActive);
+    this.cd.detectChanges();
   }
-  
 
-  this.nextAction = "";  // clear action
-}
-
-// openAssignModal(orderId: string) {
-//   const modal = document.getElementById('assignModal');
-//   if (modal) {
-//     modal.style.display = 'block';
-//     this.selectedOrder = orderId;
-//   } else {
-//     console.warn('assignModal not found in DOM');
-//   }
-// }
-// ✅ Fixed: accepts full order object
-openAssignModal(order: DistributorOrder) {
-  this.selectedOrder = order;
-
-  // LOAD employees for dropdown
-  this.filteredEmployees = this.employees;
-
-  // 🔥 Load availability from backend
-  this.distService.getCustomerEmployeeStatus(
-    this.distributorId,
-    order.customerId
-  ).subscribe(status => {
-
-    // Save availability in object for UI
-    this.employeeAvailability[order.customerId] = status;
-
-    // Decide active employee
-    this.activeEmployeeId =
-      status.temporaryEmployeeId ||
-      status.permanentEmployeeId ||
-      '';
-
-    const emp = this.employees.find(e => e.employeeId === this.activeEmployeeId);
-    this.activeEmployeeName = emp ? emp.name : "No employee assigned";
-
-    // Show temp dropdown ONLY if permanent employee exists AND NOT AVAILABLE
-    this.showTempDropdown =
-      !!status.permanentEmployeeId &&
-      status.permanentEmployeeAvailable === false;
-
-  });
-  this.showAssignModal = true;   // 🔥 show assign modal
-  this.filteredEmployees = this.employees.filter(e => e.isActive);
-  this.cd.detectChanges();
-}
-
- closeAssignModal() {
-  this.showAssignModal = false;
-  this.selectedOrder = null;
-  this.tempEmployeeId = '';
-}
+  closeAssignModal() {
+    this.showAssignModal = false;
+    this.selectedOrder = null;
+    this.tempEmployeeId = '';
+  }
 
 
   //   assignAndShip() {
@@ -307,80 +307,81 @@ openAssignModal(order: DistributorOrder) {
   //   }
 
   assignAndShip() {
-  if (!this.selectedOrder) return;
+    if (!this.selectedOrder) return;
 
-  const customerId = this.selectedOrder.customerId;
-  const availability = this.employeeAvailability[customerId];
+    const customerId = this.selectedOrder.customerId;
+    const availability = this.employeeAvailability[customerId];
 
-  // ⭐ CASE 1: Permanent Employee Available → AUTO ASSIGN + AUTO SHIP
-  if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
+    // ⭐ CASE 1: Permanent Employee Available → AUTO ASSIGN + AUTO SHIP
+    if (availability?.permanentEmployeeAvailable && availability.permanentEmployeeId) {
 
-    const empId = availability.permanentEmployeeId;
-    const emp = this.employees.find(e => e.employeeId === empId);
+      const empId = availability.permanentEmployeeId;
+      const emp = this.employees.find(e => e.employeeId === empId);
 
-    this.orderService.assignOrder(this.selectedOrder.id, {
-      employeeId: empId,
-      employeeName: emp?.name || '',
-      note: "Auto assignment to permanent employee"
-    }).subscribe(() => {
+      this.orderService.assignOrder(this.selectedOrder.id, {
+        employeeId: empId,
+        employeeName: emp?.name || '',
+        note: "Auto assignment to permanent employee"
+      }).subscribe(() => {
 
-      // ⭐ SHIP AUTOMATICALLY
-      this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
+        // ⭐ SHIP AUTOMATICALLY
+        this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
 
-        alert("Order auto-assigned to permanent employee & shipped.");
-        this.closeAssignModal();
-        this.loadOrders();
+          alert("Order auto-assigned to permanent employee & shipped.");
+          this.closeAssignModal();
+          this.loadOrders();
+
+        });
 
       });
 
-    });
+      return;
+    }
 
-    return;
-  }
+    // ⭐ CASE 2: Permanent NOT available → TEMP chosen
+    if (this.tempEmployeeId) {
 
-  // ⭐ CASE 2: Permanent NOT available → TEMP chosen
-  if (this.tempEmployeeId) {
+      this.distService.assignTempToday(
+        this.distributorId,
+        customerId,
+        this.tempEmployeeId
+      ).subscribe(() => {
 
-    this.distService.assignTempToday(
-      this.distributorId,
-      customerId,
-      this.tempEmployeeId
-    ).subscribe(() => {
+        // Assign to selected temp employee
+        this.finalOrderAssign(this.tempEmployeeId);
 
-      // Assign to selected temp employee
-      this.finalOrderAssign(this.tempEmployeeId);
+      });
 
-    });
-
-    return;
-  }
+      return;
+    }
     if (!this.selectedOrder || !this.employeeId) {
       this.toastr.warning('Please select an employee before assigning.');
       return;
     }
 
-  alert("Temporary employee not selected");
-}
-finalOrderAssign(employeeId: string) {
+    alert("Temporary employee not selected");
+  }
 
-  const emp = this.employees.find(e => e.employeeId === employeeId);
+  finalOrderAssign(employeeId: string) {
 
-  this.orderService.assignOrder(this.selectedOrder.id, {
-    employeeId: employeeId,
-    employeeName: emp?.name || '',
-    note: "Assigned manually"
-  }).subscribe(() => {
+    const emp = this.employees.find(e => e.employeeId === employeeId);
 
-    this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
-      alert("Order assigned & shipped successfully");
-      this.closeAssignModal();
-      this.loadOrders();
+    this.orderService.assignOrder(this.selectedOrder.id, {
+      employeeId: employeeId,
+      employeeName: emp?.name || '',
+      note: "Assigned manually"
+    }).subscribe(() => {
+
+      this.orderService.updateStatus(this.selectedOrder.id, "Shipped").subscribe(() => {
+        alert("Order assigned & shipped successfully");
+        this.closeAssignModal();
+        this.loadOrders();
+      });
+
     });
+  }
 
-  });
-}
 
-   
 
   // markDelivered(order: DistributorOrder) {
   //   if (!confirm(`Mark order ${order.id} as Delivered?`)) return;
@@ -419,85 +420,69 @@ finalOrderAssign(employeeId: string) {
   // }
 
   updateStatus(order: DistributorOrder, status: string) {
-  this.orderService.updateStatus(order.id, status).subscribe({
-    next: (res: any) => {
-      this.toastr.success(res?.message || `Status updated to ${status}`);
-      this.loadOrders();
+    this.orderService.updateStatus(order.id, status).subscribe({
+      next: (res: any) => {
+        this.toastr.success(res?.message || `Status updated to ${status}`);
+        this.loadOrders();
 
-      // 🔥 IMPORTANT: trigger product stock refresh
-      if (status === 'Delivered') {
-        localStorage.setItem('REFRESH_PRODUCTS', 'true');
+        // 🔥 IMPORTANT: trigger product stock refresh
+        if (status === 'Delivered') {
+          localStorage.setItem('REFRESH_PRODUCTS', 'true');
+        }
+      },
+      error: (err) => {
+        console.error('Failed update', err);
+        this.toastr.error(err?.error || 'Failed to update status');
       }
-    },
-    error: (err) => {
-      console.error('Failed update', err);
-      this.toastr.error(err?.error || 'Failed to update status');
-    }
-  });
-}
-
-  totalAmount(o: any): number {
-    if (!o || !o.products || o.products.length === 0) {
-      return o?.totalAmount ?? 0;
-    }
-
-    const subtotal = o.products.reduce((sum: number, p: any) => {
-      const price = Number(p.price ?? p.unitPrice ?? 0);
-      const qty = Number(p.quantity ?? p.qty ?? 1);
-      return sum + price * qty;
-    }, 0);
-
-    // ✅ Safe fallback discount handling
-    const discount = Number((o.discount ?? o.totalDiscount ?? 0) || 0);
-
-    return Math.max(subtotal - discount, 0);
+    });
   }
 
-   assignTempToCustomer() {
-  if (!this.selectedOrder || !this.employeeId) {
-    alert('Please select an employee.');
-    return;
+  
+  assignTempToCustomer() {
+    if (!this.selectedOrder || !this.employeeId) {
+      alert('Please select an employee.');
+      return;
+    }
+
+    const distributorId = this.distributorId;
+    const customerId = this.selectedOrder.customerId;
+
+    this.distService.assignTempToday(distributorId, customerId, this.employeeId)
+      .subscribe({
+        next: () => {
+          alert('Temporary employee assigned for today.');
+          this.closeAssignModal();
+          this.loadOrders();
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err?.error?.message || 'Failed to assign temporary employee');
+        }
+      });
   }
+  selectedEmployeeId = '';
 
-  const distributorId = this.distributorId;
-  const customerId = this.selectedOrder.customerId;
+  savePermanentEmployee() {
+    if (!this.selectedOrder || !this.selectedEmployeeId) {
+      alert("Select an employee");
+      return;
+    }
 
-  this.distService.assignTempToday(distributorId, customerId, this.employeeId)
-    .subscribe({
+    this.distService.assignPermanentEmployee(
+      this.distributorId,
+      this.selectedOrder.customerId,
+      this.selectedEmployeeId
+    ).subscribe({
       next: () => {
-        alert('Temporary employee assigned for today.');
-        this.closeAssignModal();
+        alert("Permanent employee assigned successfully!");
         this.loadOrders();
       },
       error: (err) => {
         console.error(err);
-        alert(err?.error?.message || 'Failed to assign temporary employee');
+        alert("Failed to assign permanent employee");
       }
     });
-}
-selectedEmployeeId = '';
-
-savePermanentEmployee() {
-  if (!this.selectedOrder || !this.selectedEmployeeId) {
-    alert("Select an employee");
-    return;
   }
-
-  this.distService.assignPermanentEmployee(
-    this.distributorId,
-    this.selectedOrder.customerId,
-    this.selectedEmployeeId
-  ).subscribe({
-    next: () => {
-      alert("Permanent employee assigned successfully!");
-      this.loadOrders();
-    },
-    error: (err) => {
-      console.error(err);
-      alert("Failed to assign permanent employee");
-    }
-  });
-}
 
 
 
@@ -519,47 +504,41 @@ savePermanentEmployee() {
     }
   }
 
- closeProductPopup() {
-  this.showProductPopup = false;
-  this.nextAction = "";   // 🔥 prevents unwanted opening
-}
-
-// 🧮 Subtotal (before discount)
-getOrderSubtotal(order: any): number {
-  if (!order?.products?.length) return 0;
-
-  return order.products.reduce((sum: number, p: any) => {
-    const price = Number(p.price ?? p.unitPrice ?? 0);
-    const qty = Number(p.quantity ?? 1);
-    return sum + price * qty;
-  }, 0);
-}
-
-// 💸 Discount
-getOrderDiscount(order: any): number {
-  return Number(order.discount ?? order.totalDiscount ?? 0);
-}
-
-// ✅ Final Total
-getOrderFinalTotal(order: any): number {
-  return Math.max(
-    this.getOrderSubtotal(order) - this.getOrderDiscount(order),
-    0
-  );
-}
-
-toggleTheme() {
-  document.body.classList.toggle('dark');
-}
-viewReceipt(blobName: string) {
-  if (!blobName) {
-    this.toastr.warning('Receipt not available');
-    return;
+  closeProductPopup() {
+    this.showProductPopup = false;
+    this.nextAction = "";   // 🔥 prevents unwanted opening
   }
 
-  // ✅ ALWAYS go through backend (secured)
-  const receiptUrl = `${environment.apiUrl}/orders/receipt/${blobName}`;
-  window.open(receiptUrl, '_blank');
-}
+  // 🧮 Subtotal (before discount)
+  getOrderSubtotal(order: any): number {
+    if (!order?.products?.length) return 0;
+
+    return order.products.reduce((sum: number, p: any) => {
+      const price = Number(p.price ?? p.unitPrice ?? 0);
+      const qty = Number(p.quantity ?? 1);
+      return sum + price * qty;
+    }, 0);
+  }
+
+  // 💸 Discount
+  getOrderDiscount(order: any): number {
+    return Number(order.discount ?? order.totalDiscount ?? 0);
+  }
+
+
+  toggleTheme() {
+    document.body.classList.toggle('dark');
+  }
+
+  viewReceipt(blobName: string) {
+    if (!blobName) {
+      this.toastr.warning('Receipt not available');
+      return;
+    }
+
+    // ✅ ALWAYS go through backend (secured)
+    const receiptUrl = `${environment.apiUrl}/orders/receipt/${blobName}`;
+    window.open(receiptUrl, '_blank');
+  }
 
 }

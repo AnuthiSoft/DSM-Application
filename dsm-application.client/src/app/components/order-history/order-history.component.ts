@@ -8,11 +8,11 @@ import { OrderService } from '../../services/order.service';
   styleUrl: './order-history.component.css'
 })
 export class OrderHistoryComponent implements OnInit {
-   orders: Order[] = [];
+  orders: Order[] = [];
   loading = false;
   customerId = localStorage.getItem('customerId') || '';
 
-  constructor(private orderService: OrderService) {}
+  constructor(private orderService: OrderService) { }
 
   ngOnInit(): void {
     if (!this.customerId) return;

@@ -102,10 +102,10 @@ public class OrderService
 
     private readonly IMongoCollection<CustomerDistributorConnection> _connections;
     private readonly MongoDbService _mongo;
+    private readonly InventoryService _inventoryService;
+        
 
-    private readonly MongoDbService _mongo;
-
-    public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo)
+    public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo, InventoryService inventoryService)
 
     {
 
@@ -118,6 +118,7 @@ public class OrderService
         _connections = db.GetCollection<CustomerDistributorConnection>("connections");
 
         _mongo = mongo;
+        _inventoryService = inventoryService;
 
     }
 
@@ -195,6 +196,69 @@ public class OrderService
 
     }
 
+    //public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
+    //{
+    //    if (string.IsNullOrEmpty(userId))
+    //        throw new Exception("Invalid user");
+
+    //    if (dto == null || dto.Products == null || !dto.Products.Any())
+    //        throw new Exception("Invalid order data");
+
+    //    var orderProducts = new List<OrderProduct>();
+    //    decimal subTotal = 0;
+    //    decimal totalDiscount = 0;
+
+    //    foreach (var item in dto.Products)
+    //    {
+    //        var product = await _mongo.Products
+    //            .Find(p => p.ProductId == item.ProductId)
+    //            .FirstOrDefaultAsync();
+
+    //        if (product == null)
+    //            throw new Exception($"Product not found: {item.ProductId}");
+
+    //        var itemSubtotal = product.Price * item.Quantity;
+    //        var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
+    //        var finalPrice = itemSubtotal - discountAmount;
+
+    //        orderProducts.Add(new OrderProduct
+    //        {
+    //            ProductId = product.ProductId,
+    //            ProductName = product.ProductName,
+    //            Price = product.Price,
+    //            Quantity = item.Quantity,
+    //            Subtotal = itemSubtotal,
+    //            DiscountAmount = discountAmount,
+    //            FinalPrice = finalPrice
+    //        });
+
+    //        subTotal += itemSubtotal;
+    //        totalDiscount += discountAmount;
+    //    }
+
+    //    var order = new Order
+    //    {
+    //        //CustomerEmail = dto.CustomerEmail,
+    //        //CustomerName = dto.CustomerName,
+    //        //CustomerPhone = dto.CustomerPhone,
+    //        CustomerId = dto.CustomerId,
+    //        DistributorId = dto.DistributorId,
+    //        Products = orderProducts,
+    //        Subtotal = subTotal,
+    //        TotalDiscount = totalDiscount,
+    //        TotalAmount = subTotal - totalDiscount,
+
+    //        CreatedByUserId = userId,
+    //        CreatedByRole = role,
+    //        OrderSource = "CASH_COLLECTOR",
+    //        OrderDate = DateTime.UtcNow,
+    //        ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1)
+    //    };
+
+    //    await _orders.InsertOneAsync(order);
+    //    return order;
+    //}
+
     public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
 
     {
@@ -212,6 +276,8 @@ public class OrderService
         decimal subTotal = 0;
 
         decimal totalDiscount = 0;
+        decimal totalGstAmount = 0;
+        decimal generalDiscountPercent = dto.SpecialDiscountPercent;
 
         foreach (var item in dto.Products)
 
@@ -227,12 +293,15 @@ public class OrderService
 
                 throw new Exception($"Product not found: {item.ProductId}");
 
+            // 1️⃣ Subtotal
             var itemSubtotal = product.Price * item.Quantity;
 
             var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
 
             var finalPrice = itemSubtotal - discountAmount;
-
+            // 3️⃣ GST
+            var gstPercent = product.GST;
+            var gstAmount = (finalPrice * gstPercent) / 100;
             orderProducts.Add(new OrderProduct
 
             {
@@ -247,7 +316,18 @@ public class OrderService
 
                 Subtotal = itemSubtotal,
 
+                // ✅ STORE DISCOUNTS
+                PriceDiscountPercent = generalDiscountPercent,
                 DiscountAmount = discountAmount,
+
+                // ✅ GeneralDiscount MUST be PERCENT, not amount
+                GeneralDiscount = generalDiscountPercent,
+
+                // ✅ Total discount % (for now same, later can add others)
+                TotalDiscountPercent = generalDiscountPercent,
+
+                GstPercentage = gstPercent,
+                GstAmount = gstAmount,
 
                 FinalPrice = finalPrice
 
@@ -256,7 +336,7 @@ public class OrderService
             subTotal += itemSubtotal;
 
             totalDiscount += discountAmount;
-
+            totalGstAmount += gstAmount;
         }
 
         var order = new Order
@@ -272,8 +352,11 @@ public class OrderService
             Subtotal = subTotal,
 
             TotalDiscount = totalDiscount,
+            GstAmount = totalGstAmount,
 
-            TotalAmount = subTotal - totalDiscount,
+         
+            // ✅ GST APPLIED AFTER DISCOUNT
+            TotalAmount = (subTotal - totalDiscount) + totalGstAmount,
 
             CreatedByUserId = userId,
 
@@ -287,11 +370,27 @@ public class OrderService
 
         };
 
+        // 🔥 STEP 2: REDUCE INVENTORY STOCK (BATCH-WISE)
+        foreach (var item in order.Products)
+        {
+            await _inventoryService.RemoveStockAsync(
+                item.ProductId,
+                order.DistributorId,
+                item.Quantity,
+                "Customer Order"
+            );
+        }
+
+
+
         await _orders.InsertOneAsync(order);
 
         return order;
 
     }
+
+
+
 
 
     //public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)

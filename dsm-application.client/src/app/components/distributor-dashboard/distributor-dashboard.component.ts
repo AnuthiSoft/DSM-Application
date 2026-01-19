@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './distributor-dashboard.component.html',
   styleUrl: './distributor-dashboard.component.css'
 })
-export class DistributorDashboardComponent  implements OnInit{
+export class DistributorDashboardComponent implements OnInit {
 
 
   orderedDate: string = '';
@@ -31,13 +31,14 @@ scannerQrUrl: string | null = null;
     private customerService: CustomerService,
     private http: HttpClient
   ) { }
- 
+
 
   retailerCount: number = 0;
   activeTab: string = 'dashboard'; // default tab
   isMobileMenuOpen = false;
   isDarkTheme = false;
   openSubmenus: string[] = [];
+  selectedInvoiceId: string | null = null;
 
   // pendingRequests: any[] = [];
   distributorId: string = '';
@@ -61,15 +62,15 @@ scannerQrUrl: string | null = null;
   };
 
 
-  
+
   // toggleSubmenu(menu: string) {
   //   this.submenuState[menu] = !this.submenuState[menu];
   // }
-ngOnInit() {
+  ngOnInit() {
     this.distributorId = localStorage.getItem('distributorId') || '';
     // this.loadRequests();
-      // this.loadAcceptedCustomers();
-      // this.distributorId = localStorage.getItem('distributorId') || '';
+    // this.loadAcceptedCustomers();
+    // this.distributorId = localStorage.getItem('distributorId') || '';
 
   // Load only ONCE when component is created
   const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
@@ -104,44 +105,44 @@ loadScannerQr() {
     });
 }
 
-// ==============================
+  // ==============================
   // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
   // ==============================
-  loadEmployees(){
-  this.http.get(`http://192.168.1.21:5164/api/Employees/by-distributor/${this.distributorId}`)
-    .subscribe((res:any)=>{
-      this.employees = res;
-      console.log("Loaded Employees:", res);
-    });
-}
+  loadEmployees() {
+    this.http.get(`http://192.168.1.21:5164/api/Employees/by-distributor/${this.distributorId}`)
+      .subscribe((res: any) => {
+        this.employees = res;
+        console.log("Loaded Employees:", res);
+      });
+  }
 
 
   // ==============================
   // ▶ START TRIP
   // ==============================
   startTrip() {
-  if (!this.selectedEmployeeId) {
-    alert("Select employee first!");
-    return;
-  }
-
-  this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
-    employeeId: this.selectedEmployeeId
-  }).subscribe({
-    next: () => {
-      alert("Trip Started");
-
-      // ✅ START MAP POLLING
-      if (this.trackingComp) {
-        this.trackingComp.startPolling();
-      }
-    },
-    error: (err) => {
-      console.error(err);
-      alert(err.error || "Failed to start trip");
+    if (!this.selectedEmployeeId) {
+      alert("Select employee first!");
+      return;
     }
-  });
-}
+
+    this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
+      employeeId: this.selectedEmployeeId
+    }).subscribe({
+      next: () => {
+        alert("Trip Started");
+
+        // ✅ START MAP POLLING
+        if (this.trackingComp) {
+          this.trackingComp.startPolling();
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        alert(err.error || "Failed to start trip");
+      }
+    });
+  }
 
 
 
@@ -149,28 +150,28 @@ loadScannerQr() {
   // ⏹ STOP TRIP
   // ==============================
   stopTrip() {
-  if (!this.selectedEmployeeId) {
-    alert("Select employee first!");
-    return;
-  }
-
-  this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
-    employeeId: this.selectedEmployeeId
-  }).subscribe({
-    next: () => {
-      alert("Trip Ended");
-
-      // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
-      if (this.trackingComp) {
-        this.trackingComp.removeEmployee(this.selectedEmployeeId);
-      }
-    },
-    error: err => {
-      console.error(err);
-      alert("Failed to stop trip");
+    if (!this.selectedEmployeeId) {
+      alert("Select employee first!");
+      return;
     }
-  });
-}
+
+    this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
+      employeeId: this.selectedEmployeeId
+    }).subscribe({
+      next: () => {
+        alert("Trip Ended");
+
+        // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
+        if (this.trackingComp) {
+          this.trackingComp.removeEmployee(this.selectedEmployeeId);
+        }
+      },
+      error: err => {
+        console.error(err);
+        alert("Failed to stop trip");
+      }
+    });
+  }
 
 
 
@@ -189,6 +190,7 @@ loadScannerQr() {
   //   }
   // }
   // Update these methods in your component
+  
   toggleSubmenu(menu: string) {
     // Check if the clicked menu is already open
     const isCurrentlyOpen = this.isSubmenuOpen(menu);
@@ -216,9 +218,13 @@ loadScannerQr() {
   //   // Don't close submenus here to allow navigation within the same section
   // }
 
-  setActiveTab(tab: string) {
-  this.activeTab = tab;     // ✅ this controls page display
-  this.closeAllSubmenus();  // optional
+  setActiveTab(tab: string, invoiceId?: string) {
+  this.activeTab = tab;
+  this.closeAllSubmenus();
+
+  if (invoiceId) {
+    this.selectedInvoiceId = invoiceId;
+  }
 }
 
   // Update the toggleMobileMenu method
@@ -247,16 +253,16 @@ loadScannerQr() {
 
 
 
-  
-saveLeadTime() {
-  localStorage.setItem(`leadTime_${this.distributorId}`, this.leadTime.toString());
-  alert("Delivery lead time saved!");
-}
 
-saveExpectedDayss() {
-  localStorage.setItem(`leadTime_${this.distributorId}`, this.expectedDays.toString());
-  alert("Expected delivery days saved!");
-}
+  saveLeadTime() {
+    localStorage.setItem(`leadTime_${this.distributorId}`, this.leadTime.toString());
+    alert("Delivery lead time saved!");
+  }
+
+  saveExpectedDayss() {
+    localStorage.setItem(`leadTime_${this.distributorId}`, this.expectedDays.toString());
+    alert("Expected delivery days saved!");
+  }
 
 
 
@@ -265,10 +271,10 @@ getScannerQrUrl(blobName: string | null): string {
   return `${environment.apiUrl}/distributor/scanner-qr/view/${blobName}`;
 }
 
-//   saveExpectedDays() {
-//   localStorage.setItem("expectedDays", this.expectedDays.toString());
-//   console.log("Expected Days saved:", this.expectedDays);
-// }
+  //   saveExpectedDays() {
+  //   localStorage.setItem("expectedDays", this.expectedDays.toString());
+  //   console.log("Expected Days saved:", this.expectedDays);
+  // }
 
   //   loadRequests() {
   //     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
@@ -329,17 +335,17 @@ getScannerQrUrl(blobName: string | null): string {
   }
 
   onOrderedDate() {
-  console.log("Ordered Date button clicked");
+    console.log("Ordered Date button clicked");
   }
 
 
-// onEmployeeSelect() {
-//   console.log("Employee changed → Clearing map polyline");
+  // onEmployeeSelect() {
+  //   console.log("Employee changed → Clearing map polyline");
 
-//   // Clear map route inside child component
-//   if (this.trackingComp) {
-//     this.trackingComp.clearPolyline();
-//   }
+  //   // Clear map route inside child component
+  //   if (this.trackingComp) {
+  //     this.trackingComp.clearPolyline();
+  //   }
 
 //   // Also clear local route
 //   this.polylinePath = [];

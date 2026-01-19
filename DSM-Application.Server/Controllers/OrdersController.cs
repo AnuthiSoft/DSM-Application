@@ -94,25 +94,22 @@ namespace DSM_Application.Server.Controllers
             decimal totalSubtotal = 0;
             decimal totalDiscountAmount = 0;
             decimal totalFinalAmount = 0;
+            decimal totalGst = 0;
 
             var orderProducts = new List<OrderProduct>();
 
-            int leadTime = 1; // fallback default
+            int leadTime = 1;
             bool leadTimeCaptured = false;
 
             foreach (var p in dto.Products)
             {
-
                 var product = await _products
-    .Find(x => x.ProductId == p.ProductId)
-    .FirstOrDefaultAsync();
+                    .Find(x => x.ProductId == p.ProductId)
+                    .FirstOrDefaultAsync();
 
                 if (product == null)
                     return NotFound("Product not found");
 
-
-
-                // Capture lead time from product (only once)
                 if (!leadTimeCaptured)
                 {
                     leadTime = product.LeadTimeDays ?? 1;
@@ -121,10 +118,55 @@ namespace DSM_Application.Server.Controllers
 
                 decimal unitPrice = product.Price;
                 decimal subtotal = unitPrice * p.Quantity;
+                
+
+                // ✅ FIX 1: NULL-SAFE general discount
+                decimal generalDiscountPercent = product.Discount;
+
+                // 🔹 EXISTING discount service (UNCHANGED)
+                var calc = _discountService.Calculate(
+                    p.Quantity,
+                    subtotal,
+                    dto.SpecialDiscountPercent
+                );
+
+                // 🔹 General discount from PRODUCT
+                decimal generalDiscountAmount =
+                    (subtotal * generalDiscountPercent) / 100m;
+
+                // 🔹 TOTAL discount (existing + general)
+                decimal totalDiscountForItem =
+                    calc.discountAmount + generalDiscountAmount;
+
+                // 🔹 TAXABLE AMOUNT
+                decimal taxableAmount =
+                    subtotal - totalDiscountForItem;
+
+                // ✅ FIX 2: NULL-SAFE GST
+                // ✅ GST FROM HSN TABLE
+                var category = await _mongo.Categories
+       .Find(c => c.CategoryId == product.Category)
+       .FirstOrDefaultAsync();
+                if (category == null)
+                    return BadRequest("Category not found for product");
+
+                // ===============================
+                // ✅ FETCH HSN USING CATEGORY
+                // ===============================
+                var hsn = await _mongo.HsnCodes
+                    .Find(h => h.HsnCode == category.HsnCode)
+                    .FirstOrDefaultAsync();
 
 
 
-                var calc = _discountService.Calculate(p.Quantity, subtotal, dto.SpecialDiscountPercent);
+                decimal gstPercent = hsn?.Gst ?? 0m;
+                decimal gstAmount =
+                    (taxableAmount * gstPercent) / 100m;
+
+                // 🔹 FINAL PRICE
+                decimal finalPrice =
+                    taxableAmount + gstAmount;
+
 
                 orderProducts.Add(new OrderProduct
                 {
@@ -133,32 +175,39 @@ namespace DSM_Application.Server.Controllers
                     DistributorId = product.DistributorId,
                     Price = unitPrice,
                     Quantity = p.Quantity,
+
                     QuantityDiscountPercent = calc.qtyPct,
                     PriceDiscountPercent = calc.pricePct,
                     SpecialDiscountPercent = dto.SpecialDiscountPercent,
-                    TotalDiscountPercent = calc.totalPercent,
-                    DiscountAmount = calc.discountAmount,
-                    FinalPrice = calc.finalPrice,
 
+                    // 🔹 INCLUDE GENERAL DISCOUNT
+                    GeneralDiscount = generalDiscountAmount,
+
+                    TotalDiscountPercent =
+                        calc.totalPercent + generalDiscountPercent,
+
+                    DiscountAmount = totalDiscountForItem,
+
+                    FinalPrice = finalPrice,
+
+                    GstPercentage = gstPercent,
+                    GstAmount = gstAmount
                 });
 
                 totalSubtotal += subtotal;
-                totalDiscountAmount += calc.discountAmount;
-                totalFinalAmount += calc.finalPrice;
+                totalDiscountAmount += totalDiscountForItem;
+                totalGst += gstAmount;
+                totalFinalAmount += finalPrice;
             }
 
             // -----------------------------------------------------
-            // ⭐ NEW EMPLOYEE ASSIGNMENT LOGIC
+            // EMPLOYEE ASSIGNMENT (UNCHANGED)
             // -----------------------------------------------------
-
-            // Fetch permanent employee from connection table     
             var connection = await _mongo.Connections
                 .Find(c => c.CustomerId == dto.CustomerId &&
                            c.DistributorId == dto.DistributorId)
                 .FirstOrDefaultAsync();
 
-
-            // 🔒 BLOCK ORDER IF CONNECTION IS PENDING
             if (connection != null && connection.Status == ConnectionStatus.Pending)
             {
                 return BadRequest(new
@@ -167,50 +216,25 @@ namespace DSM_Application.Server.Controllers
                 });
             }
 
-
-            // Check temporary assignment for today
             var todayTemp = await _mongo.TemporaryAssignments
                 .Find(x => x.CustomerId == dto.CustomerId &&
                            x.DistributorId == dto.DistributorId &&
                            x.AssignedDate == DateTime.UtcNow.Date)
                 .FirstOrDefaultAsync();
 
-            // Decide final employee:
-            // If temp exists today → use him
-            // Else → fallback to permanent employee
-            //var assignedEmployeeId = todayTemp?.TemporaryEmployeeId ?? connection?.PermanentEmployeeId;
+            string? assignedEmployeeId =
+                todayTemp?.TemporaryEmployeeId ??
+                connection?.PermanentEmployeeId;
 
-            // Safety check
-            // No employee assigned yet -> allow order creation
-            string? assignedEmployeeId = todayTemp?.TemporaryEmployeeId ?? connection?.PermanentEmployeeId;
-
-            // Do NOT block order creation
-
-
-            // -----------------------------------------------------
-            // BUILD ORDER OBJECT
-            // -----------------------------------------------------
-
-            var now = DateTime.UtcNow;
-
-            // If frontend provided expected delivery, prefer it. Otherwise compute from leadTime
-            DateTime expectedDelivery;
-            if (dto.ExpectedDelivery.HasValue)
-            {
-                expectedDelivery = dto.ExpectedDelivery.Value;
-            }
-            else
-            {
-                expectedDelivery = now.AddDays(leadTime);
-            }
+            DateTime expectedDelivery =
+                dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(leadTime);
 
             var order = new Order
             {
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
                 OrderedDate = DateTime.UtcNow,
-                // ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
-                ExpectedDeliveryDate = expectedDelivery,   // ✅ CORRECT
+                ExpectedDeliveryDate = expectedDelivery,
 
                 Products = orderProducts,
                 Subtotal = totalSubtotal,
@@ -221,16 +245,19 @@ namespace DSM_Application.Server.Controllers
                 Status = "Pending",
 
                 EmployeeId = assignedEmployeeId,
-                RemainingAmount = totalFinalAmount, // ⭐ MUST ADD
+                RemainingAmount = totalFinalAmount,
+                TotalGst = totalGst
             };
             // 🔥 DEDUCT STOCK FOR EACH PRODUCT
-foreach (var item in orderProducts)
-{
-    await _inventoryService.DeductStock(
-        item.ProductId,
-        item.Quantity
-    );
-}
+            foreach (var item in orderProducts)
+            {
+                await _inventoryService.RemoveStockAsync(
+                    item.ProductId,
+                    dto.DistributorId,
+                    item.Quantity,
+                    "ORDER_PLACED"
+                );
+            }
 
             await _orders.InsertOneAsync(order);
 

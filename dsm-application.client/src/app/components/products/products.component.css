@@ -54,14 +54,18 @@
 }
 
 .filter-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   gap: 20px;
-  margin-bottom: 15px;
+  align-items: end;
 }
 
+
 .search-container {
-  flex: 1;
+  max-width: 670px;
+  width: 100%;
 }
+
 
 .search-input-group {
   position: relative;
@@ -113,14 +117,28 @@
   opacity: 1;
 }
 
+.search-input-group,
+.form-select {
+  height: 44px;
+}
+
+.search-input {
+  height: 100%;
+}
+
 .filters {
   display: flex;
-  gap: 15px;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: nowrap;
 }
 
 .filter-group {
+  display: flex;
+  flex-direction: column;
   min-width: 180px;
 }
+
 
 .filter-label {
   display: block;
@@ -221,12 +239,14 @@
 }
 
 /* Stats Grid */
+/* Stats Grid – FIXED ALIGNMENT */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-bottom: 24px;
 }
+
 
 .stat-card {
   background: var(--card-bg);
@@ -836,12 +856,15 @@ textarea.form-control {
 /* Responsive Design */
 @media (max-width: 992px) {
   .filter-row {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
-  
+
   .filters {
-    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-between;
   }
+}
+
   
   .filter-group {
     flex: 1;
@@ -851,7 +874,7 @@ textarea.form-control {
   .form-grid {
     grid-template-columns: 1fr;
   }
-}
+
 
 @media (max-width: 768px) {
   .products-grid {

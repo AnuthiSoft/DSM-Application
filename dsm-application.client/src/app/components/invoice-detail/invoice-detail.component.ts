@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { InvoiceService } from '../../services/invoice.service';
 import { Invoice } from '../../models/invoice.model';
@@ -13,10 +13,10 @@ import autoTable from 'jspdf-autotable';
   styleUrls: ['./invoice-detail.component.css']
 })
 export class InvoiceDetailComponent implements OnInit {
-
-  invoiceId!: string;
+  invoiceId!: string;              // ✅ route-based
   invoice: Invoice | null = null;
   loading = true;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -24,23 +24,29 @@ export class InvoiceDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.invoiceId = this.route.snapshot.paramMap.get('id')!;
+    // ✅ GET ID FROM URL
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.loading = false;
+      return;
+    }
 
+    this.invoiceId = id;
     this.loadInvoice();
   }
 
-  loadInvoice(): void {
+ loadInvoice(): void {
     this.invoiceService.getById(this.invoiceId).subscribe({
-      next: (res: Invoice) => {
+      next: (res) => {
         this.invoice = res;
         this.loading = false;
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.loading = false;
       }
     });
   }
+
 
   downloadSimplePdf() {
   window.print();

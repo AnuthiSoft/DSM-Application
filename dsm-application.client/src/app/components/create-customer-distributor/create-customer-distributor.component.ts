@@ -65,7 +65,7 @@
 //       error: (err) => this.message = err.error || 'Failed to delete customer'
 //     });
 //   }
-  
+
 
 // }
 
@@ -82,27 +82,27 @@ import { ToastrService } from 'ngx-toastr';
 export class CreateCustomerDistributorComponent implements OnInit {
 
   otpSent = false;
-otpVerified = false;
-otpFailed = false;
-otpCode = '';
-phoneVerifiedUI = false;
+  otpVerified = false;
+  otpFailed = false;
+  otpCode = '';
+  phoneVerifiedUI = false;
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
-customer: Customer = {
-  name: '',
-  email: '',
-  phoneNumber: '',
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-  isActive: true          // ✅ ADD THIS
-};
-employees: any[] = [];
+  customer: Customer = {
+    name: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    role: 'Customer',
+    isRegistered: false,
+    isActive: true          // ✅ ADD THIS
+  };
+  employees: any[] = [];
 
-showAssignModal = false;
-selectedCustomerId = '';
-selectedEmployeeId = '';
+  showAssignModal = false;
+  selectedCustomerId = '';
+  selectedEmployeeId = '';
 
   searchTerm = '';
   statusFilter = '';
@@ -114,8 +114,8 @@ selectedEmployeeId = '';
   confirmDelete: string | null = null;
 
   constructor(private customerService: CustomerService,
-    private toastr:ToastrService
-  , private adminService:AdminService) {}
+    private toastr: ToastrService
+    , private adminService: AdminService) { }
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -124,51 +124,51 @@ selectedEmployeeId = '';
 
 
   sendOtp() {
-  const phone = this.customer.phoneNumber;
+    const phone = this.customer.phoneNumber;
 
-  if (!phone || phone.length < 10) {
-    alert('Enter a valid 10-digit phone number');
-    return;
+    if (!phone || phone.length < 10) {
+      alert('Enter a valid 10-digit phone number');
+      return;
+    }
+
+    this.adminService.sendOtp(phone).subscribe({
+      next: (res) => {
+        this.otpSent = true;
+        this.otpFailed = false;
+
+        // ⭐ SHOW THE OTP FROM BACKEND
+        alert("OTP sent! Your OTP is: " + res.otp);
+
+        console.log("OTP from backend:", res.otp);
+      },
+      error: () => alert("Failed to send OTP")
+    });
   }
 
-  this.adminService.sendOtp(phone).subscribe({
-    next: (res) => {
-      this.otpSent = true;
-      this.otpFailed = false;
+  verifyOtp() {
+    const phone = this.customer.phoneNumber;
 
-      // ⭐ SHOW THE OTP FROM BACKEND
-      alert("OTP sent! Your OTP is: " + res.otp);
+    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+      next: (res) => {
 
-      console.log("OTP from backend:", res.otp);
-    },
-    error: () => alert("Failed to send OTP")
-  });
-}
+        console.log("Verify response:", res);
 
-verifyOtp() {
-  const phone = this.customer.phoneNumber;
-
-  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-    next: (res) => {
-      
-      console.log("Verify response:", res);
-
-      if (res.valid || res.success === true) {
-        this.otpVerified = true;
-        this.phoneVerifiedUI = true;
-        this.otpFailed = false;
-        alert("Phone number verified!");
-      } else {
+        if (res.valid || res.success === true) {
+          this.otpVerified = true;
+          this.phoneVerifiedUI = true;
+          this.otpFailed = false;
+          alert("Phone number verified!");
+        } else {
+          this.otpFailed = true;
+        }
+      },
+      error: (err) => {
+        console.error("OTP verification error:", err);
         this.otpFailed = true;
+        alert('OTP verification failed!');
       }
-    },
-    error: (err) => {
-      console.error("OTP verification error:", err);
-      this.otpFailed = true;
-      alert('OTP verification failed!');
-    }
-  });
-}
+    });
+  }
 
 
 
@@ -186,14 +186,14 @@ verifyOtp() {
     });
   }
   loadEmployees() {
-  const distId = localStorage.getItem('distributorId')!;
+    const distId = localStorage.getItem('distributorId')!;
 
-  this.customerService.getEmployees(distId).subscribe((res: any[]) => {
-    this.employees = res
-      .filter(e => e.isActive)                           // only active
-      .filter(e => e.designation === "Delivery Boy");    // only delivery boys
-  });
-}
+    this.customerService.getEmployees(distId).subscribe((res: any[]) => {
+      this.employees = res
+        .filter(e => e.isActive)                           // only active
+        .filter(e => e.designation === "Delivery Boy");    // only delivery boys
+    });
+  }
 
   applyFilters() {
     this.filteredCustomers = this.customers.filter(c => {
@@ -211,38 +211,38 @@ verifyOtp() {
     });
   }
   openAssignModal(customerId: string) {
-  this.selectedCustomerId = customerId;
-  this.selectedEmployeeId = '';
-  this.showAssignModal = true;
-}
-
-closeAssignModal() {
-  this.showAssignModal = false;
-  this.selectedEmployeeId = '';
-}
-savePermanentEmployee() {
-  if (!this.selectedEmployeeId) {
-    alert("Select an employee");
-    return;
+    this.selectedCustomerId = customerId;
+    this.selectedEmployeeId = '';
+    this.showAssignModal = true;
   }
 
-  const distributorId = localStorage.getItem('distributorId')!;
-
-  this.customerService.assignPermanentEmployee(
-    distributorId,
-    this.selectedCustomerId,
-    this.selectedEmployeeId
-  ).subscribe({
-    next: () => {
-      alert("Permanent employee assigned successfully");
-      this.closeAssignModal();
-      this.loadCustomers();
-    },
-    error: (err) => {
-      alert("Failed to assign permanent employee");
+  closeAssignModal() {
+    this.showAssignModal = false;
+    this.selectedEmployeeId = '';
+  }
+  savePermanentEmployee() {
+    if (!this.selectedEmployeeId) {
+      alert("Select an employee");
+      return;
     }
-  });
-}
+
+    const distributorId = localStorage.getItem('distributorId')!;
+
+    this.customerService.assignPermanentEmployee(
+      distributorId,
+      this.selectedCustomerId,
+      this.selectedEmployeeId
+    ).subscribe({
+      next: () => {
+        alert("Permanent employee assigned successfully");
+        this.closeAssignModal();
+        this.loadCustomers();
+      },
+      error: (err) => {
+        alert("Failed to assign permanent employee");
+      }
+    });
+  }
 
 
   /* ----------------------------- Modal ------------------------------ */
@@ -251,36 +251,36 @@ savePermanentEmployee() {
     this.isEdit = false;
     this.customer = {
 
-      
-  name: '',
-  email: '',
-  phoneNumber: '',
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-  isActive: true        // ✅ ADD THIS
-};
-this.otpSent = false;
-this.otpVerified = false;
-this.otpFailed = false;
-this.otpCode = '';
-this.phoneVerifiedUI = false;
+
+      name: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      role: 'Customer',
+      isRegistered: false,
+      isActive: true        // ✅ ADD THIS
+    };
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpFailed = false;
+    this.otpCode = '';
+    this.phoneVerifiedUI = false;
 
 
     this.showModal = true;
   }
 
   editCustomer(c: Customer) {
-  this.customer = {
-    ...c,
-    phoneNumber: c.phoneNumber?.startsWith('+91')
-      ? c.phoneNumber.slice(3)   // remove +91
-      : c.phoneNumber
-  };
+    this.customer = {
+      ...c,
+      phoneNumber: c.phoneNumber?.startsWith('+91')
+        ? c.phoneNumber.slice(3)   // remove +91
+        : c.phoneNumber
+    };
 
-  this.isEdit = true;
-  this.showModal = true;
-}
+    this.isEdit = true;
+    this.showModal = true;
+  }
 
 
   closeModal() {
@@ -288,96 +288,96 @@ this.phoneVerifiedUI = false;
   }
 
   saveCustomer() {
-  const payload: Customer = {
-    ...this.customer,
-    phoneNumber: '+91' + this.customer.phoneNumber
-  };
+    const payload: Customer = {
+      ...this.customer,
+      phoneNumber: '+91' + this.customer.phoneNumber
+    };
 
-  this.isEdit ? this.updateCustomer(payload) : this.createCustomer(payload);
-}
+    this.isEdit ? this.updateCustomer(payload) : this.createCustomer(payload);
+  }
 
 
   /* ----------------------------- CREATE ------------------------------ */
 
   restrictPhoneInput(event: any) {
-  let value = event.target.value;
+    let value = event.target.value;
 
-  // allow digits only
-  value = value.replace(/\D/g, '');
+    // allow digits only
+    value = value.replace(/\D/g, '');
 
-  // max 10 digits
-  value = value.slice(0, 10);
+    // max 10 digits
+    value = value.slice(0, 10);
 
-  // first digit must be 6–9
-  if (value.length === 1 && !/^[6-9]$/.test(value)) {
-    value = '';
+    // first digit must be 6–9
+    if (value.length === 1 && !/^[6-9]$/.test(value)) {
+      value = '';
+    }
+
+    event.target.value = value;
+    this.customer.phoneNumber = value;
   }
-
-  event.target.value = value;
-  this.customer.phoneNumber = value;
-}
 
 
 
   createCustomer(customer: Customer) {
-  this.customerService.createByDistributor(customer).subscribe({
-    next: () => {
-      this.toastr.success('Customer created successfully', 'Success');
-      this.closeModal();
-      this.loadCustomers();
-    },
-    error: () => {
-      this.toastr.error('Failed to create customer', 'Error');
-    }
-  });
-}
+    this.customerService.createByDistributor(customer).subscribe({
+      next: () => {
+        this.toastr.success('Customer created successfully', 'Success');
+        this.closeModal();
+        this.loadCustomers();
+      },
+      error: () => {
+        this.toastr.error('Failed to create customer', 'Error');
+      }
+    });
+  }
 
   /* ----------------------------- UPDATE ------------------------------ */
 
   updateCustomer(customer: Customer) {
-  if (!customer.customerId) return;
+    if (!customer.customerId) return;
 
-  this.customerService.updateCustomer(customer.customerId, customer).subscribe({
-    next: () => {
-      this.toastr.success('Customer updated successfully', 'Updated');
-      this.closeModal();
-      this.loadCustomers();
-    },
-    error: () => {
-      this.toastr.error('Failed to update customer', 'Error');
-    }
-  });
-}
-
-deleteCustomer(customerId: string) {
-
-  // FIRST CLICK → SHOW CONFIRMATION TOAST
-  if (this.confirmDelete !== customerId) {
-    this.toastr.clear(); // remove existing toasts
-
-    this.toastr.warning(
-      'Click DELETE again to confirm',
-      'Confirm Delete',
-      { timeOut: 3000 }
-    );
-
-    this.confirmDelete = customerId;
-    return; // stop here
+    this.customerService.updateCustomer(customer.customerId, customer).subscribe({
+      next: () => {
+        this.toastr.success('Customer updated successfully', 'Updated');
+        this.closeModal();
+        this.loadCustomers();
+      },
+      error: () => {
+        this.toastr.error('Failed to update customer', 'Error');
+      }
+    });
   }
 
-  // SECOND CLICK → DELETE THE CUSTOMER
-  this.customerService.deleteCustomer(customerId).subscribe({
-    next: () => {
-      this.toastr.clear(); // remove confirm toast
-      this.toastr.success('Customer deleted successfully', 'Deleted');
-      this.confirmDelete = null; // reset
-      this.loadCustomers();
-    },
-    error: () => {
-      this.toastr.clear();
-      this.toastr.error('Failed to delete customer', 'Error');
+  deleteCustomer(customerId: string) {
+
+    // FIRST CLICK → SHOW CONFIRMATION TOAST
+    if (this.confirmDelete !== customerId) {
+      this.toastr.clear(); // remove existing toasts
+
+      this.toastr.warning(
+        'Click DELETE again to confirm',
+        'Confirm Delete',
+        { timeOut: 3000 }
+      );
+
+      this.confirmDelete = customerId;
+      return; // stop here
     }
-  });
-}
+
+    // SECOND CLICK → DELETE THE CUSTOMER
+    this.customerService.deleteCustomer(customerId).subscribe({
+      next: () => {
+        this.toastr.clear(); // remove confirm toast
+        this.toastr.success('Customer deleted successfully', 'Deleted');
+        this.confirmDelete = null; // reset
+        this.loadCustomers();
+      },
+      error: () => {
+        this.toastr.clear();
+        this.toastr.error('Failed to delete customer', 'Error');
+      }
+    });
+  }
 
 }

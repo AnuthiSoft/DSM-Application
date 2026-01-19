@@ -26,6 +26,7 @@ namespace DSM_Application.Server.Controllers
         private readonly IMongoCollection<Employee> _employees;
         private readonly IMongoCollection<InventoryItem> _inventory;
 
+
         public CustomersController(MongoDbService db, JwtService jwt, ProductService productService, TemporaryAssignmentService tempService)
         {
             _db = db;
@@ -128,8 +129,8 @@ namespace DSM_Application.Server.Controllers
         [HttpPost("create-by-distributor")]
         public async Task<IActionResult> CreateByDistributor([FromBody] DistributorCreateCustomerDto dto)
         {
-            if(!ModelState.IsValid)
-            return BadRequest(ModelState); // ⛔ STOP empty or invalid values
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState); // ⛔ STOP empty or invalid values
 
             // Duplicate check
             var existing = await _db.Customers
@@ -456,17 +457,24 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("dashboard/{customerId}")]
         public async Task<IActionResult> GetCustomerDashboard(string customerId)
         {
-            // 1) Fetch customer
-            var customer = await _db.Customers.Find(c => c.CustomerId == customerId).FirstOrDefaultAsync();
-            if (customer == null) return NotFound("Customer not found");
+            // 1️⃣ Fetch customer
+            var customer = await _db.Customers
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
 
-            // 2) Fetch distributor/customer connection records
+            if (customer == null)
+                return NotFound("Customer not found");
+
+            // 2️⃣ Fetch distributor–customer connections
             var connections = await _db.Connections
                 .Find(c => c.CustomerId == customerId)
                 .ToListAsync();
 
-            // 3) Load all distributors and attach products based on connection rules
-            var allDistributors = await _db.Distributors.Find(_ => true).ToListAsync();
+            // 3️⃣ Load all distributors
+            var allDistributors = await _db.Distributors
+                .Find(_ => true)
+                .ToListAsync();
+
             var distributorsWithProducts = new List<object>();
 
             foreach (var dist in allDistributors)
@@ -591,10 +599,10 @@ namespace DSM_Application.Server.Controllers
                 .SortByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            // 5) Map orders to DTO including discount breakdown
+            // 5️⃣ Map orders → DTO
             var orderDtos = orders.Select(o =>
             {
-                var first = o.Products.FirstOrDefault(); // avoid null errors
+                var first = o.Products.FirstOrDefault();
 
                 return new DistributorOrderDto
                 {
@@ -602,19 +610,16 @@ namespace DSM_Application.Server.Controllers
                     CustomerId = o.CustomerId,
                     Products = o.Products,
 
-                    // ✅ Discount Totals
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
 
-                    // ✅ Discount Breakdown (if multiple products, use first)
                     SpecialDiscountPercent = first?.SpecialDiscountPercent ?? 0,
                     QuantityDiscountPercent = first?.QuantityDiscountPercent ?? 0,
                     PriceDiscountPercent = first?.PriceDiscountPercent ?? 0,
                     TotalDiscountPercent = first?.TotalDiscountPercent ?? 0,
 
                     OrderedDate = o.OrderedDate,
-                    
                     ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     Status = o.Status,
                     EmployeeId = o.EmployeeId,
@@ -627,14 +632,15 @@ namespace DSM_Application.Server.Controllers
                 };
             }).ToList();
 
-            // 6) Return dashboard data + orders
+            // 6️⃣ Final response
             return Ok(new
             {
                 isGlobal = true,
                 distributors = distributorsWithProducts,
-                orders = orderDtos   // ✅ UI receives discount data here
+                orders = orderDtos
             });
         }
+
 
         [HttpPost("connect-distributor")]
         public async Task<IActionResult> ConnectDistributor([FromBody] ConnectRequest request)
@@ -862,7 +868,7 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new
             {
-                
+
                 role = customer.Role,
                 customerId = customer.CustomerId,
                 name = customer.Name,

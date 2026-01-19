@@ -44,11 +44,12 @@ namespace DSM_Application.Server.Models
 
         [BsonElement("CostPrice")]
         public decimal? CostPrice { get; set; }
-
+        
         [BsonElement("Discount")]
-        public decimal? Discount { get; set; }
+        public decimal Discount { get; set; }
 
-        [BsonElement("GST")]
+
+        [BsonElement("gst")]
         public decimal GST { get; set; }
 
         //[BsonElement("Stock")]
@@ -105,6 +106,7 @@ namespace DSM_Application.Server.Models
 
         // inside Product class
         public int? LeadTimeDays { get; set; } = 1; // nullable, default 1
-
+        public decimal GstPercentage { get; set; }
+      
     }
 }

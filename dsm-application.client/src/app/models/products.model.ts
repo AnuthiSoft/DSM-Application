@@ -42,7 +42,7 @@ export interface Product {
 // //   productId?: string;
 // //   productName: string;
 // //   productCode?: string;
-
+ 
 // //   price?: number;
 // //   stock?: number;
 // //   brand?: string;
@@ -50,3 +50,4 @@ export interface Product {
 // //   category?: string;
 //   // other fields as returned from backend
 // }
+ 

@@ -1,37 +1,43 @@
 ﻿using MongoDB.Bson;
-
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace DSM_Application.Server.Models
-
+[BsonIgnoreExtraElements] // ⭐ prevents future crashes
+public class InventoryBatch
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string BatchId { get; set; }
 
-    public class InventoryBatch
+    [BsonElement("ProductId")]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string ProductId { get; set; }
 
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string BatchId { get; set; }
+    [BsonElement("DistributorId")]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string DistributorId { get; set; }
 
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string ProductId { get; set; }
 
-        public string DistributorId { get; set; }
+    [BsonElement("ProductCode")]
+    public string ProductCode { get; set; }
 
-        public int QuantityInitial { get; set; }
-        public int QuantityAvailable { get; set; }
+    [BsonElement("Quantity")]
+    public int Quantity { get; set; }
 
-        public DateTime ManufactureDate { get; set; }
-        public DateTime ExpiryDate { get; set; }
+    [BsonElement("InitialQuantity")]
+    public int InitialQuantity { get; set; }
 
-        // ✅ ADD THIS
-        public bool IsActive { get; set; } = true;
+    public int QuantityAvailable { get; set; }
+          // ✅ STRING
+  
 
-        // ✅ OPTIONAL (recommended)
-        public bool IsExpired => ExpiryDate < DateTime.UtcNow;
+   
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    }
+    public DateTime? ManufactureDate { get; set; }
+    public DateTime? ExpiryDate { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
+    public bool IsExpired => ExpiryDate < DateTime.UtcNow;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
-

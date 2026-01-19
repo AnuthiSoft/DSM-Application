@@ -256,8 +256,6 @@
             <option value="Cash Collector">Cash Collector</option>
             <option value="Manager">Manager</option>
             <option value="Sales Representative">Sales Representative</option>
-            <option value="Delivery Boy">Delivery Boy</option>
-            <option value="Cash Collector">Cash Collector</option>
           </select>
         </div>
 
@@ -326,10 +324,13 @@
 
                   <button *ngIf="(emp.designation || '').toLowerCase().trim() === 'delivery boy'"
                     class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
-                    <i class="fas fa-file-upload"></i> Upload Invoice
+                    <i class="fas fa-file-upload"></i> Tax Invoice
                   </button>
 
-
+                  <button *ngIf="emp.invoicePdfUrl" class="btn btn-outline-secondary btn-sm action-btn"
+                    (click)="viewPdf(emp.invoicePdfUrl)">
+                    <i class="fas fa-eye"></i> View PDF
+                  </button>
 
                 </div>
               </td>
@@ -450,54 +451,56 @@
 
               </div>
 
-           <div class="form-group">
-  <label class="form-label">
-    <i class="fas fa-phone"></i>
-    Phone Number
-  </label>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-phone"></i> Phone Number
+                </label>
 
-  <input 
-    type="text"
-    class="form-control"
-    formControlName="phoneNumber"
-    placeholder="Enter phone number"
-    [readonly]="phoneVerifiedUI"
-    (input)="restrictPhoneInput($event)"
-  />
+                <!-- Phone Input -->
+                <div class="phone-group"
+                  [class.phone-error]="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
 
-  <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-    <i class="fas fa-check-circle"></i> Verified
-  </div>
+                  <span class="phone-prefix">+91</span>
 
-  <!-- Send OTP button -->
-  <div class="mt-2" *ngIf="!phoneVerifiedUI">
-    <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
-      Send OTP
-    </button>
-  </div>
+                  <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
+                    inputmode="numeric" autocomplete="off" placeholder="Enter phone number" [readonly]="phoneVerifiedUI"
+                    (input)="restrictPhoneInput($event)" />
+                </div>
 
-  <!-- OTP input -->
-  <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
-    <label>Enter OTP</label>
+                <!-- ❗ Error message OUTSIDE input -->
+                <div class="text-danger mt-1" *ngIf="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+                  Enter a valid 10-digit Mobile Number
+                </div>
 
-    <input 
-      type="text"
-      class="form-control"
-      maxlength="6"
-      [(ngModel)]="otpCode"
-      [ngModelOptions]="{ standalone: true }"
-    />
+                <!-- Verified -->
+                <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+                  <i class="fas fa-check-circle"></i> Verified
+                </div>
 
-    <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
-      Verify OTP
-    </button>
 
-    <div *ngIf="otpFailed" class="text-danger mt-2">
-      ✖ Invalid or expired OTP
-    </div>
-  </div>
-</div>
+                <!-- Send OTP button -->
+                <div class="mt-2" *ngIf="!phoneVerifiedUI">
+                  <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                    Send OTP
+                  </button>
+                </div>
 
+                <!-- OTP input -->
+                <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
+                  <label>Enter OTP</label>
+
+                  <input type="text" class="form-control" maxlength="6" [(ngModel)]="otpCode"
+                    [ngModelOptions]="{ standalone: true }" />
+
+                  <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
+                    Verify OTP
+                  </button>
+
+                  <div *ngIf="otpFailed" class="text-danger mt-2">
+                    ✖ Invalid or expired OTP
+                  </div>
+                </div>
+              </div>
 
               <div class="form-group">
                 <label class="form-label">

@@ -21,12 +21,12 @@
         (click)="setActiveTab('dashboard'); closeMobileMenu(); closeAllSubmenus()">
         <i class="fas fa-th-large"></i> <span>Dashboards</span>
       </div>
- 
+
       <div class="submenu-item" (click)="setActiveTab('live-tracking')">
         <span>📍 Live Tracking</span>
       </div>
- 
- 
+
+
       <!-- Inventory -->
       <div class="nav-item has-submenu" [class.active]="isActive('inventory') || isSubmenuOpen('inventory')"
         (click)="toggleSubmenu('inventory')">
@@ -41,18 +41,19 @@
         <div class="submenu-item" [class.active]="isActive('warehouse')"
           (click)="setActiveTab('warehouse'); closeMobileMenu()">
           <span>Warehouse</span>
+
         </div>
         <div class="submenu-item" [class.active]="isActive('main-inventory')"
           (click)="setActiveTab('main-inventory'); closeMobileMenu()">
           <span>Main Inventory</span>
         </div>
- 
+
         <div class="submenu-item" [class.active]="isActive('inventory-batches')"
           (click)="setActiveTab('inventory-batches'); closeMobileMenu()">
           <span>Inventory Batches</span>
         </div>
       </div>
- 
+
       <!-- Orders -->
       <div class="nav-item has-submenu" [class.active]="isActive('orders') || isSubmenuOpen('orders')"
         (click)="toggleSubmenu('orders')">
@@ -72,8 +73,14 @@
           (click)="setActiveTab('order-tracking'); closeMobileMenu()">
           <span>Order Tracking</span>
         </div>
+
+        <div class="submenu-item" [class.active]="isActive('create-invoice')"
+          (click)="setActiveTab('create-invoice'); closeMobileMenu()">
+          <span>Create Invoice</span>
+        </div>
+
       </div>
- 
+
       <!-- Sales -->
       <div class="nav-item has-submenu" [class.active]="isActive('sales') || isSubmenuOpen('sales')"
         (click)="toggleSubmenu('sales')">
@@ -90,7 +97,7 @@
           <span>Paid vs Unpaid</span>
         </div>
       </div>
- 
+
       <!-- Retailers -->
       <div class="nav-item has-submenu" [class.active]="isActive('retailers') || isSubmenuOpen('retailers')"
         (click)="toggleSubmenu('retailers')">
@@ -111,7 +118,7 @@
           <span>No Of Retailers</span>
         </div>
       </div>
- 
+
       <!-- Payments -->
       <div class="nav-item has-submenu" [class.active]="isActive('payments') || isSubmenuOpen('payments')"
         (click)="toggleSubmenu('payments')">
@@ -139,9 +146,9 @@
           (click)="setActiveTab('payment-notes'); closeMobileMenu()">
           <span>Payment Notes</span>
         </div>
- 
+
       </div>
- 
+
       <!-- Settings -->
       <div class="nav-item has-submenu" [class.active]="isActive('settings') || isSubmenuOpen('settings')"
         (click)="toggleSubmenu('settings')">
@@ -165,12 +172,12 @@
           (click)="setActiveTab('connection-requests'); closeMobileMenu()">
           <span>Connection Requests</span>
         </div>
- 
+
         <div class="submenu-item" [class.active]="isActive('settings')"
           (click)="setActiveTab('settings'); closeMobileMenu()">
           <span>Dsitributor Settings</span>
         </div>
- 
+
         <div class="submenu-item" [class.active]="isActive('test-page')"
           (click)="setActiveTab('test-page'); closeMobileMenu()">
           <span>Test Page</span>
@@ -179,23 +186,36 @@
           (click)="setActiveTab('reports'); closeMobileMenu()">
           <span>Reports</span>
         </div>
- 
+
         <div class="submenu-item logout-item" (click)="logout(); closeMobileMenu()">
           <span>Logout</span>
         </div>
       </div>
     </div>
   </div>
- 
+
   <!-- Main Content -->
   <div class="dashboard-main">
+
+    <!-- 🔧 UNDER DEVELOPMENT PLACEHOLDERS (ADD HERE AT THE END) -->
+    <div *ngIf="isActive('warehouse')" class="dashboard-under-dev">
+      🚧 Warehouse module is under development
+    </div>
+
+    <div *ngIf="isActive('order-tracking')" class="dashboard-under-dev">
+      🚧 Order Tracking module is under development
+    </div>
+
+
+
+
     <!-- Dashboard Tab -->
     <div class="tab-content active" *ngIf="isActive('dashboard')">
       <div class="welcome-header">
         <h2>Dashboard Overview</h2>
         <div class="date-display">{{currentDate | date:'fullDate'}}</div>
       </div>
- 
+
       <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card">
@@ -224,7 +244,7 @@
           <div class="stat-label">Monthly Income</div>
         </div>
       </div>
- 
+
       <!-- Charts Section -->
       <div class="charts-grid">
         <div class="dashboard-card chart-card">
@@ -233,7 +253,7 @@
             <!-- <app-sales-chart></app-sales-chart> -->
           </div>
         </div>
- 
+
         <div class="dashboard-card chart-card">
           <h3>Order Status</h3>
           <div class="chart-container">
@@ -242,109 +262,124 @@
         </div>
       </div>
     </div>
- 
- 
- 
+
+
+
     <!-- Settings Tab -->
     <!-- Settings Tab -->
     <div class="settings-tab active" *ngIf="isActive('settings')">
- 
+
       <h2 class="page-title">Distributor Settings</h2>
- 
+
       <div class="settings-wrapper">
- 
+
         <div class="settings-card">
- 
+
           <h3 class="section-title">Delivery Settings</h3>
- 
+
           <div class="form-group">
             <label>Expected Delivery Days *</label>
             <input type="number" [(ngModel)]="expectedDays" min="1" />
- 
+
           </div>
- 
+
           <button class="save-btn" (click)="saveExpectedDayss()">
             Save
           </button>
- 
+
         </div>
         <div class="settings-card">
 
-  <h3 class="section-title">Scanner QR Configuration</h3>
+          <h3 class="section-title">Scanner QR Configuration</h3>
 
-  <!-- Upload -->
-  <div class="form-group">
-    <label>Upload Scanner QR</label>
-    <input
-      type="file"
-      accept="image/*"
-      (change)="onQrSelected($event)"
-    />
-  </div>
+          <!-- Upload -->
+          <div class="form-group">
+            <label>Upload Scanner QR</label>
+            <input type="file" accept="image/*" (change)="onQrSelected($event)" />
+          </div>
 
-  <button
-    class="save-btn"
-    (click)="uploadScannerQr()"
-    [disabled]="!selectedQrFile">
-    Upload QR
-  </button>
+          <button class="save-btn" (click)="uploadScannerQr()" [disabled]="!selectedQrFile">
+            Upload QR
+          </button>
 
-  <!-- Preview -->
-  <div *ngIf="scannerQrUrl" class="qr-preview">
-    <p>Current Scanner QR</p>
-  <img
-  [src]="getScannerQrUrl(scannerQrUrl)"
-  alt="Scanner QR"
-  style="width:200px;border:1px solid #ccc;padding:10px"
-/>
-  </div>
+          <!-- Preview -->
+          <div *ngIf="scannerQrUrl" class="qr-preview">
+            <p>Current Scanner QR</p>
+            <img [src]="getScannerQrUrl(scannerQrUrl)" alt="Scanner QR"
+              style="width:200px;border:1px solid #ccc;padding:10px" />
+          </div>
 
-</div>
+        </div>
 
- 
+
       </div>
     </div>
- 
- 
- 
+
+
+
     <!-- Subpage Components -->
     <!-- Inventory -->
+
     <app-products *ngIf="isActive('products')"></app-products>
-    <!-- <app-warehouse *ngIf="isActive('warehouse')"></app-warehouse> -->
+
     <app-main-inventory *ngIf="isActive('main-inventory')"></app-main-inventory>
-    <!-- <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches> -->
+    <app-inventory-batches *ngIf="isActive('inventory-batches')"></app-inventory-batches>
+    <app-invoice-create *ngIf="isActive('create-invoice')"></app-invoice-create>
+    <app-invoice-detail *ngIf="isActive('invoice-detail')"></app-invoice-detail>
+
+
     <!-- Orders -->
     <!-- <app-order-list *ngIf="isActive('order-list')"></app-order-list> -->
     <app-distributor-orders *ngIf="isActive('order-list')"></app-distributor-orders>
     <app-distributor-connection-requests *ngIf="isActive('connection-requests')"></app-distributor-connection-requests>
     <!-- <app-distributor-view *ngIf="isActive('distributor-view')"></app-distributor-view> -->
     <!-- <app-order-tracking *ngIf="isActive('order-tracking')"></app-order-tracking> -->
- 
+
     <!-- Sales -->
-    <!-- <app-monthly-income *ngIf="isActive('monthly-income')"></app-monthly-income> -->
-    <!-- <app-paid-vs-unpaid *ngIf="isActive('paid-vs-unpaid')"></app-paid-vs-unpaid> -->
- 
- 
+    <div *ngIf="isActive('monthly-income')" class="dashboard-under-dev">
+      🚧 Monthly Income is under development
+    </div>
+    <div *ngIf="isActive('paid-vs-unpaid')" class="dashboard-under-dev">
+      🚧 Paid vs Unpaid is under development
+    </div>
+
+
     <!-- Retailers -->
     <app-customers-list *ngIf="isActive('retailer-list')"></app-customers-list>
-    <!-- <app-retailer-details *ngIf="isActive('retailer-details')"></app-retailer-details> -->
-    <!-- <app-no-of-retailers *ngIf="isActive('no-of-retailers')"></app-no-of-retailers> -->
+    <div *ngIf="isActive('no-of-retailers')" class="dashboard-under-dev">
+      🚧 No Of Retailers is under development
+    </div>
+    <div *ngIf="isActive('retailer-details')" class="dashboard-under-dev">
+      🚧 Retailer Details is under development
+    </div>
     <app-create-customer-distributor *ngIf="isActive('create-customer')"></app-create-customer-distributor>
- 
+
     <!-- Payments -->
     <app-payment-report *ngIf="isActive('payment-status')"></app-payment-report>
-    <!-- <app-payment-notes *ngIf="isActive('payment-notes')"></app-payment-notes> -->
-    <app-pending-handovers *ngIf="isActive('pending-handovers')"></app-pending-handovers>
+
+    <!-- <app-pending-handovers *ngIf="isActive('pending-handovers')"></app-pending-handovers> -->
     <app-customer-payment-status *ngIf="isActive('customer-status')"></app-customer-payment-status>
-    <!-- <app-payment-summary *ngIf="isActive('payment-summary')"></app-payment-summary> -->
- 
- 
+    <div *ngIf="isActive('pending-handovers')" class="dashboard-under-dev">
+      🚧 Payment Handovers is under development
+    </div>
+
+    <div *ngIf="isActive('payment-notes')" class="dashboard-under-dev">
+      🚧 Payment Notes is under development
+    </div>
+
+
     <!-- Settings -->
-    <!-- <app-company-config *ngIf="isActive('company-config')"></app-company-config> -->
+    <div *ngIf="isActive('company-config')" class="dashboard-under-dev">
+      🚧 Company Configuration is under development
+    </div>
     <app-employees *ngIf="isActive('employees')"></app-employees>
-   
-    <!-- <app-test-page *ngIf="isActive('test-page')"></app-test-page> -->
-    <!-- <app-reports *ngIf="isActive('reports')"></app-reports> -->
+
+    <div *ngIf="isActive('test-page')" class="dashboard-under-dev">
+      🚧 Test Page is under development
+    </div>
+    <div *ngIf="isActive('reports')" class="dashboard-under-dev">
+      🚧 Reports is under development
+    </div>
     <!-- LIVE TRACKING PAGE -->
     <!-- <div *ngIf="isActive('live-tracking')" style="padding: 15px;">
 
@@ -388,9 +423,16 @@
 
       </div>
 
+
+
       <div class="tracking-map-card">
         <div class="map-wrapper">
           <app-employee-tracking #trackingComp></app-employee-tracking>
+
+
+          <!-- <div *ngIf="isActive('live-tracking')" class="dashboard-under-dev">
+    🚧 Live Employee Tracking is under development
+  </div> -->
 
         </div>
       </div>
@@ -401,4 +443,3 @@
 
   </div>
 </div>
- 

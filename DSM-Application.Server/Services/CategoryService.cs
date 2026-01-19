@@ -1,6 +1,7 @@
 ﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DSM_Application.Server.Services
@@ -21,8 +22,13 @@ namespace DSM_Application.Server.Services
         public async Task<List<Category>> GetAllAsync()
             => await _categories.Find(c => c.IsActive).SortBy(c => c.SortOrder).ToListAsync();
 
+
         public async Task<Category?> GetByIdAsync(string id)
-            => await _categories.Find(c => c.CategoryId == id && c.IsActive).FirstOrDefaultAsync();
+        {
+            return await _categories
+                .Find(c => c.CategoryId == id)
+                .FirstOrDefaultAsync();
+        }
         public async Task<Category?> GetByNameAsync(string name)
         {
             return await _categories
@@ -60,8 +66,12 @@ namespace DSM_Application.Server.Services
             {
                 Name = dto.Name,
                 //ParentId = dto.ParentId,
+                ParentId = !string.IsNullOrWhiteSpace(dto.ParentId)
+        ? ObjectId.Parse(dto.ParentId)
+        : null,
                 HsnCode = dto.HsnCode,
                 GST = gst,
+                
 
                 Attributes = dto.Attributes ?? new(),
                 IconUrl = dto.IconUrl,

@@ -15,11 +15,8 @@
           <span class="input-icon">
             <i class="fas fa-search"></i>
           </span>
-          <input type="text" 
-                 class="form-control" 
-                 placeholder="Search products..." 
-                 [(ngModel)]="searchTerm"
-                 (input)="onSmartSearch()">
+          <input type="text" class="form-control" placeholder="Search products..." [(ngModel)]="searchTerm"
+            (input)="onSmartSearch()">
           <button class="clear-btn" *ngIf="searchTerm" (click)="clearSearch()">
             <i class="fas fa-times"></i>
           </button>
@@ -129,40 +126,40 @@
       <div class="product-card" *ngFor="let prod of filterProducts">
         <!-- Product Image -->
         <div class="product-image">
-        <div class="product-image">
+          <div class="product-image">
 
-  <!-- 🔁 Image Carousel -->
-  <div *ngIf="prod.imageUrls?.length"
-       id="carousel-{{ prod.productId }}"
-       class="carousel slide"
-       data-bs-ride="carousel"
-       data-bs-interval="2500">
+            <!-- 🔁 Image Carousel -->
+            <div *ngIf="prod.imageUrls?.length" id="carousel-{{ prod.productId }}" class="carousel slide"
+              data-bs-ride="carousel" data-bs-interval="2500">
 
-    <div class="carousel-inner">
-      <div class="carousel-item"
-           *ngFor="let img of prod.imageUrls; let i = index"
-           [class.active]="i === 0">
+              <div class="carousel-inner">
+                <div *ngFor="let img of prod.imageUrls; let i = index" class="carousel-item" [class.active]="i === 0">
+                  <img [src]="getFullImageUrl(img)" class="d-block w-100" />
+                </div>
+              </div>
 
-        <img
-          [src]="getFullImageUrl(img)"
-          class="d-block w-100 product-img"
-          (error)="handleImageError($event)">
-      </div>
-    </div>
+              <button class="carousel-control-prev" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
+                data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </button>
 
-  </div>
+              <button class="carousel-control-next" type="button" [attr.data-bs-target]="'#carousel'+prod.productId"
+                data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </button>
+            </div>
 
-  <!-- ❌ No Image -->
-  <div *ngIf="!prod.imageUrls?.length" class="no-image">
-    <i class="fas fa-box"></i>
-    <span>No Image</span>
-  </div>
+            <!-- ❌ No Image -->
+            <div *ngIf="!prod.imageUrls?.length" class="no-image">
+              <i class="fas fa-box"></i>
+              <span>No Image</span>
+            </div>
 
-</div>
+          </div>
 
 
           <!-- Stock Badge -->
-          <div class="stock-badge" [class]="getStockClass(prod.currentStock)">
+          <div class="stock-badge" [ngClass]="getStockClass(prod.currentStock)">
             {{ getStockText(prod.currentStock) }}
           </div>
         </div>
@@ -210,15 +207,12 @@
                 <i class="fas fa-minus"></i>
               </button>
               <span class="qty-value">{{ getCartQty(prod) }}</span>
-              <button class="qty-btn" (click)="increaseQty(prod)" 
-                      [disabled]="getCartQty(prod) >= prod.currentStock">
+              <button class="qty-btn" (click)="increaseQty(prod)" [disabled]="getCartQty(prod) >= prod.currentStock">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
 
-            <button class="btn btn-primary btn-add" 
-                    (click)="openAddPopup(prod)"
-                    [disabled]="prod.currentStock === 0">
+            <button class="btn btn-primary btn-add" (click)="openAddPopup(prod)" [disabled]="prod.currentStock === 0">
               <i class="fas fa-cart-plus"></i>
               {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
             </button>
@@ -241,16 +235,16 @@
       <div class="popup-body">
         <div class="popup-product">
           <div class="popup-image">
-            <img *ngIf="selectedProduct?.imageUrls?.length" 
-                 [src]="getFullImageUrl(selectedProduct!.imageUrls[0])"
-                 [alt]="selectedProduct?.productName">
+            <img *ngIf="selectedProduct?.imageUrls?.length" [src]="getFullImageUrl(selectedProduct!.imageUrls[0])"
+              [alt]="selectedProduct?.productName">
             <div *ngIf="!selectedProduct?.imageUrls?.length" class="popup-no-image">
               <i class="fas fa-box"></i>
             </div>
           </div>
           <div class="popup-details">
             <h6>{{ selectedProduct?.productName }}</h6>
-            <p class="text-muted">{{ selectedProduct?.productCode }}</p>
+            <p class="product-code">{{ selectedProduct?.productCode }}</p>
+
             <p class="distributor">
               <i class="fas fa-truck"></i> {{ selectedProduct?.distributorName }}
             </p>
@@ -271,7 +265,7 @@
             </button>
             <span class="qty-display">{{ selectedQuantity }}</span>
             <button class="btn-qty" (click)="popupIncrease()"
-                    [disabled]="selectedQuantity >= (selectedProduct?.currentStock || 0)">
+              [disabled]="selectedQuantity >= (selectedProduct?.currentStock || 0)">
               <i class="fas fa-plus"></i>
             </button>
           </div>
@@ -280,12 +274,12 @@
           </div>
         </div>
 
-       <ng-container *ngIf="selectedProduct as p">
-  <div class="stock-warning" *ngIf="p.currentStock <= 10">
-    <i class="fas fa-exclamation-circle"></i>
-    Only {{ p.currentStock }} units remaining
-  </div>
-</ng-container>
+        <ng-container *ngIf="selectedProduct as p">
+          <div class="stock-warning" *ngIf="p.currentStock <= 10">
+            <i class="fas fa-exclamation-circle"></i>
+            Only {{ p.currentStock }} units remaining
+          </div>
+        </ng-container>
       </div>
 
       <div class="popup-footer">

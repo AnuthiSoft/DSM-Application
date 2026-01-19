@@ -23,14 +23,16 @@ namespace DSM_Application.Server.Controllers
         private readonly CategoryService _categoryService;
         private readonly BlobService _blobService;
         private readonly InventoryService _inventoryService;
+        private readonly HsnService _hsnService;
 
-        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService, BlobService blobService)
+        public ProductsController(ProductService productService, CategoryService categoryService, InventoryService inventoryService, BlobService blobService,HsnService hsnService)
         {
             _productService = productService;
             _categoryService = categoryService;
             _blobService = blobService;
             _inventoryService = inventoryService;
             _blobService = blobService;
+            _hsnService = hsnService; // ✅ REQUIRED
         }
 
 
@@ -102,12 +104,86 @@ namespace DSM_Application.Server.Controllers
             return Ok(product);
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
+        //{
+
+        //    var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
+        //    if (distributor == null)
+        //        return NotFound("Distributor not found");
+
+        //    var imageUrls = new List<string>();
+
+        //    if (dto.Images != null && dto.Images.Any())
+        //    {
+        //        foreach (var file in dto.Images)
+        //        {
+        //            var blobUrl = await _blobService.UploadAsync(file);
+        //            var blobName = Path.GetFileName(new Uri(blobUrl).LocalPath);
+        //            imageUrls.Add(blobName);
+        //        }
+        //    }
+
+        //    var subCategory = await _categoryService.GetByIdAsync(dto.Category);
+        //    decimal gst = subCategory?.GST ?? 0;
+        //    var product = new Product
+        //    {
+        //        ProductName = dto.ProductName,
+        //        ProductCode = dto.ProductCode,
+        //        Description = dto.Description,
+        //        Measure = dto.Measure,
+        //        Price = dto.Price,
+        //        CostPrice = dto.CostPrice,
+        //        Discount = dto.Discount,
+        //        GST = gst,
+        //        GstPercentage = gst,
+
+        //        ReorderLevel = dto.ReorderLevel,
+        //        Brand = dto.Brand,
+        //        DistributorId = dto.DistributorId,
+        //        DistributorName = distributor.Name,
+        //        CategoryId = dto.CategoryId,
+        //        Category = dto.Category,
+        //        Color = dto.Color,
+
+        //        // MULTIPLE IMAGES
+        //        ImageUrls = imageUrls,
+
+        //        IsActive = true,
+        //        IsDeleted = false
+        //    };
+        //    Console.WriteLine("FINAL GST BEFORE SAVE: " + product.GST);
+        //    Console.WriteLine("FINAL GST % BEFORE SAVE: " + product.GstPercentage);
+        //    var created = await _productService.CreateAsync(product);
+
+        //    return Ok(created);
+        //}
+
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ProductCreateDto dto)
         {
             var distributor = await _productService.GetDistributorByIdAsync(dto.DistributorId);
             if (distributor == null)
                 return NotFound("Distributor not found");
+
+            // 🔥 Fetch SubCategory properly
+            var subCategory = await _categoryService.GetByIdAsync(dto.Category);
+            if (subCategory == null)
+                return BadRequest("Invalid subcategory");
+
+            decimal gst = 0;
+
+            if (!string.IsNullOrWhiteSpace(subCategory.HsnCode))
+            {
+                var hsn = await _hsnService.GetByCodeAsync(subCategory.HsnCode);
+                if (hsn != null)
+                    gst = hsn.Gst;
+            }
+
+            // DEBUG — YOU WILL SEE THIS NOW
+            Console.WriteLine($"GST FROM HSN = {gst}");
+
+            Console.WriteLine($"GST FROM CATEGORY = {gst}");
 
             var imageUrls = new List<string>();
             if (dto.Images != null && dto.Images.Any())
@@ -121,8 +197,6 @@ namespace DSM_Application.Server.Controllers
                 }
             }
 
-            var subCategory = await _categoryService.GetByIdAsync(dto.Category);
-            decimal gst = subCategory?.GST ?? 0;
             var product = new Product
             {
                 ProductName = dto.ProductName,
@@ -132,25 +206,34 @@ namespace DSM_Application.Server.Controllers
                 Price = dto.Price,
                 CostPrice = dto.CostPrice,
                 Discount = dto.Discount,
+
+                // ✅ GST SET ONLY HERE
                 GST = gst,
 
                 ReorderLevel = dto.ReorderLevel,
                 Brand = dto.Brand,
                 DistributorId = dto.DistributorId,
                 DistributorName = distributor.Name,
+                CategoryId = dto.Category,
                 Category = dto.Category,
                 Color = dto.Color,
 
-                // MULTIPLE IMAGES
                 ImageUrls = imageUrls,
-
                 IsActive = true,
                 IsDeleted = false
             };
 
-            var created = await _productService.CreateAsync(product);
+            Console.WriteLine("FINAL GST SAVED = " + product.GST);
 
-            return Ok(created);
+            await _productService.CreateAsync(product);
+            // 🔥 AUTO CREATE INVENTORY BATCH
+            //await _inventoryService.CreateInitialBatch(
+            //    product.ProductId,
+            //    product.ProductCode,
+            //    dto.DistributorId,
+            //    dto.Stock
+            //);
+            return Ok(product);
         }
 
 

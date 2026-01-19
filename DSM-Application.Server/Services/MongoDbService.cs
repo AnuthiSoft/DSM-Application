@@ -61,11 +61,14 @@ namespace DistributorManagementSystem.Server.Services
     _db.GetCollection<CustomerPaymentReceipt>("CustomerPaymentReceipt");
 
         public IMongoCollection<InventoryItem> InventoryItems =>
-    _db.GetCollection<InventoryItem>("InventoryItems");
+    _db.GetCollection<InventoryItem>("InventoryItems");   // summary stock
 
-        public IMongoCollection<InventoryItem> Inventory =>
-    _db.GetCollection<InventoryItem>("InventoryItems");
+        public IMongoCollection<InventoryBatch> Inventory =>
+            _db.GetCollection<InventoryBatch>("Inventory");       // 🔥 batches
 
+        public IMongoCollection<InventoryBatch> InventoryBatches =>_db.GetCollection<InventoryBatch>("InventoryBatches");
+        public IMongoCollection<InvoiceUpload> InvoiceUploads =>
+            _db.GetCollection<InvoiceUpload>("InvoiceUploads");
 
     }
 

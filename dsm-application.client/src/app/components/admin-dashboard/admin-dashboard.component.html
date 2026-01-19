@@ -79,7 +79,7 @@
       </div>
     </div>
 
-   <!-- Dashboard Tab -->
+    <!-- Dashboard Tab -->
     <div class="tab-content" *ngIf="activeTab === 'dashboard'">
       <!-- Stats Overview -->
       <div class="row mt-3">
@@ -330,75 +330,64 @@
                     </div>
                   </div>
                 </div>
-</div>
+              </div>
 
-               <!-- PHONE & OTP SECTION -->
-<div class="row">
-  <!-- Phone Number -->
-  <div class="col-md-6">
-    <div class="mb-3">
-      <label class="form-label">Phone Number *</label>
+              <!-- PHONE & OTP SECTION -->
+              <div class="row">
+                <!-- Phone Number -->
+                <!-- PHONE -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Phone Number *</label>
 
-      <input
-        type="text"
-        class="form-control"
-        formControlName="phoneNumber"
-        [readonly]="phoneVerifiedUI"
-        [class.is-invalid]="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched"
-      />
+                    <div class="phone-group">
+                      <span class="phone-prefix">+91</span>
 
-      <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-        <i class="fas fa-check-circle"></i> Verified
-      </div>
+                      <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
+                        placeholder="Enter phone number" [readonly]="phoneVerifiedUI" (input)="onPhoneInput($event)" />
+                    </div>
 
-      <div
-        class="invalid-feedback"
-        *ngIf="distributorForm.get('phoneNumber')?.invalid && distributorForm.get('phoneNumber')?.touched"
-      >
-        Phone number is required
-      </div>
-    </div>
-  </div>
+                    <!-- Verified -->
+                    <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+                      <i class="fas fa-check-circle"></i> Verified
+                    </div>
 
-  <!-- OTP -->
-  <div class="col-md-6" *ngIf="!phoneVerifiedUI">
-    <div class="mb-3">
-      <label class="form-label">&nbsp;</label>
+                    <!-- Error -->
+                    <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.invalid &&
+                distributorForm.get('phoneNumber')?.touched">
+                      Phone number is required
+                    </div>
+                  </div>
+                </div>
 
-      <button
-        class="btn btn-warning w-100"
-        type="button"
-        (click)="sendOtp()"
-      >
-        Send OTP
-      </button>
 
-      <div *ngIf="otpSent" class="mt-3">
-        <label>Enter OTP</label>
 
-        <input
-          type="text"
-          maxlength="6"
-          class="form-control"
-          [(ngModel)]="otpCode"
-          [ngModelOptions]="{ standalone: true }"
-        />
+                <!-- OTP -->
+                <div class="col-md-6" *ngIf="!phoneVerifiedUI">
+                  <div class="mb-3">
+                    <label class="form-label">&nbsp;</label>
 
-        <button
-          class="btn btn-success mt-2 w-100"
-          type="button"
-          (click)="verifyOtp()"
-        >
-          Verify OTP
-        </button>
+                    <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                      Send OTP
+                    </button>
 
-        <div *ngIf="otpFailed" class="text-danger mt-2">
-          ✖ Invalid or Expired OTP
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                    <div *ngIf="otpSent" class="mt-3">
+                      <label>Enter OTP</label>
+
+                      <input type="text" maxlength="6" class="form-control" [(ngModel)]="otpCode"
+                        [ngModelOptions]="{ standalone: true }" />
+
+                      <button class="btn btn-success mt-2 w-100" type="button" (click)="verifyOtp()">
+                        Verify OTP
+                      </button>
+
+                      <div *ngIf="otpFailed" class="text-danger mt-2">
+                        ✖ Invalid or Expired OTP
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
 
 
@@ -423,7 +412,8 @@
                     <label class="form-label">Address *</label>
                     <textarea class="form-control" formControlName="address" rows="2"
                       [class.is-invalid]="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched"></textarea>
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
+                    <div class="invalid-feedback"
+                      *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
                       Address is required
                     </div>
                   </div>
@@ -500,12 +490,12 @@
     </div>
     <!-- ⭐ END OF MODAL -->
 
-          </div> <!-- Closing tag for dashboard-main -->
-        </div> <!-- Closing tag for body -->
+  </div> <!-- Closing tag for dashboard-main -->
+</div> <!-- Closing tag for body -->
 
-        <!-- Footer -->
-        <footer>
-          <div class="container">
-            <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
-          </div>
-        </footer>
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+  </div>
+</footer>

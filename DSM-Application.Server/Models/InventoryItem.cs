@@ -23,8 +23,8 @@ namespace DSM_Application.Server.Models
         public decimal CostPrice { get; set; }
         public decimal SellingPrice { get; set; }
 
-        public int CurrentStock { get; set; }
-        public int ReorderLevel { get; set; }
+        public int CurrentStock { get; set; } = 0;
+        public int ReorderLevel { get; set; } = 0;
 
         public DateTime UpdatedAt { get; set; }
 

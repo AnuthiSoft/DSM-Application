@@ -46,7 +46,7 @@ cartCount = 0;
   recentOrders: any[] = [];
   // products: any[] = [];
   productsLoading: boolean = true;
-connectedDistributors: { distributorId: string; name: string }[] = [];
+  connectedDistributors: { distributorId: string; name: string }[] = [];
 
 
   selectedCartProduct: Product | null = null;

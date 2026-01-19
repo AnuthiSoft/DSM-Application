@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 using System.IO;
 
 namespace DSM_Application.Server.Controllers
@@ -13,6 +14,7 @@ namespace DSM_Application.Server.Controllers
 
         public InvoiceUploadController(IMongoDatabase db)
         {
+
             _invoiceCollection = db.GetCollection<DeliveryInvoice>("DeliveryInvoices");
         }
 
@@ -70,5 +72,27 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(invoices);
         }
+
+        // ================= VIEW (EMPLOYEE + DISTRIBUTOR) =================
+        [HttpGet("view/{employeeId}")]
+        public async Task<IActionResult> ViewInvoice(string employeeId)
+        {
+            var invoice = await _invoiceCollection
+                .Find(i => i.EmployeeId == employeeId)
+                .SortByDescending(i => i.UploadedOn)
+                .FirstOrDefaultAsync();
+
+            if (invoice == null)
+                return NotFound("Invoice not found");
+
+            var fileName = Path.GetFileName(invoice.PdfUrl);
+            var filePath = Path.Combine("wwwroot", "invoices", fileName);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound("PDF missing");
+
+            return PhysicalFile(filePath, "application/pdf", fileName);
+        }
     }
 }
+

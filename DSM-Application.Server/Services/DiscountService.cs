@@ -24,7 +24,7 @@
             if (specialDiscountPercent > 10)
                 specialDiscountPercent = 10;
 
-            decimal totalPct = qtyPct + pricePct + specialDiscountPercent;
+            decimal totalPct = qtyPct + pricePct + specialDiscountPercent ;
             decimal discountAmount = (subtotal * totalPct) / 100m;
             decimal finalPrice = subtotal - discountAmount;
 

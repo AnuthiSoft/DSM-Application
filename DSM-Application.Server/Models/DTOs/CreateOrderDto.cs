@@ -4,12 +4,15 @@ namespace DSM_Application.Server.Models.DTOs
 {
     public class OrderCreateDto
     {
-        
+        //public string CustomerName { get; set; }
+        //public string CustomerEmail { get; set; }
+        //public string CustomerPhone { get; set; }
         public string CustomerId { get; set; }
         public string DistributorId { get; set; }
         public List<OrderProductInputDto> Products { get; set; }
         public decimal SpecialDiscountPercent { get; set; }
         public DateTime? ExpectedDelivery { get; set; }
+
 
 
     }

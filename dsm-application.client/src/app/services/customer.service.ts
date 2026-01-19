@@ -10,20 +10,20 @@ import {
 } from '../models/customer.model';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
-
+ 
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
-
+ 
    private apiUrl = environment.apiUrl; 
   constructor(private api: ApiService, private http: HttpClient) {}
-
+ 
   // ---------------------- AUTH ----------------------
   register(request: CustomerRegisterRequest): Observable<any> {
     return this.api.post(`customers/register`, request);
   }
-
+ 
   login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
     return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
       tap(res => {
@@ -35,21 +35,21 @@ export class CustomerService {
       })
     );
   }
-
+ 
   // ---------------------- CUSTOMER CREATION ----------------------
   createByDistributor(customer: Customer): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
-
+ 
     return this.api.post(`customers/create-by-distributor`, customer, { headers });
   }
-
+ 
   setPassword(request: CustomerLoginRequest): Observable<any> {
     return this.api.post(`customers/set-password`, request);
   }
-
+ 
   getRole(): string | null {
     return localStorage.getItem('role');
   }
@@ -60,10 +60,10 @@ getCustomerId(): string {
   getMyCustomers(): Observable<Customer[]> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
-
+ 
     return this.api.get<Customer[]>(`customers/my-customers`, { headers });
   }
-
+ 
   updateCustomer(customerId: string, customer: Customer): Observable<any> {
     return this.api.put(`customers/update-customer/${customerId}`, customer);
   }
@@ -77,59 +77,56 @@ getMyCustomersForCustomer() {
   getCustomerById(customerId: string) {
   return this.api.get<any>(`customers/get-customer/${customerId}`);
 }
-
-
-
+ 
+ 
   deleteCustomer(customerId: string): Observable<any> {
     return this.api.delete(`customers/delete-customer/${customerId}`);
   }
-
+ 
   // ---------------------- PROFILE ----------------------
-
+ 
   /** GET PROFILE (GET /customers/profile) */
   getProfile(): Observable<CustomerProfileDto> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     return this.api.get<CustomerProfileDto>(`customers/profile`, { headers });
   }
-
-
-
+ 
+ 
   
-
+ 
   /** UPDATE PROFILE (PUT /customers/profile) */
   updateProfile(data: CustomerProfileDto): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     return this.api.put(`customers/profile`, data, { headers });
   }
-
+ 
   /** UPLOAD IMAGE (POST /customers/upload-profile-picture) */
   uploadProfilePicture(file: File): Observable<any> {
   const token = localStorage.getItem('token');
-
+ 
   const formData = new FormData();
   formData.append('file', file);
-
+ 
   return this.api.post(`customers/upload-profile-picture`, formData, {
     headers: { Authorization: `Bearer ${token}` }
   });
 
 }
-
-
-
+ 
+ 
 getAllCustomersForDistributor(): Observable<Customer[]> {
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
-
+ 
   return this.api.get<Customer[]>(`customers/all-for-distributor`, { headers });
 }
-
- // ================= PERMANENT EMPLOYEE ASSIGN =================
+ 
+// ================= PERMANENT EMPLOYEE ASSIGN =================
   assignPermanentEmployee(distributorId: string, customerId: string, employeeId: string) {
     const token = localStorage.getItem('token');
-
+ 
     return this.api.put(
       `distributor/assign-permanent-employee?distributorId=${distributorId}&customerId=${customerId}&employeeId=${employeeId}`,
       {},
@@ -138,8 +135,8 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
       }
     );
   }
-
-
+ 
+ 
   changePassword(data: { newPassword: string }) {
   return this.http.post(
     `${this.apiUrl}/customers/change-password`,
@@ -151,11 +148,11 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
     }
   );
 }
-
+ 
   // ================= GET EMPLOYEES FOR DROPDOWN =================
   getEmployees(distributorId: string): Observable<any[]> {
     const token = localStorage.getItem('token');
-
+ 
     return this.api.get<any[]>(
       `orders/${distributorId}/employees`,
       {
@@ -163,13 +160,13 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
       }
     );
   }
-
+ 
   checkEmailExists(email: string): Observable<boolean> {
   return this.api.get<boolean>(
     `customers/check-email/${email}`
   );
 }
-
+ 
 checkPhoneExists(phoneNumber: string): Observable<boolean> {
   return this.api.get<boolean>(
     `customers/check-phone/${phoneNumber}`

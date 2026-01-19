@@ -85,6 +85,7 @@ namespace DistributorManagementSystem.Server.Controllers
             distributor.Categories ??= new List<string>(); // ✅ Ensure categories is never null
                                                            // ✅ ADD THIS LINE
             //distributor.Pincodes ??= new List<string>();
+            //distributor.Pincodes ??= new List<string>();
             await _db.Distributors.InsertOneAsync(distributor);
 
             // create distributor login with temporary username

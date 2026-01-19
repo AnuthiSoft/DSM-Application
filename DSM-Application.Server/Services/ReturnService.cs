@@ -20,7 +20,7 @@ namespace DSM_Application.Server.Services
         {
             _orders = db.Orders;
             _returns = db.ReturnRequests;
-            _inventory = db.Inventory;   // ✅ ADD THIS
+            _inventory = db.InventoryItems;    // ✅ ADD THIS
             _inventoryService = inventoryService;
             _httpContextAccessor = httpContextAccessor;
         }

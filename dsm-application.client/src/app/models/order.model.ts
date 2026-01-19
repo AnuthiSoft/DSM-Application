@@ -4,7 +4,7 @@ export interface OrderProduct {
   price: number;
   quantity: number;
 }
-
+ 
 // export interface Order {
 //  id?: string;
 //  orderId :string;
@@ -31,16 +31,16 @@ export interface DistributorOrder {
   employeeId?: string;
   name?: string;
   assignedOn?: string; // optional if you want to show assignment date
-
+ 
   // ✅ Add these two fields to fix errors
   shippingAddress?: string;
   shippingFee?: number;// ✅ Payment fields
   // ✅ ADD THESE (FROM BACKEND)
   subtotal: number;
   totalDiscount: number;
-  
+ 
   // totalAmount: number;
-
+ 
   paymentCollectedByEmployee?: boolean;
   collectedAmount?: number;
   paymentMethod?: string;
@@ -55,7 +55,7 @@ export interface DistributorOrder {
 //   price: number;
 //   quantity: number;
 // }
-
+ 
 export interface Order {
   id: string;
   customerId: string;
@@ -66,12 +66,11 @@ export interface Order {
   assignedOn?: Date;
   orderedDate: string;
   expectedDeliveryDate: string;
-
+ 
   status: string;
   subtotal: number;
   totalDiscount: number;
   totalAmount: number;
-  generalDiscount: number;
   orderDate: Date;
   deliveredOn?: Date;
   products: OrderProduct[];
@@ -80,15 +79,15 @@ export interface Order {
   paymentMethod?: string;
   collectedOn?: Date;
   deliveryRemarks?: string;
-
-
-
+ 
+ 
+ 
   // ➕ Add this field
   // deliveryEta?: string;
-
+ 
 }
 export interface Employee {
-
+ 
   id?: string;           // <-- Backend usually sends this
   _id?: string;          // <-- MongoDB style ID (sometimes)
   employeeId?: string;   // <-- Use this in UI
@@ -98,3 +97,4 @@ export interface Employee {
   distributorId?: string;
   designation?: string;   // <-- Add this line
 }
+ 

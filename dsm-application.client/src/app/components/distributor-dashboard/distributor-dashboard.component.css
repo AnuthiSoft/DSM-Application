@@ -729,3 +729,27 @@ html[data-theme="dark"] .chart-card {
   min-height: 100px; 
   margin-top: 12px; 
 }
+
+.dashboard-main .dashboard-under-dev {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #6c757d;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+.dashboard-under-dev {
+  margin: 40px auto;
+  padding: 40px;
+  max-width: 800px;
+  text-align: center;
+  font-size: 18px;
+  color: #4c4633;
+  background: #fff3cd;
+  border: 1px dashed #ffc107;
+  border-radius: 8px;
+}

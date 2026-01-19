@@ -6,6 +6,7 @@
     <div class="card-body">
       <h5>Order #{{ o.id }} — {{ o.status }}</h5>
       <p>Date: {{ o.orderDate | date:'medium' }}</p>
+
       <p>Total: ₹{{ o.totalAmount }}</p>
       <table class="table">
         <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>

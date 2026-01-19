@@ -121,7 +121,7 @@
 
             <!-- ✅ Correct total amount column -->
             <td class="order-total text-success fw-bold">
-              {{ totalAmount(o) | currency:'INR' }}
+              {{ o.totalAmount | currency:'INR' }}
             </td>
 
             <td class="order-status">
@@ -145,11 +145,10 @@
               <div class="action-buttons">
 
                 <!-- Pending -->
-                <button *ngIf="o.status === 'Pending'" 
-        class="btn btn-success btn-sm" 
-        (click)="confirmOrderWithCheck(o)">
-  Confirm
-</button>
+                <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm"
+                  (click)="confirmOrderWithCheck(o)">
+                  Confirm
+                </button>
 
 
                 <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm" (click)="rejectOrder(o)">
@@ -175,27 +174,25 @@
               </div>
             </td>
 
-           <td>
-  <!-- 💰 PAYMENT INFO -->
-  <div *ngIf="o.paymentCollectedByEmployee; else notCollected">
-    <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
-    <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
-  </div>
+            <td>
+              <!-- 💰 PAYMENT INFO -->
+              <div *ngIf="o.paymentCollectedByEmployee; else notCollected">
+                <p>Payment: ₹{{ o.collectedAmount }} via {{ o.paymentMethod }}</p>
+                <p>Collected On: {{ o.collectedOn | date:'short' }}</p>
+              </div>
 
-  <ng-template #notCollected>
-    <!-- <span class="text-warning">Payment not collected</span> -->
-  </ng-template>
+              <ng-template #notCollected>
+                <!-- <span class="text-warning">Payment not collected</span> -->
+              </ng-template>
 
-  <!-- 🧾 RECEIPT (INDEPENDENT) -->
-  <div *ngIf="o.deliveryReceiptUrl" class="mt-2">
-  <button
-  *ngIf="o.deliveryReceiptUrl"
-  class="btn btn-outline-primary btn-sm"
-  (click)="viewReceipt(o.deliveryReceiptUrl)">
-  <i class="fas fa-receipt"></i> View Receipt
-</button>
-  </div>
-</td>
+              <!-- 🧾 RECEIPT (INDEPENDENT) -->
+              <div *ngIf="o.deliveryReceiptUrl" class="mt-2">
+                <button *ngIf="o.deliveryReceiptUrl" class="btn btn-outline-primary btn-sm"
+                  (click)="viewReceipt(o.deliveryReceiptUrl)">
+                  <i class="fas fa-receipt"></i> View Receipt
+                </button>
+              </div>
+            </td>
             <ng-template #notCollected>
               <!-- <span class="text-warning">Payment not collected</span> -->
             </ng-template>
@@ -279,7 +276,8 @@
       <div class="order-info">
         <h4>Order #{{ selectedOrder.id }}</h4>
         <p><strong>Customer:</strong> {{ selectedOrder.customerName }}</p>
-        <p><strong>Total Amount:</strong> {{ totalAmount(selectedOrder) | currency:'INR' }}</p>
+        <p><strong>Total Amount:</strong> {{ selectedOrder?.totalAmount | currency:'INR' }}</p>
+
       </div>
 
       <!-- ACTIVE EMPLOYEE -->
@@ -296,26 +294,25 @@
 
         <select class="form-select" [(ngModel)]="tempEmployeeId">
           <option value="">-- Select Temp Employee --</option>
-         <option *ngFor="let e of getTempEmployees(selectedOrder)"
-        [value]="e.employeeId">
-  {{ e.name }}
-</option>
+          <option *ngFor="let e of getTempEmployees(selectedOrder)" [value]="e.employeeId">
+            {{ e.name }}
+          </option>
 
         </select>
       </div>
 
-    <div class="modal-footer">
-      <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
-        Cancel
-      </button>
-      <button class="btn btn-primary" [disabled]="false" (click)="assignAndShip()">
-        Assign & Ship
-      </button>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
+          Cancel
+        </button>
+        <button class="btn btn-primary" [disabled]="false" (click)="assignAndShip()">
+          Assign & Ship
+        </button>
+      </div>
     </div>
+
+
   </div>
-
-
-</div>
 </div>
 
 <!-- 📌 PRODUCT DETAILS POPUP -->
@@ -328,7 +325,7 @@
     <div class="modal-header">
       <h3><i class="fas fa-box">
 
-      </i> Product Details</h3>
+        </i> Product Details</h3>
       <button class="modal-close" (click)="closeProductPopup()">
         <i class="fas fa-times"></i>
       </button>
@@ -338,11 +335,8 @@
 
       <div *ngFor="let item of selectedOrder?.products" class="product-box d-flex gap-3 mb-3">
 
-        <img
-          [src]="item.imageUrl || 'assets/no-image.png'"
-          class="product-img"
-          style="width:80px;height:80px;object-fit:contain;"
-        />
+        <img [src]="item.imageUrl || 'assets/no-image.png'" class="product-img"
+          style="width:80px;height:80px;object-fit:contain;" />
 
         <div class="product-info">
           <h5>{{ item.productName }}</h5>
@@ -355,25 +349,83 @@
 
       </div>
 
-    
 
-  <!-- 🧾 ORDER SUMMARY -->
-  <div class="order-summary">
-    <p>
-      <strong>Subtotal:</strong>
-      ₹{{ getOrderSubtotal(selectedOrder) }}
-    </p>
 
-    <p *ngIf="getOrderDiscount(selectedOrder) > 0" class="text-danger">
-      <strong>Discount:</strong>
-      - ₹{{ getOrderDiscount(selectedOrder) }}
-    </p>
+      <!-- 🧾 ORDER SUMMARY -->
+      <div class="order-summary" style="font-size:14px; line-height:1.6">
 
-    <h5 class="text-success">
-      <strong>Total Amount:</strong>
-      ₹{{ getOrderFinalTotal(selectedOrder) }}
-    </h5>
-  </div>
+        <p><strong>Subtotal:</strong>
+          ₹{{ selectedOrder.subtotal | number:'1.2-2' }}
+        </p>
+
+        <hr>
+
+        <p><strong>Discounts</strong></p>
+
+        <p>
+          Price Discount ({{ selectedOrder.priceDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (selectedOrder.subtotal * (selectedOrder.priceDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          Quantity Discount ({{ selectedOrder.quantityDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (selectedOrder.subtotal * (selectedOrder.quantityDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          Special Discount ({{ selectedOrder.specialDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (selectedOrder.subtotal * (selectedOrder.specialDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          General Discount:
+          <span class="text-success">
+            - ₹{{ selectedOrder.products?.[0]?.generalDiscount | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p style="font-weight:600">
+          Total Discount:
+          <span class="text-success">
+            - ₹{{ selectedOrder.totalDiscount | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <hr>
+
+        <p>
+          <strong>Taxable Amount:</strong>
+          ₹{{ (selectedOrder.subtotal - selectedOrder.totalDiscount) | number:'1.2-2' }}
+        </p>
+
+        <p>
+          <strong>
+            GST ({{ selectedOrder.products?.[0]?.gstPercentage ?? 0 }}%):
+          </strong>
+          ₹{{
+          (
+          (selectedOrder.subtotal - selectedOrder.totalDiscount) *
+          (selectedOrder.products?.[0]?.gstPercentage ?? 0) / 100
+          ) | number:'1.2-2'
+          }}
+        </p>
+
+
+        <hr>
+
+        <h5 class="text-success">
+          <strong>Total Amount:</strong>
+          ₹{{ selectedOrder.totalAmount | number:'1.2-2' }}
+        </h5>
+
+      </div>
+
     </div>
 
     <div class="modal-footer">
@@ -383,13 +435,11 @@
   </div>
 </div>
 
-    
-
-    <div class="modal-footer">
-      <!-- Continue Button Based on Action -->
-      <button class="btn btn-primary" (click)="continueAction()">
-        Continue
-      </button>
-    </div>
 
 
+<div class="modal-footer">
+  <!-- Continue Button Based on Action -->
+  <button class="btn btn-primary" (click)="continueAction()">
+    Continue
+  </button>
+</div>

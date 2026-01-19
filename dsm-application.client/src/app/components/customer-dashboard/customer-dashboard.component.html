@@ -44,14 +44,14 @@
 
   <!-- Main Content -->
   <div class="dashboard-main">
-<div class="floating-cart" (click)="openCart()">
-  <i class="fas fa-shopping-cart"></i>
-  <span class="cart-badge" *ngIf="cartCount > 0">
-    {{ cartCount }}
-  </span>
-</div>
-<!-- 🔝 TOP HEADER WITH CART ICON -->
-<!-- <div class="top-header">
+    <div class="floating-cart" *ngIf="activeTab !== 'profile'" (click)="openCart()">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="cart-badge" *ngIf="cartCount > 0">
+        {{ cartCount }}
+      </span>
+    </div>
+    <!-- 🔝 TOP HEADER WITH CART ICON -->
+    <!-- <div class="top-header">
  
 
   <div class="header-actions">
@@ -122,8 +122,8 @@
 
 
 
-  <app-cust-dashboard *ngIf="activeTab === 'distributors'">
-</app-cust-dashboard>
+    <app-cust-dashboard *ngIf="activeTab === 'distributors'">
+    </app-cust-dashboard>
 
 
     <!-- <div *ngIf="isActive('returns')">

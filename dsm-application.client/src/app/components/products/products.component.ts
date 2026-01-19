@@ -332,113 +332,63 @@ startAutoSlide(product: any) {
   //   });
   // }
 
-  submitForm() {
-    if (this.isEdit && !this.selectedProductId) {
-      this.toastr.error('Invalid product update');
-      return;
-    }
+submitForm() {
+  this.formSubmitted = true;
+  this.productForm.markAllAsTouched();
 
-    this.formSubmitted = true;
-    this.productForm.markAllAsTouched();
-
-    if (this.productForm.invalid) {
-      this.toastr.error('Please fill all required fields');
-      return;
-    }
-
-    const productData = this.productForm.getRawValue();
-    const initialStock = Number(productData.stock || 0);
-
-    // ✅ CREATE FORM DATA FIRST
-    const formData = new FormData();
-
-    // ✅ APPEND ALL PRODUCT FIELDS (except stock)
-    Object.keys(productData).forEach(key => {
-      if (key === 'stock') return;
-
-      const value = productData[key];
-      if (value !== null && value !== undefined) {
-        formData.append(key, value.toString());
-      }
-    });
-
-    // ✅ APPEND DISTRIBUTOR
-    const distributorId = this.distributorId!;
-    formData.append('DistributorId', distributorId);
-
-    // ✅ IMAGE HANDLING (CRITICAL FIX)
-    if (this.isEdit) {
-      if (this.selectedFiles.length > 0) {
-        // replace images
-        for (let file of this.selectedFiles) {
-          formData.append('Images', file);
-        }
-      } else {
-        // preserve existing images
-        this.existingImageUrls.forEach(img =>
-          formData.append('ExistingImages', img)
-        );
-      }
-    } else {
-      // create mode
-      for (let file of this.selectedFiles) {
-        formData.append('Images', file);
-      }
-    }
-
-    // =========================
-    // UPDATE
-    // =========================
-    if (this.isEdit && this.selectedProductId) {
-      this.productService.update(this.selectedProductId, formData).subscribe({
-        next: () => {
-          this.toastr.success('Product updated successfully');
-
-          this.productService.getById(this.selectedProductId!)
-            .subscribe(updated => {
-              const index = this.products.findIndex(p => p.productId === updated.productId);
-              if (index > -1) {
-                this.products[index] = {
-                  ...updated,
-                  currentStock: this.products[index].currentStock
-                };
-                this.filteredProducts = [...this.products];
-              }
-            });
-
-          this.closeModal();
-          this.resetForm();
-        },
-        error: () => this.toastr.error('Failed to update product')
-      });
-    }
-    // =========================
-    // CREATE
-    // =========================
-    else {
-      this.productService.create(formData).subscribe({
-        next: (createdProduct: any) => {
-          if (initialStock > 0) {
-            this.inventoryService.stockIn({
-              productId: createdProduct.productId,
-              distributorId,
-              quantity: initialStock,
-              reason: 'Initial stock on product creation'
-            }).subscribe(() => {
-              this.loadProducts(distributorId);
-            });
-          } else {
-            this.loadProducts(distributorId);
-          }
-
-          this.toastr.success('Product saved successfully');
-          this.closeModal();
-          this.resetForm();
-        },
-        error: () => this.toastr.error('Failed to save product')
-      });
-    }
+  if (this.productForm.invalid) {
+    this.toastr.error('Please fill all required fields');
+    return;
   }
+
+  const data = this.productForm.getRawValue();
+  const distributorId = this.distributorId!;
+  const initialStock = Number(data.stock || 0);
+
+  const formData = new FormData();
+
+  // ✅ append fields ONCE
+  formData.append('productName', data.productName);
+  formData.append('productCode', data.productCode);
+  formData.append('color', data.color);
+  formData.append('description', data.description);
+  formData.append('measure', data.measure);
+  formData.append('price', data.price.toString());
+  formData.append('costPrice', data.costPrice.toString());
+  formData.append('discount', data.discount.toString());
+  formData.append('brand', data.brand);
+
+  // ✅ subcategory → backend will calculate GST
+  formData.append('Category', data.category);
+  formData.append('CategoryId', data.category);
+
+  // ✅ distributor
+  formData.append('DistributorId', distributorId);
+
+  // ✅ images
+  for (let file of this.selectedFiles) {
+    formData.append('Images', file);
+  }
+
+  this.productService.create(formData).subscribe({
+    next: (created) => {
+      if (initialStock > 0) {
+        this.inventoryService.stockIn({
+          productId: created.productId,
+          distributorId,
+          quantity: initialStock,
+          reason: 'Initial stock'
+        }).subscribe();
+      }
+
+      this.toastr.success('Product created successfully');
+      this.loadProducts(distributorId);
+      this.closeModal();
+      this.resetForm();
+    },
+    error: () => this.toastr.error('Failed to save product')
+  });
+}
 
 
   editProduct(product: Product) {
@@ -816,6 +766,7 @@ startAutoSlide(product: any) {
       current === 'dark' ? 'light' : 'dark'
     );
   }
+
 clearSearch() {
   this.searchTerm = '';
   this.filteredProducts = [...this.products];
@@ -929,4 +880,5 @@ removeExistingImage(img: string) {
 }
 
 }
+
 

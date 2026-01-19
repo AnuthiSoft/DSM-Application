@@ -32,25 +32,27 @@ export class EmployeesComponent {
   statusFilter = '';
   email = '';
   showModal = false;
- emailExists = false;   // ✅ ADD THIS
+  emailExists = false;   // ✅ ADD THIS
   phoneExists = false;   // ✅ ADD THIS
+  phoneSubmitted = false; // ✅ ADD THIS
 
 
   otpSent = false;
-otpVerified = false;
-otpFailed = false;
-otpCode = '';
-phoneVerifiedUI = false;
-apiUrl = environment.apiUrl;
-// isEdit = false;
+  otpVerified = false;
+  otpFailed = false;
+  otpCode = '';
+  phoneVerifiedUI = false;
+  apiUrl = environment.apiUrl;
+
+  // isEdit = false;
   constructor(
     private employeeService: EmployeeService,
     private auth: AuthService,
     private fb: FormBuilder,
     private toastr: ToastrService,
- 
+
     private http: HttpClient,
-    private adminService:AdminService
+    private adminService: AdminService
   ) { }
 
   ngOnInit(): void {
@@ -60,11 +62,13 @@ apiUrl = environment.apiUrl;
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', [
-        Validators.required,
-        Validators.pattern(/^[6-9]\d{9}$/)
-
-      ]],
+      phoneNumber: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[6-9]\d{9}$/)
+        ]
+      ],
       role: [{ value: 'Employee', disabled: true }],
       designation: ['', Validators.required],
       isActive: [true] // ensures value exists
@@ -74,59 +78,68 @@ apiUrl = environment.apiUrl;
     this.loadEmployees();
   }
 
-  
- sendOtp() {
-  const phone = this.employeeForm.get("phoneNumber")!.value;
 
-  this.adminService.sendOtp(phone).subscribe({
-    next: (res) => {
-      this.otpSent = true;
-      this.otpFailed = false;
+  sendOtp() {
+    const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
 
-      // ⭐ SHOW THE OTP FROM BACKEND
-      alert("OTP sent! Your OTP is: " + res.otp);
+    this.adminService.sendOtp(phone).subscribe({
+      next: (res) => {
+        this.otpSent = true;
+        this.otpFailed = false;
 
-      console.log("OTP from backend:", res.otp);
-    },
-    error: () => alert("Failed to send OTP")
-  });
-}
+        // ⭐ SHOW THE OTP FROM BACKEND
+        alert("OTP sent! Your OTP is: " + res.otp);
+
+        console.log("OTP from backend:", res.otp);
+      },
+      error: () => alert("Failed to send OTP")
+    });
+  }
 
 
   // ------------------- OTP VERIFY -------------------
- verifyOtp() {
-  const phone = this.employeeForm.get("phoneNumber")!.value;
+  verifyOtp() {
+    const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
 
-  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-    next: () => {
-      this.otpVerified = true;
-      this.otpFailed = false;
-      this.phoneVerifiedUI = true; // ⭐ Show tick mark
-      this.otpSent = false;        // ⭐ Hide OTP inputs
-      alert("Phone verified successfully!");
-    },
-    error: () => {
-      this.otpVerified = false;
-      this.otpFailed = true;
-      alert("Invalid or expired OTP");
-    }
-  });
-}
+    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+      next: () => {
+        this.otpVerified = true;
+        this.otpFailed = false;
+        this.phoneVerifiedUI = true; // ⭐ Show tick mark
+        this.otpSent = false;        // ⭐ Hide OTP inputs
+        alert("Phone verified successfully!");
+      },
+      error: () => {
+        this.otpVerified = false;
+        this.otpFailed = true;
+        alert("Invalid or expired OTP");
+      }
+    });
+  }
 
   // ✅ Load all employees
   loadEmployees() {
     this.loading = true;
-    this.employeeService.getEmployees(this.distributorId).subscribe({
-      next: (data) => {
 
-        this.employees = data;
-        this.filteredEmployees = [...this.employees];
+    this.employeeService.getEmployees(this.distributorId).subscribe({
+      next: (employees) => {
+        this.employees = employees;
+        this.filteredEmployees = [...employees];
+
+        // 🔥 FETCH INVOICE FOR EACH EMPLOYEE
+        this.employees.forEach(emp => {
+          this.http
+            .get<any[]>(`${this.apiUrl}/invoice-upload/employee/${emp.employeeId}`)
+            .subscribe(invoices => {
+              if (invoices && invoices.length > 0) {
+                emp.invoicePdfUrl = invoices[0].pdfUrl; // latest invoice
+              }
+            });
+        });
+
         this.loading = false;
       },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-      }
+      error: () => this.loading = false
     });
   }
 
@@ -135,6 +148,7 @@ apiUrl = environment.apiUrl;
     if (this.employeeForm.invalid) return;
     this.emailExists = false;
     this.phoneExists = false;
+
 
     if (this.employeeForm.invalid) {
       this.employeeForm.markAllAsTouched();
@@ -247,22 +261,22 @@ apiUrl = environment.apiUrl;
   }
 
   restrictPhoneInput(event: any) {
-  let value = event.target.value;
+    let value = event.target.value;
 
-  // Allow only digits
-  value = value.replace(/\D/g, '');
+    // Allow only digits
+    value = value.replace(/[^0-9]/g, '');
 
-  // Max 10 digits
-  value = value.slice(0, 10);
+    // Max 10 digits
+    value = value.slice(0, 10);
 
-  // First digit must be 6–9
-  if (value.length === 1 && !/^[6-9]$/.test(value)) {
-    value = '';
+    // First digit must be 6–9
+    if (value.length === 1 && !/^[6-9]$/.test(value)) {
+      value = '';
+    }
+
+    event.target.value = value;
+    this.employeeForm.get('phoneNumber')?.setValue(value, { emitEvent: false });
   }
-
-  event.target.value = value;
-  this.employeeForm.get('phoneNumber')?.setValue(value, { emitEvent: false });
-}
 
 
   // ✅ Edit employee (patch form)
@@ -354,6 +368,7 @@ apiUrl = environment.apiUrl;
     });
   }
   openEmployeeModal(): void {
+    this.phoneSubmitted = false;
     this.isEdit = false;
     this.employeeForm.reset();
     this.emailExists = false;
@@ -399,7 +414,7 @@ apiUrl = environment.apiUrl;
     formData.append("file", this.selectedFile);
     formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
 
-   this.http.post(`${this.apiUrl}/invoice-upload/upload`, formData)
+    this.http.post(`${this.apiUrl}/invoice-upload/upload`, formData)
       .subscribe({
         next: (res: any) => {
           this.toastr.success("Invoice uploaded successfully!");
@@ -461,6 +476,15 @@ apiUrl = environment.apiUrl;
     delete errors[errorKey];
 
     control.setErrors(Object.keys(errors).length ? errors : null);
+  }
+
+  viewInvoice(emp: any) {
+    const url = `${this.apiUrl}/invoice-upload/view/${emp.employeeId}`;
+    window.open(url, '_blank');
+  }
+
+  viewPdf(url: string) {
+    window.open(url, '_blank');
   }
 
 }

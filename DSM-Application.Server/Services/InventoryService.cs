@@ -100,7 +100,7 @@ namespace DSM_Application.Server.Services
             {
                 ProductId = productId,
                 DistributorId = distributorId,
-                QuantityInitial = quantity,
+                InitialQuantity = quantity,
                 QuantityAvailable = quantity,
                 ManufactureDate = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddMonths(6), // default
@@ -160,57 +160,61 @@ namespace DSM_Application.Server.Services
 
         // 🔥 Stock Out
         public async Task RemoveStockAsync(
-       string productId,
-       string distributorId,
-       int quantity,
-       string reason)
+    string productId,
+    string distributorId,
+    int quantity,
+    string reason)
         {
-            var batches = await _batches.Find(b =>
+            // 1️⃣ Pick FIRST batch only
+            var batch = await _batches.Find(b =>
                 b.ProductId == productId &&
                 b.DistributorId == distributorId &&
-                b.QuantityAvailable > 0 &&
-                b.ExpiryDate > DateTime.UtcNow   // 🔥 BLOCK expired
+                b.QuantityAvailable > 0
             )
-            .SortBy(b => b.ExpiryDate) // 🔥 FEFO (earliest expiry first)
-            .ToListAsync();
+            .SortBy(b => b.CreatedAt)
+            .FirstOrDefaultAsync();
 
-            int remaining = quantity;
+            if (batch == null)
+                throw new Exception("No stock available");
 
-            foreach (var batch in batches)
+            // 2️⃣ FULL CONSUMPTION → DELETE ROW
+            if (batch.QuantityAvailable == quantity)
             {
-                if (remaining <= 0) break;
-
-                int deduct = Math.Min(batch.QuantityAvailable, remaining);
-                batch.QuantityAvailable -= deduct;
-                remaining -= deduct;
-
-                await _batches.ReplaceOneAsync(
+                await _batches.DeleteOneAsync(b => b.BatchId == batch.BatchId);
+            }
+            // 3️⃣ PARTIAL CONSUMPTION → UPDATE
+            else if (batch.QuantityAvailable > quantity)
+            {
+                await _batches.UpdateOneAsync(
                     b => b.BatchId == batch.BatchId,
-                    batch
+                    Builders<InventoryBatch>.Update
+                        .Inc(b => b.QuantityAvailable, -quantity)
                 );
-
-                await _movements.InsertOneAsync(new StockMovement
-                {
-                    ProductId = productId,
-                    DistributorId = distributorId,
-                    BatchId = batch.BatchId,
-                    Quantity = deduct,
-                    Type = "OUT",
-                    Reason = reason,
-                    Date = DateTime.UtcNow
-                });
+            }
+            else
+            {
+                throw new Exception("Insufficient batch stock");
             }
 
-            if (remaining > 0)
-                throw new Exception("Not enough non-expired stock available");
-
-            // Update summary inventory
+            // 4️⃣ Update inventory summary
             await _inventory.UpdateOneAsync(
                 i => i.ProductId == productId && i.DistributorId == distributorId,
                 Builders<InventoryItem>.Update
                     .Inc(i => i.CurrentStock, -quantity)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow)
             );
+
+            // 5️⃣ Movement log (optional but recommended)
+            await _movements.InsertOneAsync(new StockMovement
+            {
+                ProductId = productId,
+                DistributorId = distributorId,
+                BatchId = batch.BatchId,
+                Quantity = quantity,
+                Type = "OUT",
+                Reason = reason,
+                Date = DateTime.UtcNow
+            });
         }
 
 
@@ -296,15 +300,12 @@ namespace DSM_Application.Server.Services
 
         public async Task AddInventoryAsync(AddInventoryDto dto, string distributorId)
         {
-            if (dto.ExpiryDate <= dto.ManufactureDate)
-                throw new Exception("Expiry date must be after manufacture date");
-
-            // 1️⃣ Create batch
+            // 1️⃣ CREATE NEW BATCH (NEW ROW)
             var batch = new InventoryBatch
             {
                 ProductId = dto.ProductId,
                 DistributorId = distributorId,
-                QuantityInitial = dto.Quantity,
+                InitialQuantity = dto.Quantity,
                 QuantityAvailable = dto.Quantity,
                 ManufactureDate = dto.ManufactureDate,
                 ExpiryDate = dto.ExpiryDate,
@@ -314,21 +315,22 @@ namespace DSM_Application.Server.Services
 
             await _batches.InsertOneAsync(batch);
 
-            // 2️⃣ UPDATE SUMMARY INVENTORY
+            // 2️⃣ UPDATE PRODUCT TOTAL STOCK
             await _inventory.UpdateOneAsync(
                 i => i.ProductId == dto.ProductId && i.DistributorId == distributorId,
                 Builders<InventoryItem>.Update
                     .SetOnInsert(i => i.InventoryId, ObjectId.GenerateNewId().ToString())
                     .SetOnInsert(i => i.ProductId, dto.ProductId)
                     .SetOnInsert(i => i.DistributorId, distributorId)
-                    .SetOnInsert(i => i.CreatedAt, DateTime.UtcNow)
                     .Inc(i => i.CurrentStock, dto.Quantity)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow),
                 new UpdateOptions { IsUpsert = true }
             );
+        
 
-            // 3️⃣ Movement
-            await _movements.InsertOneAsync(new StockMovement
+
+        // 3️⃣ Movement
+        await _movements.InsertOneAsync(new StockMovement
             {
                 ProductId = dto.ProductId,
                 DistributorId = distributorId,
@@ -391,8 +393,47 @@ namespace DSM_Application.Server.Services
             var batches = await _batches.Find(b =>
                 b.DistributorId == distributorId &&
                 b.QuantityAvailable > 0 &&
+                b.IsActive == true &&
+
+                b.ExpiryDate != null &&
                 b.ExpiryDate <= alertDate
             ).ToListAsync();
+
+            var productIds = batches.Select(b => b.ProductId).Distinct().ToList();
+
+            var products = await _products
+                .Find(p => productIds.Contains(p.ProductId))
+                .ToListAsync();
+
+            return batches
+    .Where(b => b.ExpiryDate.HasValue) // 🔥 important
+    .Select(b =>
+    {
+        var product = products.FirstOrDefault(p => p.ProductId == b.ProductId);
+
+        var daysToExpire = (b.ExpiryDate!.Value - today).Days;
+
+        return new ExpiringStockDto
+        {
+            ProductId = b.ProductId,
+            ProductName = product?.ProductName,
+            BatchId = b.BatchId,
+            QuantityAvailable = b.QuantityAvailable,
+            ExpiryDate = b.ExpiryDate.Value,
+            DaysToExpire = daysToExpire,
+            Status = daysToExpire < 0 ? "Expired" : "ExpiringSoon"
+        };
+    })
+    .ToList();
+        }
+
+
+        public async Task<List<InventoryBatchDto>> GetBatchesByDistributor(string distributorId)
+        {
+            var batches = await _batches
+                .Find(b => b.DistributorId == distributorId)
+                .SortBy(b => b.CreatedAt) // ✅ FIFO VISIBILITY FIX
+                .ToListAsync();
 
             var productIds = batches.Select(b => b.ProductId).Distinct().ToList();
 
@@ -404,18 +445,22 @@ namespace DSM_Application.Server.Services
             {
                 var product = products.FirstOrDefault(p => p.ProductId == b.ProductId);
 
-                return new ExpiringStockDto
+                return new InventoryBatchDto
                 {
-                    ProductId = b.ProductId,
-                    ProductName = product?.ProductName,
                     BatchId = b.BatchId,
-                    QuantityAvailable = b.QuantityAvailable,
+                    ProductId = b.ProductId,
+                    ProductName = product?.ProductName ?? "-",
+                    ProductCode = product?.ProductCode ?? "-",
+                    InitialQuantity = b.InitialQuantity,
+                    QuantityAvailable = b.QuantityAvailable, // ✅ YOU WILL SEE IT DROP
+                    ManufactureDate = b.ManufactureDate,
                     ExpiryDate = b.ExpiryDate,
-                    DaysToExpire = (b.ExpiryDate - today).Days,
-                    Status = b.ExpiryDate < today ? "Expired" : "ExpiringSoon"
+                    IsExpired = b.IsExpired
                 };
             }).ToList();
         }
+
+
 
 
     }

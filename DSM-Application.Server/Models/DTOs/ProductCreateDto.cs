@@ -6,12 +6,14 @@ namespace DSM_Application.Server.Models.DTOs
     [BsonIgnoreExtraElements]
     public class ProductCreateDto
     {
+  
         public string ProductName { get; set; }
         public string ProductCode { get; set; }
         //public string? Category { get; set; } // ✅ add this
-
+        public string CategoryId { get; set; }
         public string Category { get; set; } // <-- must match FormData key
         public string Description { get; set; }
+
         public string Measure { get; set; }
 
         public decimal Price { get; set; }
@@ -44,6 +46,8 @@ namespace DSM_Application.Server.Models.DTOs
         //public string? Color { get; set; }
         public string? SizeOrWeight { get; set; }
 
+        public int InitialStock { get; set; }   // ✅ NEW (required)
+       
 
     }
 }

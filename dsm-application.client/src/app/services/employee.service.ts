@@ -12,6 +12,7 @@ export interface Employee {
   designation: string;
   role: string;
   isActive: boolean;
+  invoicePdfUrl?: string;
 }
  
 

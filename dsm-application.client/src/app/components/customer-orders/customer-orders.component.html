@@ -1,7 +1,7 @@
-<!-- 
+<!--
   <div *ngIf="loading">Loading orders...</div>
   <div *ngIf="!loading && orders?.length === 0">No orders found.</div>
-
+ 
 <div *ngIf="!loading && orders.length > 0" class="table-responsive">
     <table class="table table-bordered">
       <thead>
@@ -129,12 +129,7 @@
               </span>
             </div>
 
-            <div class="detail-item">
-              <span class="detail-label">General Discount:</span>
-              <span class="detail-value text-success">
-                - ₹{{ order.generalDiscount || 0 }}
-              </span>
-            </div>
+
 
             <div class="detail-item">
               <span class="detail-label fw-bold">Total Amount:</span>
@@ -180,7 +175,7 @@
 
 
 
-          
+
 
           <!-- Cancel -->
           <button class="btn btn-outline-secondary btn-sm" *ngIf="order.status === 'Pending'"
@@ -195,17 +190,15 @@
           </button>
         </div>
 
-           <!-- Return (only for delivered orders) -->
-<button class="btn btn-warning btn-sm"
-        *ngIf="order.status === 'Delivered'"
-        (click)="openReturnPopup(order)">
-  <i class="fas fa-undo"></i> Return
-</button>
+        <!-- Return (only for delivered orders) -->
+        <button class="btn btn-warning btn-sm" *ngIf="order.status === 'Delivered'" (click)="openReturnPopup(order)">
+          <i class="fas fa-undo"></i> Return
+        </button>
 
       </div>
     </div>
 
- 
+
 
 
     <!-- ✅ Order Summary (after clicking View Details) -->
@@ -223,11 +216,6 @@
       <p class="text-success">
         <strong>Product Discount:</strong>
         - ₹{{ selectedOrder.totalDiscount }}
-      </p>
-
-      <p class="text-success">
-        <strong>General Discount:</strong>
-        - ₹{{ selectedOrder.generalDiscount || 0 }}
       </p>
 
       <hr>
@@ -292,98 +280,92 @@
   </div>
 
   <!-- ============================== -->
-<!--        RETURN POPUP MODAL      -->
-<!-- ============================== -->
-
-<div class="modal-overlay" *ngIf="isReturnPopupOpen">
-  <div class="modal-box">
-
-    <h2>Return / Exchange / Replace</h2>
-
-    <label>Select Option:</label>
-    <select [(ngModel)]="returnData.returnType">
-      <option value="Return">Return</option>
-      <option value="Exchange">Exchange</option>
-      <option value="Replace">Replace (if damaged)</option>
-    </select>
-
-    <label>Reason:</label>
-    <select [(ngModel)]="returnData.reason">
-      <option>Received damaged product</option>
-      <option>Wrong item received</option>
-      <option>Item not as described</option>
-      <option>Size/fit issue</option>
-      <option>Quality issue</option>
-      <option>Changed my mind</option>
-      <option>Ordered by mistake</option>
-      <option>Other</option>
-    </select>
-
-    <textarea
-      placeholder="Type your reason..."
-      *ngIf="returnData.reason === 'Other'"
-      [(ngModel)]="returnData.otherReason">
-    </textarea>
-
-    <label>Upload Photos/Videos:</label>
-    <input type="file" multiple (change)="onFilesSelected($event)"
->
-
-
-    <div class="modal-actions">
-      <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
-      <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
-    </div>
-
-  </div>
-
+  <!--        RETURN POPUP MODAL      -->
   <!-- ============================== -->
-<!--        RETURN POPUP MODAL      -->
-<!-- ============================== -->
 
-<div class="modal-overlay" *ngIf="isReturnPopupOpen">
-  <div class="modal-box">
+  <div class="modal-overlay" *ngIf="isReturnPopupOpen">
+    <div class="modal-box">
 
-    <h2>Return / Exchange / Replace</h2>
+      <h2>Return / Exchange / Replace</h2>
 
-    <label>Select Option:</label>
-    <select [(ngModel)]="returnData.returnType">
-      <option value="Return">Return</option>
-      <option value="Exchange">Exchange</option>
-      <option value="Replace">Replace (if damaged)</option>
-    </select>
+      <label>Select Option:</label>
+      <select [(ngModel)]="returnData.returnType">
+        <option value="Return">Return</option>
+        <option value="Exchange">Exchange</option>
+        <option value="Replace">Replace (if damaged)</option>
+      </select>
 
-    <label>Reason:</label>
-    <select [(ngModel)]="returnData.reason">
-      <option>Received damaged product</option>
-      <option>Wrong item received</option>
-      <option>Item not as described</option>
-      <option>Size/fit issue</option>
-      <option>Quality issue</option>
-      <option>Changed my mind</option>
-      <option>Ordered by mistake</option>
-      <option>Other</option>
-    </select>
+      <label>Reason:</label>
+      <select [(ngModel)]="returnData.reason">
+        <option>Received damaged product</option>
+        <option>Wrong item received</option>
+        <option>Item not as described</option>
+        <option>Size/fit issue</option>
+        <option>Quality issue</option>
+        <option>Changed my mind</option>
+        <option>Ordered by mistake</option>
+        <option>Other</option>
+      </select>
 
-    <textarea
-      placeholder="Type your reason..."
-      *ngIf="returnData.reason === 'Other'"
-      [(ngModel)]="returnData.otherReason">
+      <textarea placeholder="Type your reason..." *ngIf="returnData.reason === 'Other'"
+        [(ngModel)]="returnData.otherReason">
     </textarea>
 
-    <label>Upload Photos/Videos:</label>
-    <input type="file" multiple (change)="onFilesSelected($event)"
->
+      <label>Upload Photos/Videos:</label>
+      <input type="file" multiple (change)="onFilesSelected($event)">
 
 
-    <div class="modal-actions">
-      <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
-      <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
+        <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
+      </div>
+
+    </div>
+
+    <!-- ============================== -->
+    <!--        RETURN POPUP MODAL      -->
+    <!-- ============================== -->
+
+    <div class="modal-overlay" *ngIf="isReturnPopupOpen">
+      <div class="modal-box">
+
+        <h2>Return / Exchange / Replace</h2>
+
+        <label>Select Option:</label>
+        <select [(ngModel)]="returnData.returnType">
+          <option value="Return">Return</option>
+          <option value="Exchange">Exchange</option>
+          <option value="Replace">Replace (if damaged)</option>
+        </select>
+
+        <label>Reason:</label>
+        <select [(ngModel)]="returnData.reason">
+          <option>Received damaged product</option>
+          <option>Wrong item received</option>
+          <option>Item not as described</option>
+          <option>Size/fit issue</option>
+          <option>Quality issue</option>
+          <option>Changed my mind</option>
+          <option>Ordered by mistake</option>
+          <option>Other</option>
+        </select>
+
+        <textarea placeholder="Type your reason..." *ngIf="returnData.reason === 'Other'"
+          [(ngModel)]="returnData.otherReason">
+    </textarea>
+
+        <label>Upload Photos/Videos:</label>
+        <input type="file" multiple (change)="onFilesSelected($event)">
+
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
+          <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
+        </div>
+
+      </div>
     </div>
 
   </div>
-</div>
-
-</div>
 
 </div>

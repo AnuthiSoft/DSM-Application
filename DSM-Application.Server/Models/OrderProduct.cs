@@ -6,6 +6,7 @@ namespace DSM_Application.Server.Models
     [BsonIgnoreExtraElements]
     public class OrderProduct
     {
+
         public string ProductId { get; set; }
         public string ProductName { get; set; }
 
@@ -29,6 +30,11 @@ namespace DSM_Application.Server.Models
         public decimal TotalDiscountPercent { get; set; }
 
         public decimal DiscountAmount { get; set; }
+        [BsonElement("generalDiscount")]
+        public decimal GeneralDiscount { get; set; } = 0;
+
         public decimal FinalPrice { get; set; }
+        public decimal GstPercentage { get; set; }   // copied from Product
+        public decimal GstAmount { get; set; }
     }
 }

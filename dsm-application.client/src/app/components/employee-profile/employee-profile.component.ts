@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { EmployeeService } from '../../services/employee.service';
 import { ToastrService } from 'ngx-toastr';
 
@@ -12,85 +12,81 @@ import { ToastrService } from 'ngx-toastr';
 export class EmployeeProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
 
-  profile: any = {
-    name: '',
-    email: '',
-    phoneNumber: '',
-    address: ''
-  };
+  profile: any = {};
   selectedImage: File | null = null;
   profileImageUrl: string = '';
 
   constructor(
     private employeeService: EmployeeService,
     private toastr: ToastrService,
-    
-  ) {}
 
- ngOnInit() {
-  this.loadProfile();
-   this.loadImage();  
+  ) { }
 
-  // Try loading image, but fallback handled in HTML
-  // this.profileImageUrl = this.employeeService.getProfileImage();
-}
+  ngOnInit() {
+    this.loadProfile();
+    this.loadImage();
 
-
-// onImgError(event: any) {
-//   event.target.src = 'assets/default-user.png';
-// }
+    // Try loading image, but fallback handled in HTML
+    // this.profileImageUrl = this.employeeService.getProfileImage();
+  }
 
 
-//   loadProfile() {
-//     this.employeeService.getMyProfile().subscribe({
-//       next: (res) => {
-//         this.profile = {
-//   name: res.name || '',
-//   email: res.email || '',
-//   phoneNumber: res.phoneNumber || '',
-//   address: res.address || ''
-// };
-//       },
-        
-//     error: () => {
-//         Swal.fire({
-//           icon: 'error',
-//           title: 'Failed!',
-//           text: 'Failed to load profile'
-//         });
-//       }
-//     });
-//   }
+  // onImgError(event: any) {
+  //   event.target.src = 'assets/default-user.png';
+  // }
 
-loadProfile() {
-  this.employeeService.getMyProfile().subscribe({
-    next: (res) => {
-      this.profile = res;   // <-- Use entire response directly
-    },
-    error: () => {
-      this.toastr.error('Failed to load profile', 'Error');
-    }
-  });
-}
-        
 
-//   updateProfile() {
-//   console.log("SAVE BUTTON WORKING, profile:", this.profile);
+  //   loadProfile() {
+  //     this.employeeService.getMyProfile().subscribe({
+  //       next: (res) => {
+  //         this.profile = {
+  //   name: res.name || '',
+  //   email: res.email || '',
+  //   phoneNumber: res.phoneNumber || '',
+  //   address: res.address || ''
+  // };
+  //       },
 
-//   this.employeeService.updateMyProfile(this.profile).subscribe({
-//     next: () => {
-//       // this.toastr.success("Profile updated successfully");
-//        this.toastr.success("Profile saved successfully!", "Success");
+  //     error: () => {
+  //         Swal.fire({
+  //           icon: 'error',
+  //           title: 'Failed!',
+  //           text: 'Failed to load profile'
+  //         });
+  //       }
+  //     });
+  //   }
 
-//     },
-//     error: (err) => {
-//       console.log("UPDATE ERROR:", err);
-//       this.toastr.error("Update failed");
-//     }
-//   });
-// }
+  loadProfile() {
+    this.employeeService.getMyProfile().subscribe({
+      next: (res) => {
+        this.profile = res;   // <-- Use entire response directly
+        this.profileImageUrl = res.profileImageUrl || '';
+      },
+      error: () => {
+        this.toastr.error('Failed to load profile', 'Error');
+      }
+    });
+  }
 
-// 👉 Trigger hidden file input
+
+  //   updateProfile() {
+  //   console.log("SAVE BUTTON WORKING, profile:", this.profile);
+
+  //   this.employeeService.updateMyProfile(this.profile).subscribe({
+  //     next: () => {
+  //       // this.toastr.success("Profile updated successfully");
+  //        this.toastr.success("Profile saved successfully!", "Success");
+
+  //     },
+  //     error: (err) => {
+  //       console.log("UPDATE ERROR:", err);
+  //       this.toastr.error("Update failed");
+  //     }
+  //   });
+  // }
+
+  // 👉 Trigger hidden file input
   triggerFileInput() {
     this.fileInput.nativeElement.click();
   }
@@ -102,37 +98,60 @@ loadProfile() {
     if (!file) return;
 
     this.selectedImage = file;  // <--- Save file
-    this.uploadImage(); // <--- Auto-upload when selected
-
-    // TODO: upload logic here
-    // this.uploadAvatar(file);
+   const reader = new FileReader();
+    reader.onload = () => {
+      this.profileImageUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
-updateProfile() {
-  this.employeeService.updateMyProfile(this.profile).subscribe({
+  // ======================
+  // UPDATE PROFILE
+  // ======================
+  updateProfile() {
+  const formData = new FormData();
+
+  formData.append('Name', this.profile.name || '');
+  formData.append('PhoneNumber', this.profile.phoneNumber || '');
+  formData.append('Street', this.profile.street || '');
+  formData.append('City', this.profile.city || '');
+  formData.append('State', this.profile.state || '');
+  formData.append('Pincode', this.profile.pincode || '');
+  formData.append('Country', this.profile.country || '');
+
+  if (this.selectedImage) {
+    formData.append('profileImage', this.selectedImage);
+  }
+
+  this.employeeService.updateMyProfile(formData).subscribe({
     next: () => {
-         this.toastr.success('Profile updated successfully', 'Success');
-      },
-      error: (err) => {
-        console.log("UPDATE ERROR:", err);
-       this.toastr.error('Profile update failed', 'Error');
-      }
-    });
-  }
-  loadImage() {
-  this.employeeService.getProfileImage().subscribe({
-    next: (blob) => {
-      this.profileImageUrl = URL.createObjectURL(blob);
+      this.toastr.success('Profile updated successfully', 'Success');
+      this.loadProfile();
+      this.loadImage();
+      this.selectedImage = null;
     },
     error: () => {
-      this.profileImageUrl = ''; // will use default avatar
+      this.toastr.error('Profile update failed', 'Error');
     }
   });
 }
 
-uploadImage() {
+
+
+  loadImage() {
+    this.employeeService.getProfileImage().subscribe({
+      next: (blob) => {
+        this.profileImageUrl = URL.createObjectURL(blob);
+      },
+      error: () => {
+        this.profileImageUrl = ''; // will use default avatar
+      }
+    });
+  }
+
+  uploadImage() {
     if (!this.selectedImage) {
-       this.toastr.warning('Please select an image', 'No Image Selected');
+      this.toastr.warning('Please select an image', 'No Image Selected');
       return;
     }
 
@@ -151,9 +170,9 @@ uploadImage() {
         // Swal.fire({
         //   icon: 'error',
         //   title: 'Upload Failed',
-           this.toastr.error('Image upload failed', 'Error');
-        }
-      });
-    }
+        this.toastr.error('Image upload failed', 'Error');
+      }
+    });
   }
+}
 

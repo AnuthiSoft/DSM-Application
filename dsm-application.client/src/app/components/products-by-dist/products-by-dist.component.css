@@ -427,9 +427,10 @@
 .product-code {
   font-size: 12px;
   font-weight: 500;
-  opacity: 1; /* 🔥 important */
-  color: #cfd3da; 
+  opacity: 0.8;
+  color: var(--muted-text-color);
 }
+
 
 
 .product-meta {

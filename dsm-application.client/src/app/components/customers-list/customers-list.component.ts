@@ -11,105 +11,121 @@ import { CustomerService } from '../../services/customer.service';
 export class CustomersListComponent implements OnInit {
   allCustomers: Customer[] = [];
   // filteredCustomers: Customer[] = [];
-   customers: Customer[] = [];
+  customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
-customer: Customer = {
-  name: '',
-  email: '',
-  phoneNumber: '',
+  customer: Customer = {
+    name: '',
+    email: '',
+    phoneNumber: '',
     password: '',        // ✅ EMPTY
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-  isActive: true          // ✅ ADD THIS
-};
-employees: any[] = [];
-showPassword = false;
+    address: '',
+    role: 'Customer',
+    isRegistered: false,
+    isActive: true          // ✅ ADD THIS
+  };
+  employees: any[] = [];
+  showPassword = false;
 
   searchTerm = '';
   statusFilter = '';
   showModal = false;
   isEdit = false;
   message = '';
-showAssignModal = false;
-selectedCustomerId = '';
-selectedEmployeeId = '';
-  constructor(private customerService: CustomerService) {}
+  showAssignModal = false;
+  selectedCustomerId = '';
+  selectedEmployeeId = '';
+  // 🔐 Phone + OTP
+  phoneError = '';
+  otpSent = false;
+  otpVerified = false;
+  otpCode = '';
+  generatedOtp = '';
+  formSubmitted = false;
+
+
+  constructor(private customerService: CustomerService) { }
 
   ngOnInit(): void {
-    this. loadAllCustomers();
-        this.loadEmployees();
-    
+    this.loadAllCustomers();
+    this.loadEmployees();
+
   }
-   loadEmployees() {
-  const distId = localStorage.getItem('distributorId')!;
+  loadEmployees() {
+    const distId = localStorage.getItem('distributorId')!;
 
-  this.customerService.getEmployees(distId).subscribe((res: any[]) => {
-    this.employees = res
-      .filter(e => e.isActive)                           // only active
-      .filter(e => e.designation === "Delivery Boy");    // only delivery boys
-  });
-}
-openAssignModal(customerId: string) {
-  this.selectedCustomerId = customerId;
-  this.selectedEmployeeId = '';
-  this.showAssignModal = true;
-}
-
-closeAssignModal() {
-  this.showAssignModal = false;
-  this.selectedEmployeeId = '';
-}
-
-closeModal() {
-  this.customer.password = '';
-  this.showPassword = false;
-  this.showModal = false;
-}
-
-
-
-savePermanentEmployee() {
-  if (!this.selectedEmployeeId) {
-    alert("Select an employee");
-    return;
+    this.customerService.getEmployees(distId).subscribe((res: any[]) => {
+      this.employees = res
+        .filter(e => e.isActive)                           // only active
+        .filter(e => e.designation === "Delivery Boy");    // only delivery boys
+    });
+  }
+  openAssignModal(customerId: string) {
+    this.selectedCustomerId = customerId;
+    this.selectedEmployeeId = '';
+    this.showAssignModal = true;
   }
 
-  const distributorId = localStorage.getItem('distributorId')!;
+  closeAssignModal() {
+    this.showAssignModal = false;
+    this.selectedEmployeeId = '';
+  }
 
-  this.customerService.assignPermanentEmployee(
-    distributorId,
-    this.selectedCustomerId,
-    this.selectedEmployeeId
-  ).subscribe({
-    next: () => {
-      alert("Permanent employee assigned successfully");
-      this.closeAssignModal();
-      this.loadAllCustomers();
-    },
-    error: (err) => {
-      alert("Failed to assign permanent employee");
+  closeModal() {
+    this.customer.password = '';
+    this.showPassword = false;
+
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpCode = '';
+    this.phoneError = '';
+
+    this.showModal = false;
+  }
+
+
+
+
+  savePermanentEmployee() {
+    if (!this.selectedEmployeeId) {
+      alert("Select an employee");
+      return;
     }
-  });
-}
+
+    const distributorId = localStorage.getItem('distributorId')!;
+
+    this.customerService.assignPermanentEmployee(
+      distributorId,
+      this.selectedCustomerId,
+      this.selectedEmployeeId
+    ).subscribe({
+      next: () => {
+        alert("Permanent employee assigned successfully");
+        this.closeAssignModal();
+        this.loadAllCustomers();
+      },
+      error: (err) => {
+        alert("Failed to assign permanent employee");
+      }
+    });
+  }
 
 
 
-applyFilters() {
-  this.filteredCustomers = this.allCustomers.filter(c => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      (c.phoneNumber ?? '').toLowerCase().includes(this.searchTerm.toLowerCase());
+  applyFilters() {
+    this.filteredCustomers = this.allCustomers.filter(c => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        c.email.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        (c.phoneNumber ?? '').toLowerCase().includes(this.searchTerm.toLowerCase());
 
-    const matchesStatus =
-      !this.statusFilter ||
-      (this.statusFilter === 'registered' && c.isRegistered) ||
-      (this.statusFilter === 'unregistered' && !c.isRegistered);
+      const matchesStatus =
+        !this.statusFilter ||
+        (this.statusFilter === 'registered' && c.isRegistered) ||
+        (this.statusFilter === 'unregistered' && !c.isRegistered);
 
-    return matchesSearch && matchesStatus;
-  });
-}
+      return matchesSearch && matchesStatus;
+    });
+  }
 
 
   /* ----------------------------- Modal ------------------------------ */
@@ -117,37 +133,57 @@ applyFilters() {
   openCustomerModal() {
     this.isEdit = false;
     this.customer = {
-      
-  name: '',
-  email: '',
-  phoneNumber: '',
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-   password: '',  
-  isActive: true        // ✅ ADD THIS
-};
+
+      name: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      role: 'Customer',
+      isRegistered: false,
+      password: '',
+      isActive: true        // ✅ ADD THIS
+    };
 
     this.showModal = true;
   }
 
-editCustomer(c: Customer) {
-  this.customer = { ...c, customerId: c.customerId ?? (c as any)._id };
-  this.isEdit = true;
-  this.showModal = true;
-}
-  
+  editCustomer(c: Customer) {
+    this.customer = { ...c, customerId: c.customerId ?? (c as any)._id };
+    this.isEdit = true;
+    this.showModal = true;
+  }
+
 
   saveCustomer() {
+    this.formSubmitted = true;
+
+    if (
+      !this.customer.name ||
+      !this.customer.email ||
+      !this.customer.phoneNumber ||
+      !this.customer.address ||
+      !this.customer.password
+    ) {
+      alert('All fields are required');
+      return;
+    }
+
+    if (!this.otpVerified) {
+      alert('Please verify phone number using OTP');
+      return;
+    }
+
     this.isEdit ? this.updateCustomer() : this.createCustomer();
   }
 
+
+
   /* ----------------------------- CREATE ------------------------------ */
 
- 
+
 
   /* ----------------------------- UPDATE ------------------------------ */
-createCustomer() {
+  createCustomer() {
     this.customerService.createByDistributor(this.customer).subscribe({
       next: (res: any) => {
         this.message = res.message;
@@ -159,24 +195,24 @@ createCustomer() {
       }
     });
   }
-updateCustomer() {
-  if (!this.customer.customerId) {
-    console.error("Missing customerId for update");
-    return;
-  }
+  updateCustomer() {
+    if (!this.customer.customerId) {
+      console.error("Missing customerId for update");
+      return;
+    }
 
-  this.customerService.updateCustomer(this.customer.customerId, this.customer)
-    .subscribe({
-      next: (res: any) => {
-        this.message = res.message;
-        this.closeModal();
-        this.loadAllCustomers();
-      },
-      error: (err) => {
-        this.message = err.error || 'Failed to update customer';
-      }
-    });
-}
+    this.customerService.updateCustomer(this.customer.customerId, this.customer)
+      .subscribe({
+        next: (res: any) => {
+          this.message = res.message;
+          this.closeModal();
+          this.loadAllCustomers();
+        },
+        error: (err) => {
+          this.message = err.error || 'Failed to update customer';
+        }
+      });
+  }
 
   /* ----------------------------- DELETE ------------------------------ */
 
@@ -186,14 +222,14 @@ updateCustomer() {
     this.customerService.deleteCustomer(customerId).subscribe({
       next: (res: any) => {
         this.message = res.message;
-        this. loadAllCustomers();
+        this.loadAllCustomers();
       },
       error: (err) => {
         this.message = err.error || 'Failed to delete customer';
       }
     });
   }
-    loadAllCustomers() {
+  loadAllCustomers() {
     this.customerService.getAllCustomersForDistributor()
       .subscribe({
         next: (res) => {
@@ -203,4 +239,54 @@ updateCustomer() {
         error: (err) => console.error(err)
       });
   }
+
+  validatePhone(event: any) {
+    // allow only digits
+    const value = event.target.value.replace(/\D/g, '');
+    this.customer.phoneNumber = value;
+
+    // ❌ must start with 6–9 and be max 10 digits
+    if (!/^[6-9]\d{0,9}$/.test(value)) {
+      this.phoneError = 'Mobile number must start with 6, 7, 8, or 9';
+      this.otpSent = false;
+      this.otpVerified = false;
+      return;
+    }
+
+    // ❌ must be exactly 10 digits for OTP
+    if (value.length !== 10) {
+      this.phoneError = '';
+      this.otpVerified = false;
+      return;
+    }
+
+    // ✅ valid phone
+    this.phoneError = '';
+  }
+
+
+
+  sendOtp() {
+    if (this.phoneError || this.customer.phoneNumber.length !== 10) {
+      return;
+    }
+
+    this.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    this.otpSent = true;
+    this.otpVerified = false;
+    this.otpCode = '';
+
+    alert(`OTP sent! Your OTP is: ${this.generatedOtp}`);
+    // 🔥 Replace later with SMS API
+  }
+
+  verifyOtp() {
+    if (this.otpCode === this.generatedOtp) {
+      this.otpVerified = true;
+      alert('Phone verified successfully!');
+    } else {
+      alert('Invalid OTP');
+    }
+  }
+
 }

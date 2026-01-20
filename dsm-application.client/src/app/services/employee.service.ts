@@ -12,6 +12,12 @@ export interface Employee {
   designation: string;
   role: string;
   isActive: boolean;
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+  profileImageUrl?: string;
   invoicePdfUrl?: string;
 }
  
@@ -118,15 +124,18 @@ getMyProfile(): Observable<any> {
 }
 
 
-updateMyProfile(profile: any): Observable<any> {
-  const token = localStorage.getItem("token");
-  return this.http.put(
-    `${this.apiUrl}/employees/my-profile`,
-    profile,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-}
+/** UPDATE logged-in employee profile (FormData + Image) */
+  updateMyProfile(formData: FormData): Observable<any> {
+    const token = localStorage.getItem('token');
 
+    return this.http.put(
+      `${this.baseUrl}/my-profile`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
 
 
 uploadProfileImage(file: File) {

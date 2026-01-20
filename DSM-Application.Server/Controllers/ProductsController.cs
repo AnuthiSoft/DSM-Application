@@ -447,6 +447,10 @@ namespace DSM_Application.Server.Controllers
                 id,
                 distributorId,
                 quantity,
+               DateTime.UtcNow,
+                           // ManufactureDate
+    DateTime.UtcNow.AddMonths(6),
+
                 "Manual stock add"
             );
 

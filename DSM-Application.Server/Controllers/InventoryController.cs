@@ -295,7 +295,8 @@ namespace DSM_Application.Server.Controllers
                 return Unauthorized();
 
             await _inventoryService.AddStockAsync(
-                req.ProductId, distributorId, req.Quantity, req.Reason);
+                req.ProductId, distributorId, req.Quantity, req.ManufactureDate,   // ✅ distributor provided
+        req.ExpiryDate, req.Reason);
 
             return Ok(new { message = "Stock added successfully" });
         }
@@ -369,12 +370,23 @@ namespace DSM_Application.Server.Controllers
             return Ok(batches);
         }
 
+        [Authorize(Roles = "Distributor")]
+        [HttpPut("batches/update-dates")]
+        public async Task<IActionResult> UpdateBatchDates(
+    [FromBody] UpdateBatchDatesDto dto)
+        {
+            await _inventoryService.UpdateBatchDatesAsync(dto);
+            return Ok();
+        }
+
     }
 
     public class StockInRequest
     {
         public string ProductId { get; set; }
         public int Quantity { get; set; }
+        public DateTime ManufactureDate { get; set; }
+        public DateTime ExpiryDate { get; set; }
         public string Reason { get; set; }
     }
 
@@ -382,6 +394,8 @@ namespace DSM_Application.Server.Controllers
     {
         public string ProductId { get; set; }
         public int Quantity { get; set; }
+        public DateTime ManufactureDate { get; set; }
+        public DateTime ExpiryDate { get; set; }
         public string Reason { get; set; }
     }
 }

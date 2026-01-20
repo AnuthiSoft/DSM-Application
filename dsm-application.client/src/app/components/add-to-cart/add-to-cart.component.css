@@ -225,6 +225,77 @@ body {
   line-height: 1.4;
 }
 
+.customer-box {
+  position: relative;
+}
+
+.customer-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.customer-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 10;
+}
+
+.customer-dropdown {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+/* FULL SCREEN OVERLAY WITH BLUR */
+.customer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+/* MODAL BOX */
+.customer-modal {
+  background: #fff;
+  width: 360px;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* ACTION BUTTONS */
+.modal-actions {
+  text-align: right;
+  margin-top: 16px;
+}
+
+.btn-cancel {
+  padding: 6px 16px;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 /* Product Table */
 .product-table {
   width: 100%;

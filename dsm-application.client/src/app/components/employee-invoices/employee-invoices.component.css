@@ -60,6 +60,12 @@
   border-radius: 12px;
   border: 1px solid var(--border-color);
   background: var(--card-bg);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.table-container::-webkit-scrollbar {
+  display: none;
 }
 
 .invoice-table {
@@ -357,6 +363,22 @@
 .sub-text {
   font-size: 0.95rem !important;
   opacity: 0.5 !important;
+}
+
+/* Upload Date column */
+.date-cell {
+  white-space: nowrap;      /* 🔥 prevents line break */
+  min-width: 180px;
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-cell {
+  white-space: nowrap;
 }
 
 /* Text Alignment Classes */

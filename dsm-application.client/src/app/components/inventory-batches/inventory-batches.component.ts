@@ -23,6 +23,7 @@ export class InventoryBatchesComponent implements OnInit {
     this.inventoryService.getAllInventoryBatches(distributorId).subscribe({
       next: (data: any[]) => {
         this.rows = data.map(b => ({
+          batchId: b.batchId,
           productName: b.productName,
           productCode: b.productCode,
           // 👇 MUST match backend property names
@@ -53,4 +54,21 @@ export class InventoryBatchesComponent implements OnInit {
     if (diffDays <= 30) return 'Near Expiry';
     return 'Valid';
   }
+
+  updateBatchDates(row: any, value: string, type: 'mfg' | 'exp') {
+  if (type === 'mfg') {
+    row.manufactureDate = value;
+  } else {
+    row.expiryDate = value;
+  }
+
+  this.inventoryService.updateBatchDates({
+    batchId: row.batchId,
+    manufactureDate: row.manufactureDate, // ✅ string "YYYY-MM-DD"
+    expiryDate: row.expiryDate              // ✅ string "YYYY-MM-DD"
+  }).subscribe({
+    error: () => alert('Failed to update batch dates')
+  });
+}
+
 }

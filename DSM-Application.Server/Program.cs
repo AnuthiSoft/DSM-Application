@@ -51,6 +51,8 @@ builder.Services.AddScoped<BlobService>();
 builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<ReturnService>();
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<EmployeeProfileService>();
+
 
 
 builder.Services.AddScoped<EwayBillService>();

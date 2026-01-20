@@ -6,11 +6,8 @@
     <div class="profile-header">
       <div class="avatar-container" (click)="triggerFileInput()">
         <!-- If profile image exists, show it -->
-        <img 
-          *ngIf="profileImageUrl && profileImageUrl !== ''; else defaultAvatar"
-          [src]="profileImageUrl"
-          class="avatar-img"
-        />
+        <img *ngIf="profileImageUrl && profileImageUrl !== ''; else defaultAvatar" [src]="profileImageUrl"
+          class="avatar-img" />
 
         <!-- Default icon when no image uploaded -->
         <ng-template #defaultAvatar>
@@ -20,13 +17,7 @@
         </ng-template>
 
         <!-- Hidden input -->
-        <input
-          type="file"
-          #fileInput
-          accept="image/*"
-          (change)="onFileSelected($event)"
-          style="display: none"
-        />
+        <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" style="display: none" />
       </div>
 
       <div>
@@ -39,15 +30,16 @@
     <hr />
 
     <form (ngSubmit)="updateProfile()">
+
       <div class="row">
         <div class="col">
           <label>Full Name</label>
-          <input type="text" class="form-control" [(ngModel)]="profile.name" name="name" />
+          <input type="text" class="form-control" [(ngModel)]="profile.name" name="name" required />
         </div>
 
         <div class="col">
           <label>Email Address</label>
-          <input type="email" class="form-control" [(ngModel)]="profile.email" name="email" />
+          <input type="email" class="form-control" [value]="profile.email" readonly />
         </div>
       </div>
 
@@ -60,15 +52,71 @@
 
       <div class="row">
         <div class="col">
-          <label>Address</label>
-          <textarea class="form-control"
-                    rows="3"
-                    [(ngModel)]="profile.address"
-                    name="address"></textarea>
+          <label>Street</label>
+          <input class="form-control" [(ngModel)]="profile.street" name="street" />
+        </div>
+
+        <div class="col">
+          <label>City</label>
+          <input class="form-control" [(ngModel)]="profile.city" name="city" />
         </div>
       </div>
 
-      <button class="save-btn" type="submit">Save Changes</button>
+      <div class="row">
+        <div class="col">
+          <label>State</label>
+          <input class="form-control" [(ngModel)]="profile.state" name="state" />
+        </div>
+
+        <div class="col">
+          <label>Pincode</label>
+          <input class="form-control" [(ngModel)]="profile.pincode" name="pincode" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Country</label>
+          <input class="form-control" [(ngModel)]="profile.country" name="country" />
+        </div>
+      </div>
+
+      <button class="save-btn" type="submit">
+        Save Changes
+      </button>
     </form>
+
+    
+  </div>
+</div>
+
+<!-- ============================= -->
+<!--  EMPLOYEE PROFILE INFO CARD  -->
+<!-- ============================= -->
+
+<div class="info-card">
+  <h4><i class="fas fa-info-circle"></i> Profile Information</h4>
+
+  <div class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Member Since</span>
+      <span class="info-value">
+        {{ profile.createdDate ? (profile.createdDate | date:'mediumDate') : 'Not available' }}
+      </span>
+    </div>
+
+    <div class="info-item">
+      <span class="info-label">Last Updated</span>
+      <span class="info-value">
+        {{ profile.updatedDate ? (profile.updatedDate | date:'mediumDate') : 'Not available' }}
+      </span>
+    </div>
+
+    <div class="info-item">
+      <span class="info-label">Account Status</span>
+      <span class="info-value status-active">
+        {{ profile.isActive ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
   </div>
 </div>

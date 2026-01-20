@@ -61,6 +61,16 @@ getAllInventoryBatches(distributorId: string) {
   );
 }
 
+updateBatchDates(data: {
+  batchId: string;
+  manufactureDate: string;
+  expiryDate: string;
+}) {
+  return this.api.put(
+    `${this.endpoint}/batches/update-dates`,
+    data
+  );
+}
 
 
 }

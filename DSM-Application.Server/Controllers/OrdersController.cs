@@ -565,6 +565,9 @@ namespace DSM_Application.Server.Controllers
      item.ProductId,
      order.DistributorId,
      item.Quantity,
+       DateTime.UtcNow,                 // or original MFG
+    DateTime.UtcNow.AddMonths(6),
+
      "ORDER_REJECTED"
  );
                 }

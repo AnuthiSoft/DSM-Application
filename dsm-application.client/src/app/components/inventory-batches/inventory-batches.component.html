@@ -27,7 +27,6 @@
         <td>{{ row.initialQuantity }}</td>
         <td>
           <strong [class.text-danger]="row.quantityAvailable === 0"
-
             [class.text-warning]="row.availableQuantity <= 5 && row.availableQuantity > 0"
             [class.text-success]="row.availableQuantity > 5">
             {{ row.quantityAvailable }}
@@ -35,9 +34,16 @@
         </td>
 
 
-        <td>{{ row.manufactureDate | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <input type="date" class="form-control form-control-sm" [ngModel]="row.manufactureDate | date:'yyyy-MM-dd'"
+            (ngModelChange)="updateBatchDates(row, $event, 'mfg')" />
+        </td>
 
-        <td>{{ row.expiryDate | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <input type="date" class="form-control form-control-sm" [ngModel]="row.expiryDate | date:'yyyy-MM-dd'"
+            (ngModelChange)="updateBatchDates(row, $event, 'exp')" />
+        </td>
+
 
         <td>
           <span class="badge" [ngClass]="{

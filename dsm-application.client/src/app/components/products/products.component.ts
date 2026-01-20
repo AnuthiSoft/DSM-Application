@@ -343,11 +343,9 @@ submitForm() {
 
   const data = this.productForm.getRawValue();
   const distributorId = this.distributorId!;
-  const initialStock = Number(data.stock || 0);
-
   const formData = new FormData();
 
-  // ✅ append fields ONCE
+  // ---------- COMMON FIELDS ----------
   formData.append('productName', data.productName);
   formData.append('productCode', data.productCode);
   formData.append('color', data.color);
@@ -358,17 +356,41 @@ submitForm() {
   formData.append('discount', data.discount.toString());
   formData.append('brand', data.brand);
 
-  // ✅ subcategory → backend will calculate GST
-  formData.append('Category', data.category);
+  // ✅ REQUIRED BY BACKEND
   formData.append('CategoryId', data.category);
-
-  // ✅ distributor
+  formData.append('Category', data.category);
   formData.append('DistributorId', distributorId);
 
-  // ✅ images
+  // ---------- NEW IMAGES ----------
   for (let file of this.selectedFiles) {
     formData.append('Images', file);
   }
+
+  // ---------- KEEP OLD IMAGES ----------
+  for (let img of this.existingImageUrls) {
+    formData.append('ExistingImages', img);
+  }
+
+  // =====================================
+  // 🔥 EDIT MODE (STOP HERE)
+  // =====================================
+  if (this.isEdit && this.selectedProductId) {
+    this.productService.update(this.selectedProductId, formData).subscribe({
+      next: () => {
+        this.toastr.success('Product updated successfully');
+        this.loadProducts(distributorId);
+        this.closeModal();
+        this.resetForm();
+      },
+      error: () => this.toastr.error('Update failed')
+    });
+    return; // 🚨 THIS LINE IS MANDATORY
+  }
+
+  // =====================================
+  // 🔥 CREATE MODE
+  // =====================================
+  const initialStock = Number(data.stock || 0);
 
   this.productService.create(formData).subscribe({
     next: (created) => {

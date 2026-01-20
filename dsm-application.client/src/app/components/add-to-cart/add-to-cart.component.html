@@ -5,7 +5,7 @@
 
     <!-- Ordered Date -->
     <div class="form-group">
-      <label>Ordered Date *</label>
+      <label>Ordered Date</label>
       <input type="date" [(ngModel)]="orderedDate" (change)="updateExpectedDate()" />
     </div>
 
@@ -14,32 +14,41 @@
 
 
     <div class="form-group">
-      <label>Retailer *</label>
+      <label>Retailer</label>
 
       <div class="customer-box">
 
-        <!-- Visible Selected Customer -->
-        <div class="customer-display" (click)="toggleCustomerDropdown()">
-          {{ customerDisplay || customerName }}
-          <span class="arrow">▼</span>
+        <div class="customer-display">
+          <span class="customer-text">
+            {{ customerDisplay || customerName }}
+          </span>
+
+          <!-- 🔥 CLICKABLE ARROW (SEPARATE) -->
+          <span class="arrow" (click)="toggleCustomerDropdown($event)">▼</span>
+
         </div>
 
-        <!-- DROPDOWN (Appears Inside Same Box at Bottom) -->
-        <div class="customer-dropdown" *ngIf="showCustomerDropdown">
-          <small>ID: {{ customerId}}</small><br>
-          <small>Email: {{ customerEmail }}</small><br>
+        <!-- 🔥 POPUP -->
+        <!-- 🔥 CUSTOMER INFO MODAL -->
+        <div class="customer-modal-overlay" *ngIf="showCustomerDropdown">
+          <div class="customer-modal">
 
-          <div class="customer-item" *ngFor="let c of customers" (click)="selectCustomer(c)">
-            <strong>{{ c.customerName }}</strong><br>
-            <small>ID: {{ c.customerId }}</small><br>
-            <small>Email: {{ c.email }}</small><br>
-            <small>Phone: {{ c.phoneNumber }}</small>
+            <h3>Customer Details</h3>
+
+            <p><b>Name:</b> {{ customerName }}</p>
+            <p><b>ID:</b> {{ customerId }}</p>
+            <p><b>Email:</b> {{ customerEmail }}</p>
+
+            <div class="modal-actions">
+              <button class="btn-cancel" (click)="closeCustomerPopup()">Cancel</button>
+            </div>
+
           </div>
-
         </div>
 
       </div>
     </div>
+
 
 
 
@@ -108,12 +117,12 @@
 
     <!-- Expected Delivery Date -->
     <div class="form-group">
-      <label>Expected Delivery Date *</label>
+      <label>Expected Delivery Date</label>
       <input type="date" [(ngModel)]="expectedDate" readonly />
     </div>
 
     <!-- Products Section -->
-    <h3>Products *</h3>
+    <h3>Products</h3>
 
     <table class="product-table">
       <thead>

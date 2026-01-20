@@ -5,7 +5,7 @@ using MongoDB.Bson;
 namespace DSM_Application.Server.Models
 
 {
-
+    [BsonIgnoreExtraElements]
     public class Order
 
     {

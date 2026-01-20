@@ -18,11 +18,8 @@
       <div class="search-container">
         <div class="search-input-group">
           <i class="fas fa-search search-icon"></i>
-          <input type="text" 
-                 class="search-input" 
-                 placeholder="Search products..." 
-                 [(ngModel)]="searchTerm"
-                 (input)="onSmartSearch()">
+          <input type="text" class="search-input" placeholder="Search products..." [(ngModel)]="searchTerm"
+            (input)="onSmartSearch()">
           <button class="search-clear" *ngIf="searchTerm" (click)="clearSearch()">
             <i class="fas fa-times"></i>
           </button>
@@ -142,17 +139,13 @@
         <!-- Product Image -->
         <div class="product-image">
           <!-- Image Slider for multiple images -->
-          <div *ngIf="product.imageUrls && product.imageUrls.length > 1"
-               class="image-slider">
+          <div *ngIf="product.imageUrls && product.imageUrls.length > 1" class="image-slider">
             <div class="slider-main">
-    <img
-  [src]="getFullImageUrl(
+              <img [src]="getFullImageUrl(
     product.imageUrls[
       imageIndexMap[product.productId ?? ''] ?? 0
     ]
-  )"
-  class="main-image"
-/>
+  )" class="main-image" />
             </div>
             <div class="slider-indicator">
               <i class="fas fa-images"></i> {{ product.imageUrls.length }} images
@@ -161,9 +154,7 @@
 
           <!-- Single Image -->
           <div *ngIf="product.imageUrls && product.imageUrls.length === 1" class="single-image">
-            <img [src]="getFullImageUrl(product.imageUrls[0])" 
-                 [alt]="product.productName"
-                 class="product-img">
+            <img [src]="getFullImageUrl(product.imageUrls[0])" [alt]="product.productName" class="product-img">
           </div>
 
           <!-- No Image Placeholder -->
@@ -219,8 +210,8 @@
               <span class="stock-value">{{ product.currentStock }}</span>
             </div>
             <div class="progress-bar">
-              <div class="progress-fill" 
-                   [style.width.%]="getStockPercentage(product.currentStock, product.maxStock || 100)"></div>
+              <div class="progress-fill"
+                [style.width.%]="getStockPercentage(product.currentStock, product.maxStock || 100)"></div>
             </div>
           </div>
         </div>
@@ -246,10 +237,8 @@
         <i class="fas fa-chevron-left"></i> Previous
       </button>
       <div class="page-numbers">
-        <span *ngFor="let page of getPageNumbers()"
-              class="page-number"
-              [class.active]="page === currentPage"
-              (click)="goToPage(page)">
+        <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+          (click)="goToPage(page)">
           {{ page }}
         </span>
       </div>
@@ -279,7 +268,7 @@
             <div class="form-group">
               <label class="form-label">Product Name *</label>
               <input type="text" class="form-control" formControlName="productName"
-                     [class.is-invalid]="formSubmitted && productForm.get('productName')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('productName')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('productName')?.invalid">
                 Product name is required
               </div>
@@ -288,7 +277,7 @@
             <div class="form-group">
               <label class="form-label">Product Code *</label>
               <input type="text" class="form-control" formControlName="productCode"
-                     [class.is-invalid]="formSubmitted && productForm.get('productCode')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('productCode')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('productCode')?.invalid">
                 Product Code is required
               </div>
@@ -298,7 +287,7 @@
             <div class="form-group">
               <label class="form-label">Color *</label>
               <input type="text" class="form-control" formControlName="color"
-                     [class.is-invalid]="formSubmitted && productForm.get('color')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('color')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('color')?.invalid">
                 Color is required
               </div>
@@ -307,7 +296,7 @@
             <div class="form-group">
               <label class="form-label">Price (₹) *</label>
               <input type="number" step="0.01" class="form-control" formControlName="price"
-                     [class.is-invalid]="formSubmitted && productForm.get('price')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('price')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('price')?.invalid">
                 Price is required and must be valid
               </div>
@@ -317,7 +306,7 @@
             <div class="form-group">
               <label class="form-label">Cost Price (₹) *</label>
               <input type="number" step="0.01" class="form-control" formControlName="costPrice"
-                     [class.is-invalid]="formSubmitted && productForm.get('costPrice')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('costPrice')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('costPrice')?.invalid">
                 Cost Price is required
               </div>
@@ -335,7 +324,7 @@
             <div class="form-group">
               <label class="form-label">Main Category *</label>
               <select class="form-select" formControlName="mainCategory" (change)="onMainCategoryChange($event)"
-                      [class.is-invalid]="formSubmitted && productForm.get('mainCategory')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('mainCategory')?.invalid">
                 <option value="">Select Main Category</option>
                 <option *ngFor="let mc of mainCategories" [value]="mc.categoryId">
                   {{ mc.name }}
@@ -349,7 +338,7 @@
             <div class="form-group">
               <label class="form-label">Subcategory *</label>
               <select class="form-select" formControlName="category" (change)="onSubCategoryChange($event)"
-                      [class.is-invalid]="formSubmitted && productForm.get('category')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('category')?.invalid">
                 <option value="">Select Subcategory</option>
                 <option *ngFor="let sc of subCategories" [value]="sc.categoryId">
                   {{ sc.name }}
@@ -360,11 +349,16 @@
               </div>
             </div>
 
+            <div class="form-group">
+              <label class="form-label">GST (%)</label>
+              <input type="number" step="0.01" class="form-control" formControlName="gst" readonly>
+            </div>
+
             <!-- Row 5: Brand & Measure -->
             <div class="form-group">
               <label class="form-label">Brand *</label>
               <input type="text" class="form-control" formControlName="brand"
-                     [class.is-invalid]="formSubmitted && productForm.get('brand')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('brand')?.invalid">
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('brand')?.invalid">
                 Brand is required
               </div>
@@ -373,7 +367,7 @@
             <div class="form-group">
               <label class="form-label">Measure *</label>
               <select class="form-select" formControlName="measure"
-                      [class.is-invalid]="formSubmitted && productForm.get('measure')?.invalid">
+                [class.is-invalid]="formSubmitted && productForm.get('measure')?.invalid">
                 <option value="">Select Measure</option>
                 <option *ngFor="let m of measures" [value]="m">{{ m }}</option>
               </select>
@@ -388,16 +382,13 @@
               <input type="number" step="0.01" class="form-control" formControlName="discount">
             </div>
 
-            <div class="form-group">
-              <label class="form-label">GST (%)</label>
-              <input type="number" step="0.01" class="form-control" formControlName="gst" readonly>
-            </div>
+
 
             <!-- Image Upload -->
             <div class="form-group full-width">
               <label class="form-label">Product Images</label>
               <input type="file" multiple (change)="onFileSelected($event)" class="form-control" />
-              
+
               <!-- Image Previews -->
               <div *ngIf="previewUrls.length > 0" class="image-previews">
                 <div class="preview-grid">
@@ -411,7 +402,7 @@
               </div>
 
               <!-- Existing Images -->
-              <div *ngIf="selectedProduct?.imageUrls?.length && isEdit" class="existing-images">
+              <!-- <div *ngIf="selectedProduct?.imageUrls?.length && isEdit" class="existing-images">
                 <div class="existing-title">Existing Images:</div>
                 <div class="preview-grid">
                   <div *ngFor="let img of selectedProduct.imageUrls" class="preview-item">
@@ -421,14 +412,14 @@
                     </button>
                   </div>
                 </div>
-              </div>
+              </div> -->
             </div>
 
             <!-- Description -->
             <div class="form-group full-width">
               <label class="form-label">Description</label>
               <textarea class="form-control" rows="3" formControlName="description"
-                        [class.is-invalid]="formSubmitted && productForm.get('description')?.invalid"></textarea>
+                [class.is-invalid]="formSubmitted && productForm.get('description')?.invalid"></textarea>
               <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('description')?.invalid">
                 Description is required
               </div>

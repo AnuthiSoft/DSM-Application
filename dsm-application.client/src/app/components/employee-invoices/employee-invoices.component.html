@@ -14,7 +14,7 @@
         <thead>
           <tr>
             <th class="text-center">
-              <i class="fas fa-hashtag"></i> #
+              <i class="fas fa-hashtag"></i> 
             </th>
             <th>
               <i class="fas fa-calendar"></i> Upload Date
@@ -38,7 +38,8 @@
             <td class="date-cell">
               <div class="date-info">
                 <i class="fas fa-calendar-day"></i>
-                <span>{{ inv.uploadedOn | date:'fullDate' }}</span>
+                <span>{{ inv.uploadedOn | date:'EEE, dd MMM yyyy' }}</span>
+
               </div>
             </td>
             <td class="time-cell">

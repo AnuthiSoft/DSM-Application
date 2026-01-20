@@ -123,7 +123,6 @@ pendingCategories: any[] = [];
   premiumDistributors = 0;
   formSubmitted = false;
   pendingDeleteId: string | null = null;
-  isDarkMode = false;
 
   private distributorModal: bootstrap.Modal | null = null;
 
@@ -155,27 +154,7 @@ pendingCategories: any[] = [];
     if (modalEl) {
       this.distributorModal = new bootstrap.Modal(modalEl);
     }
-
-     const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    this.isDarkMode = true;
-    document.body.classList.add('dark-theme'); // Add to body
   }
-  }
-
-  // When toggling dark mode, add class to BODY, not to a div
-toggleTheme() {
-  this.isDarkMode = !this.isDarkMode;
-  
-  if (this.isDarkMode) {
-    document.body.classList.add('dark-theme');  // Add to body
-    localStorage.setItem('theme', 'dark');
-  } else {
-    document.body.classList.remove('dark-theme'); // Remove from body
-    localStorage.setItem('theme', 'light');
-  }
-}
-
 
 
   loadCategories() {
@@ -397,14 +376,14 @@ toggleTheme() {
 
   saveDistributor(): void {
   this.formSubmitted = true;
- 
+
   if (this.distributorForm.invalid) {
     this.distributorForm.markAllAsTouched();
     return;
   }
- 
+
   const dist = { ...this.distributorForm.value };
- 
+
   if (this.isEdit && this.selectedDistributor) {
     this.adminService
       .updateDistributor(this.selectedDistributor.distributorId, dist)
@@ -437,6 +416,8 @@ toggleTheme() {
     });
   }
 }
+
+
   deactivate(id: string): void {
     this.adminService.deactivateDistributor(id).subscribe({
       next: () => {

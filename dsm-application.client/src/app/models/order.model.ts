@@ -66,9 +66,7 @@ export interface Order {
   assignedOn?: Date;
   orderedDate: string;
   expectedDeliveryDate: string;
-  returnStatus?: 'NONE' | 'PENDING' | 'COMPLETED';
-
-
+ 
   status: string;
   subtotal: number;
   totalDiscount: number;

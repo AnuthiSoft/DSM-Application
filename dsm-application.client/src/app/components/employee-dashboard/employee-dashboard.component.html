@@ -90,38 +90,11 @@
         <i class="fas fa-hand-holding-usd"></i> <span>Handover Cash</span>
       </div>
 
-      <!-- <button class="action-btn"
-        *ngIf="isCashCollector"
-        (click)="openAddToCart()">
-  <i class="fas fa-cart-plus"></i>
-  <span>Add to Cart</span>
-</button> -->
-
-
-<!-- products -->
-<div *ngIf="isCashCollector"
-     class="nav-item"
-     [class.active]="isActive('products')"
-     (click)="setActiveTab('products')">
-  <i class="fas fa-box"></i>
-  <span>Products</span>
-</div>
-
-
       <!-- 🚚 DELIVERY BOY -->
       <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('invoices')"
         (click)="setActiveTab('invoices')">
         <i class="fas fa-file-pdf"></i> <span>Invoices</span>
       </div>
-
-      <div *ngIf="canSeeInvoices"
-     class="nav-item"
-     [class.active]="isActive('return-orders')"
-     (click)="setActiveTab('return-orders')">
-  <i class="fas fa-undo"></i>
-  <span>Return Pickups</span>
-</div>
-
 
       <!-- Common -->
       <div class="nav-item" [class.active]="isActive('tasks')" (click)="setActiveTab('tasks')">
@@ -347,26 +320,6 @@
     <!-- Profile Tab -->
 
     <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
-
-
-    <app-employee-return-orders *ngIf="activeTab === 'return-orders'"></app-employee-return-orders>
-
-
-    <app-employee-products
-  *ngIf="activeTab === 'products'"
-(addToCart)="openEmployeeAddToCart()">
-</app-employee-products>
-
-<app-employee-add-to-cart
-  *ngIf="activeTab === 'employee-add-to-cart'"
-  (close)="backToProducts()">
-</app-employee-add-to-cart>
-
-
-    <!-- <app-employee-add-to-cart
-  *ngIf="showAddToCart"
-  (close)="closeAddToCart()">
-</app-employee-add-to-cart> -->
 
 
 

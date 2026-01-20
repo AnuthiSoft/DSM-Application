@@ -2,12 +2,10 @@
 
 namespace DSM_Application.Server.Models
 {
-    [BsonIgnoreExtraElements] // ✅ ADD THIS
+
+    [BsonIgnoreExtraElements]
     public class OrderProduct
-
-
     {
-
 
         public string ProductId { get; set; }
         public string ProductName { get; set; }

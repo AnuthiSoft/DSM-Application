@@ -40,11 +40,6 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<FraudReport> FraudReports => _db.GetCollection<FraudReport>("fraudreports");
         public IMongoCollection<DistributorCategoryMap> DistributorCategoryMaps => _db.GetCollection<DistributorCategoryMap>("DistributorCategoryMap");
         public IMongoCollection<Category> Categories => _db.GetCollection<Category>("Categories");
-        public IMongoCollection<ReturnImageInfo> ReturnImages =>
-        _db.GetCollection<ReturnImageInfo>("ReturnImages");
-
-
-
 
         public IMongoCollection<ReturnRequest> ReturnRequests =>
     _db.GetCollection<ReturnRequest>("ReturnRequests");

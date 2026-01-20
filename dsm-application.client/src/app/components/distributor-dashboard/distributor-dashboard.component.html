@@ -65,13 +65,6 @@
           (click)="setActiveTab('order-list'); closeMobileMenu()">
           <span>Order List</span>
         </div>
-
-        <div class="submenu-item"
-     [class.active]="isActive('return-requests')"
-     (click)="setActiveTab('return-requests') ">
-  <span>Return Requests</span>
-</div>
-
         <!-- <div class="submenu-item" [class.active]="isActive('distributor-orders')"
              (click)="setActiveTab('distributor-orders'); closeMobileMenu()">
           <span>Distributor Orders</span>
@@ -88,8 +81,6 @@
 
       </div>
 
-      
- 
       <!-- Sales -->
       <div class="nav-item has-submenu" [class.active]="isActive('sales') || isSubmenuOpen('sales')"
         (click)="toggleSubmenu('sales')">
@@ -184,7 +175,7 @@
 
         <div class="submenu-item" [class.active]="isActive('settings')"
           (click)="setActiveTab('settings'); closeMobileMenu()">
-          <span>Distributor Settings</span>
+          <span>Dsitributor Settings</span>
         </div>
 
         <div class="submenu-item" [class.active]="isActive('test-page')"
@@ -203,8 +194,6 @@
     </div>
   </div>
 
-  
- 
   <!-- Main Content -->
   <div class="dashboard-main">
 
@@ -385,14 +374,12 @@
     </div>
     <app-employees *ngIf="isActive('employees')"></app-employees>
 
-<!-- return request -->
-    <app-distributor-return-requests
-  *ngIf="isActive('return-requests')">
-</app-distributor-return-requests>
-
-   
-    <!-- <app-test-page *ngIf="isActive('test-page')"></app-test-page> -->
-    <!-- <app-reports *ngIf="isActive('reports')"></app-reports> -->
+    <div *ngIf="isActive('test-page')" class="dashboard-under-dev">
+      🚧 Test Page is under development
+    </div>
+    <div *ngIf="isActive('reports')" class="dashboard-under-dev">
+      🚧 Reports is under development
+    </div>
     <!-- LIVE TRACKING PAGE -->
     <!-- <div *ngIf="isActive('live-tracking')" style="padding: 15px;">
 
@@ -416,8 +403,6 @@
   </button>
 
 </div> -->
-
-
 
     <div *ngIf="isActive('live-tracking')" class="live-tracking-container">
 

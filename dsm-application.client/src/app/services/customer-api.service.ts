@@ -68,12 +68,14 @@ export class CustomerApiService {
     );
   }
  
+getConnectedDistributors(
+  customerId: string
+): Observable<ConnectedDistributorsResponse> {
+  return this.http.get<ConnectedDistributorsResponse>(
+    `${this.base}/${customerId}/connected-distributors`,
+    this.getHeaders()
+  );
+}
 
-
-  getConnectedDistributors(customerId: string): Observable<any> {
-    return this.http.get<any>(
-      `${this.base}/connected/${customerId}`,
-      this.getHeaders()
-    );
-  }
+  
 }

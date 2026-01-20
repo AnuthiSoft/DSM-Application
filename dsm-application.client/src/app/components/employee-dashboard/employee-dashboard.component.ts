@@ -20,9 +20,6 @@ export class EmployeeDashboardComponent implements OnInit {
   availabilityReason: string = '';
 
   activeTab: string = 'dashboard';
-  showAddToCart = false; // 👈 NEW
-  
-
   employeeName: string = '';
   employeeId: string = '';
   orderStats = { assigned: 0, completed: 0, pending: 0 };
@@ -76,28 +73,11 @@ ngOnInit(): void {
   this.loadAvailability();
 }
 
-openEmployeeAddToCart() {
-  this.activeTab = 'employee-add-to-cart';
-}
-
-backToProducts() {
-  this.activeTab = 'products';
-}
-
 
   setActiveTab(tab: string) {
     console.log("Switched to tab:", tab);
     this.activeTab = tab;
   }
-
-  openAddToCart() {
-  this.showAddToCart = true;
-}
-
-closeAddToCart() {
-  this.showAddToCart = false;
-}
-
 
 
   isActive(tab: string): boolean {

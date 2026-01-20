@@ -913,84 +913,6 @@ namespace DSM_Application.Server.Controllers
         }
 
 
-        [Authorize(Roles = "CashCollector,Employee")]
-        [HttpGet("for-cash-collector")]
-        public async Task<IActionResult> GetCustomersForCashCollector()
-        {
-            // 🔑 Get employeeId from token
-            var employeeId = User.FindFirst("EmployeeId")?.Value;
-
-            if (string.IsNullOrEmpty(employeeId))
-                return Unauthorized("EmployeeId missing in token");
-
-            // 🔎 Find employee
-            var employee = await _db.Employees
-                .Find(e => e.EmployeeId == employeeId)
-                .FirstOrDefaultAsync();
-
-            if (employee == null)
-                return Unauthorized("Employee not found");
-
-            var distributorId = employee.DistributorId;
-
-            // 1️⃣ Customers CREATED by this distributor
-            var createdCustomers = await _db.Customers
-                .Find(c => c.AddedByDistributorId == distributorId)
-                .ToListAsync();
-
-            // 2️⃣ ACCEPTED connections
-            var connections = await _db.Connections
-                .Find(c => c.DistributorId == distributorId &&
-                           c.Status == ConnectionStatus.Accepted)
-                .ToListAsync();
-
-            var connectedCustomerIds = connections
-                .Select(c => c.CustomerId)
-                .ToList();
-
-            var connectedCustomers = await _db.Customers
-                .Find(c => connectedCustomerIds.Contains(c.CustomerId))
-                .ToListAsync();
-
-            // 3️⃣ Merge + remove duplicates
-            var customers = createdCustomers
-                .Concat(connectedCustomers)
-                .GroupBy(c => c.CustomerId)
-                .Select(g => g.First())
-                .ToList();
-
-            // 4️⃣ Attach permanent employee name (optional but useful)
-            var employeeIds = connections
-                .Where(c => !string.IsNullOrEmpty(c.PermanentEmployeeId))
-                .Select(c => c.PermanentEmployeeId)
-                .Distinct()
-                .ToList();
-
-            var employees = await _db.Employees
-                .Find(e => employeeIds.Contains(e.EmployeeId))
-                .ToListAsync();
-
-            var result = customers.Select(c =>
-            {
-                var conn = connections.FirstOrDefault(x => x.CustomerId == c.CustomerId);
-                var emp = employees.FirstOrDefault(e => e.EmployeeId == conn?.PermanentEmployeeId);
-
-                return new
-                {
-                    c.CustomerId,
-                    c.Name,
-                    c.PhoneNumber,
-                    c.Address,
-                    c.IsRegistered,
-                    PermanentEmployeeName = emp?.Name ?? "Not Assigned"
-                };
-            });
-
-            return Ok(result);
-        }
-
-
-
 
         //[Authorize(Roles = "Distributor")]
         // [Authorize(Roles = "Distributor")]
@@ -1052,10 +974,6 @@ namespace DSM_Application.Server.Controllers
                     c.PhoneNumber,
                     c.Address,
                     c.IsRegistered,
-
-                    AddedByDistributorId = c.AddedByDistributorId,
-                    IsAddedByDistributor = c.AddedByDistributorId == distributorId,
-
 
                     PermanentEmployeeId = conn?.PermanentEmployeeId,
                     PermanentEmployeeName = emp?.Name   // ✅ KEY FIX

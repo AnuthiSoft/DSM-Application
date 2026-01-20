@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
-
 namespace DSM_Application.Server.Controllers
 {
     [ApiController]
@@ -76,27 +75,17 @@ namespace DSM_Application.Server.Controllers
         public async Task<IActionResult> CompleteReturn(string returnId)
         {
             await _returnService.CompleteReturnAsync(returnId);
-            return Ok(new { message = "Return completed" });
+            return Ok("Return completed");
         }
 
         // 5️⃣ REJECT RETURN
-        [Authorize(Roles = "Customer,Distributor")]
-        [HttpPut("reject/{id}")]
-        public async Task<IActionResult> RejectReturn(
-    [FromRoute] string id,
-    [FromBody] RejectReasonRequest body
-)
+        [Authorize(Roles = "Distributor")]
+        [HttpPut("reject/{returnId}")]
+        public async Task<IActionResult> RejectReturn(string returnId, [FromBody] string reason)
         {
-            await _returnService.RejectReturnAsync(
-                id,
-                body.Reason,
-                "Distributor"
-            );
-
-            return Ok();
+            await _returnService.RejectReturnAsync(returnId, reason);
+            return Ok("Return rejected");
         }
-
-
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReturnById(string id)
@@ -115,87 +104,6 @@ namespace DSM_Application.Server.Controllers
             var result = await _returnService.GetReturnHistoryAsync(status);
             return Ok(result);
         }
-
-
-
-        [Authorize(Roles = "Customer,Employee")]
-        [HttpPost("{returnId}/images")]
-        public async Task<IActionResult> UploadReturnImages(
-      string returnId,
-      List<IFormFile> files)
-        {
-            if (files == null || files.Count == 0)
-                return BadRequest("No files uploaded");
-
-            await _returnService.UploadReturnImagesAsync(returnId, files);
-            return Ok(new { message = "Images uploaded" });
-        }
-
-
-        [HttpGet("return-image/{imageId}")]
-        public async Task<IActionResult> GetReturnImage(string imageId)
-        {
-            var stream = await _returnService.GetReturnImageStreamByIdAsync(imageId);
-
-            if (stream == null)
-                return NotFound();
-
-            return File(stream, "image/jpeg");
-        }
-
-
-
-
-
-
-
-        [Authorize(Roles = "Distributor")]
-        [HttpGet("pending/{distributorId}")]
-        public async Task<IActionResult> GetPendingReturns(string distributorId)
-        {
-            var data = await _returnService.GetPendingReturnsForDistributor(distributorId);
-            return Ok(data);
-        }
-
-
-        [Authorize(Roles = "Distributor")]
-        [HttpPost("{returnId}/schedule-pickup")]
-        public async Task<IActionResult> SchedulePickup(string returnId,[FromBody] SchedulePickupDto dto)
-        {
-            await _returnService.SchedulePickupAsync(returnId, dto);
-            return Ok(new { message = "Pickup scheduled" });
-        }
-
-
-        [HttpGet("assigned-to-employee/{employeeId}")]
-        public async Task<IActionResult> GetAssignedReturns(string employeeId)
-        {
-            var returns = await _returnService.GetReturnsForEmployee(employeeId);
-            return Ok(returns);
-        }
-
-
-        [Authorize(Roles = "Employee")]
-        [HttpPut("picked-up/{returnId}")]
-        public async Task<IActionResult> MarkPickedUp(string returnId)
-        {
-            await _returnService.MarkPickedUpAsync(returnId);
-            return Ok(new { message = "Product submitted to distributor" });
-
-        }
-
-
-        [Authorize(Roles = "Distributor")]
-        [HttpGet("distributor/{distributorId}")]
-        public async Task<IActionResult> GetReturnHistoryForDistributor(string distributorId)
-        {
-            var data = await _returnService.GetAllReturnsForDistributorAsync(distributorId);
-            return Ok(data);
-        }
-
-
-
-
 
 
         [HttpGet("history/filter")]

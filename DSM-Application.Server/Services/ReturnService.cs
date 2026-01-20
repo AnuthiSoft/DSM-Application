@@ -5,7 +5,6 @@ using MongoDB.Driver;
 using DSM_Application.Server.Models.DTOs;
 
 
-
 namespace DSM_Application.Server.Services
 {
     public class ReturnService
@@ -15,279 +14,49 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<InventoryItem> _inventory;
         private readonly InventoryService _inventoryService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IMongoCollection<ReturnImageInfo> _returnImages;
-        private readonly IWebHostEnvironment _env;
-        private readonly IMongoCollection<Customer> _customers;
-        private readonly BlobService _blobService;
 
 
-        public ReturnService(
-            MongoDbService db,
-            InventoryService inventoryService,
-            IHttpContextAccessor httpContextAccessor,
-            IWebHostEnvironment env ,// ✅ ADD THIS
-            BlobService blobService
-
-        )
+        public ReturnService(MongoDbService db, InventoryService inventoryService, IHttpContextAccessor httpContextAccessor)
         {
-            _customers = db.Customers;
             _orders = db.Orders;
             _returns = db.ReturnRequests;
             _inventory = db.InventoryItems;    // ✅ ADD THIS
             _inventoryService = inventoryService;
             _httpContextAccessor = httpContextAccessor;
-            _returnImages = db.ReturnImages;
-
-            _env = env; // ✅ ASSIGN IT (THIS WAS MISSING)
-            _blobService = blobService;
         }
-
-
-
-        public async Task<List<ReturnHistoryDto>> GetPendingReturnsForDistributor(string distributorId)
-        {
-            var returns = await _returns
-                .Find(r =>
-                    r.DistributorId == distributorId &&
-                    (
-                        r.Status == "Pending" ||
-                        r.Status == "PickupConfirmed" ||
-                        r.Status == "PickedUp" ||
-                        r.Status == "Received"
-                    )
-                )
-                .SortByDescending(r => r.CreatedAt)
-                .ToListAsync();
-
-            return returns.Select(r => new ReturnHistoryDto
-            {
-                Id = r.Id,
-                OrderId = r.OrderId,
-                ProductId = r.ProductId,
-                ProductName = _orders
-                    .Find(o => o.Id == r.OrderId)
-                    .FirstOrDefault()?
-                    .Products.FirstOrDefault(p => p.ProductId == r.ProductId)?
-                    .ProductName,
-                ReturnQty = r.ReturnQty,
-                Status = r.Status,
-                Reason = r.Reason,
-                CreatedAt = r.CreatedAt
-            }).ToList();
-        }
-
-        public async Task<List<ReturnHistoryDto>> GetAllReturnsForDistributorAsync(string distributorId)
-        {
-            var returns = await _returns
-                .Find(r => r.DistributorId == distributorId)
-                .SortByDescending(r => r.CreatedAt)
-                .ToListAsync();
-
-            var customerIds = returns
-                .Where(r => !string.IsNullOrEmpty(r.CustomerId))
-                .Select(r => r.CustomerId)
-                .Distinct()
-                .ToList();
-
-            var customers = await _customers
-                .Find(c => customerIds.Contains(c.CustomerId))
-                .ToListAsync();
-
-            var images = await _returnImages
-                .Find(_ => true)
-                .ToListAsync();
-
-            return returns.Select(r =>
-            {
-                // 🔹 CUSTOMER (new + old data safe)
-                var customer = customers.FirstOrDefault(c => c.CustomerId == r.CustomerId);
-
-                // 🔹 ORDER FALLBACK (🔥 THIS FIXES OLD DATA 🔥)
-                Order? order = ObjectId.TryParse(r.OrderId, out _)
-                    ? _orders.Find(o => o.Id == r.OrderId).FirstOrDefault()
-                    : null;
-
-
-                var product = order?.Products?.FirstOrDefault(p => p.ProductId == r.ProductId);
-
-                return new ReturnHistoryDto
-                {
-                    Id = r.Id,
-                    OrderId = r.OrderId,
-                    ProductId = r.ProductId,
-
-                    // ✅ PRODUCT NAME FIX
-                    ProductName =
-                        r.ProductName
-                        ?? product?.ProductName
-                        ?? "Unknown Product",
-
-                    ReturnQty = r.ReturnQty,
-                    Reason = r.Reason,
-                    Status = r.Status,
-                    DistributorId = r.DistributorId,
-
-                    // ✅ CUSTOMER NAME FIX
-                    CustomerName =
-                        customer?.Name
-                        ?? r.CustomerName
-                        ?? order?.CustomerName
-                        ?? "Unknown Customer",
-
-                    CustomerPhone =
-                        customer?.PhoneNumber
-                        ?? order?.CustomerPhone,
-
-                    CustomerEmail =
-                        customer?.Email
-                        ?? order?.CustomerEmail,
-
-                    ImageUrls = images
-                        .Where(i => i.ReturnId == r.Id)
-                        .Select(i => i.Id)
-                        .ToList(),
-
-                    CreatedAt = r.CreatedAt
-                };
-            }).ToList();
-        }
-
-
-        public async Task<Stream?> GetReturnImageStreamByIdAsync(string imageId)
-        {
-            var image = await _returnImages
-                .Find(i => i.Id == imageId)
-                .FirstOrDefaultAsync();
-
-            if (image == null)
-                return null;
-
-            // 🔥 Uses blobName (not URL)
-            var blobBytes = await _blobService.DownloadAsync(image.BlobName);
-
-            if (blobBytes == null)
-                return null;
-
-            return new MemoryStream(blobBytes);
-        }
-
-
-
-
-
-        public async Task SchedulePickupAsync(string returnId, SchedulePickupDto dto)
-        {
-            var distributorId = _httpContextAccessor.HttpContext?.User?
-      .Claims.FirstOrDefault(c => c.Type == "DistributorId")?.Value;
-
-
-
-            if (string.IsNullOrEmpty(distributorId))
-                throw new Exception("Unauthorized distributor");
-
-            var ret = await _returns.Find(r =>
-                r.Id == returnId &&
-                r.DistributorId == distributorId
-            ).FirstOrDefaultAsync();
-
-            if (ret == null)
-                throw new Exception("Return not found or access denied");
-
-            ret.Status = "PickupConfirmed";
-            ret.PickupDate = dto.PickupDate;
-            ret.PickupSlot = dto.PickupSlot;
-            ret.AssignedEmployeeId = dto.EmployeeId;
-
-            ret.PickupMessage =
-                string.IsNullOrWhiteSpace(dto.Message)
-                    ? $"Pickup scheduled on {dto.PickupDate:dd MMM yyyy} ({dto.PickupSlot})"
-                    : dto.Message;
-
-            ret.ApprovedAt = DateTime.UtcNow;
-
-            await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
-        }
-
-
 
         // 1️⃣ CREATE RETURN (ONLY AFTER DELIVERY)
         public async Task<ReturnRequest> CreateReturnAsync(CreateReturnDto dto)
         {
-            var customerId = _httpContextAccessor.HttpContext?
-                .User.FindFirst("CustomerId")?.Value;
+            var order = await _orders.Find(o => o.Id == dto.OrderId).FirstOrDefaultAsync();
+            if (order == null)
+                throw new Exception("Order not found");
 
-            if (string.IsNullOrEmpty(customerId))
-                throw new Exception("Customer not authenticated");
+            if (order.Status != "Delivered")
+                throw new Exception("Return allowed only after delivery");
 
-            var order = await _orders
-                .Find(o => o.Id == dto.OrderId)
-                .FirstOrDefaultAsync();
+            var product = order.Products.FirstOrDefault(p => p.ProductId == dto.ProductId);
+            if (product == null)
+                throw new Exception("Product not found in order");
 
-            var customer = await _customers
-                .Find(c => c.CustomerId == customerId)
-                .FirstOrDefaultAsync();
+            int remainingQty = product.Quantity - product.ReturnedQty;
+            if (dto.ReturnQty > remainingQty)
+                throw new Exception("Return quantity exceeds delivered quantity");
 
             var returnRequest = new ReturnRequest
             {
-                CustomerId = customerId,
                 OrderId = dto.OrderId,
                 ProductId = dto.ProductId,
-                ProductName = dto.ProductName,
                 ReturnQty = dto.ReturnQty,
                 Reason = dto.Reason,
-
-             
-                CustomerName = customer?.Name, // optional cache
-
-                DistributorId = order.DistributorId,
-
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow
             };
 
             await _returns.InsertOneAsync(returnRequest);
-            return returnRequest;
+
+            return returnRequest; // ✅ IMPORTANT
         }
-
-
-
-
-        public async Task<List<EmployeeReturnPickupDto>> GetReturnsForEmployee(string employeeId)
-        {
-            var returns = await _returns
-                .Find(r =>
-                    r.AssignedEmployeeId == employeeId &&
-                    r.Status == "PickupConfirmed"
-                )
-                .ToListAsync();
-
-            var result = new List<EmployeeReturnPickupDto>();
-
-            foreach (var r in returns)
-            {
-                var order = await _orders
-                    .Find(o => o.Id == r.OrderId)
-                    .FirstOrDefaultAsync();
-
-                var product = order?.Products
-                    .FirstOrDefault(p => p.ProductId == r.ProductId);
-
-                result.Add(new EmployeeReturnPickupDto
-                {
-                    ReturnId = r.Id,
-                    OrderId = r.OrderId,
-                    ProductName = product?.ProductName ?? "Unknown",
-                    ReturnQty = r.ReturnQty,
-                    PickupDate = r.PickupDate ?? DateTime.MinValue,
-                    PickupSlot = r.PickupSlot,
-                    Status = r.Status
-                });
-            }
-
-            return result;
-        }
-
-
 
         // 2️⃣ APPROVE RETURN
         public async Task ApproveReturnAsync(string returnId)
@@ -306,16 +75,7 @@ namespace DSM_Application.Server.Services
         // 3️⃣ RECEIVE RETURN (PHYSICAL COLLECTION)
         public async Task ReceiveReturnAsync(string returnId)
         {
-            var distributorId = GetDistributorId();
-
-            var ret = await _returns.Find(r =>
-                r.Id == returnId &&
-                r.Status == "PickedUp" &&
-                r.DistributorId == distributorId
-            ).FirstOrDefaultAsync();
-
-            if (ret == null)
-                throw new Exception("Return not ready for receiving");
+            var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
 
             ret.Status = "Received";
             ret.ReceivedAt = DateTime.UtcNow;
@@ -323,26 +83,31 @@ namespace DSM_Application.Server.Services
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
         }
 
-
-
-
-
         // 4️⃣ COMPLETE RETURN (INVENTORY + ORDER)
         public async Task CompleteReturnAsync(string returnId)
         {
-            var distributorId = GetDistributorId();
-            if (string.IsNullOrEmpty(distributorId))
-                throw new Exception("Unauthorized");
+            // 1️⃣ Get distributorId from JWT
+            var distributorId = _httpContextAccessor.HttpContext?
+                .User?.FindFirst("DistributorId")?.Value;
 
+            if (string.IsNullOrEmpty(distributorId))
+                throw new Exception("Unauthorized: Distributor not found");
+
+            // 2️⃣ Get return
             var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
             if (ret == null)
                 throw new Exception("Return not found");
 
-            // 🚫 PREVENT SKIPPING STATES
-            if (ret.Status != "Received")
-                throw new Exception("Item not yet picked up");
+            // 3️⃣ Get order and validate ownership
+            var order = await _orders.Find(o =>
+                o.Id == ret.OrderId &&
+                o.DistributorId == distributorId
+            ).FirstOrDefaultAsync();
 
-            // 1️⃣ UPDATE INVENTORY
+            if (order == null)
+                throw new Exception("Unauthorized access to this order");
+
+            // 4️⃣ Get inventory for this distributor
             var inventory = await _inventory.Find(i =>
                 i.ProductId == ret.ProductId &&
                 i.DistributorId == distributorId
@@ -351,29 +116,20 @@ namespace DSM_Application.Server.Services
             if (inventory == null)
                 throw new Exception("Inventory not found");
 
+            // 5️⃣ Update stock
             inventory.CurrentStock += ret.ReturnQty;
+            //inventory.AvailableQuantity += ret.ReturnQty;
             inventory.ReturnedQty += ret.ReturnQty;
             inventory.UpdatedAt = DateTime.UtcNow;
 
-            await _inventory.ReplaceOneAsync(i => i.Id == inventory.Id, inventory);
+            await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
-            // 2️⃣ UPDATE RETURN STATUS
+            // 6️⃣ Update return status
             ret.Status = "Completed";
             ret.CompletedAt = DateTime.UtcNow;
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
-
-            // ✅ 3️⃣ UPDATE ORDER STATUS (🔥 THIS IS WHAT WAS MISSING 🔥)
-            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
-            if (order != null)
-            {
-                order.Status = "Return Completed";
-                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
-            }
         }
-
-
-
 
 
         //public async Task CompleteReturnAsync(string returnId
@@ -451,67 +207,17 @@ namespace DSM_Application.Server.Services
 
 
         // 5️⃣ REJECT RETURN
-        public async Task RejectReturnAsync(
-       string returnId,
-       string reason,
-       string rejectedBy
-   )
+        public async Task RejectReturnAsync(string returnId, string reason)
         {
             var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
-            if (ret == null)
-                throw new Exception("Return not found");
 
-            // 🔐 CUSTOMER RULE
-            if (rejectedBy == "Customer")
-            {
-                if (ret.Status != "Pending")
-                    throw new Exception("Return cannot be cancelled now");
-            }
-
-            // 🔐 DISTRIBUTOR RULE
-            if (rejectedBy == "Distributor")
-            {
-                var distributorId = GetDistributorId();
-                if (ret.DistributorId != distributorId)
-                    throw new Exception("Unauthorized distributor");
-
-                if (ret.Status == "Received" || ret.Status == "Completed")
-                    throw new Exception("Cannot reject after receiving item");
-            }
-
-            // ✅ UPDATE RETURN
             ret.Status = "Rejected";
-            ret.RejectedBy = rejectedBy;
             ret.RejectionReason = reason;
-            
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
-
-            // ✅ OPTIONAL: update order status
-            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
-            if (order != null)
-            {
-                order.Status = rejectedBy == "Customer"
-                    ? "Delivered"
-                    : "Return Rejected";
-
-                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
-            }
         }
 
-       
-
-       
-
-
-
-
-
-
-
-
-
-        public async Task<ReturnRequest> GetReturnByIdAsync(string id)
+    public async Task<ReturnRequest> GetReturnByIdAsync(string id)
         {
             var objectId = new ObjectId(id);
             var ret = await _returns.Find(r => r.Id == id).FirstOrDefaultAsync();
@@ -541,8 +247,6 @@ namespace DSM_Application.Server.Services
                 ReturnQty = r.ReturnQty,
                 Status = r.Status,
                 Reason = r.Reason,
-                RejectedBy = r.RejectedBy,
-
                 CreatedAt = r.CreatedAt,
                 ApprovedAt = r.ApprovedAt,
                 ReceivedAt = r.ReceivedAt,
@@ -565,68 +269,6 @@ namespace DSM_Application.Server.Services
             return _httpContextAccessor.HttpContext?.User?
                 .FindFirst("DistributorId")?.Value;
         }
-
-
-        public async Task MarkPickedUpAsync(string returnId)
-{
-    // 1️⃣ Find return
-    var ret = await _returns
-        .Find(r => r.Id == returnId)
-        .FirstOrDefaultAsync();
-
-    if (ret == null)
-        throw new Exception("Return not found");
-
-    // 2️⃣ Validate current state
-    if (ret.Status != "PickupConfirmed")
-        throw new Exception(
-            $"Pickup not scheduled. Current status: {ret.Status}"
-        );
-
-    // 3️⃣ Update return status
-    ret.Status = "Received";
-    ret.ReceivedAt = DateTime.UtcNow;
-
-    // 4️⃣ Persist change
-    await _returns.ReplaceOneAsync(
-        r => r.Id == ret.Id,
-        ret
-    );
-}
-
-
-
-
-
-
-
-
-
-        public async Task UploadReturnImagesAsync(
-    string returnId,
-    List<IFormFile> files
-)
-        {
-            foreach (var file in files)
-            {
-                if (!file.ContentType.StartsWith("image/"))
-                    throw new Exception("Only image files allowed");
-
-                // 1️⃣ Upload to Azure Blob → returns blobName
-                var blobName = await _blobService.UploadAsync(file);
-
-                // 2️⃣ Save ONLY blobName in MongoDB
-                var image = new ReturnImageInfo
-                {
-                    ReturnId = returnId,
-                    BlobName = blobName,
-                    UploadedAt = DateTime.UtcNow
-                };
-
-                await _returnImages.InsertOneAsync(image);
-            }
-        }
-
 
     }
 }

@@ -788,6 +788,11 @@ textarea.form-control {
   font-family: 'Courier New', monospace;
 }
 
+.md{
+  color: var(--text-color);
+  background-color: var(--hover-color);
+}
+
 .table td:nth-child(4) {
   color: var(--text-muted);
   max-width: 200px;

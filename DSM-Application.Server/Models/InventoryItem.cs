@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace DSM_Application.Server.Models
+
 {
     [BsonIgnoreExtraElements]
     public class InventoryItem
@@ -10,6 +11,8 @@ namespace DSM_Application.Server.Models
         [BsonRepresentation(BsonType.ObjectId)]
 
 
+      
+        public string Id { get; set; }
         //public string Id { get; set; }
         public string InventoryId { get; set; }
 
@@ -46,5 +49,6 @@ namespace DSM_Application.Server.Models
 
         // FIFO key
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     }
 }

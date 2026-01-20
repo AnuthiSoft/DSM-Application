@@ -73,12 +73,33 @@ getMyCustomersForCustomer() {
   );
 }
 
-
-  getCustomerById(customerId: string) {
-  return this.api.get<any>(`customers/get-customer/${customerId}`);
+  getCustomersForCashCollector() {
+  return this.api.get<any[]>(
+    'customers/for-cash-collector'
+  );
 }
- 
- 
+
+// getMyCustomers() {
+//   return this.http.get<any[]>(`${environment.apiUrl}/orders/my-customers`);
+// }
+
+
+
+
+ getCustomerById(customerId: string): Observable<Customer> {
+  const token = localStorage.getItem('token');
+
+  return this.api.get<Customer>(
+    `customers/get-customer/${customerId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+}
+
+
+
+
   deleteCustomer(customerId: string): Observable<any> {
     return this.api.delete(`customers/delete-customer/${customerId}`);
   }

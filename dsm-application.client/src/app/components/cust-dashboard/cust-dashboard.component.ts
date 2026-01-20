@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
+import { CustomerApiService } from '../../services/customer-api.service';
 interface Distributor {
   distributorId: string;
   companyName: string;
@@ -136,6 +137,7 @@ loadDistributors() {
       }
     });
 }
+
 
 
   connectDistributor(distributorId: string) {

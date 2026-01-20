@@ -259,25 +259,24 @@ public class OrderService
     //    return order;
     //}
 
-    public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
-
+    public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role,string distributorId)
     {
-
         if (string.IsNullOrEmpty(userId))
-
             throw new Exception("Invalid user");
 
         if (dto == null || dto.Products == null || !dto.Products.Any())
 
             throw new Exception("Invalid order data");
 
-        var orderProducts = new List<OrderProduct>();
-
-        decimal subTotal = 0;
-
+        decimal subtotal = 0;
         decimal totalDiscount = 0;
-        decimal totalGstAmount = 0;
+        decimal totalAmount = 0;
+
+        var orderProducts = new List<OrderProduct>();
+        decimal subTotal = 0;
+         decimal totalGstAmount = 0;
         decimal generalDiscountPercent = dto.SpecialDiscountPercent;
+
 
         foreach (var item in dto.Products)
 
@@ -349,8 +348,12 @@ public class OrderService
 
             Products = orderProducts,
 
-            Subtotal = subTotal,
+            OrderedDate = DateTime.UtcNow,
+            OrderDate = DateTime.UtcNow,
+            ExpectedDeliveryDate =
+                dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1),
 
+            Subtotal = subtotal,
             TotalDiscount = totalDiscount,
             GstAmount = totalGstAmount,
 
@@ -358,16 +361,11 @@ public class OrderService
             // ✅ GST APPLIED AFTER DISCOUNT
             TotalAmount = (subTotal - totalDiscount) + totalGstAmount,
 
+            // Audit fields
             CreatedByUserId = userId,
 
             CreatedByRole = role,
-
-            OrderSource = "CASH_COLLECTOR",
-
-            OrderDate = DateTime.UtcNow,
-
-            ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1)
-
+            OrderSource = "EMPLOYEE"
         };
 
         // 🔥 STEP 2: REDUCE INVENTORY STOCK (BATCH-WISE)

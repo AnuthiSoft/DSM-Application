@@ -35,7 +35,6 @@ import { EmployeeLoginComponent } from './components/employee-login/employee-log
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
-
 import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 
@@ -60,15 +59,20 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
 import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
-// import { GoogleMapsModule } from '@angular/google-maps';
+ import { GoogleMapsModule } from '@angular/google-maps';
+// import { CustomerChangePasswordComponent } from './components/customer-change-password/customer-change-password.component';
+
 import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
-import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { CustomerSearchComponent } from './components/customer-search/customer-search.component';import { CustomerChangePasswordComponent } from './components/customer-change-password/customer-change-password.component';
+import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
+
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { EmployeeInvoicesComponent } from './components/employee-invoices/employee-invoices.component';
+import { DistributorReturnRequestsComponent } from './components/distributor-return-requests/distributor-return-requests.component';
+import { EmployeeReturnOrdersComponent } from './components/employee-return-orders/employee-return-orders.component';
+import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
+import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/employee-add-to-cart.component';
 
 
 
@@ -107,6 +111,7 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     EmployeeSignupComponent,
     AddToCartComponent,
     EmployeeProfileComponent,
+    ReturnOrdersComponent ,  // ✅ ADD THIS
 
     FraudReportComponent,
 
@@ -138,9 +143,7 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
 
 
 
-    DistributorViewComponent,
-    AddPaymentNoteComponent,
-    DashboardComponent,
+   
 
     InvoiceCreateComponent,
     InvoiceDetailComponent,
@@ -160,7 +163,7 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     EmployeeSignupComponent,
     AddToCartComponent,
     EmployeeProfileComponent,
-
+CustomerDashboardComponent,
     FraudReportComponent,
 
     AdminFraudListComponent,
@@ -187,6 +190,10 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     EmployeeTrackingComponent,
     InventoryBatchesComponent,
     CustomerSearchComponent,
+    DistributorReturnRequestsComponent,
+    EmployeeReturnOrdersComponent,
+    EmployeeProductsComponent,
+    EmployeeAddToCartComponent
 
 
 

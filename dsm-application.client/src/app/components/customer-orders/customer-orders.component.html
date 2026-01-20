@@ -84,9 +84,11 @@
               {{ order.orderDate | date:'medium' }}
             </span>
           </div>
-          <span class="status-badge" [class]="order.status.toLowerCase()">
-            {{ order.status }}
-          </span>
+          <span class="status-badge"
+      [class]="order.status.toLowerCase().replace(' ', '-')">
+  {{ order.status }}
+</span>
+
         </div>
 
         <div class="order-body">
@@ -97,10 +99,22 @@
               <span class="detail-value">{{ order.id }}</span>
             </div>
 
+            <div *ngIf="order.status === 'Return Pending'" class="return-info">
+  <i class="fas fa-clock"></i>
+  Return request is under review
+</div>
+
+<div *ngIf="order.status === 'Return Completed'" class="return-info success">
+  <i class="fas fa-check-circle"></i>
+  Return order completed
+</div>
+
+
             <div class="detail-item">
               <span class="detail-label">Expected Delivery:</span>
               <span class="detail-value">{{ order.expectedDeliveryDate | date:'mediumDate' }}</span>
             </div>
+
             <!-- <div class="detail-item">
   <span class="detail-label">Order Date:</span>
   <span class="detail-value">
@@ -114,6 +128,8 @@
                 {{ order.status }}
               </span>
             </div>
+
+            
 
             <div class="detail-item">
               <span class="detail-label">Subtotal:</span>
@@ -190,10 +206,13 @@
           </button>
         </div>
 
-        <!-- Return (only for delivered orders) -->
-        <button class="btn btn-warning btn-sm" *ngIf="order.status === 'Delivered'" (click)="openReturnPopup(order)">
-          <i class="fas fa-undo"></i> Return
-        </button>
+           <!-- Return (only for delivered orders) -->
+<button class="btn btn-warning btn-sm"
+        *ngIf="order.status === 'Delivered'"
+        (click)="openReturnPopup(order)">
+  <i class="fas fa-undo"></i> Return
+</button>
+
 
       </div>
     </div>
@@ -280,66 +299,120 @@
   </div>
 
   <!-- ============================== -->
-  <!--        RETURN POPUP MODAL      -->
-  <!-- ============================== -->
+<!--        RETURN POPUP MODAL      -->
+<!-- ============================== -->
+<!-- ============================== -->
+<!--        RETURN POPUP MODAL      -->
+<!-- ============================== -->
 
-  <div class="modal-overlay" *ngIf="isReturnPopupOpen">
-    <div class="modal-box">
-
-      <h2>Return / Exchange / Replace</h2>
-
-      <label>Select Option:</label>
-      <select [(ngModel)]="returnData.returnType">
-        <option value="Return">Return</option>
-        <option value="Exchange">Exchange</option>
-        <option value="Replace">Replace (if damaged)</option>
-      </select>
-
-      <label>Reason:</label>
-      <select [(ngModel)]="returnData.reason">
-        <option>Received damaged product</option>
-        <option>Wrong item received</option>
-        <option>Item not as described</option>
-        <option>Size/fit issue</option>
-        <option>Quality issue</option>
-        <option>Changed my mind</option>
-        <option>Ordered by mistake</option>
-        <option>Other</option>
-      </select>
-
-      <textarea placeholder="Type your reason..." *ngIf="returnData.reason === 'Other'"
-        [(ngModel)]="returnData.otherReason">
-    </textarea>
-
-      <label>Upload Photos/Videos:</label>
-      <input type="file" multiple (change)="onFilesSelected($event)">
-
-
-      <div class="modal-actions">
-        <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
-        <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
+<div class="modal-overlay" *ngIf="isReturnPopupOpen">
+  <div class="modal-box">
+    
+    <!-- Close Button -->
+    <button class="modal-close" (click)="closeReturnPopup()">
+      <i class="fas fa-times"></i>
+    </button>
+    
+    <!-- Progress Steps (Optional) -->
+    <div class="return-progress" *ngIf="showProgressSteps">
+      <div class="progress-step active">
+        <div class="step-number">1</div>
+        <div class="step-label">Reason</div>
       </div>
-
+      <div class="progress-step">
+        <div class="step-number">2</div>
+        <div class="step-label">Resolution</div>
+      </div>
+      <div class="progress-step">
+        <div class="step-number">3</div>
+        <div class="step-label">Review</div>
+      </div>
     </div>
-
-    <!-- ============================== -->
-    <!--        RETURN POPUP MODAL      -->
-    <!-- ============================== -->
-
-    <div class="modal-overlay" *ngIf="isReturnPopupOpen">
-      <div class="modal-box">
-
-        <h2>Return / Exchange / Replace</h2>
-
-        <label>Select Option:</label>
-        <select [(ngModel)]="returnData.returnType">
-          <option value="Return">Return</option>
-          <option value="Exchange">Exchange</option>
-          <option value="Replace">Replace (if damaged)</option>
+    
+    <!-- Modal Header -->
+    <h2>
+      <i class="fas fa-undo-alt"></i>
+      Return Request
+    </h2>
+    
+    <!-- Success/Error Message -->
+    <div *ngIf="returnMessage" class="alert-message" [class]="returnMessageType">
+      <i class="fas" [ngClass]="returnMessageType === 'alert-success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+      {{ returnMessage }}
+    </div>
+    
+    <!-- Return Type Selection -->
+    <div class="return-type-indicator">
+      <button class="return-type-btn" 
+              [class.active]="returnData.returnType === 'Return'"
+              (click)="returnData.returnType = 'Return'">
+        <i class="fas fa-undo"></i> Return
+      </button>
+      <button class="return-type-btn" 
+              [class.active]="returnData.returnType === 'Exchange'"
+              (click)="returnData.returnType = 'Exchange'">
+        <i class="fas fa-exchange-alt"></i> Exchange
+      </button>
+      <button class="return-type-btn" 
+              [class.active]="returnData.returnType === 'Replace'"
+              (click)="returnData.returnType = 'Replace'">
+        <i class="fas fa-sync-alt"></i> Replace
+      </button>
+    </div>
+    
+    <form (ngSubmit)="submitReturnRequest()">
+      <!-- Product Selection -->
+      <div class="form-group">
+        <label for="productSelect" class="required">
+          <i class="fas fa-box"></i> Select Product
+        </label>
+        <select id="productSelect" 
+                [(ngModel)]="selectedProductId" 
+                name="product"
+                required
+                class="form-select">
+          <option value="" disabled>Choose a product</option>
+          <option *ngFor="let p of selectedOrderForReturn?.products" 
+                  [value]="p.productId"
+                  [disabled]="p.returnedQty >= p.quantity">
+            {{ p.productName }}
+            <span *ngIf="p.returnedQty >= p.quantity">(Already returned)</span>
+          </option>
         </select>
-
-        <label>Reason:</label>
-        <select [(ngModel)]="returnData.reason">
+        <span class="form-note">
+          <i class="fas fa-info-circle"></i> Select the product you want to return
+        </span>
+      </div>
+      
+      <!-- Return Quantity -->
+      <div class="form-group">
+        <label for="returnQty" class="required">
+          <i class="fas fa-hashtag"></i> Return Quantity
+        </label>
+        <input type="number" 
+               id="returnQty" 
+               [(ngModel)]="returnQty" 
+               name="quantity"
+               min="1" 
+               [max]="getMaxReturnQuantity()"
+               required
+               class="form-control">
+        <span class="form-note">
+          <i class="fas fa-info-circle"></i> Max available: {{ getMaxReturnQuantity() }} units
+        </span>
+      </div>
+      
+      <!-- Return Reason -->
+      <div class="form-group">
+        <label for="returnReason" class="required">
+          <i class="fas fa-question-circle"></i> Reason for Return
+        </label>
+        <select id="returnReason" 
+                [(ngModel)]="returnData.reason" 
+                name="reason"
+                required
+                class="form-select">
+          <option value="" disabled>Select a reason</option>
           <option>Received damaged product</option>
           <option>Wrong item received</option>
           <option>Item not as described</option>
@@ -349,23 +422,120 @@
           <option>Ordered by mistake</option>
           <option>Other</option>
         </select>
-
-        <textarea placeholder="Type your reason..." *ngIf="returnData.reason === 'Other'"
-          [(ngModel)]="returnData.otherReason">
-    </textarea>
-
-        <label>Upload Photos/Videos:</label>
-        <input type="file" multiple (change)="onFilesSelected($event)">
-
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="closeReturnPopup()">Cancel</button>
-          <button class="btn-primary" (click)="submitReturnRequest()">Submit Request</button>
-        </div>
-
       </div>
-    </div>
-
+      
+      <!-- Other Reason Textarea -->
+      <div class="form-group" *ngIf="returnData.reason === 'Other'">
+        <label for="otherReason">
+          <i class="fas fa-comment-alt"></i> Please specify
+        </label>
+        <textarea id="otherReason"
+                  [(ngModel)]="returnData.otherReason"
+                  name="otherReason"
+                  placeholder="Please provide more details about your return reason..."
+                  rows="3"
+                  class="form-control">
+        </textarea>
+      </div>
+      
+      <!-- Return Resolution -->
+      <div class="form-group">
+        <label for="returnResolution" class="required">
+          <i class="fas fa-check-circle"></i> Preferred Resolution
+        </label>
+        <select id="returnResolution" 
+                [(ngModel)]="returnData.resolution" 
+                name="resolution"
+                required
+                class="form-select">
+          <option value="" disabled>Select resolution</option>
+          <option value="Refund">Refund to original payment method</option>
+          <option value="Wallet">Store credit / Wallet refund</option>
+          <option value="Exchange">Exchange </option>
+          <option value="Replacement">Replacement (defective item)</option>
+        </select>
+        <span class="form-note" *ngIf="returnData.resolution === 'Refund'">
+          <i class="fas fa-clock"></i> Refunds are processed within 5-7 business days
+        </span>
+        <span class="form-note" *ngIf="returnData.resolution === 'Wallet'">
+          <i class="fas fa-wallet"></i> Store credit is added instantly to your account
+        </span>
+      </div>
+      
+      <!-- File Upload -->
+      <div class="form-group">
+        <label for="returnPhotos">
+          <i class="fas fa-camera"></i> Upload Photos (Optional)
+        </label>
+        <input type="file" 
+               id="returnPhotos" 
+               (change)="onFilesSelected($event)"
+               multiple
+               accept="image/*"
+               class="form-control">
+        <span class="form-note">
+          <i class="fas fa-info-circle"></i> Upload clear photos of the product (max 5 files)
+        </span>
+        
+        <!-- File Preview -->
+        <div class="file-preview" *ngIf="selectedFiles.length">
+          <div class="file-preview-item" *ngFor="let file of selectedFiles; let i = index">
+            <img [src]="getFilePreview(file)" alt="Preview">
+            <button class="remove-file" (click)="removeFile(i)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Additional Notes -->
+      <div class="form-group">
+        <label for="additionalNotes">
+          <i class="fas fa-sticky-note"></i> Additional Notes (Optional)
+        </label>
+        <textarea id="additionalNotes"
+                  [(ngModel)]="returnData.additionalNotes"
+                  name="additionalNotes"
+                  placeholder="Any other information that might help us process your return..."
+                  rows="3"
+                  class="form-control">
+        </textarea>
+      </div>
+      
+      <!-- Terms and Conditions -->
+      <div class="form-group">
+        <div class="checkbox-group">
+          <label class="custom-checkbox">
+            <input type="checkbox" 
+                   [(ngModel)]="returnData.agreeTerms" 
+                   name="agreeTerms"
+                   required>
+            <span class="checkmark"></span>
+            <span class="label-text">
+              I agree to the return policy and understand that returns must be initiated within 7 days of delivery
+            </span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Modal Actions -->
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeReturnPopup()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" 
+                class="btn btn-primary" 
+                [disabled]="!returnData.agreeTerms || submitting"
+                [class.loading]="submitting">
+          <i class="fas fa-paper-plane"></i>
+          {{ submitting ? 'Submitting...' : 'Submit Return Request' }}
+        </button>
+      </div>
+    </form>
   </div>
+</div>
+
+
+
 
 </div>

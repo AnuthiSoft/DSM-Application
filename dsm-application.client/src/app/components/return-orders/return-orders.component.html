@@ -1,0 +1,160 @@
+<div class="return-orders-container">
+  <div class="welcome-header">
+    <h2>My Return Orders</h2>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading dashboard-card">
+    <div class="loading-content">
+      <i class="fas fa-spinner fa-spin"></i> 
+      <span>Loading return orders...</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && returnOrders.length === 0" class="empty-state dashboard-card">
+    <div class="empty-content">
+      <i class="fas fa-box-open"></i>
+      <h3>No Return Orders Yet</h3>
+      <p>Your return requests will appear here.</p>
+    </div>
+  </div>
+
+  <!-- Return Orders List -->
+  <div *ngIf="!loading && returnOrders.length > 0" class="return-orders-list">
+    <div class="return-card dashboard-card" *ngFor="let r of returnOrders">
+      
+      <!-- Header -->
+      <div class="return-header">
+        <h4>Return #{{ r.id }}</h4>
+        <span class="status-badge" [class]="r.status.toLowerCase()">
+  {{
+    r.status === 'Rejected' && r.rejectedBy === 'Distributor'
+      ? 'Rejected by Distributor'
+      : r.status === 'Rejected' && r.rejectedBy === 'Customer'
+      ? 'Cancelled by You'
+      : r.status
+  }}
+</span>
+      </div>
+
+      <!-- Summary -->
+      <div class="return-summary">
+        <p><strong>Order ID:</strong> {{ r.orderId }}</p>
+        <p><strong>Quantity:</strong> {{ r.returnQty }}</p>
+        <p><strong>Reason:</strong> {{ r.reason }}</p>
+        <p><strong>Date:</strong> {{ r.createdAt | date:'medium' }}</p>
+      </div>
+
+      <!-- Return Instructions -->
+      <div *ngIf="isApproved(r) || isReceived(r)" class="return-section">
+        <h4><i class="fas fa-clipboard-list"></i> Return Instructions</h4>
+        <ul class="instructions-list">
+          <li><i class="fas fa-check-circle"></i> Pack item securely in original packaging</li>
+          <li><i class="fas fa-check-circle"></i> Remove old shipping labels</li>
+          <li><i class="fas fa-check-circle"></i> Include all accessories and manuals</li>
+        </ul>
+        <div class="return-info-grid">
+          <div class="info-item">
+            <i class="fas fa-barcode"></i>
+            <div>
+              <small>Return Tracking ID</small>
+              <p>RTN-{{ r.id }}</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-calendar-check"></i>
+            <div>
+              <small>Expected Refund Date</small>
+              <p>3–5 business days after inspection</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Tracking -->
+      <div class="return-timeline">
+        <h4><i class="fas fa-map-marker-alt"></i> Status Tracking</h4>
+        <div class="timeline-container">
+          <div class="timeline-progress" [ngClass]="r.status.toLowerCase()"></div>
+          <div class="timeline-steps">
+            <span [class.active]="timelineActive('Pending', r)" class="timeline-step">
+              <i class="fas fa-flag"></i>
+              <small>Initiated</small>
+            </span>
+            <span [class.active]="timelineActive('PickupConfirmed', r)" class="timeline-step">
+              <i class="fas fa-check-circle"></i>
+              <small>Confirmed</small>
+            </span>
+            <span [class.active]="timelineActive('Received', r)" class="timeline-step">
+              <i class="fas fa-truck-loading"></i>
+              <small>Picked Up</small>
+            </span>
+            <span [class.active]="timelineActive('Completed', r)" class="timeline-step">
+              <i class="fas fa-check-double"></i>
+              <small>Completed</small>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distributor Message -->
+      <div *ngIf="r.distributorMessage" class="distributor-message">
+        <div class="message-header">
+          <i class="fas fa-info-circle"></i>
+          <strong>Distributor Note</strong>
+        </div>
+        <p>{{ r.distributorMessage }}</p>
+      </div>
+
+      <!-- Completion Details -->
+      <div *ngIf="isCompleted(r)" class="return-section success">
+        <h4><i class="fas fa-check-circle"></i> Return Completed</h4>
+        <div class="completion-grid">
+          <div class="completion-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <div>
+              <small>Refund Amount</small>
+              <p class="refund-amount">Calculated after inspection</p>
+            </div>
+          </div>
+          <div class="completion-item">
+            <i class="fas fa-wallet"></i>
+            <div>
+              <small>Refund Method</small>
+              <p>Wallet / Original Payment</p>
+            </div>
+          </div>
+          <div class="completion-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <small>Timeline</small>
+              <p>3–5 business days</p>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="r.reason.includes('Replacement')" class="replacement-info">
+          <div class="replacement-header">
+            <i class="fas fa-sync-alt"></i>
+            <strong>Replacement Information</strong>
+          </div>
+          <p>Replacement has been shipped</p>
+          <p class="tracking-id">Tracking ID: SHP-{{ r.id }}</p>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="return-footer">
+        <button class="btn btn-primary" (click)="viewDetails(r)">
+          <i class="fas fa-eye"></i> View Details
+        </button>
+        <!-- <button *ngIf="canCancel(r)" class="btn btn-outline-primary" (click)="cancelReturn(r)">
+          <i class="fas fa-times"></i> Cancel Return
+        </button> -->
+        
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 <!-- Navigation Bar -->
 <div class="body">
 
+
   <!-- Sidebar Navigation -->
   <div class="dashboard-sidebar">
     <div class="sidebar-header">
@@ -139,15 +140,15 @@
           <table class="table table-striped align-middle">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Company</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>GST</th>
-                <th>Status</th>
-                <th>Premium</th>
-                <th>Categories</th>
+                <th class="text-center">ID</th>
+                <th class="text-center">Company</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">Email</th>
+                <th class="text-center">Phone</th>
+                <th class="text-center">GST</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Premium</th>
+                <th class="text-center">Categories</th>
                 <th class="text-center">Actions</th>
               </tr>
             </thead>
@@ -155,21 +156,21 @@
               <tr *ngFor="let d of searchText ? filteredDistributors : distributors">
                 <td class="fw-semibold">{{ d.distributorId }}</td>
                 <td class="fw-semibold">{{ d.companyName }}</td>
-                <td>{{ d.name }}</td>
-                <td>{{ d.email }}</td>
-                <td>{{ d.phoneNumber }}</td>
-                <td>{{ d.gst }}</td>
-                <td>
-                  <span class="status-badge bg-success" *ngIf="d.isActive">Active</span>
+                <td class="fw-semibold">{{ d.name }}</td>
+                <td class="fw-semibold">{{ d.email }}</td>
+                <td class="fw-semibold">{{ d.phoneNumber }}</td>
+                <td class="fw-semibold">{{ d.gst }}</td>
+                <td class="fw-semibold">
+                  <span class="status-badge bg-success" *ngIf="d.isActive" >Active</span>
                   <span class="status-badge bg-secondary" *ngIf="!d.isActive">Inactive</span>
                 </td>
-                <td>
-                  <span *ngIf="d.isPremium" class="premium-indicator">
+                <td class="fw-semibold">
+                  <span *ngIf="d.isPremium" class="premium-indicator" >
                     <i class="fas fa-crown fa-sm text-warning"></i> Premium
                   </span>
                   <span *ngIf="!d.isPremium" class="text-muted">Standard</span>
                 </td>
-                <td>
+                <td class="fw-semibold">
                   <div class="categories-list">
                     {{ d.categories?.join(", ") || "-" }}
                   </div>
@@ -421,6 +422,7 @@
               </div>
 
                     <!-- <div class="row">
+                    <!-- <div class="row">
                       <div class="col-md-6">
                         <div class="mb-3">
                           <label class="form-label">Categories</label>
@@ -489,9 +491,8 @@
       </div>
     </div>
     <!-- ⭐ END OF MODAL -->
-
-  </div> <!-- Closing tag for dashboard-main -->
-</div> <!-- Closing tag for body -->
+          </div> <!-- Closing tag for dashboard-main -->
+        </div> <!-- Closing tag for body -->
 
 <!-- Footer -->
 <footer>

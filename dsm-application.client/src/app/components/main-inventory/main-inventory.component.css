@@ -145,7 +145,7 @@
 
         .table-dark th {
             background: transparent !important;
-            color: white !important;
+           color: var(--text-color) !important;
             font-weight: 600;
             font-size: 0.9rem;
             text-transform: uppercase;
@@ -155,7 +155,7 @@
             position: relative;
         }
 
-        .table-dark th::after {
+        [data-theme="dark"].table-dark th::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -241,7 +241,7 @@
 
         .theme-toggle:hover {
             background: var(--primary-color);
-            color: white;
+           color: var(--text-color) !important;
         }
 
         @media (max-width: 768px) {

@@ -172,6 +172,7 @@ builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<ImageService>();
 
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<BlobService>();
 
 

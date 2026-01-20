@@ -5,13 +5,23 @@ using MongoDB.Bson;
 namespace DSM_Application.Server.Models
 
 {
+    [BsonIgnoreExtraElements]
 
     public class Order
 
     {
+
+
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } 
+        public string Id { get; set; } = null!;
+
+
+
+
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ReturnId { get; set; }
+
         public string CustomerId { get; set; }
 
         public string DistributorId { get; set; }
@@ -31,6 +41,7 @@ namespace DSM_Application.Server.Models
         public DateTime CanceledOn { get; set; } = DateTime.UtcNow;
 
         [BsonElement("employeeId")]
+
         public string? EmployeeId { get; set; }
 
         [BsonElement("employeeName")]
@@ -65,6 +76,7 @@ namespace DSM_Application.Server.Models
         public string AssignedEmployeeId { get; set; }   // REQUIRED
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;  // REQUIRED
+
         public string? CustomerName { get; set; }
 
         public string? CustomerPhone { get; set; }
@@ -72,6 +84,7 @@ namespace DSM_Application.Server.Models
         public string? CustomerEmail { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
+
         // 🟦 🆕 ADD ONLY NEW FIELDS FOR "NEW ORDER REQUEST FORM"
 
         // ----------------------------------------------
@@ -81,6 +94,7 @@ namespace DSM_Application.Server.Models
         public DateTime OrderedDate { get; set; }
 
         // ✅ ADD THIS LINE
+
         public DateTime? UpdatedOn { get; set; }
 
         // NEW FIELD → Retailer dropdown
@@ -107,11 +121,14 @@ namespace DSM_Application.Server.Models
 
         public string OrderSource { get; set; }       // "RETAILER" or "CASH_COLLECTOR"
 
-       
+
+
         public decimal BasicDiscount { get; set; }
+
         public decimal TotalGst { get; set; }
+
         public decimal GstAmount { get; set; } = 0;
-    
+
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
 
     }

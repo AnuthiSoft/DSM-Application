@@ -73,17 +73,11 @@ const phone: string = this.request.phoneNumber || "";
     });
   }
 checkPasswordStrength() {
-  const pwd = this.request.password || '';
-
-  const hasUpper = /[A-Z]/.test(pwd);
-  const hasLower = /[a-z]/.test(pwd);
-  const hasNumber = /\d/.test(pwd);
-  const hasMinLen = pwd.length >= 8;
-
-  if (hasUpper && hasLower && hasNumber && hasMinLen) {
+  const pwd = this.request.password;
+  if (pwd.length >= 12) {
     this.passwordStrength = 'strong';
     this.passwordStrengthText = 'Strong';
-  } else if (pwd.length >= 6) {
+  } else if (pwd.length >= 8) {
     this.passwordStrength = 'medium';
     this.passwordStrengthText = 'Medium';
   } else {
@@ -92,10 +86,10 @@ checkPasswordStrength() {
   }
 }
 
-// hasMinLength(): boolean { return this.request.password.length >= 8; }
-// hasUpperCase(): boolean { return /[A-Z]/.test(this.request.password); }
-// hasLowerCase(): boolean { return /[a-z]/.test(this.request.password); }
-// hasNumber(): boolean { return /\d/.test(this.request.password); }
+hasMinLength(): boolean { return this.request.password.length >= 8; }
+hasUpperCase(): boolean { return /[A-Z]/.test(this.request.password); }
+hasLowerCase(): boolean { return /[a-z]/.test(this.request.password); }
+hasNumber(): boolean { return /\d/.test(this.request.password); }
 
 
 
@@ -103,35 +97,23 @@ isPhoneValid(): boolean {
   return /^\d{10}$/.test(this.request.phoneNumber || '');
 }
 
-isEmailValid(): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.request.email || '');
-}
 
 
 
 isFormValid(): boolean {
-  const name = this.request.name?.trim() ?? '';
-  const email = this.request.email?.trim() ?? '';
-  const phone = this.request.phoneNumber?.trim() ?? '';
-  const password = this.request.password ?? '';
-
   return (
-    name !== '' &&
-    email !== '' &&
-    this.isEmailValid() &&
+    this.request.name !== '' &&
+    this.request.email !== '' &&
+    this.request.phoneNumber !== '' &&
+        this.isPhoneValid() &&  // ✅ added here
 
-    phone !== '' &&
-    this.isPhoneValid() &&
-    this.phoneVerifiedUI === true &&
-
-    password !== '' &&
-    this.passwordStrength === 'strong' &&
-
-    !this.isProcessing
+    this.request.password !== '' &&
+    this.hasMinLength() &&
+    this.hasUpperCase() &&
+    this.hasLowerCase() &&
+    this.hasNumber()
   );
 }
-
-
 
 resetForm() {
   this.request = { name: '', email: '', phoneNumber: '', password: '' };

@@ -347,9 +347,3 @@
     justify-content: center;
   }
 }
-
-/* Force full page coverage */
-.fraud-report-container {
-  min-height: 100vh;
-  background-color: transparent; /* inherits from body */
-}

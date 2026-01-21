@@ -525,12 +525,6 @@
   padding: 25px;
 }
 
- .upload-btn-center {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
 .employee-form {
   margin-top: 10px;
 }
@@ -787,106 +781,16 @@
     width: 100%;
     justify-content: center;
   }
-
 }
 
-/* ============================= */
-/* 🌙 FILE INPUT FIX (VARIABLE BASED) */
-/* ============================= */
+/* =================================================
+   FIX: Upload Invoice - Employee name visibility
+   (Works for both Light & Dark mode)
+================================================= */
 
-.modal-content input[type="file"] {
+.modal-content .modal-body p,
+.modal-content .modal-body p strong {
   color: var(--text-color);
+  opacity: 1;
 }
 
-.modal-content input[type="file"]::file-selector-button {
-  background-color: var(--primary-color);
-  color: #ffffff;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 6px;
-  margin-right: 10px;
-  cursor: pointer;
-}
-
-.modal-content input[type="file"]::file-selector-button:hover {
-  opacity: 0.9;
-}
-
-/* ============================= */
-/* ✅ CUSTOM FILE UPLOAD (WORKS IN DARK MODE) */
-/* ============================= */
-
-.file-upload-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.file-upload-btn {
-  background-color: var(--primary-color);
-  color: #ffffff;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.file-upload-btn:hover {
-  opacity: 0.9;
-}
-
-.file-name {
-  color: var(--text-color);
-  font-size: 0.85rem;
-  opacity: 0.85;
-}
-
-/* ============================= */
-/* 🌙 DARK MODE – FINAL FIX */
-/* ============================= */
-
-.dark-theme .modal-content {
-  background-color: #1f2937;
-  color: #f9fafb;
-}
-
-.dark-theme .modal-body,
-.dark-theme .modal-body p,
-.dark-theme .modal-body strong,
-.dark-theme .modal-body label {
-  color: #f9fafb !important;
-}
-
-/* Employee label visibility */
-.dark-theme .employee-label {
-  color: #f9fafb !important;
-  opacity: 1 !important;
-}
-
-/* Text selection (Chrome, Edge) */
-.dark-theme .employee-label::selection {
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-/* Text selection (Firefox) */
-.dark-theme .employee-label::-moz-selection {
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-
-/* ============================= */
-/* 🌙 ANGULAR DARK MODE FIX */
-/* ============================= */
-
-:host-context(.dark-theme) .employee-label,
-:host-context(.dark-theme) .employee-title,
-:host-context(.dark-theme) .employee-name {
-  color: #ffffff !important;
-  opacity: 1 !important;
-}

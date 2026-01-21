@@ -73,13 +73,6 @@ getMyCustomersForCustomer() {
   );
 }
 
-  getCustomersForCashCollector() {
-  return this.api.get<any[]>(
-    'customers/for-cash-collector'
-  );
-}
-
-
 
   getCustomerById(customerId: string) {
   return this.api.get<any>(`customers/get-customer/${customerId}`);
@@ -183,7 +176,7 @@ checkPhoneExists(phoneNumber: string): Observable<boolean> {
     return this.api.get(`customers/dashboard/${customerId}`);
   }
 
-   // ✅ Connect distributor
+  // ✅ Connect distributor
   connectDistributor(customerId: string, distributorId: string): Observable<any> {
     return this.api.post(`customers/connect-distributor`, {
       customerId,

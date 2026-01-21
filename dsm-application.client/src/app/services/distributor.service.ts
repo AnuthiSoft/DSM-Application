@@ -127,20 +127,4 @@ uploadScannerQr(distributorId: string, file: File) {
       distributorId
     });
   }
-
-  // ✅ GET DISTRIBUTOR BY ID (for Fraud Report)
-getDistributorById(distributorId: string) {
-  return this.http.get<any>(
-    `/api/Distributors/${distributorId}`
-  );
 }
-
-
-getDistributorName(distributorId: string) {
-  return this.api.get<any[]>(
-    `distributor/accepted-customers?distributorId=${distributorId}`
-  );
-}
-
-}
-

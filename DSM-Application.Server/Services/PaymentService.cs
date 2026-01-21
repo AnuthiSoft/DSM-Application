@@ -322,61 +322,40 @@ namespace DSM_Application.Server.Services
         // ---------------------------------------------------------
         // 3️⃣ CUSTOMER PAYMENT HISTORY (FULL — NO DATE REQUIRED)
         // ---------------------------------------------------------
-        public async Task<CustomerPaymentStatusDto> GetCustomerPaymentHistory(string orderId)
+        public async Task<object> GetCustomerPaymentHistory(string orderId)
         {
             // 1️⃣ Fetch order
-            var order = await _db.Orders
-                .Find(o => o.Id == orderId)
-                .FirstOrDefaultAsync();
-
+            var order = await _db.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
             if (order == null)
-                throw new Exception("Order not found");
+                return new { message = "Order not found" };
 
-            // 2️⃣ Fetch all payments
+            decimal orderTotal = order.TotalAmount;
+
+            // 2️⃣ Fetch ALL payments for this order
             var payments = await _db.PaymentHistory
                 .Find(p => p.OrderId == orderId)
                 .SortBy(p => p.PaymentDate)
                 .ToListAsync();
 
-            decimal totalPaid = payments.Sum(p => p.AmountPaidToday);
-            if (totalPaid > order.TotalAmount)
-                totalPaid = order.TotalAmount;
+            // 3️⃣ Calculate totals
+            decimal totalPaid = payments.Sum(x => x.AmountPaidToday);
+            if (totalPaid > orderTotal) totalPaid = orderTotal;
 
-            // 3️⃣ Detect cancellation (🔥 CRITICAL)
-            bool isCancelled =
-                order.Status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) ||
-                order.Status.Equals("Canceled", StringComparison.OrdinalIgnoreCase);
+            decimal pending = order.RemainingAmount;
 
-            // 4️⃣ Business rule for cancelled orders
-            decimal pendingAmount = isCancelled
-                ? 0
-                : order.TotalAmount - totalPaid;
+            if (pending < 0) pending = 0;
 
-            if (pendingAmount < 0)
-                pendingAmount = 0;
-
-            // 5️⃣ Return DTO (🔥 THIS IS WHAT FE NEEDS)
-            return new CustomerPaymentStatusDto
+            // 4️⃣ Return ALL payments
+            return new
             {
                 OrderId = order.Id,
-                OrderStatus = order.Status,          // ✅ REQUIRED FOR FE
-                TotalAmount = order.TotalAmount,
-                TotalPaid = isCancelled ? 0 : totalPaid,
-                PendingAmount = pendingAmount,
-
-                Payments = payments.Select(p => new CustomerPaymentHistoryItemDto
-                {
-                    PaymentId = p.PaymentId,
-                    AmountPaidToday = p.AmountPaidToday,
-                    PendingAmount = isCancelled ? 0 : p.PendingAmount,
-                    PaymentMode = p.PaymentMode,
-                    CashierId = p.CashierId,
-                    PaymentDate = p.PaymentDate,
-                    IsHandedOver = p.IsHandedOver
-                }).ToList()
+                CustomerName = order.CustomerName,
+                TotalAmount = orderTotal,
+                TotalPaid = orderTotal - order.RemainingAmount,
+                PendingAmount = order.RemainingAmount,
+                Payments = payments
             };
         }
-
         public async Task<List<object>> GetPendingHandovers(string distributorId)
         {
             var handoverCollection = _db.Database.GetCollection<Handover>("Handover");

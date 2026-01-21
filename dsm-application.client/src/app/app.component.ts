@@ -7,10 +7,12 @@ import { ThemeService } from './shared/theme.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent  {
-   title = 'distributormanagementsystem.client';
   constructor(private themeService: ThemeService) {}
 
   toggleTheme() {
     this.themeService.toggleTheme();
-  } 
+  }
+  title = 'distributormanagementsystem.client';
+
+   
 }

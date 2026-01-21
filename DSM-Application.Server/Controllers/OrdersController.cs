@@ -344,89 +344,23 @@ namespace DSM_Application.Server.Controllers
         //    return Ok(orders);
         //}
 
-        //[HttpGet("distributor/{distributorId}")]
-        //public async Task<IActionResult> GetOrdersByDistributor(string distributorId, [FromQuery] string? status = null)
-        //{
-        //    var filter = Builders<Order>.Filter.Eq(o => o.DistributorId, distributorId);
-        //    if (!string.IsNullOrEmpty(status))
-        //    {
-        //        filter = Builders<Order>.Filter.And(filter, Builders<Order>.Filter.Eq(o => o.Status, status));
-        //    }
-
-        //    var orders = await _mongo.Orders.Find(filter)
-        //        .SortByDescending(o => o.OrderDate)
-        //        .ToListAsync();
-
-        //    var result = new List<DistributorOrderDto>();
-        //    foreach (var o in orders)
-        //    {
-        //        var customer = await _mongo.Customers.Find(c => c.CustomerId == o.CustomerId).FirstOrDefaultAsync();
-        //        Employee employee = null;
-        //        if (!string.IsNullOrEmpty(o.EmployeeId))
-        //        {
-        //            employee = await _mongo.Employees
-        //                .Find(e => e.EmployeeId == o.EmployeeId)
-        //                .FirstOrDefaultAsync();
-        //        }
-
-        //        result.Add(new DistributorOrderDto
-        //        {
-        //            Id = o.Id,
-        //            CustomerId = o.CustomerId,
-        //            CustomerName = customer?.Name ?? "Unknown",
-        //            CustomerEmail = customer?.Email,
-        //            CustomerPhone = customer?.PhoneNumber,
-        //            Products = o.Products,
-        //            Subtotal = o.Subtotal,
-        //            TotalDiscount = o.TotalDiscount,
-        //            TotalAmount = o.TotalAmount,
-        //            SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
-        //            QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
-        //            PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
-        //            TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
-        //            OrderedDate = o.OrderedDate,
-        //            ExpectedDeliveryDate = o.ExpectedDeliveryDate,
-        //            Status = o.Status,
-        //            EmployeeId = employee?.EmployeeId,
-        //            Name = employee?.Name,
-        //            PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
-        //            CollectedAmount = o.CollectedAmount,
-        //            PaymentMethod = o.PaymentMethod,
-        //            CollectedOn = o.CollectedOn,
-        //            DeliveryReceiptUrl = o.DeliveryReceiptUrl,
-        //            DeliveredOn = o.DeliveredOn,
-        //            // ✅ Include these two fields
-
-        //        });
-        //    }
-
-        //    return Ok(result);
-        //}
-
         [HttpGet("distributor/{distributorId}")]
-        public async Task<IActionResult> GetOrdersByDistributor(string distributorId,[FromQuery] string? status = null)
+        public async Task<IActionResult> GetOrdersByDistributor(string distributorId, [FromQuery] string? status = null)
         {
             var filter = Builders<Order>.Filter.Eq(o => o.DistributorId, distributorId);
-
-            // ✅ IMPORTANT FIX
-            if (!string.IsNullOrEmpty(status) && status != "All")
+            if (!string.IsNullOrEmpty(status))
             {
-                filter &= Builders<Order>.Filter.Eq(o => o.Status, status);
+                filter = Builders<Order>.Filter.And(filter, Builders<Order>.Filter.Eq(o => o.Status, status));
             }
 
-            var orders = await _mongo.Orders
-                .Find(filter)
+            var orders = await _mongo.Orders.Find(filter)
                 .SortByDescending(o => o.OrderDate)
                 .ToListAsync();
 
             var result = new List<DistributorOrderDto>();
-
             foreach (var o in orders)
             {
-                var customer = await _mongo.Customers
-                    .Find(c => c.CustomerId == o.CustomerId)
-                    .FirstOrDefaultAsync();
-
+                var customer = await _mongo.Customers.Find(c => c.CustomerId == o.CustomerId).FirstOrDefaultAsync();
                 Employee employee = null;
                 if (!string.IsNullOrEmpty(o.EmployeeId))
                 {
@@ -442,30 +376,27 @@ namespace DSM_Application.Server.Controllers
                     CustomerName = customer?.Name ?? "Unknown",
                     CustomerEmail = customer?.Email,
                     CustomerPhone = customer?.PhoneNumber,
-
                     Products = o.Products,
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
-
                     SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                     QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
                     PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
                     TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
-
                     OrderedDate = o.OrderedDate,
                     ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     Status = o.Status,
-
                     EmployeeId = employee?.EmployeeId,
                     Name = employee?.Name,
-
                     PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
                     CollectedAmount = o.CollectedAmount,
                     PaymentMethod = o.PaymentMethod,
                     CollectedOn = o.CollectedOn,
+                    DeliveryReceiptUrl = o.DeliveryReceiptUrl,
                     DeliveredOn = o.DeliveredOn,
-                    DeliveryReceiptUrl = o.DeliveryReceiptUrl
+                    // ✅ Include these two fields
+
                 });
             }
 
@@ -1044,151 +975,20 @@ namespace DSM_Application.Server.Controllers
         }
 
 
-        [HttpPost("place")]
-        public async Task<IActionResult> PlaceOrder(OrderRequestDto dto)
-        {
-            await _inventoryService.DeductStock(dto.ProductId, dto.Quantity);
-            //await _inventoryService.DeductStockFIFO(dto.ProductId, dto.Quantity);
-            return Ok("Order placed successfully");
-        }
-
-
-        //[Authorize(Roles = "CashCollector,Employee")]
-        //[HttpPost("create-by-collector")]
-        //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
-        //{
-        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-        //  ?? User.FindFirst("UserId")?.Value;
-        //    //var userId = User.FindFirst("id")?.Value;
-        //    var role = User.FindFirst("role")?.Value;
-
-        //    var order = await _orderService.CreateByCollector(dto, userId, role);
-
-        //    return Ok(order);
-        //}
-
 
         [Authorize(Roles = "CashCollector,Employee")]
-
         [HttpPost("create-by-collector")]
-
         public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
-
         {
-
-            var userId = User.FindFirst("UserId")?.Value;
-
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+          ?? User.FindFirst("UserId")?.Value;
+            //var userId = User.FindFirst("id")?.Value;
             var role = User.FindFirst("role")?.Value;
 
-            var distributorId = User.FindFirst("DistributorId")?.Value;
-
-            if (string.IsNullOrEmpty(distributorId))
-
-                return Unauthorized("DistributorId missing from token");
-
-            // 🔐 FORCE distributor from JWT (ignore frontend value)
-
-            dto.DistributorId = distributorId;
-
-            var order = await _orderService.CreateByCollector(
-
-                dto,
-
-                userId,
-
-                role,
-
-                distributorId
-
-            );
-
+            var order = await _orderService.CreateByCollector(dto, userId, role);
 
             return Ok(order);
-
         }
-
-
-        //[Authorize(Roles = "CashCollector,Employee")]
-        //[HttpGet("my-customers")]
-        //public async Task<IActionResult> GetMyCustomers()
-        //{
-        //    // 1️⃣ Distributor comes from JWT
-        //    var distributorId = User.FindFirst("DistributorId")?.Value;
-
-        //    if (string.IsNullOrEmpty(distributorId))
-        //        return Unauthorized("DistributorId missing from token");
-
-        //    // 2️⃣ Get approved connections
-        //    var connections = await _mongo.Connections
-        //        .Find(c => c.DistributorId == distributorId &&
-        //                   c.Status == ConnectionStatus.Approved)
-        //        .ToListAsync();
-
-        //    var customers = new List<object>();
-
-        //    // 3️⃣ Fetch customer details
-        //    foreach (var c in connections)
-        //    {
-        //        var customer = await _mongo.Customers
-        //            .Find(x => x.CustomerId == c.CustomerId)
-        //            .FirstOrDefaultAsync();
-
-        //        if (customer != null)
-        //        {
-        //            customers.Add(new
-        //            {
-        //                customerId = customer.CustomerId,
-        //                name = customer.Name,
-        //                phone = customer.PhoneNumber,
-        //                address = customer.Address
-        //            });
-        //        }
-        //    }
-
-        //    return Ok(customers);
-        //}
-
-        [Authorize(Roles = "CashCollector,Employee")]
-        [HttpGet("my-customers")]
-        public async Task<IActionResult> GetMyCustomers()
-        {
-            var distributorId = User.FindFirst("DistributorId")?.Value;
-
-            if (string.IsNullOrEmpty(distributorId))
-                return Unauthorized("DistributorId missing from token");
-
-            var connections = await _mongo.Connections
-                .Find(c =>
-                    c.DistributorId == distributorId &&
-                    c.Status == ConnectionStatus.Accepted
-                )
-                .ToListAsync();
-
-            var customers = new List<object>();
-
-            foreach (var c in connections)
-            {
-                var customer = await _mongo.Customers
-                    .Find(x => x.CustomerId == c.CustomerId)
-                    .FirstOrDefaultAsync();
-
-                if (customer != null)
-                {
-                    customers.Add(new
-                    {
-                        customerId = customer.CustomerId,
-                        name = customer.Name,
-                        phone = customer.PhoneNumber,
-                        address = customer.Address
-                    });
-                }
-            }
-
-            return Ok(customers);
-        }
-
-
-
 
         //[Authorize(Roles = "CashCollector,Employee")]
         //[HttpPost("create-by-collector")]

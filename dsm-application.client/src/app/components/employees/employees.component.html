@@ -384,7 +384,7 @@
           </button>
         </div>
 
-        <!-- <div class="modal-body">
+        <div class="modal-body">
           <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p>
 
           <input type="file" (change)="onFileSelected($event)" accept="application/pdf" />
@@ -394,46 +394,7 @@
           </button>
         </div>
 
-      </div> -->
-
-      <div class="modal-body">
-        <p class="employee-label">
-  <span class="employee-title">Employee:</span>
-  <span class="employee-name">{{ selectedEmployee?.name }}</span>
-</p>
-
-        <!-- <p class="employee-label">
-  <strong>Employee:</strong> {{ selectedEmployee?.name }}
-</p> -->
-
-  <!-- <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p> -->
-
-  <div class="file-upload-wrapper">
-  <label class="file-upload-btn">
-    <i class="fas fa-upload"></i>
-    Choose PDF
-    <input
-      type="file"
-      accept="application/pdf"
-      hidden
-      (change)="onFileSelected($event)"
-    />
-  </label>
-
-  <span class="file-name">
-    {{ selectedFileName || 'No file chosen' }}
-  </span>
-</div>
-
-  <!-- <input type="file" (change)="onFileSelected($event)" accept="application/pdf" /> -->
-
-  <div class="upload-btn-center">
-    <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
-      Upload PDF
-    </button>
-  </div>
-</div>
-
+      </div>
     </div>
     <!-- ========================================================== -->
 

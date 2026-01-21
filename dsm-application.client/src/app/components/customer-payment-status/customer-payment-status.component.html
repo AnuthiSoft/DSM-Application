@@ -35,13 +35,9 @@
           <button class="btn btn-primary search-btn" (click)="check()">
             <i class="fas fa-search"></i> Check Status
           </button>
-          <button class="btn btn-clear" (click)="clearSearch()">
-            Clear
-          </button>
-
-          <!-- <button class="btn btn-outline-secondary" (click)="clearSearch()">
+          <button class="btn btn-outline-secondary" (click)="clearSearch()">
             <i class="fas fa-times"></i> Clear
-          </button> -->
+          </button>
         </div>
       </div>
     </div>
@@ -56,11 +52,11 @@
     <div class="summary-cards">
       <div class="summary-card">
         <div class="summary-icon">
-          <!-- <i class="fas fa-hashtag"></i> -->
+          <i class="fas fa-hashtag"></i>
         </div>
         <div class="summary-content">
           <div class="summary-label">Order ID</div>
-          <div class="summary-value order-id">{{ status.orderId }}</div>
+          <div class="summary-value order-id">#{{ status.orderId }}</div>
         </div>
       </div>
 
@@ -89,85 +85,27 @@
           <i class="fas fa-clock"></i>
         </div>
         <div class="summary-content">
-
-                    <div class="summary-value pending-amount"
-              *ngIf="!isOrderCancelled(); else cancelledPending">
-            ₹{{ status.pendingAmount | number:'1.2-2' }}
-          </div>
-
-          <ng-template #cancelledPending>
-            <div class="summary-value cancelled-text">
-              Order Cancelled
-            </div>
-          </ng-template>
-
-          <!-- <div class="summary-label">Pending Amount</div>
-          <div class="summary-value pending-amount">₹{{ status.pendingAmount | number:'1.2-2' }}</div> -->
+          <div class="summary-label">Pending Amount</div>
+          <div class="summary-value pending-amount">₹{{ status.pendingAmount | number:'1.2-2' }}</div>
         </div>
       </div>
     </div>
 
     <!-- Progress Bar -->
-    <!-- <div class="payment-progress"> -->
-
-      <!-- Payment Progress -->
-          <ng-container *ngIf="!isOrderCancelled(); else cancelledProgress">
-
-            <div class="payment-progress">
-              <div class="progress-label">
-                <span>Payment Progress</span>
-                <span class="progress-percentage">{{ getPaymentPercentage() }}%</span>
-              </div>
-
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="getPaymentPercentage()"></div>
-              </div>
-
-              <div class="progress-stats">
-                <span>Paid: ₹{{ status.totalPaid | number:'1.2-2' }}</span>
-                <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span>
-              </div>
-            </div>
-
-          </ng-container>
-
-          <!-- CANCELLED TEMPLATE -->
-          <ng-template #cancelledProgress>
-            <div class="payment-progress cancelled-text">
-              This order has been cancelled. No payment required.
-            </div>
-          </ng-template>
- </div>
-      <!-- <div class="payment-progress" *ngIf="!isOrderCancelled(); else cancelledProgress">
-
+    <div class="payment-progress">
       <div class="progress-label">
         <span>Payment Progress</span>
         <span class="progress-percentage">{{ getPaymentPercentage() }}%</span>
       </div>
-
-          <ng-template #cancelledProgress>
-      <div class="payment-progress cancelled-text">
-        This order has been cancelled. No payment required.
-      </div>
-    </ng-template>
-
       <div class="progress-bar-container">
         <div class="progress-bar" [style.width.%]="getPaymentPercentage()"></div>
       </div>
       <div class="progress-stats">
         <span>Paid: ₹{{ status.totalPaid | number:'1.2-2' }}</span>
-        <span *ngIf="!isOrderCancelled(); else cancelledRemaining">
-          Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}
-        </span>
-
-        <ng-template #cancelledRemaining>
-          <span class="cancelled-text">Order Cancelled</span>
-        </ng-template>
-
-        <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span> -->
-      <!-- </div>
-    </div> -->
- 
+        <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Payment History -->
  <div *ngIf="status?.payments?.length" class="payment-history-section">

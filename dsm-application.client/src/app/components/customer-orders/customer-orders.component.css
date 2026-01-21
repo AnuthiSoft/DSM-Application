@@ -287,47 +287,9 @@ color: var(--text-color);
 .order-footer {
   display: flex;
   gap: 10px;
-   flex-wrap: wrap;   /* ✅ allows next line on small screens */
   padding-top: 15px;
   border-top: 1px solid var(--border-color);
 }
-
-/* ============================= */
-/* 🔘 ORDER ACTION BUTTON FIX */
-/* ============================= */
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;               /* spacing between icon & text */
-  min-height: 36px;
-  padding: 6px 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.action-btn i {
-  font-size: 14px;
-  width: 16px;            /* forces icon alignment */
-  text-align: center;
-}
-/* ============================= */
-/* 🔘 FORCE EQUAL BUTTON SIZE */
-/* ============================= */
-
-.order-footer .action-btn {
-   min-width: 150px; 
-  min-height: 40px;      /* force same height */
-  padding: 8px 18px;     /* equal padding */
-  font-size: 0.9rem;     /* same text size */
-  line-height: 1;    
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;    /* prevents vertical shrink */
-}
-
 
 /* Buttons */
 .btn {
@@ -343,10 +305,10 @@ color: var(--text-color);
   font-size: 0.9rem;
 }
 
-/* .btn-sm {
+.btn-sm {
   padding: 6px 12px;
   font-size: 0.8rem;
-} */
+}
 
 .btn-primary {
  background-color: var(--primary-color);
@@ -394,18 +356,9 @@ color: var(--text-color);
   transform: translateY(-1px);
 }
 
-/* .btn i {
+.btn i {
   margin-right: 5px;
-} */
-
-.btn-outline-secondary.action-btn:hover {
-  background-color: #374151;
-  color: #ffffff;
 }
-.btn-outline-secondary.action-btn {
-  border-width: 2px;
-}
-
 
 
 .modal-overlay {
@@ -489,12 +442,6 @@ color: var(--text-color);
   }
 }
 
-.cancelled-text {
-  text-decoration: line-through;
-  color: #9ca3af;
-  opacity: 0.6;
-}
-
 @media (max-width: 480px) {
   .orders-stats {
     grid-template-columns: 1fr;
@@ -520,11 +467,3 @@ color: var(--text-color);
     justify-content: center;
   }
 }
-
-/* 🔴 Cancelled / Canceled (RED) */
-.status-badge.cancelled,
-.status-badge.canceled {
-  background-color: hsla(0, 93%, 45%, 0.954);
-  color: #ffffff;
-}
-

@@ -289,6 +289,7 @@ namespace DSM_Application.Server.Services
             {
                 var update = Builders<InventoryItem>.Update
                     .Set(i => i.CurrentStock, newStock)
+                    .Set(i => i.AvailableQuantity, newStock)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow);
 
                 await _inventory.UpdateOneAsync(filter, update);
@@ -416,41 +417,20 @@ namespace DSM_Application.Server.Services
                 .FirstOrDefaultAsync();
         }
 
-
-        // 🔥 Damaged + Expired summary (NON-SELLABLE STOCK)
-        // 🔥 Damaged stock only (Expired handled later)
-        // 🔥 Damaged + Expired summary (NON-SELLABLE STOCK)
-        public async Task<List<DamageExpiredSummaryDto>> GetDamagedAndExpiredItemsAsync(string distributorId)
+        public async Task<List<InventoryBatch>> GetBatchDetailsByProduct(string productId)
         {
-            // 1️⃣ Get distributor inventory
-            var inventory = await _inventory
-                .Find(i => i.DistributorId == distributorId)
+            return await _batches
+                .Find(b => b.ProductId == productId)
+                .SortBy(b => b.ExpiryDate)
                 .ToListAsync();
-
-            // 2️⃣ Filter damaged OR expired
-            return inventory
-                .Where(i => i.DamagedQty > 0 || i.ExpiryDate < DateTime.UtcNow)
-                .Select(i => new DamageExpiredSummaryDto
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductName,   // make sure this exists in InventoryItem
-                    DamagedQty = i.DamagedQty,
-
-                    // Expired stock = remaining current stock if expired
-                    ExpiredQty = i.ExpiryDate < DateTime.UtcNow
-                        ? i.CurrentStock
-                        : 0
-                })
-                .ToList();
         }
 
-
-        // 🔔 Expiring stock within next N days (WARNING ONLY)
-        public async Task<List<InventoryItem>> GetExpiringStock(
-            string distributorId,
-            int days)
+        public async Task<List<ExpiringStockDto>> GetExpiringStock(
+    string distributorId,
+    int days = 30)
         {
-            var thresholdDate = DateTime.UtcNow.AddDays(days);
+            var today = DateTime.UtcNow;
+            var alertDate = today.AddDays(days);
 
             var batches = await _batches.Find(b =>
                 b.DistributorId == distributorId &&

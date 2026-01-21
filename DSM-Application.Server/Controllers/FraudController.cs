@@ -14,47 +14,21 @@ namespace DSM_Application.Server.Controllers
         private readonly FraudService _fraudService;
         public FraudController(FraudService fraudService) { _fraudService = fraudService; }
 
-        //[HttpPost]
-        ////[Authorize]
-        //public async Task<IActionResult> Report([FromBody] AddFraudReportDto dto)
-        //{
-        //    var r = new FraudReport
-        //    {
-        //        ReportedById = dto.ReportedById,
-        //        TargetId = dto.TargetId,
-        //        TargetType = dto.TargetType,
-        //        Reason = dto.Reason,
-        //        EvidenceUrl = dto.EvidenceUrl
-        //    };
-        //    await _fraudService.AddAsync(r);
-        //    return Ok(new { message = "Fraud report submitted (pending admin review)" });
-        //}
-
         [HttpPost]
+        //[Authorize]
         public async Task<IActionResult> Report([FromBody] AddFraudReportDto dto)
         {
-            if (string.IsNullOrEmpty(dto.TargetId) || string.IsNullOrEmpty(dto.TargetType))
-            {
-                return BadRequest("Invalid fraud target");
-            }
-
-            var report = new FraudReport
+            var r = new FraudReport
             {
                 ReportedById = dto.ReportedById,
                 TargetId = dto.TargetId,
                 TargetType = dto.TargetType,
                 Reason = dto.Reason,
-                EvidenceUrl = dto.EvidenceUrl,
-                Status = "Pending"
+                EvidenceUrl = dto.EvidenceUrl
             };
-
-            await _fraudService.AddAsync(report);
-
+            await _fraudService.AddAsync(r);
             return Ok(new { message = "Fraud report submitted (pending admin review)" });
         }
-
-
-
 
         [HttpGet("pending")]
         //[Authorize(Roles = "Admin")]

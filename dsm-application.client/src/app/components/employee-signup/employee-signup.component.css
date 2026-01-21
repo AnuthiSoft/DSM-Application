@@ -7,29 +7,17 @@
 
 .body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-   background: linear-gradient(to right,var(--bg-color),var(--section-bg-light));
-  color: var(--text-color);
-  /* background: linear-gradient(to right, #f8f9fa, #ecf0f1);
-  color: #333; */
+  background: linear-gradient(to right, #f8f9fa, #ecf0f1);
+  color: #333;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-/* .navbar {
+.navbar {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   background-color: white;
-} */
-
-.navbar {
-  background-color: var(--header-bg);
 }
-
-.navbar .navbar-brand,
-.navbar .nav-link {
-  color: var(--text-color) !important;
-}
-
 
 .signup-container {
   flex: 1;
@@ -39,9 +27,7 @@
 }
 
 .signup-card {
-  /* background: white; */
-  background: var(--card-bg);
-  color: var(--text-color);
+  background: white;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -51,10 +37,8 @@
 }
 
 .signup-header {
-  /* background: #2c3e50;
-  color: white; */
-   background: var(--secondary-color);
-  color: var(--white-bg);
+  background: #2c3e50;
+  color: white;
   padding: 25px;
   text-align: center;
 }
@@ -67,10 +51,7 @@
   padding: 12px 15px;
   border-radius: 8px;
   margin-bottom: 20px;
-  /* border: 1px solid #ddd; */
-   background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-color);
+  border: 1px solid #ddd;
   transition: all 0.3s;
 }
 
@@ -105,23 +86,18 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--border-color);
+  background: #ddd;
 }
 
 .divider-text {
-  .terms-text {
-  color: var(--text-muted);
   padding: 0 15px;
-  /* color: #777; */
+  color: #777;
   font-size: 14px;
-  }
 }
 
 footer {
-  /* background-color: #2c3e50;
-  color: white; */
-  background-color: var(--footer-bg);
-  color: var(--footer-text);
+  background-color: #2c3e50;
+  color: white;
   padding: 20px 0;
   text-align: center;
 }
@@ -157,27 +133,4 @@ footer {
   font-size: 0.9rem;
   color: #666;
   margin-top: 15px;
-}
-
-.dark-theme .signup-card {
-  background: var(--card-bg);
-}
-
-.dark-theme .signup-header {
-  background: var(--section-bg-dark);
-}
-
-.dark-theme .form-control {
-  background: var(--input-bg);
-  color: var(--text-color);
-}
-
-.dark-theme .divider::before,
-.dark-theme .divider::after {
-  background: var(--border-color);
-}
-
-.dark-theme .terms-text,
-.dark-theme .divider-text {
-  color: var(--text-muted);
 }

@@ -14,12 +14,10 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<InventoryItem> _inventory;
         private readonly InventoryService _inventoryService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly MongoDbService _mongo;
 
 
         public ReturnService(MongoDbService db, InventoryService inventoryService, IHttpContextAccessor httpContextAccessor)
         {
-            _mongo = db; // ✅ ADD THIS
             _orders = db.Orders;
             _returns = db.ReturnRequests;
             _inventory = db.InventoryItems;    // ✅ ADD THIS
@@ -27,7 +25,7 @@ namespace DSM_Application.Server.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        //// 1️⃣ CREATE RETURN (ONLY AFTER DELIVERY)
+        // 1️⃣ CREATE RETURN (ONLY AFTER DELIVERY)
         public async Task<ReturnRequest> CreateReturnAsync(CreateReturnDto dto)
         {
             var order = await _orders.Find(o => o.Id == dto.OrderId).FirstOrDefaultAsync();
@@ -41,56 +39,24 @@ namespace DSM_Application.Server.Services
             if (product == null)
                 throw new Exception("Product not found in order");
 
+            int remainingQty = product.Quantity - product.ReturnedQty;
+            if (dto.ReturnQty > remainingQty)
+                throw new Exception("Return quantity exceeds delivered quantity");
+
             var returnRequest = new ReturnRequest
             {
                 OrderId = dto.OrderId,
                 ProductId = dto.ProductId,
                 ReturnQty = dto.ReturnQty,
                 Reason = dto.Reason,
-
-                ReturnType = dto.ReturnType,
-                ExchangeProductId = dto.ExchangeProductId,
-                ExchangeQty = dto.ExchangeQty,
-
                 Status = "Pending",
                 CreatedAt = DateTime.UtcNow
             };
 
             await _returns.InsertOneAsync(returnRequest);
-            return returnRequest;
+
+            return returnRequest; // ✅ IMPORTANT
         }
-
-        //public async Task<ReturnRequest> CreateReturnAsync(CreateReturnDto dto)
-        //{
-        //    var order = await _orders.Find(o => o.Id == dto.OrderId).FirstOrDefaultAsync();
-        //    if (order == null)
-        //        throw new Exception("Order not found");
-
-        //    if (order.Status != "Delivered")
-        //        throw new Exception("Return allowed only after delivery");
-
-        //    var product = order.Products.FirstOrDefault(p => p.ProductId == dto.ProductId);
-        //    if (product == null)
-        //        throw new Exception("Product not found in order");
-
-        //    int remainingQty = product.Quantity - product.ReturnedQty;
-        //    if (dto.ReturnQty > remainingQty)
-        //        throw new Exception("Return quantity exceeds delivered quantity");
-
-        //    var returnRequest = new ReturnRequest
-        //    {
-        //        OrderId = dto.OrderId,
-        //        ProductId = dto.ProductId,
-        //        ReturnQty = dto.ReturnQty,
-        //        Reason = dto.Reason,
-        //        Status = "Pending",
-        //        CreatedAt = DateTime.UtcNow
-        //    };
-
-        //    await _returns.InsertOneAsync(returnRequest);
-
-        //    return returnRequest; // ✅ IMPORTANT
-        //}
 
         // 2️⃣ APPROVE RETURN
         public async Task ApproveReturnAsync(string returnId)
@@ -151,26 +117,12 @@ namespace DSM_Application.Server.Services
                 throw new Exception("Inventory not found");
 
             // 5️⃣ Update stock
-            // 5️⃣ Update stock based on return reason
-            if (ret.Reason == "Damaged" || ret.Reason == "Expired")
-            {
-                // ❌ NOT sellable → move to damaged
-                inventory.DamagedQty += ret.ReturnQty;
-            }
-            else
-            {
-                // ✅ Sellable return → add back to stock
-                inventory.CurrentStock += ret.ReturnQty;
-                inventory.ReturnedQty += ret.ReturnQty;
-            }
-
+            inventory.CurrentStock += ret.ReturnQty;
+            //inventory.AvailableQuantity += ret.ReturnQty;
+            inventory.ReturnedQty += ret.ReturnQty;
             inventory.UpdatedAt = DateTime.UtcNow;
 
-            await _inventory.ReplaceOneAsync(
-                i => i.InventoryId == inventory.InventoryId,
-                inventory
-            );
-
+            await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
             // 6️⃣ Update return status
             ret.Status = "Completed";
@@ -309,112 +261,6 @@ namespace DSM_Application.Server.Services
                 .Find(r => r.Status == status)
                 .SortByDescending(r => r.CreatedAt)
                 .ToListAsync();
-        }
-
-        public async Task CompleteExchangeAsync(string returnId)
-        {
-            // 1️⃣ Get DistributorId from JWT
-            var distributorId = _httpContextAccessor.HttpContext?
-                .User?.FindFirst("DistributorId")?.Value;
-
-            if (string.IsNullOrEmpty(distributorId))
-                throw new Exception("Unauthorized: Distributor not found");
-
-            // 2️⃣ Get return request
-            var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
-            if (ret == null)
-                throw new Exception("Return not found");
-
-            // 🔐 Ensure this is an EXCHANGE
-            if (!string.Equals(ret.ReturnType, "Exchange", StringComparison.OrdinalIgnoreCase))
-                throw new Exception("Not an exchange request");
-
-            // 🔐 Ensure return was physically received
-            if (ret.Status != "Received")
-                throw new Exception("Exchange can be completed only after return is received");
-
-            // 3️⃣ Get original order & validate distributor ownership
-            var originalOrder = await _orders.Find(o =>
-                o.Id == ret.OrderId &&
-                o.DistributorId == distributorId
-            ).FirstOrDefaultAsync();
-
-            if (originalOrder == null)
-                throw new Exception("Unauthorized access to this order");
-
-            // 4️⃣ Update INVENTORY for returned product (add back stock)
-            var returnInventory = await _inventory.Find(i =>
-                i.ProductId == ret.ProductId &&
-                i.DistributorId == distributorId
-            ).FirstOrDefaultAsync();
-
-            if (returnInventory == null)
-                throw new Exception("Inventory not found for returned product");
-
-            returnInventory.CurrentStock += ret.ReturnQty;
-            returnInventory.ReturnedQty += ret.ReturnQty;
-            returnInventory.UpdatedAt = DateTime.UtcNow;
-
-            await _inventory.ReplaceOneAsync(
-                i => i.InventoryId == returnInventory.InventoryId,
-                returnInventory
-            );
-
-            // 5️⃣ Fetch EXCHANGE product details
-            var exchangeProduct = await _mongo.Products
-                .Find(p => p.ProductId == ret.ExchangeProductId)
-                .FirstOrDefaultAsync();
-
-            if (exchangeProduct == null)
-                throw new Exception("Exchange product not found");
-
-            int exchangeQty = ret.ExchangeQty ?? ret.ReturnQty;
-            decimal unitPrice = exchangeProduct.Price;
-            decimal subtotal = unitPrice * exchangeQty;
-
-            // 6️⃣ Build replacement order product
-            var replacementProduct = new OrderProduct
-            {
-                ProductId = exchangeProduct.ProductId,
-                ProductName = exchangeProduct.ProductName,
-                DistributorId = exchangeProduct.DistributorId,
-
-                Price = unitPrice,
-                Quantity = exchangeQty,
-
-                Subtotal = subtotal,
-                DiscountAmount = 0,
-                FinalPrice = subtotal
-            };
-
-            // 7️⃣ Create replacement order
-            var replacementOrder = new Order
-            {
-                CustomerId = originalOrder.CustomerId,
-                DistributorId = distributorId,
-
-                Products = new List<OrderProduct> { replacementProduct },
-
-                Subtotal = subtotal,
-                TotalDiscount = 0,
-                TotalAmount = subtotal,
-
-                OrderDate = DateTime.UtcNow,
-                OrderedDate = DateTime.UtcNow,
-                ExpectedDeliveryDate = DateTime.UtcNow.AddDays(1),
-
-                Status = "Replacement",
-                OrderSource = "EXCHANGE"
-            };
-
-            await _orders.InsertOneAsync(replacementOrder);
-
-            // 8️⃣ Complete return & link replacement order
-            ret.Status = "Completed";
-            ret.CompletedAt = DateTime.UtcNow;
-            ret.ReplacementOrderId = replacementOrder.Id;
-
-            await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
         }
 
 

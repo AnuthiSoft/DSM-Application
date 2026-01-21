@@ -93,27 +93,17 @@
                 <i class="fas fa-edit"></i> Edit
               </button>
 
-    <button class="btn btn-outline-danger btn-sm me-1"
-            (click)="deleteCustomer(c.customerId!)">
-      <i class="fas fa-trash"></i> Delete
-    </button>
-  </ng-container>
-       <!-- <button
-  class="btn btn-outline-danger btn-sm"
-  [routerLink]="[
-    '/report-fraud',
-    'DISTRIBUTOR',
-    customer.addedByDistributorId
-  ]">
-  <i class="fas fa-flag"></i> Report
-</button> -->
-<button
-  class="btn btn-outline-danger btn-sm"
-  [routerLink]="['/report-fraud', 'CUSTOMER', c.customerId]">
-  <i class="fas fa-flag"></i> Report
-</button>
-
-
+              <button class="btn btn-outline-danger btn-sm me-1" (click)="deleteCustomer(c.customerId!)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </ng-container>
+            <button class="btn btn-outline-danger btn-sm" [routerLink]="[
+          '/report-fraud',
+          'customer',
+          c.customerId
+        ]">
+              <i class="fas fa-flag"></i> Report
+            </button>
           </td>
 
         </tr>

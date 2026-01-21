@@ -253,21 +253,6 @@
 }
 
 /* ===== PHONE FIELD ===== */
-/* +91 prefix – theme aware */
-.phone-prefix {
-  height: 100%;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-
-  background: var(--card-bg);
-  color: var(--text-color);
-
-  border-right: 1px solid var(--border-color);
-  font-weight: 500;
-  border-radius: 8px 0 0 8px;
-}
-
 .phone-wrapper {
   display: flex;
   align-items: center;
@@ -279,6 +264,18 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* +91 prefix */
+.phone-prefix {
+  height: 100%;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border-right: 1px solid #d0d5dd;
+  color: #344054;
+  font-weight: 500;
+  border-radius: 8px 0 0 8px;
+}
 
 /* input */
 .phone-input {
@@ -306,38 +303,4 @@
 /* ❌ Error state (optional) */
 .phone-wrapper.error {
   border-color: #e11d48;
-}
-
-/* 🌙 Dark theme phone input fix */
-
-.dark-theme .phone-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.dark-theme .phone-prefix {
-  background-color: var(--card-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-right: none;
-
-  /* padding: 10px 12px; */
-  border-radius: 6px 0 0 6px;
-  font-weight: 500;
-
-  opacity: 1;
-}
-
-.dark-theme .phone-input {
-  background-color: var(--card-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-left: none;
-
-  border-radius: 0 6px 6px 0;
-}
-
-/* Placeholder */
-.dark-theme .phone-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
 }

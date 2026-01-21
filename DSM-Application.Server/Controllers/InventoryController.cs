@@ -378,6 +378,23 @@ namespace DSM_Application.Server.Controllers
             await _inventoryService.UpdateBatchDatesAsync(dto);
             return Ok();
         }
+        // 🔥 Damaged + Expired stock (NON-SELLABLE)
+        [Authorize(Roles = "Distributor")]
+        [HttpGet("non-sellable")]
+        public async Task<IActionResult> GetDamagedAndExpiredItems()
+        {
+            // 🔐 DistributorId from JWT
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+
+            if (string.IsNullOrEmpty(distributorId))
+                return Unauthorized("Invalid distributor");
+
+            var data = await _inventoryService
+                .GetDamagedAndExpiredItemsAsync(distributorId);
+
+            return Ok(data);
+        }
+
 
     }
 

@@ -29,16 +29,18 @@ namespace DSM_Application.Server.Models
         public DateTime UpdatedAt { get; set; }
 
         // ✅ Auto-calculated (DO NOT STORE IN DB)
-
         [BsonIgnore] // 🔥 VERY IMPORTANT
+        public int? AvailableQuantity
+        {
+            get
+            {
+                return CurrentStock - DamagedQty - ReturnedQty;
+            }
+        }
 
-        public int? AvailableQuantity { get; set; }
-
-
+        //public int AvailableQuantity { get; set; }
         public int DamagedQty { get; set; } = 0;    // ❌ damaged items
-
-
-
+        //public int ReturnedQty { get; set; } = 0;    // ↩ returned items
         public DateTime ManufactureDate { get; set; }
         [BsonElement("ReturnedQty")]
         public int? ReturnedQty { get; set; } = 0;

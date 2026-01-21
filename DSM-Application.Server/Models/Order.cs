@@ -13,7 +13,7 @@ namespace DSM_Application.Server.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } 
         public string CustomerId { get; set; }
-
+        [BsonRepresentation(BsonType.ObjectId)]
         public string DistributorId { get; set; }
 
         public List<OrderProduct> Products { get; set; } = new List<OrderProduct>();

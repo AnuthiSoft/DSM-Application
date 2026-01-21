@@ -167,6 +167,18 @@ h2::before {
   color: var(--primary-color);
 }
 
+/* FIX: Filter header text not visible in dark mode */
+.filter-header h4 {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+/* Ensure icon is visible too */
+.filter-header h4 i {
+  color: var(--primary-color);
+}
+
+
 /* Search and Filter Grids - Unified */
 .search-filter-grid {
   display: grid;

@@ -305,3 +305,27 @@ select.form-control {
   background-color: #9ca3af;
   transform: none;
 }
+
+.rating-select {
+  appearance: auto !important;
+  -webkit-appearance: menulist !important;
+  -moz-appearance: menulist !important;
+
+  background-image: none !important;
+
+  /* ⭐ KEY FIX — MORE HEIGHT */
+  height: 44px;                 /* ⬅️ THIS FIXES IT */
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  padding-right: 12px !important;
+  padding-left: 12px;
+
+  font-family: "Segoe UI Emoji",
+               "Apple Color Emoji",
+               "Noto Color Emoji",
+               Arial, sans-serif;
+
+  font-size: 1rem;
+  line-height: 1.2;
+}

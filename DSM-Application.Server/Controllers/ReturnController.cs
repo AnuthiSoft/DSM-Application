@@ -113,6 +113,14 @@ namespace DSM_Application.Server.Controllers
             return Ok(data);
         }
 
+        [Authorize(Roles = "Distributor")]
+        [HttpPut("complete-exchange/{returnId}")]
+        public async Task<IActionResult> CompleteExchange(string returnId)
+        {
+            await _returnService.CompleteExchangeAsync(returnId);
+            return Ok("Exchange completed");
+        }
+
 
     }
 }

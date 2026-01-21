@@ -115,10 +115,20 @@ loadDistributors() {
 
         if (res.isGlobal && res.distributors?.length) {
           this.dashboardType = 'global';
-          this.distributors = res.distributors.map(d => ({
+          this.distributors = res.distributors.map(d => {
+
+          console.log('REPORTING DISTRIBUTOR ID =>', d.distributor.distributorId);
+
+          return {
             ...d.distributor,
+
+            // 🔥 IMPORTANT: force correct business ID
+            distributorId: d.distributor.distributorId,
+
             canConnect: d.canConnect
-          }));
+          };
+        });
+
         } 
         else if (!res.isGlobal && res.distributor) {
           this.dashboardType = 'local';

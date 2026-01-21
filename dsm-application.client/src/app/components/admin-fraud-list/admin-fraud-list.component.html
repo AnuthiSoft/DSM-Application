@@ -55,7 +55,16 @@
           <tbody>
             <tr *ngFor="let report of pendingFrauds" class="report-row">
               <td class="fw-semibold text-primary">#{{ report.id }}</td>
-              <td class="fw-semibold">{{ report.targetId }}</td>
+              <!-- <td class="fw-semibold">{{ report.targetId }}</td> -->
+               <td>
+              <div class="fw-semibold">
+                {{ report.targetName || 'Loading...' }}
+              </div>
+              <div class="text-muted small">
+                {{ report.targetId }}
+              </div>
+            </td>
+
               <td>
                 <span class="target-type-badge" [ngClass]="getTargetTypeClass(report.targetType)">
                   {{ report.targetType }}

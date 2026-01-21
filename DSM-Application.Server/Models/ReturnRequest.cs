@@ -19,6 +19,15 @@ namespace DSM_Application.Server.Models
 
         public string Status { get; set; }
         // Pending | Approved | Received | Completed | Rejected
+        // 🔥 NEW
+        public string ReturnType { get; set; }   // Refund | Exchange
+
+        public string? ExchangeProductId { get; set; }
+        public int? ExchangeQty { get; set; }
+
+        // 🔥 Link replacement order
+        public string? ReplacementOrderId { get; set; }
+
 
         public string? RejectionReason { get; set; }
 

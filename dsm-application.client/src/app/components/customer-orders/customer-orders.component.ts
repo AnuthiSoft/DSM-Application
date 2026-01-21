@@ -36,6 +36,12 @@ export class CustomerOrdersComponent {
     this.loadOrders();
   }
 
+  isCancelled(order: any): boolean {
+  const status = order?.status?.toLowerCase();
+  return status === 'cancelled' || status === 'canceled';
+}
+
+
   loadOrders(): void {
     if (!this.customerId) return;
     this.loading = true;
@@ -234,19 +240,35 @@ export class CustomerOrdersComponent {
   }
 
   // Count completed orders
+  // getCompletedCount(): number {
+  //   return this.orders.filter(o => o.status === 'Delivered').length;
+  // }
   getCompletedCount(): number {
-    return this.orders.filter(o => o.status === 'Delivered').length;
-  }
+  return this.activeOrders.filter(
+    o => o.status?.toLowerCase() === 'delivered'
+  ).length;
+}
 
   // Count pending orders
   getPendingCount(): number {
-    return this.orders.filter(o => o.status === 'Pending').length;
-  }
+  return this.activeOrders.filter(
+    o => o.status?.toLowerCase() === 'pending'
+  ).length;
+}
+  // getPendingCount(): number {
+  //   return this.orders.filter(o => o.status === 'Pending').length;
+  // }
 
   // Calculate total spent
   getTotalSpent(): number {
-    return this.orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  }
+  return this.activeOrders.reduce(
+    (sum, o) => sum + (o.totalAmount || 0),
+    0
+  );
+}
+  // getTotalSpent(): number {
+  //   return this.orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  // }
 
   // ✅ FIXED View Details for order
   viewOrderDetails(id: string | null | undefined): void {

@@ -634,6 +634,8 @@ body[data-theme='dark'] .dashboard-card {
  
         /* Main container */
 .live-tracking-container {
+   background: var(--bg-color);
+  color: var(--text-color);
     padding: 20px;
 }
  
@@ -654,16 +656,18 @@ body[data-theme='dark'] .dashboard-card {
  
 /* Dropdown */
 .employee-select {
+  background: var(--card-bg);
+  color: var(--text-color);
     width: 250px;
     padding: 8px 12px;
     border-radius: 6px;
-    border: 1px solid #ccc;
+   border: 1px solid var(--border-color);
     font-size: 15px;
 }
  
 /* Start Button */
 .btn-start {
-    background-color: #28a745;
+    background-color: #22c55e;
     color: white;
     border: none;
     padding: 8px 14px;
@@ -679,7 +683,7 @@ body[data-theme='dark'] .dashboard-card {
  
 /* Stop Button */
 .btn-stop {
-    background-color: #dc3545;
+    background-color: #ef4444;
     color: white;
     border: none;
     padding: 8px 14px;
@@ -696,11 +700,11 @@ body[data-theme='dark'] .dashboard-card {
 /* Map card styling */
 .tracking-map-card {
     margin-top: 15px;
-    background: #fff;
+    background: var(--card-bg);
     padding: 0;
     border-radius: 10px;
-    border: 1px solid #ddd;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
 }
  
 /* MAP WRAPPER TO FORCE HEIGHT */
@@ -730,26 +734,60 @@ html[data-theme="dark"] .chart-card {
   margin-top: 12px; 
 }
 
-.dashboard-main .dashboard-under-dev {
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: 500;
-  color: #6c757d;
-  border: 1px dashed #ddd;
-  border-radius: 8px;
-  background: #fafafa;
+/* ============================= */
+/* 🌙 DARK THEME TABLE FIX */
+/* ============================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-bg);
+  color: var(--text-color);
 }
-.dashboard-under-dev {
-  margin: 40px auto;
-  padding: 40px;
-  max-width: 800px;
-  text-align: center;
-  font-size: 18px;
-  color: #4c4633;
-  background: #fff3cd;
-  border: 1px dashed #ffc107;
-  border-radius: 8px;
+
+th {
+  background: var(--hover-color);
+  color: var(--text-color);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
 }
+
+td {
+  background: var(--card-bg);
+  color: var(--text-color);
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Row hover */
+tbody tr:hover {
+  background: var(--hover-color);
+}
+
+
+/* 🔥 Prevent blurry text in dark mode tables */
+html[data-theme="dark"] table,
+html[data-theme="dark"] th,
+html[data-theme="dark"] td {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+html[data-theme="dark"] th {
+  background: #1f2530 !important;
+  color: #e5e7eb !important;
+}
+
+/* Make stock numbers crisp */
+td span,
+td strong {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.dashboard-card table {
+  background: transparent;
+}
+

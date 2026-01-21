@@ -2,26 +2,26 @@
   height="500px"
   width="100%"
   [center]="center"
-  [zoom]="zoom"> -->
+  [zoom]="zoom"> 
 
-  <!-- 🔵 Employee live markers -->
-  <!-- <map-marker
+  🔵 Employee live markers 
+   <map-marker
     *ngFor="let m of markers"
     [position]="m.position"
     [label]="m.label">
-  </map-marker> -->
+  </map-marker>
 
-  <!-- 🔵 Employee route lines -->
-  <!-- <map-polyline
+  🔵 Employee route lines 
+ <map-polyline
     *ngFor="let empId of (polylines | keyvalue)"
     [path]="empId.value"
  [options]="polylineOptions">
   </map-polyline>
 
-</google-map> -->
+</google-map> 
 
 
-<!-- <div class="live-distance-panel">
+ <div class="live-distance-panel">
   <h4>📏 Live Distance</h4>
 
   <div *ngFor="let empId of liveDistances | keyvalue">
@@ -29,3 +29,25 @@
     {{ empId.value | number:'1.2-2' }} km
   </div>
 </div> -->
+
+<google-map
+  height="100%"
+  width="100%"
+  [center]="center"
+  [zoom]="zoom">
+
+  <!-- 🔵 Employee live markers -->
+  <map-marker
+    *ngFor="let m of markers"
+    [position]="m.position"
+    [label]="m.label">
+  </map-marker>
+
+  <!-- 🔵 Employee route lines -->
+  <map-polyline
+    *ngFor="let emp of (polylines | keyvalue)"
+    [path]="emp.value"
+    [options]="polylineOptions">
+  </map-polyline>
+
+</google-map>

@@ -11,7 +11,9 @@ export interface FraudReport {
   id: string;
   reportedById: string;
   targetId: string;
-  targetType: string;
+  // targetType: string;
+  targetType: 'CUSTOMER' | 'DISTRIBUTOR';
+  targetName?: string; // ✅ REQUIRED
   reason: string;
   evidenceUrl?: string;
   status: string;

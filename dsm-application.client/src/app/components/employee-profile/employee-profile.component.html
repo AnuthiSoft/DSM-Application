@@ -93,30 +93,49 @@
 <!-- ============================= -->
 <!--  EMPLOYEE PROFILE INFO CARD  -->
 <!-- ============================= -->
+<div class="profile-section">
 
-<div class="info-card">
-  <h4><i class="fas fa-info-circle"></i> Profile Information</h4>
+  <div class="profile-content">  <!-- ✅ GRID CONTAINER -->
 
-  <div class="info-grid">
-    <div class="info-item">
-      <span class="info-label">Member Since</span>
-      <span class="info-value">
-        {{ profile.createdDate ? (profile.createdDate | date:'mediumDate') : 'Not available' }}
-      </span>
+    <!-- LEFT SIDE : EMPLOYEE PROFILE FORM -->
+    <div class="profile-card">
+      <!-- avatar -->
+      <!-- name / email -->
+      <!-- form fields -->
+      <!-- save button -->
     </div>
 
-    <div class="info-item">
-      <span class="info-label">Last Updated</span>
-      <span class="info-value">
-        {{ profile.updatedDate ? (profile.updatedDate | date:'mediumDate') : 'Not available' }}
-      </span>
+    <!-- RIGHT SIDE : EMPLOYEE INFO CARD -->
+    <div class="info-card">
+      <h4><i class="fas fa-info-circle"></i> Profile Information</h4>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Member Since</span>
+          <span class="info-value">
+            {{ profile.createdDate
+              ? (profile.createdDate | date:'mediumDate')
+              : 'Not available' }}
+          </span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Last Updated</span>
+          <span class="info-value">
+            {{ profile.updatedDate
+              ? (profile.updatedDate | date:'mediumDate')
+              : 'Not available' }}
+          </span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Account Status</span>
+          <span class="info-value status-active">
+            {{ profile.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
     </div>
 
-    <div class="info-item">
-      <span class="info-label">Account Status</span>
-      <span class="info-value status-active">
-        {{ profile.isActive ? 'Active' : 'Inactive' }}
-      </span>
-    </div>
   </div>
 </div>

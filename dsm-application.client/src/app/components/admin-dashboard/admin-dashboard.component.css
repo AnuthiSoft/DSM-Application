@@ -470,3 +470,91 @@ footer {
     min-width: 800px;
   }
 }
+
+
+
+.modal-content {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.modal-header {
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-title {
+  color: var(--text-color);
+}
+
+.dark-theme .btn-close {
+  filter: invert(1);
+}
+
+/* ===============================
+   ADMIN ACTION ICONS – DARK MODE
+   =============================== */
+
+.dark-theme .btn-action,
+.dark-theme .btn-action i,
+.dark-theme td .fa,
+.dark-theme td i {
+  color: #e5e7eb !important;
+}
+
+.dark-theme .btn-action:hover i {
+  color: #ffffff !important;
+}
+
+/* ===============================
+   SEARCH INPUT – DARK MODE
+   =============================== */
+
+.dark-theme .search-box {
+  background-color: #1f1f1f;
+  color: #e5e7eb;
+  border: 1px solid var(--border-color);
+}
+
+.dark-theme .search-box::placeholder {
+  color: #9ca3af;
+}
+
+/* ===============================
+   ADMIN TABLE – DARK MODE
+   =============================== */
+
+.dark-theme table {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+
+.dark-theme table thead th {
+  background-color: var(--header-bg);
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dark-theme table tbody tr {
+  background-color: var(--card-bg);
+}
+
+.dark-theme table tbody tr:nth-child(even) {
+  background-color: #252525;
+}
+
+/* ===============================
+   ACTION COLUMN BACKGROUND – DARK
+   =============================== */
+
+.dark-theme td:last-child {
+  background-color: var(--card-bg);
+}
+
+.dark-theme .btn-edit:hover,
+.dark-theme .btn-delete:hover,
+.dark-theme .btn-activate:hover,
+.dark-theme .btn-deactivate:hover,
+.dark-theme .btn-premium:hover {
+  color: #ffffff !important;
+}

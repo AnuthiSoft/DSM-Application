@@ -290,3 +290,45 @@ textarea.ng-invalid.ng-touched {
     font-size: 1.7rem;
   }
 }
+
+.profile-page {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Left side */
+.profile-main {
+  width: 100%;
+}
+
+/* Right side */
+.profile-side {
+  position: sticky;
+  top: 20px;
+}
+
+.info-card {
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+/* Mobile */
+@media (max-width: 992px) {
+  .profile-page {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-side {
+    position: static;
+  }
+}
+
+.profile-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: flex-start; /* 🔥 IMPORTANT */
+}

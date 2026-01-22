@@ -57,17 +57,29 @@ export class EmployeeProfileComponent implements OnInit {
   //     });
   //   }
 
-  loadProfile() {
-    this.employeeService.getMyProfile().subscribe({
-      next: (res) => {
-        this.profile = res;   // <-- Use entire response directly
-        this.profileImageUrl = res.profileImageUrl || '';
-      },
-      error: () => {
-        this.toastr.error('Failed to load profile', 'Error');
-      }
-    });
-  }
+loadProfile() {
+  this.employeeService.getMyProfile().subscribe({
+    next: (res) => {
+      Object.assign(this.profile, {
+        name: res.name,
+        email: res.email,
+        phoneNumber: res.phoneNumber,
+        street: res.street,
+        city: res.city,
+        state: res.state,
+        pincode: res.pincode,
+        country: res.country,
+        createdDate: res.createdDate,
+        updatedDate: res.updatedDate,
+        isActive: res.isActive
+      });
+    }
+  });
+}
+
+
+
+
 
 
   //   updateProfile() {
@@ -108,7 +120,7 @@ export class EmployeeProfileComponent implements OnInit {
   // ======================
   // UPDATE PROFILE
   // ======================
-  updateProfile() {
+updateProfile() {
   const formData = new FormData();
 
   formData.append('Name', this.profile.name || '');
@@ -123,19 +135,19 @@ export class EmployeeProfileComponent implements OnInit {
     formData.append('profileImage', this.selectedImage);
   }
 
-  this.employeeService.updateMyProfile(formData).subscribe({
-    next: () => {
-      this.toastr.success('Profile updated successfully', 'Success');
-      this.loadProfile();
-      this.loadImage();
-      this.selectedImage = null;
-    },
-    error: () => {
-      this.toastr.error('Profile update failed', 'Error');
-    }
-  });
-}
+ this.employeeService.updateMyProfile(formData).subscribe({
+  next: () => {
+    this.toastr.success('Profile updated successfully', 'Success');
 
+    setTimeout(() => {
+      this.loadProfile();
+    }, 200);
+  },
+  error: () => {
+    this.toastr.error('Profile update failed', 'Error');
+  }
+});
+}
 
 
   loadImage() {

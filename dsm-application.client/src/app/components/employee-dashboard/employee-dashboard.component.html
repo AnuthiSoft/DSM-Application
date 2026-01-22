@@ -80,10 +80,25 @@
         <i class="fas fa-rupee-sign"></i> <span>Collect Cash</span>
       </div>
 
-      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('cash-summary')"
+      <!-- <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('cash-summary')"
         (click)="setActiveTab('cash-summary')">
         <i class="fas fa-file-alt"></i> <span>My Daily Summary</span>
-      </div>
+      </div> -->
+
+<div *ngIf="isCashCollector"
+     class="nav-item"
+     [class.active]="isActive('cash-summary')"
+     (click)="setActiveTab('cash-summary')">
+
+  <span class="nav-icon">
+    <i class="fas fa-file-alt"></i>
+  </span>
+
+  <span class="nav-text">My Daily Summary</span>
+</div>
+
+
+
 
       <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('handover')"
         (click)="setActiveTab('handover')">

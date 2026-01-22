@@ -100,8 +100,6 @@ export class AddToCartComponent implements OnInit, OnChanges {
   connectedDistributorIds: string[] = [];
 
   showCustomerDropdown = false;
-  showCustomerPopup = false;
-
 
   expectedDays: number = 1;
 
@@ -989,10 +987,6 @@ export class AddToCartComponent implements OnInit, OnChanges {
     this.showConnectionPopup = false;
     this.router.navigate(['/customer/distributors']);
   }
-
-  closeCustomerPopup(): void {
-  this.showCustomerPopup = false;
-}
 
 
 }

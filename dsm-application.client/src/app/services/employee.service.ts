@@ -117,23 +117,26 @@ deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
   
 getMyProfile(): Observable<any> {
   const token = localStorage.getItem("token");
-
   return this.http.get(
-    `${this.apiUrl}/employee-profile/my-profile`,
+    `${this.apiUrl}/employees/my-profile`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
 }
+
 
 /** UPDATE logged-in employee profile (FormData + Image) */
   updateMyProfile(formData: FormData): Observable<any> {
     const token = localStorage.getItem('token');
 
-   return this.http.put(
-  `${this.apiUrl}/employee-profile/my-profile`,
-  formData,
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+    return this.http.put(
+      `${this.baseUrl}/my-profile`,
+      formData,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
   }
+
 
 uploadProfileImage(file: File) {
   const formData = new FormData();

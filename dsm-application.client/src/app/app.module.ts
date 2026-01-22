@@ -35,14 +35,14 @@ import { EmployeeLoginComponent } from './components/employee-login/employee-log
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
- 
+
 import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
- 
+
 import { TruncatePipe } from './pipe/truncate.pipe';
 import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
 import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
- 
+
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
@@ -53,30 +53,29 @@ import { CustomerPaymentStatusComponent } from './components/customer-payment-st
 import { PaymentReportComponent } from './components/payment-report/payment-report.component';
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
- 
- 
- 
- 
+
+
+
+
 import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
 // import { GoogleMapsModule } from '@angular/google-maps';
 import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-//import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-//import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
- 
+import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
+import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { EmployeeInvoicesComponent } from './components/employee-invoices/employee-invoices.component';
- 
-//import { GoogleMapsModule } from '@angular/google-maps';
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -108,16 +107,16 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     EmployeeSignupComponent,
     AddToCartComponent,
     EmployeeProfileComponent,
- 
+
     FraudReportComponent,
- 
+
     AdminFraudListComponent,
- 
+
     TruncatePipe,
     ReviewSubmitComponent,
     AdminReviewListComponent,
- 
- 
+
+
     FraudHistoryComponent,
     AdminReviewHistoryComponent,
     CashCollectionComponent,
@@ -128,28 +127,28 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     PaymentReportComponent,
     PendingPaymentsComponent,
     PendingHandoversComponent,
- 
- 
+
+
     MainInventoryComponent,
     CustomersListComponent,
- 
- 
- 
- 
- 
- 
- 
-    //DistributorViewComponent,
-    //AddPaymentNoteComponent,
- 
- 
+
+
+
+
+
+
+
+    DistributorViewComponent,
+    AddPaymentNoteComponent,
+    DashboardComponent,
+
     InvoiceCreateComponent,
     InvoiceDetailComponent,
     EmployeeInvoicesComponent,
- 
- 
+
+
     // AdminDistributorsComponent
- 
+
     OrderHistoryComponent,
     DistributorOrdersComponent,
     CustomerOrdersComponent,
@@ -161,16 +160,16 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     EmployeeSignupComponent,
     AddToCartComponent,
     EmployeeProfileComponent,
- 
+
     FraudReportComponent,
- 
+
     AdminFraudListComponent,
- 
+
     TruncatePipe,
     ReviewSubmitComponent,
     AdminReviewListComponent,
- 
- 
+
+
     FraudHistoryComponent,
     AdminReviewHistoryComponent,
     CashCollectionComponent,
@@ -181,32 +180,32 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
     PaymentReportComponent,
     PendingPaymentsComponent,
     PendingHandoversComponent,
- 
- 
+
+
     MainInventoryComponent,
     CustomersListComponent,
     EmployeeTrackingComponent,
     InventoryBatchesComponent,
     CustomerSearchComponent,
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
     // AdminDistributorsComponent
- 
- 
- 
+
+
+
   ],
   imports: [
-    BrowserModule, HttpClientModule, //GoogleMapsModule,
-    AppRoutingModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
-      timeOut: 1500,
-      positionClass: 'toast-top-right',
+    BrowserModule, HttpClientModule,  
+    AppRoutingModule, FormsModule,  ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
+      timeOut: 2000,
+      positionClass: 'toast-center-center',
       preventDuplicates: true,
- 
+
     }),
   ],
   providers: [{
@@ -217,5 +216,3 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
   bootstrap: [AppComponent]
 })
 export class AppModule { }
- 
- 

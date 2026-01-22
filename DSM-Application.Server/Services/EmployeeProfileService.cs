@@ -1,8 +1,6 @@
-﻿using DistributorManagementSystem.Server.Models;
-using DSM_Application.Server.Models;
+﻿using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
 using MongoDB.Driver;
-using System.Security.Claims;
 
 namespace DSM_Application.Server.Services
 {
@@ -24,38 +22,37 @@ namespace DSM_Application.Server.Services
     IFormFile? profileImage
 )
         {
-            var filter = Builders<Employee>.Filter
-                .Where(e => e.Email.ToLower() == email.ToLower());
+            var employee = await _employees
+                .Find(e => e.Email == email)
+                .FirstOrDefaultAsync();
 
-            var update = Builders<Employee>.Update
-                .Set(e => e.Name, dto.Name)
-                .Set(e => e.PhoneNumber, dto.PhoneNumber)
-                .Set(e => e.Street, dto.Street ?? "")
-                .Set(e => e.City, dto.City ?? "")
-                .Set(e => e.State, dto.State ?? "")
-                .Set(e => e.Pincode, dto.Pincode ?? "")
-                .Set(e => e.Country, dto.Country ?? "")
-                .Set(e => e.UpdatedDate, DateTime.UtcNow);
+            if (employee == null)
+                throw new Exception("Employee not found");
 
+            // 🔹 Update basic fields
+            employee.Name = dto.Name;
+            employee.PhoneNumber = dto.PhoneNumber;
+            employee.Address = dto.Address;
+
+            // ✅ ADD THIS LINE
+            employee.UpdatedDate = DateTime.UtcNow;
+
+            // 🔹 Update image (stored inside MongoDB)
             if (profileImage != null && profileImage.Length > 0)
             {
                 using var ms = new MemoryStream();
                 await profileImage.CopyToAsync(ms);
 
-                update = update
-                    .Set(e => e.ProfileImageData, ms.ToArray())
-                    .Set(e => e.ProfileImageName, profileImage.FileName)
-                    .Set(e => e.ProfileImageType, profileImage.ContentType);
+                employee.ProfileImageData = ms.ToArray();
+                employee.ProfileImageName = profileImage.FileName;
+                employee.ProfileImageType = profileImage.ContentType;
             }
 
-            var result = await _employees.UpdateOneAsync(filter, update);
-
-            if (result.MatchedCount == 0)
-                throw new Exception("Employee not found");
+            await _employees.ReplaceOneAsync(
+                e => e.Id == employee.Id,
+                employee
+            );
         }
-
-
-
 
 
         // ===========================
@@ -64,7 +61,7 @@ namespace DSM_Application.Server.Services
         public async Task<EmployeeProfileDto> GetProfileByEmailAsync(string email)
         {
             var employee = await _employees
-                .Find(e => e.Email.ToLower() == email.ToLower())
+                .Find(e => e.Email == email)
                 .FirstOrDefaultAsync();
 
             if (employee == null)
@@ -76,18 +73,15 @@ namespace DSM_Application.Server.Services
                 Name = employee.Name,
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
-                Street = employee.Street,
-                City = employee.City,
-                State = employee.State,
-                Pincode = employee.Pincode,
-                Country = employee.Country,
+                Address = employee.Address,
                 Role = employee.Role,
                 IsActive = employee.IsActive,
+
+                // ✅ REQUIRED FOR RIGHT INFO CARD
                 CreatedDate = employee.CreatedDate,
                 UpdatedDate = employee.UpdatedDate
             };
         }
-
 
     }
 }

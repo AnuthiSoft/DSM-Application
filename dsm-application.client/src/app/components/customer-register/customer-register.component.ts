@@ -31,8 +31,7 @@ passwordStrengthText = '';
 
   
   sendOtp() {
-const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
-
+const phone: string = this.request.phoneNumber || "";
 
     if (!this.isPhoneValid()) {
       this.error = "Enter a valid 10-digit phone number";
@@ -54,8 +53,7 @@ const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
   }
 
   verifyOtp() {
-const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
-
+const phone: string = this.request.phoneNumber || "";
 
     this.adminService.verifyOtp(phone, this.otpCode).subscribe({
       next: (res) => {
@@ -102,8 +100,7 @@ checkPasswordStrength() {
 
 
 isPhoneValid(): boolean {
-  const phone = (this.request.phoneNumber || '').replace(/\D/g, '');
-  return /^[6-9]\d{9}$/.test(phone);
+  return /^\d{10}$/.test(this.request.phoneNumber || '');
 }
 
 isEmailValid(): boolean {
@@ -147,10 +144,9 @@ resetForm() {
 
 allowOnlyNumbers(event: any) {
   const input = event.target as HTMLInputElement;
-  const digits = input.value.replace(/\D/g, '').slice(-10);
-  this.request.phoneNumber = digits;
+  input.value = input.value.replace(/[^0-9]/g, ''); // remove non-numeric input
+  this.request.phoneNumber = input.value.substring(0, 10); // allow only max 10 digits
 }
-
 
 
 register() {

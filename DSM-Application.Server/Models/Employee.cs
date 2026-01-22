@@ -54,12 +54,5 @@ namespace DSM_Application.Server.Models
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
-
-        public string Street { get; set; } = string.Empty;
-        public string City { get; set; } = string.Empty;
-        public string State { get; set; } = string.Empty;
-        public string Pincode { get; set; } = string.Empty;
-        public string Country { get; set; } = string.Empty;
-
     }
 }

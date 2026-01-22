@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
- 
+
 import { AuthGuard } from './guards/auth.guard';
 import { ProductsComponent } from './components/products/products.component';
 import { CustomerRegisterComponent } from './components/customer-register/customer-register.component';
@@ -28,17 +28,17 @@ import { EmployeeLoginComponent } from './components/employee-login/employee-log
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component'; import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
- 
+
 import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
 import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
- 
+
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
- 
+
 // //import { DashboardComponent } from './components/dashboard/dashboard.component';
- 
- 
+
+
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
 import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
 import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
@@ -47,20 +47,19 @@ import { CustomerPaymentStatusComponent } from './components/customer-payment-st
 import { PaymentReportComponent } from './components/payment-report/payment-report.component';
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
- 
+
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
-import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
+
+
+
 const routes: Routes = [
   { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
   { path: 'customer/register', component: CustomerRegisterComponent },
@@ -86,11 +85,11 @@ const routes: Routes = [
   { path: 'test', component: TestComponent },
   { path: 'employee-login', component: EmployeeLoginComponent },
   { path: 'employee-signup', component: EmployeeSignupComponent },
- 
- 
+
+
   { path: 'admin-fruad-list', component: AdminFraudListComponent },
- 
- 
+
+
   {
     path: 'report-fraud/:targetType/:targetId',
     component: FraudReportComponent
@@ -102,7 +101,7 @@ const routes: Routes = [
     component: FraudHistoryComponent
   },
   { path: 'admin/review-history', component: AdminReviewHistoryComponent },
- 
+
   { path: 'add-to-cart', component: AddToCartComponent },
   { path: 'employee-profile', component: EmployeeProfileComponent },
   { path: 'cash-collection', component: CashCollectionComponent },
@@ -110,25 +109,22 @@ const routes: Routes = [
   { path: 'collector-reports', component: CollectorReportsComponent },
   { path: ' payment-summary', component: PaymentSummaryComponent },
   { path: ' customer-payment-status', component: CustomerPaymentStatusComponent },
- 
+
   { path: 'payment-report', component: PaymentReportComponent },
   { path: 'pending-payments', component: PendingPaymentsComponent },
   { path: 'pending-handovers', component: PendingHandoversComponent },
- 
- 
- 
+
+
+
  
  
   { path: 'customers', component: CustomersListComponent },
- 
-  { path: 'distributor-orders', component: DistributorOrdersComponent },
- 
-  // ✅ ADD THIS
-  { path: 'invoice-detail/:id', component: InvoiceDetailComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
- 
+
+ { path: 'distributor-orders', component: DistributorOrdersComponent },
+
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];
- 
+
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]

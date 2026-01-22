@@ -210,7 +210,7 @@
 
 .total-pending-summary {
   font-weight: 600;
-  color: var(--accent-color);
+  color: red;
   font-size: 0.9rem;
 }
 

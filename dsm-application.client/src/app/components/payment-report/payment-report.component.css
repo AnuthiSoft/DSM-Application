@@ -11,6 +11,115 @@
   transition: all 0.3s ease;
 }
 
+/* Last Payment Date Column Styling */
+.report-table td:nth-child(6) {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  white-space: nowrap;
+  min-width: 140px;
+}
+
+/* Date and Time Separator Styling */
+.report-table td:nth-child(6)::before {
+  content: none; /* Remove any default separators */
+}
+
+/* Date Time Display Container */
+.date-time-display {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-display {
+  font-weight: 600;
+  color: var(--text-color);
+  padding: 2px 6px;
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.time-display {
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  text-align: center;
+  padding: 2px 6px;
+  background: rgba(149, 165, 166, 0.1);
+  border-radius: 4px;
+}
+
+/* Alternative: Inline with Icon */
+.date-time-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.date-time-inline i {
+  color: var(--primary-color);
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+
+.date-time-inline span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date-time-inline .date {
+  font-weight: 500;
+}
+
+.date-time-inline .time {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* Badge-style Date Display */
+.date-time-badge {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  background: rgba(52, 152, 219, 0.05);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+  min-width: 110px;
+}
+
+.date-time-badge .date {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.date-time-badge .time {
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+/* Hover effect */
+.report-table tr:hover .date-time-badge {
+  background: rgba(52, 152, 219, 0.1);
+  border-color: rgba(52, 152, 219, 0.3);
+}
+
+/* For the table cell specifically */
+.report-table td:nth-child(6) {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+/* Update the HTML template to use one of these styles */
+
 /* Card Header */
 .card-header {
   display: flex;
@@ -618,6 +727,86 @@
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
+/* --------------------------------------------- */
+/* CLEAN VISUAL SEPARATION FOR FULL REPORT TABLE */
+/* --------------------------------------------- */
+
+.report-table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Header: bottom border + column dividers */
+.report-table thead th {
+  border-bottom: 2px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.report-table thead th:last-child {
+  border-right: none;
+}
+
+/* Row lines + column separation */
+.report-table tbody tr td {
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-table tbody tr td:last-child {
+  border-right: none;
+}
+
+/* Remove double-line on last row */
+.report-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover effect without removing lines */
+.report-table tbody tr:hover {
+  background: var(--hover-color);
+}
+
+/* Optional: Extra sharp header */
+.report-table thead {
+  background: var(--bg-color);
+}
+
+/* Optional: Rounded top edges */
+.report-table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.report-table thead th:last-child {
+  border-top-right-radius: 8px;
+}
+
+/* Optional: If you want thicker column lines */
+.report-table td,
+.report-table th {
+  padding: 12px;
+}
+
+/* Dark Mode Header Styling - Blue */
+.report-table thead {
+  background: #1e3a5f !important;     /* deep navy blue */
+}
+
+.report-table thead th {
+  color: #ffffff !important;
+  border-bottom: 2px solid #2c4d72 !important;
+  border-right: 1px solid #2c4d72;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.report-table thead th:last-child {
+  border-right: none;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

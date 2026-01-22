@@ -63,15 +63,15 @@
 
       <tbody>
         <tr *ngFor="let c of filteredCustomers">
-          <td>{{ c.name }}</td>
-          <td>{{ c.email }}</td>
-          <td>{{ c.phoneNumber }}</td>
-          <td>
+          <td class="md">{{ c.name }}</td>
+          <td class="md">{{ c.email }}</td>
+          <td class="md">{{ c.phoneNumber }}</td>
+          <td class="md">
             {{ c.addedByDistributorId ? c.address : c.city ||c.street}}
           </td>
 
 
-          <td>
+          <td class="md">
             <span class="badge" [ngClass]="{
                 'bg-success': c.isRegistered,
                 'bg-warning text-dark': !c.isRegistered
@@ -79,7 +79,7 @@
               {{ c.isRegistered ? 'Registered' : 'Pending' }}
             </span>
           </td>
-          <td>
+          <td class="md">
             {{ c.permanentEmployeeName || 'Not Assigned' }}
 
             <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
@@ -87,34 +87,28 @@
             </button>
           </td>
 
-          <td>
+          <td class="md">
+            <!-- ONLY distributor-created customers -->
             <ng-container *ngIf="c.addedByDistributorId">
               <button class="btn btn-outline-primary btn-sm me-1" (click)="editCustomer(c)">
                 <i class="fas fa-edit"></i> Edit
               </button>
 
-    <button class="btn btn-outline-danger btn-sm me-1"
-            (click)="deleteCustomer(c.customerId!)">
-      <i class="fas fa-trash"></i> Delete
-    </button>
-  </ng-container>
-       <!-- <button
-  class="btn btn-outline-danger btn-sm"
-  [routerLink]="[
-    '/report-fraud',
-    'DISTRIBUTOR',
-    customer.addedByDistributorId
-  ]">
-  <i class="fas fa-flag"></i> Report
-</button> -->
-<button
-  class="btn btn-outline-danger btn-sm"
-  [routerLink]="['/report-fraud', 'CUSTOMER', c.customerId]">
-  <i class="fas fa-flag"></i> Report
-</button>
+              <button class="btn btn-outline-danger btn-sm me-1" (click)="deleteCustomer(c.customerId!)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </ng-container>
 
-
+            <!-- Visible for ALL customers -->
+            <button class="btn btn-outline-danger btn-sm" [routerLink]="[
+            '/report-fraud',
+            'customer',
+            c.customerId
+          ]">
+              <i class="fas fa-flag"></i> Report
+            </button>
           </td>
+
 
         </tr>
       </tbody>
@@ -134,7 +128,7 @@
     <div class="modal-body">
       <div class="form-grid">
 
-        <div class="form-group">
+        <div class="form-group" >
           <label><i class="fas fa-user"></i> Full Name</label>
           <input class="form-control" type="text" [(ngModel)]="customer.name" />
         </div>

@@ -89,16 +89,18 @@ export class CreateCustomerDistributorComponent implements OnInit {
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
-  customer: Customer = {
-    name: '',
-    email: '',
-    phoneNumber: '',
-    address: '',
-    role: 'Customer',
-    isRegistered: false,
-    isActive: true          // ✅ ADD THIS
-  };
-  employees: any[] = [];
+customer: Customer = {
+  name: '',
+  email: '',
+  
+  phoneNumber: '',
+  address: '',
+  role: 'Customer',
+  isRegistered: false,
+  
+  isActive: true          // ✅ ADD THIS
+};
+employees: any[] = [];
 
   showAssignModal = false;
   selectedCustomerId = '';
@@ -251,20 +253,22 @@ export class CreateCustomerDistributorComponent implements OnInit {
     this.isEdit = false;
     this.customer = {
 
+      
+  name: '',
+  email: '',
+  phoneNumber: '',
+  address: '',
+  role: 'Customer',
+  isRegistered: false,
+    password: '', // ✅ ADD
 
-      name: '',
-      email: '',
-      phoneNumber: '',
-      address: '',
-      role: 'Customer',
-      isRegistered: false,
-      isActive: true        // ✅ ADD THIS
-    };
-    this.otpSent = false;
-    this.otpVerified = false;
-    this.otpFailed = false;
-    this.otpCode = '';
-    this.phoneVerifiedUI = false;
+  isActive: true        // ✅ ADD THIS
+};
+this.otpSent = false;
+this.otpVerified = false;
+this.otpFailed = false;
+this.otpCode = '';
+this.phoneVerifiedUI = false;
 
 
     this.showModal = true;

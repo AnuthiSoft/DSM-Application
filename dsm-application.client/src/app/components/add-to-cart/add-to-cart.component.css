@@ -161,6 +161,18 @@ body {
   min-height: 46px;
 }
 
+.dropdown-row td {
+  padding: 0;
+  background: var(--hover-color);
+}
+.product-dropdown {
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin: 0;
+}
+
+
 .customer-display:hover {
   border-color: var(--primary-color);
   background-color: var(--hover-color);

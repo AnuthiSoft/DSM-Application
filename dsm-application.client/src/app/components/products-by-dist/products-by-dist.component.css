@@ -50,6 +50,10 @@
   max-width: 600px;
   width: 100%;
 }
+.form-control::placeholder {
+  color: var(--input-text);
+  opacity: 5;
+}
 
 
 .input-group {

@@ -61,57 +61,12 @@
 
 
 
-    <!-- <div class="dropdown-container">
- 
-    <input
-      type="text"
-      class="dropdown-input"
-      [value]="customerDisplay || customerName"
-      (click)="toggleCustomerDropdown()"
-      readonly
-    />
- 
-    <button class="dropdown-arrow" (click)="toggleCustomerDropdown()">
-      ▼
-    </button> -->
-
-    <!-- CUSTOMER DROPDOWN LIST -->
 
 
 
 
-    <!-- <div class="dropdown-list" *ngIf="showCustomerDropdown">
- 
-      <div
-        class="dropdown-item"
-        *ngFor="let c of customers"
-        (click)="selectCustomer(c)"
-      >
-        <strong>{{ c.customerName }}</strong><br>
-        <small>ID: {{ c.customerId }}</small><br>
-        <small>Email: {{ c.email }}</small><br>
-        <small>Phone: {{ c.phoneNumber }}</small>
-      </div>
- 
-    </div>
- 
-  </div>
-</div> -->
 
-    <!-- <div class="form-group">
-  <label>CustomerName*</label>
-  <button class="form-group" input type="text" >{{ customerName}}</button>
-   <button class="dropdown-arrow" (click)="toggleProductDropdown(customerId)">
-      ▼
-    </button>
- 
-</div> -->
 
-    <!-- <span class="form-group" input type="text" >{{ customerName}}</span>
- 
-    <button class="dropdown-arrow" (click)="toggleProductDropdown(item.product.productId)">
-      ▼
-    </button> -->
 
 
 
@@ -134,72 +89,56 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let item of orderProducts">
-          <td class="product-cell">
+  <ng-container *ngFor="let item of orderProducts">
 
-            <div class="product-box">
-              <span class="product-name">{{ item.product.productName }}</span>
+    <!-- MAIN PRODUCT ROW -->
+    <tr>
 
-              <button class="dropdown-arrow" (click)="openProductModal(item.product)">
-                ▼
-              </button>
+      <!-- PRODUCT NAME + DROPDOWN BUTTON -->
+      <td class="product-cell">
+        <div class="product-box">
+          <span class="product-name">{{ item.product.productName }}</span>
 
-              <button class="remove-btn" (click)="removeFromOrder(item.product.productId)">
-                ✖
-              </button>
-            </div>
+          <button class="dropdown-arrow"
+                  (click)="toggleProductDropdown(item.product.productId)">
+            ▼
+          </button>
 
-            <!-- DROPDOWN UNDER PRODUCT BOX -->
-            <div class="product-dropdown" *ngIf="expandedProduct[item.product.productId]">
+          <button class="remove-btn"
+                  (click)="removeFromOrder(item.product.productId)">
+            ✖
+          </button>
+        </div>
+      </td>
 
-              <div class="drop-img">
-                <img [src]="getImageUrl(item.product.imageUrl)" (error)="onImgError($event)"
-                  [alt]="item.product.productName" />
+      <!-- QUANTITY COLUMN (STAYS FIXED ALWAYS) -->
+      <td class="quantity-cell">
+        <input type="number" [(ngModel)]="item.quantity" min="1" />
+      </td>
 
+    </tr>
 
-                <div class="drop-info">
-                  <p><strong>Price: ₹{{ item.product.price }}</strong></p>
-                  <p>Stock: {{ item.product.stock }}</p>
-                </div>
-              </div>
+    <!-- DROPDOWN DETAILS ROW (EXPANDS BELOW WITHOUT MOVING QUANTITY) -->
+    <tr *ngIf="expandedProduct[item.product.productId]" class="dropdown-row">
+      <td colspan="2">
+        <div class="product-dropdown">
 
-            </div>
+          <p><strong>Price:</strong> ₹{{ item.product.price }}</p>
+          <p><strong>Stock:</strong> {{ item.product.currentStock }}</p>
+          <p><strong>Brand:</strong> {{ item.product.brand }}</p>
+          <p><strong>Category:</strong> {{ item.product.category }}</p>
+          <p><strong>Distributor:</strong> {{ item.product.distributorName }}</p>
+          <p><strong>Expected Delivery:</strong>
+            {{ computeDeliveryDate(item.product, orderedDate) }}
+          </p>
 
-          </td>
+        </div>
+      </td>
+    </tr>
 
-          <!-- FULL-SCREEN POPUP OVERLAY -->
-          <div class="product-modal-overlay" *ngIf="modalProduct">
-            <div class="product-modal">
+  </ng-container>
+</tbody>
 
-              <button class="modal-close" (click)="closeProductModal()">✖</button>
-
-              <img [src]="getImageUrl(modalProduct.imageUrls)" (error)="onImgError($event)"
-                [alt]="modalProduct.productName" />
-
-              <h3>{{ modalProduct.productName }}</h3>
-
-              <p><strong>Price:</strong> ₹{{ modalProduct.price }}</p>
-              <p><strong>Stock:</strong> {{ modalProduct.currentStock }}</p>
-              <p><strong>Brand:</strong> {{ modalProduct.brand }}</p>
-              <p><strong>Category:</strong> {{ modalProduct.category }}</p>
-              <p><strong>Distributor:</strong>{{modalProduct.distributorName}}</p>
-              <p><strong>Expected Delivery:</strong>
-                {{ computeDeliveryDate(modalProduct!, orderedDate) }}
-              </p>
-
-            </div>
-          </div>
-
-
-          <td class="quantity-cell">
-
-
-            <input type="number" [(ngModel)]="item.quantity" min="1" />
-          </td>
-
-
-        </tr>
-      </tbody>
     </table>
 
     <a class="add-row" (click)="goToProducts()">+ Add New</a>
@@ -210,7 +149,7 @@
 
     <!-- Buttons -->
     <div class="actions">
-      <button class="submit-btn" (click)="placeOrder()">Submit</button>
+      <button class="submit-btn" (click)="placeOrder()">Place Order</button>
       <button class="reset-btn" (click)="resetOrder()">Reset</button>
     </div>
 

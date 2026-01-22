@@ -57,16 +57,20 @@ export interface DistributorOrder {
 // }
  
 export interface Order {
+
   id: string;
   customerId: string;
   customerName: string;
   distributorId: string;
+   distributorName?: string; 
   EmployeeId?: string;
   Name?: string;
   assignedOn?: Date;
   orderedDate: string;
   expectedDeliveryDate: string;
- 
+  returnStatus?: 'NONE' | 'PENDING' | 'COMPLETED';
+
+
   status: string;
   subtotal: number;
   totalDiscount: number;

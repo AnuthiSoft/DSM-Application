@@ -523,17 +523,27 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     }
   }
 
-  confirmAddToCart() {
-    if (!this.selectedProduct) return;
+confirmAddToCart() {
+  if (!this.selectedProduct) return;
 
-    this.cartService.addWithQuantity(
-      this.selectedProduct,
-      this.selectedQuantity
-    );
+  // Reduce UI stock instantly
+  this.selectedProduct.currentStock -= this.selectedQuantity;
 
-    this.showPopup = false;
-    this.selectedProduct = null;
+  if (this.selectedProduct.currentStock < 0) {
+    this.selectedProduct.currentStock = 0;
   }
+
+  // Inform cart service
+  this.cartService.addWithQuantity(
+    this.selectedProduct,
+    this.selectedQuantity
+  );
+
+  // Close popup
+  this.showPopup = false;
+  this.selectedProduct = null;
+}
+
 
   /* Helper function for TypeScript/JavaScript */
   /* Add this to your component TypeScript file if needed */
@@ -566,6 +576,9 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
         break;
     }
   }
+
+
+
   hasActiveFilters(): boolean {
     return !!(
       this.searchTerm ||

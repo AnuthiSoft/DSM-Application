@@ -1,8 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { InventoryService } from '../../services/inventory.service';
 import { ProductService } from '../../services/product.service';
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import {
+  Chart,
+  ChartConfiguration,
+  ChartTypeRegistry,
+  PieController,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+
+Chart.register(PieController, ArcElement, Tooltip, Legend);
+
 
 @Component({
   selector: 'app-main-inventory',
@@ -148,7 +158,8 @@ loadStock(distributorId: string) {
 //   });
 // }
 
-private pieChart?: Chart;
+pieChart!: Chart<'pie', number[], string>;
+
 
 createPieChart() {
   const labels = this.stockList.map(x => x.productName);

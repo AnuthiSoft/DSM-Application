@@ -14,6 +14,12 @@ namespace DistributorManagementSystem.Server.Models
         public string CompanyName { get; set; } = string.Empty;
         public string GST { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
+
+
+        [BsonElement("Pincodes")]
+        public List<string> Pincodes { get; set; } = new();
+
+
         public string PhoneNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty; // Primary contact name
         [Required]

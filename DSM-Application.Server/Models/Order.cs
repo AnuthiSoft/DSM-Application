@@ -11,7 +11,16 @@ namespace DSM_Application.Server.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; } 
+
+        public string Id { get; set; } = null!;
+
+
+
+
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ReturnId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+
         public string CustomerId { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]

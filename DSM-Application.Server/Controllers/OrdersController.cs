@@ -91,6 +91,11 @@ namespace DSM_Application.Server.Controllers
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
                 return BadRequest("No products provided");
 
+            var distributorId = dto.DistributorId;
+
+            if (string.IsNullOrEmpty(distributorId))
+                return BadRequest("DistributorId is required");
+
             decimal totalSubtotal = 0;
             decimal totalDiscountAmount = 0;
             decimal totalFinalAmount = 0;
@@ -118,7 +123,7 @@ namespace DSM_Application.Server.Controllers
 
                 decimal unitPrice = product.Price;
                 decimal subtotal = unitPrice * p.Quantity;
-                
+
 
                 // ✅ FIX 1: NULL-SAFE general discount
                 decimal generalDiscountPercent = product.Discount;
@@ -204,16 +209,17 @@ namespace DSM_Application.Server.Controllers
             // EMPLOYEE ASSIGNMENT (UNCHANGED)
             // -----------------------------------------------------
             var connection = await _mongo.Connections
-                .Find(c => c.CustomerId == dto.CustomerId &&
-                           c.DistributorId == dto.DistributorId)
-                .FirstOrDefaultAsync();
+    .Find(c => c.CustomerId == dto.CustomerId &&
+               c.DistributorId == distributorId &&      // ✅ JWT value
+               c.Status == ConnectionStatus.Accepted)    // ✅ IMPORTANT
+    .FirstOrDefaultAsync();
 
-            if (connection != null && connection.Status == ConnectionStatus.Pending)
+
+
+            // 🔒 BLOCK ORDER IF CONNECTION IS PENDING
+            if (connection == null)
             {
-                return BadRequest(new
-                {
-                    message = "Connection request is pending. Order cannot be placed until approved."
-                });
+                return BadRequest("Customer not connected to this distributor");
             }
 
             var todayTemp = await _mongo.TemporaryAssignments
@@ -231,6 +237,7 @@ namespace DSM_Application.Server.Controllers
 
             var order = new Order
             {
+                //Id = Guid.NewGuid().ToString(),
                 CustomerId = dto.CustomerId,
                 DistributorId = dto.DistributorId,
                 OrderedDate = DateTime.UtcNow,
@@ -274,7 +281,6 @@ namespace DSM_Application.Server.Controllers
 
 
 
-
         [Authorize(Roles = "Customer")]
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetCustomerOrders(string customerId)
@@ -294,33 +300,42 @@ namespace DSM_Application.Server.Controllers
                 .SortByDescending(o => o.OrderDate)
                 .ToListAsync();
 
-            // ✅ Map orders to DTO including discount fields
-            var result = orders.Select(o => new DistributorOrderDto
+            // ⭐ UPDATED: Fetch Distributor Name for each order
+            var result = await Task.WhenAll(orders.Select(async o =>
             {
-                Id = o.Id,
-                CustomerId = o.CustomerId,
+                var distributor = await _mongo.Distributors
+                    .Find(d => d.DistributorId == o.DistributorId)
+                    .FirstOrDefaultAsync();
 
-                Products = o.Products,
-                OrderedDate = o.OrderedDate,
-                ExpectedDeliveryDate = o.ExpectedDeliveryDate,
-                DistributorId = o.DistributorId,
+                return new DistributorOrderDto
+                {
+                    Id = o.Id,
+                    CustomerId = o.CustomerId,
 
+                    Products = o.Products,
+                    OrderedDate = o.OrderedDate,
+                    ExpectedDeliveryDate = o.ExpectedDeliveryDate,
+                    DistributorId = o.DistributorId,
 
-                // ✅ Discount totals
-                Subtotal = o.Subtotal,
-                TotalDiscount = o.TotalDiscount,
-                TotalAmount = o.TotalAmount,
+                    // ⭐ ADD THIS
+                    DistributorName = distributor?.Name ?? "Unknown Distributor",
 
-                // ✅ Discount breakdown per item (use first item)
-                SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
-                QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
-                PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
-                TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
+                    // Discount totals
+                    Subtotal = o.Subtotal,
+                    TotalDiscount = o.TotalDiscount,
+                    TotalAmount = o.TotalAmount,
 
-                Status = o.Status,
-                EmployeeId = o.EmployeeId,
-                Name = o.Name
-            }).ToList();
+                    // Discount breakdown per item
+                    SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
+                    QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
+                    PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
+                    TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
+
+                    Status = o.Status,
+                    EmployeeId = o.EmployeeId,
+                    Name = o.Name
+                };
+            }));
 
             return Ok(result);
         }
@@ -352,63 +367,92 @@ namespace DSM_Application.Server.Controllers
         //}
 
         [HttpGet("distributor/{distributorId}")]
-        public async Task<IActionResult> GetOrdersByDistributor(string distributorId, [FromQuery] string? status = null)
+        public async Task<IActionResult> GetOrdersByDistributor(
+      string distributorId,
+      [FromQuery] string? status = null)
         {
-            var filter = Builders<Order>.Filter.Eq(o => o.DistributorId, distributorId);
-            if (!string.IsNullOrEmpty(status))
+            try
             {
-                filter = Builders<Order>.Filter.And(filter, Builders<Order>.Filter.Eq(o => o.Status, status));
-            }
+                // 🔍 Build base filter
+                var filter = Builders<Order>.Filter.Eq(o => o.DistributorId, distributorId);
 
-            var orders = await _mongo.Orders.Find(filter)
-                .SortByDescending(o => o.OrderDate)
-                .ToListAsync();
-
-            var result = new List<DistributorOrderDto>();
-            foreach (var o in orders)
-            {
-                var customer = await _mongo.Customers.Find(c => c.CustomerId == o.CustomerId).FirstOrDefaultAsync();
-                Employee employee = null;
-                if (!string.IsNullOrEmpty(o.EmployeeId))
+                if (!string.IsNullOrEmpty(status))
                 {
-                    employee = await _mongo.Employees
-                        .Find(e => e.EmployeeId == o.EmployeeId)
-                        .FirstOrDefaultAsync();
+                    filter &= Builders<Order>.Filter.Eq(o => o.Status, status);
                 }
 
-                result.Add(new DistributorOrderDto
-                {
-                    Id = o.Id,
-                    CustomerId = o.CustomerId,
-                    CustomerName = customer?.Name ?? "Unknown",
-                    CustomerEmail = customer?.Email,
-                    CustomerPhone = customer?.PhoneNumber,
-                    Products = o.Products,
-                    Subtotal = o.Subtotal,
-                    TotalDiscount = o.TotalDiscount,
-                    TotalAmount = o.TotalAmount,
-                    SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
-                    QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
-                    PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
-                    TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
-                    OrderedDate = o.OrderedDate,
-                    ExpectedDeliveryDate = o.ExpectedDeliveryDate,
-                    Status = o.Status,
-                    EmployeeId = employee?.EmployeeId,
-                    Name = employee?.Name,
-                    PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
-                    CollectedAmount = o.CollectedAmount,
-                    PaymentMethod = o.PaymentMethod,
-                    CollectedOn = o.CollectedOn,
-                    DeliveryReceiptUrl = o.DeliveryReceiptUrl,
-                    DeliveredOn = o.DeliveredOn,
-                    // ✅ Include these two fields
+                // 📦 Fetch orders
+                var orders = await _mongo.Orders
+                    .Find(filter)
+                    .SortByDescending(o => o.OrderDate)
+                    .ToListAsync();
 
+                var result = new List<DistributorOrderDto>();
+
+                foreach (var o in orders)
+                {
+                    // 🛡️ Ensure Products is never null
+                    var products = o.Products ?? new List<OrderProduct>();
+                    var firstProduct = products.FirstOrDefault();
+
+                    // 👤 Load customer
+                    var customer = await _mongo.Customers
+                        .Find(c => c.CustomerId == o.CustomerId)
+                        .FirstOrDefaultAsync();
+
+                    // 👷 Load employee (optional)
+                    Employee employee = null;
+                    if (!string.IsNullOrEmpty(o.EmployeeId))
+                    {
+                        employee = await _mongo.Employees
+                            .Find(e => e.EmployeeId == o.EmployeeId)
+                            .FirstOrDefaultAsync();
+                    }
+
+                    result.Add(new DistributorOrderDto
+                    {
+                        Id = o.Id,
+                        CustomerId = o.CustomerId,
+                        CustomerName = customer?.Name ?? "Unknown",
+                        CustomerEmail = customer?.Email,
+                        CustomerPhone = customer?.PhoneNumber,
+                        Products = o.Products,
+                        Subtotal = o.Subtotal,
+                        TotalDiscount = o.TotalDiscount,
+                        TotalAmount = o.TotalAmount,
+                        SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
+                        QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
+                        PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
+                        TotalDiscountPercent = o.Products.First().TotalDiscountPercent,
+                        OrderedDate = o.OrderedDate,
+                        ExpectedDeliveryDate = o.ExpectedDeliveryDate,
+                        Status = o.Status,
+                        EmployeeId = employee?.EmployeeId,
+                        Name = employee?.Name,
+                        PaymentCollectedByEmployee = o.PaymentCollectedByEmployee,
+                        CollectedAmount = o.CollectedAmount,
+                        PaymentMethod = o.PaymentMethod,
+                        CollectedOn = o.CollectedOn,
+                        DeliveryReceiptUrl = o.DeliveryReceiptUrl,
+                        DeliveredOn = o.DeliveredOn,
+                        // ✅ Include these two fields
+
+                    });
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // 🔥 TEMP: return real error while debugging
+                return StatusCode(500, new
+                {
+                    message = "Failed to load distributor orders",
+                    error = ex.Message
                 });
             }
-
-            return Ok(result);
         }
+
 
 
         // Optional: distributor can update order status
@@ -446,7 +490,8 @@ namespace DSM_Application.Server.Controllers
                     customerPhone = customer?.PhoneNumber,
                     customerEmail = customer?.Email,
                     customerAddress = customer?.Address,
-                    products = order.Products.Select(p => new {
+                    products = order.Products.Select(p => new
+                    {
                         productId = p.ProductId,
                         productName = p.ProductName,
                         price = p.Price,
@@ -818,14 +863,18 @@ namespace DSM_Application.Server.Controllers
 
         [Authorize(Roles = "Customer")]
         [HttpPost("{orderId}/reorder")]
-        public async Task<IActionResult> Reorder(string orderId)
+        public async Task<IActionResult> Reorder(string orderId, [FromQuery] DateTime? expectedDelivery)
         {
             var customerId = User.FindFirst("CustomerId")?.Value;
             if (string.IsNullOrEmpty(customerId))
                 return Unauthorized("CustomerId missing from token");
 
-            var existingOrder = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (existingOrder == null) return NotFound("Order not found");
+            var existingOrder = await _mongo.Orders
+                .Find(o => o.Id == orderId)
+                .FirstOrDefaultAsync();
+
+            if (existingOrder == null)
+                return NotFound("Order not found");
 
             if (existingOrder.CustomerId != customerId)
                 return Forbid("Not authorized to reorder this order");
@@ -833,28 +882,41 @@ namespace DSM_Application.Server.Controllers
             if (existingOrder.Status != "Delivered")
                 return BadRequest($"Only delivered orders can be reordered. Current status: '{existingOrder.Status}'");
 
-            //var newOrder = new Order
-            //{
-            //    CustomerId = existingOrder.CustomerId,
-            //    DistributorId = existingOrder.DistributorId,
-            //    Products = existingOrder.Products.Select(p => new OrderProduct
-            //    {
-            //        ProductId = p.ProductId,
-            //        ProductName = p.ProductName,
-            //        UnitPrice = p.UnitPrice,
-            //        Quantity = p.Quantity
-            //    }).ToList(),
-            //    TotalAmount = existingOrder.Products.Sum(p => p.UnitPrice * p.Quantity),
-            //    OrderDate = DateTime.UtcNow,
-            //    Status = "Pending"
-            //};
+            // 🔹 Set expected delivery date
+            DateTime deliveryDate = expectedDelivery ?? DateTime.UtcNow.AddDays(1);
 
+            // 🔍 Assign employee (same logic as CreateOrder)
+            var connection = await _mongo.Connections
+                .Find(c =>
+                    c.CustomerId == existingOrder.CustomerId &&
+                    c.DistributorId == existingOrder.DistributorId &&
+                    c.Status == ConnectionStatus.Accepted
+                )
+                .FirstOrDefaultAsync();
 
+            if (connection == null)
+                return BadRequest("Customer not connected to distributor");
 
+            var todayTemp = await _mongo.TemporaryAssignments
+                .Find(x =>
+                    x.CustomerId == existingOrder.CustomerId &&
+                    x.DistributorId == existingOrder.DistributorId &&
+                    x.AssignedDate == DateTime.UtcNow.Date
+                )
+                .FirstOrDefaultAsync();
+
+            string? assignedEmployeeId =
+                todayTemp?.TemporaryEmployeeId ??
+                connection?.PermanentEmployeeId;
+
+            // 🆕 Create cloned order
             var newOrder = new Order
             {
+                Id = Guid.NewGuid().ToString(),
+
                 CustomerId = existingOrder.CustomerId,
                 DistributorId = existingOrder.DistributorId,
+
                 Products = existingOrder.Products.Select(p => new OrderProduct
                 {
                     ProductId = p.ProductId,
@@ -867,32 +929,50 @@ namespace DSM_Application.Server.Controllers
                     SpecialDiscountPercent = p.SpecialDiscountPercent,
                     TotalDiscountPercent = p.TotalDiscountPercent,
                     DiscountAmount = p.DiscountAmount,
-                    FinalPrice = p.FinalPrice
+                    FinalPrice = p.FinalPrice,
+                    GstAmount = p.GstAmount,
+                    GstPercentage = p.GstPercentage
                 }).ToList(),
 
                 Subtotal = existingOrder.Subtotal,
                 TotalDiscount = existingOrder.TotalDiscount,
                 TotalAmount = existingOrder.TotalAmount,
+                TotalGst = existingOrder.TotalGst,
+
+                RemainingAmount = existingOrder.TotalAmount,
 
                 OrderDate = DateTime.UtcNow,
-                Status = "Pending"
+                OrderedDate = DateTime.UtcNow,
+                ExpectedDeliveryDate = deliveryDate,
+
+                Status = "Pending",
+                EmployeeId = assignedEmployeeId
             };
 
+            // 🔥 Deduct stock (just like CreateOrder)
+            foreach (var item in newOrder.Products)
+            {
+                await _inventoryService.RemoveStockAsync(
+                    item.ProductId,
+                    existingOrder.DistributorId,
+                    item.Quantity,
+                    "ORDER_PLACED"
+                );
+            }
+
             await _mongo.Orders.InsertOneAsync(newOrder);
-
-            //return Ok(new { message = "Order placed successfully", orderId = newOrder.Id });
-
 
             return Ok(new
             {
                 message = "Order placed successfully",
                 orderId = newOrder.Id,
+                expectedDelivery = newOrder.ExpectedDeliveryDate,
                 subtotal = newOrder.Subtotal,
                 discount = newOrder.TotalDiscount,
                 finalAmount = newOrder.TotalAmount
             });
-
         }
+
         [HttpGet("delivered-for-cashier/{distributorId}")]
         public async Task<IActionResult> GetDeliveredOrdersForCashier(string distributorId)
         {
@@ -984,161 +1064,230 @@ namespace DSM_Application.Server.Controllers
 
 
         [Authorize(Roles = "CashCollector,Employee")]
+
         [HttpPost("create-by-collector")]
+
         public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-          ?? User.FindFirst("UserId")?.Value;
-            //var userId = User.FindFirst("id")?.Value;
+
+            var userId = User.FindFirst("UserId")?.Value;
+
             var role = User.FindFirst("role")?.Value;
 
-            var order = await _orderService.CreateByCollector(dto, userId, role);
+            var distributorId = User.FindFirst("DistributorId")?.Value;
+
+            if (string.IsNullOrEmpty(distributorId))
+
+                return Unauthorized("DistributorId missing from token");
+
+            // 🔐 FORCE distributor from JWT (ignore frontend value)
+
+            dto.DistributorId = distributorId;
+
+            var order = await _orderService.CreateByCollector(
+
+                dto,
+
+                userId,
+
+                role,
+
+                distributorId
+
+            );
+
 
             return Ok(order);
+
         }
 
-        //[Authorize(Roles = "CashCollector,Employee")]
-        //[HttpPost("create-by-collector")]
-        //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
-        //{
-        //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-        //    if (string.IsNullOrEmpty(role))
-        //        return Unauthorized("Role missing in token");
 
-        //    if (role != "CashCollector" && role != "Employee")
-        //        return Forbid("Only CashCollector or Employee can perform this action");
-
-        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
-        //        return BadRequest("Invalid order data");
-
-        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    //var userId = User.FindFirst("UserId")?.Value;
-        //    if (string.IsNullOrEmpty(userId))
-        //        return Unauthorized("Invalid user");
-
-        //    var orderProducts = new List<OrderProduct>();
-        //    decimal subTotal = 0;
-        //    decimal totalDiscount = 0;
-
-        //    foreach (var item in dto.Products)
-        //    {
-        //        var product = await _mongo.Products
-        //        .Find(p => p.ProductId == item.ProductId)
-        //        .FirstOrDefaultAsync();
-
-        //        if (product == null)
-        //            return BadRequest($"Product not found: {item.ProductId}");
-
-        //        var itemSubtotal = product.Price * item.Quantity;
-        //        var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
-        //        var finalPrice = itemSubtotal - discountAmount;
-
-        //        orderProducts.Add(new OrderProduct
-        //        {
-        //            ProductId = product.ProductId,
-        //            ProductName = product.ProductName,
-        //            Price = product.Price,
-        //            Quantity = item.Quantity,
-        //            Subtotal = itemSubtotal,
-        //            DiscountAmount = discountAmount,
-        //            FinalPrice = finalPrice
-        //        });
-
-        //        subTotal += itemSubtotal;
-        //        totalDiscount += discountAmount;
-        //    }
-
-        //    var order = new Order
-        //    {
-        //        CustomerId = dto.CustomerId,
-        //        DistributorId = dto.DistributorId,
-        //        Products = orderProducts,
-
-        //        Subtotal = subTotal,
-        //        TotalDiscount = totalDiscount,
-        //        TotalAmount = subTotal - totalDiscount,
-
-        //        CreatedByUserId = userId,
-        //        CreatedByRole = "CashCollector",
-        //        OrderSource = "CASH_COLLECTOR",
-
-        //        OrderDate = DateTime.UtcNow,
-        //        ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1),
-        //        Status = "Pending"
-        //    };
-
-        //    await _orders.InsertOneAsync(order);
-
-        //    return Ok(order);
-        //}
-
-        //[Authorize(Roles = "CashCollector,Employee")]
-        //[HttpPost("create-by-collector")]
-        //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
-        //{
-        //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
-        //    if (string.IsNullOrEmpty(userId))
-        //        return Unauthorized("Invalid user");
-
-        //    if (role != "CashCollector" && role != "Employee")
-        //        return Forbid("Only CashCollector or Employee can create orders");
-
-        //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
-        //        return BadRequest("Invalid order data");
-
-        //    var order = await _orderService.CreateByCollector(dto, userId, role);
-        //    return Ok(order);
-        //}
-        [Authorize(Roles = "Employee")]
-        [HttpPost("{orderId}/upload-receipt")]
-        public async Task<IActionResult> UploadDeliveryReceipt(
-            string orderId,
-            IFormFile receipt)
+        [Authorize(Roles = "CashCollector,Employee")]
+        [HttpGet("my-customers")]
+        public async Task<IActionResult> GetMyCustomers()
         {
-            if (receipt == null || receipt.Length == 0)
-                return BadRequest("Receipt image is required");
+            var distributorId = User.FindFirst("DistributorId")?.Value;
 
-            var employeeId = User.FindFirst("EmployeeId")?.Value;
-            if (string.IsNullOrEmpty(employeeId))
-                return Unauthorized("EmployeeId missing");
+            if (string.IsNullOrEmpty(distributorId))
+                return Unauthorized("DistributorId missing from token");
 
-            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (order == null)
-                return NotFound("Order not found");
+            var connections = await _mongo.Connections
+                .Find(c =>
+                    c.DistributorId == distributorId &&
+                    c.Status == ConnectionStatus.Accepted
+                )
+                .ToListAsync();
 
-            if (order.EmployeeId != employeeId)
-                return Unauthorized("Not your assigned order");
+            var customers = new List<object>();
 
-            // ✅ Upload to Azure Blob (FULL URL)
-            var blobName = await _blobService.UploadAsync(receipt);
-
-            var update = Builders<Order>.Update
-                .Set(o => o.DeliveryReceiptUrl, blobName)
-                            .Set(o => o.Status, "Delivered")
-                .Set(o => o.DeliveredOn, DateTime.UtcNow);
-
-            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
-
-            return Ok(new
+            foreach (var c in connections)
             {
-                message = "Receipt uploaded & order delivered",
-                deliveryReceiptUrl = blobName
-            });
-        }
-        [AllowAnonymous]
-        [HttpGet("receipt/{blobName}")]
-        public async Task<IActionResult> GetReceipt(string blobName)
-        {
-            var data = await _blobService.DownloadAsync(blobName);
-            if (data == null)
-                return NotFound();
+                var customer = await _mongo.Customers
+                    .Find(x => x.CustomerId == c.CustomerId)
+                    .FirstOrDefaultAsync();
 
-            return File(data, "image/jpeg");
-        }
+                if (customer != null)
+                {
+                    customers.Add(new
+                    {
+                        customerId = customer.CustomerId,
+                        name = customer.Name,
+                        phone = customer.PhoneNumber,
+                        address = customer.Address
+                    });
+                }
+            }
 
+            return Ok(customers);
+
+
+            //[Authorize(Roles = "CashCollector,Employee")]
+            //[HttpPost("create-by-collector")]
+            //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+            //{
+            //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            //    if (string.IsNullOrEmpty(role))
+            //        return Unauthorized("Role missing in token");
+
+            //    if (role != "CashCollector" && role != "Employee")
+            //        return Forbid("Only CashCollector or Employee can perform this action");
+
+            //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
+            //        return BadRequest("Invalid order data");
+
+            //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //    //var userId = User.FindFirst("UserId")?.Value;
+            //    if (string.IsNullOrEmpty(userId))
+            //        return Unauthorized("Invalid user");
+
+            //    var orderProducts = new List<OrderProduct>();
+            //    decimal subTotal = 0;
+            //    decimal totalDiscount = 0;
+
+            //    foreach (var item in dto.Products)
+            //    {
+            //        var product = await _mongo.Products
+            //        .Find(p => p.ProductId == item.ProductId)
+            //        .FirstOrDefaultAsync();
+
+            //        if (product == null)
+            //            return BadRequest($"Product not found: {item.ProductId}");
+
+            //        var itemSubtotal = product.Price * item.Quantity;
+            //        var discountAmount = (itemSubtotal * dto.SpecialDiscountPercent) / 100;
+            //        var finalPrice = itemSubtotal - discountAmount;
+
+            //        orderProducts.Add(new OrderProduct
+            //        {
+            //            ProductId = product.ProductId,
+            //            ProductName = product.ProductName,
+            //            Price = product.Price,
+            //            Quantity = item.Quantity,
+            //            Subtotal = itemSubtotal,
+            //            DiscountAmount = discountAmount,
+            //            FinalPrice = finalPrice
+            //        });
+
+            //        subTotal += itemSubtotal;
+            //        totalDiscount += discountAmount;
+            //    }
+
+            //    var order = new Order
+            //    {
+            //        CustomerId = dto.CustomerId,
+            //        DistributorId = dto.DistributorId,
+            //        Products = orderProducts,
+
+            //        Subtotal = subTotal,
+            //        TotalDiscount = totalDiscount,
+            //        TotalAmount = subTotal - totalDiscount,
+
+            //        CreatedByUserId = userId,
+            //        CreatedByRole = "CashCollector",
+            //        OrderSource = "CASH_COLLECTOR",
+
+            //        OrderDate = DateTime.UtcNow,
+            //        ExpectedDeliveryDate = dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1),
+            //        Status = "Pending"
+            //    };
+
+            //    await _orders.InsertOneAsync(order);
+
+            //    return Ok(order);
+            //}
+
+            //[Authorize(Roles = "CashCollector,Employee")]
+            //[HttpPost("create-by-collector")]
+            //public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
+            //{
+            //    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            //    if (string.IsNullOrEmpty(userId))
+            //        return Unauthorized("Invalid user");
+
+            //    if (role != "CashCollector" && role != "Employee")
+            //        return Forbid("Only CashCollector or Employee can create orders");
+
+            //    if (dto == null || dto.Products == null || dto.Products.Count == 0)
+            //        return BadRequest("Invalid order data");
+
+            //    var order = await _orderService.CreateByCollector(dto, userId, role);
+            //    return Ok(order);
+            //}
+        }
+            [Authorize(Roles = "Employee")]
+            [HttpPost("{orderId}/upload-receipt")]
+            public async Task<IActionResult> UploadDeliveryReceipt(
+                string orderId,
+                IFormFile receipt)
+            {
+                if (receipt == null || receipt.Length == 0)
+                    return BadRequest("Receipt image is required");
+
+                var employeeId = User.FindFirst("EmployeeId")?.Value;
+                if (string.IsNullOrEmpty(employeeId))
+                    return Unauthorized("EmployeeId missing");
+
+                var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+                if (order == null)
+                    return NotFound("Order not found");
+
+                if (order.EmployeeId != employeeId)
+                    return Unauthorized("Not your assigned order");
+
+                // ✅ Upload to Azure Blob (FULL URL)
+                var blobName = await _blobService.UploadAsync(receipt);
+
+                var update = Builders<Order>.Update
+                    .Set(o => o.DeliveryReceiptUrl, blobName)
+                                .Set(o => o.Status, "Delivered")
+                    .Set(o => o.DeliveredOn, DateTime.UtcNow);
+
+                await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+
+                return Ok(new
+                {
+                    message = "Receipt uploaded & order delivered",
+                    deliveryReceiptUrl = blobName
+                });
+            }
+
+            [AllowAnonymous]
+            [HttpGet("receipt/{blobName}")]
+            public async Task<IActionResult> GetReceipt(string blobName)
+            {
+                var data = await _blobService.DownloadAsync(blobName);
+                if (data == null)
+                    return NotFound();
+
+                return File(data, "image/jpeg");
+            }
+
+        }
     }
-}
+
 

@@ -1,0 +1,165 @@
+<div class="return-requests-container">
+
+  <!-- Header Section -->
+  <div class="return-header-card dashboard-card">
+    <h2><i class="fas fa-undo-alt"></i> Return Order Requests</h2>
+    <div class="header-stats" *ngIf="!loading && returnRequests.length > 0">
+      <span class="stat-badge pending">{{ getStatusCount('Pending') }} Pending</span>
+      <span class="stat-badge received">{{ getStatusCount('Received') }} Received</span>
+      <span class="stat-badge total">{{ returnRequests.length }} Total</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state dashboard-card">
+    <div class="loader">
+      <i class="fas fa-spinner fa-spin fa-2x"></i>
+      <p>Loading return requests...</p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && returnRequests.length === 0" class="empty-state dashboard-card">
+    <div class="empty-content">
+      <i class="fas fa-box-open fa-3x"></i>
+      <h3>No Return Requests</h3>
+      <p>All return requests are processed</p>
+    </div>
+  </div>
+
+  <!-- Return Cards -->
+  <div *ngIf="!loading && returnRequests.length > 0" class="returns-grid">
+    <div class="return-card dashboard-card" *ngFor="let r of returnRequests; let i = index" [ngClass]="r.status">
+
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="header-left">
+          <h4><i class="fas fa-exchange-alt"></i> Return #{{ r.id }}</h4>
+          <small class="request-date">
+            <i class="far fa-clock"></i> Requested: {{ r.createdAt | date:'medium' }}
+          </small>
+        </div>
+        <span class="status-badge" [ngClass]="r.status">
+          <i class="fas" [ngClass]="getStatusIcon(r.status)"></i>
+          {{ getStatusLabel(r.status) }}
+        </span>
+      </div>
+
+   <!-- Return Images -->
+<div class="product-image-section" *ngIf="r.imageUrls?.length">
+  <div class="image-thumbnails">
+    <img
+      *ngFor="let img of r.imageUrls; let i = index"
+      [src]="img"
+      class="thumbnail"
+      (click)="openImageGallery(r.imageUrls, i)"
+      alt="Returned product image"
+    />
+  </div>
+</div>
+
+
+      <!-- Details Grid -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <i class="fas fa-barcode"></i>
+          <div>
+            <label>Order ID</label>
+            <p class="order-id">{{ r.orderId }}</p>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <i class="fas fa-cube"></i>
+          <div>
+            <label>Product</label>
+            <p>{{ r.productName }}</p>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <i class="fas fa-hashtag"></i>
+          <div>
+            <label>Quantity</label>
+            <p class="quantity">{{ r.returnQty }}</p>
+          </div>
+        </div>
+
+        <!-- <div class="detail-item">
+          <i class="fas fa-user"></i>
+          <div>
+            <label>Customer</label>
+            <p>{{ r.customerName }}</p>
+          </div>
+        </div> -->
+
+        <div class="detail-item full-width">
+          <i class="fas fa-comment-alt"></i>
+          <div>
+            <label>Return Reason</label>
+            <p class="reason-text">{{ r.reason }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-section">
+        <div class="action-buttons">
+          <button class="btn approve" *ngIf="r.status === 'Pending'" [disabled]="r.status !== 'Pending'"
+            (click)="approveAndSchedule(r)">
+            <i class="fas fa-check-circle"></i>
+            {{ r.status === 'Pending' ? 'Approve & Schedule' : 'Scheduled' }}
+          </button>
+
+
+          <button class="btn reject" *ngIf="r.status === 'Pending'" (click)="rejectReturnUI(r)">
+            <i class="fas fa-times-circle"></i> Reject Return
+          </button>
+
+          <button class="btn receive" *ngIf="r.status === 'Received'" (click)="markReceived(r)">
+            <i class="fas fa-truck-loading"></i> Product Received
+          </button>
+        </div>
+
+        <div class="secondary-actions">
+          <button class="btn btn-outline" (click)="viewDetails(r)">
+            <i class="fas fa-eye"></i> View Details
+          </button>
+          <!-- <button class="btn btn-outline" (click)="contactCustomer(r)">
+            <i class="fas fa-phone-alt"></i> Contact
+          </button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGE GALLERY MODAL -->
+<div class="image-modal" *ngIf="isImageModalOpen">
+  <div class="modal-overlay" (click)="closeImageGallery()"></div>
+
+  <div class="modal-content">
+    <button class="close-btn" (click)="closeImageGallery()">×</button>
+
+    <button class="nav-btn left" (click)="prevImage()" [disabled]="selectedImageIndex === 0">
+      ‹
+    </button>
+
+    <img
+      [src]="selectedImages[selectedImageIndex]"
+      class="full-image"
+    />
+
+    <button
+      class="nav-btn right"
+      (click)="nextImage()"
+      [disabled]="selectedImageIndex === selectedImages.length - 1">
+      ›
+    </button>
+
+    <div class="image-count">
+      {{ selectedImageIndex + 1 }} / {{ selectedImages.length }}
+    </div>
+  </div>
+</div>
+
+</div>

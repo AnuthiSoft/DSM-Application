@@ -210,9 +210,10 @@ export class DistributorOrdersComponent implements OnInit {
         this.productService.getById(item.productId).subscribe((p: any) => {
           item.brand = p.brand;
           item.category = p.category;
-          item.imageUrl = p.imageUrls?.length
-            ? `${this.apiBaseUrl}${p.imageUrls[0]}`
-            : 'assets/no-image.png';
+         item.imageUrl = p.imageUrls?.length
+  ? `${environment.apiUrl}/images/${p.imageUrls[0]}`
+  : 'assets/no-image.png';
+
         });
       });
 

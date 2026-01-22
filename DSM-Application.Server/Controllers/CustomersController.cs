@@ -130,9 +130,8 @@ namespace DSM_Application.Server.Controllers
         public async Task<IActionResult> CreateByDistributor([FromBody] DistributorCreateCustomerDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState); // ⛔ STOP empty or invalid values
+                return BadRequest(ModelState);
 
-            // Duplicate check
             var existing = await _db.Customers
                 .Find(c =>
                     (!string.IsNullOrEmpty(dto.Email) && c.Email == dto.Email) ||
@@ -141,25 +140,11 @@ namespace DSM_Application.Server.Controllers
                 .FirstOrDefaultAsync();
 
             if (existing != null)
-            {
-                if (!string.IsNullOrEmpty(dto.Email) && existing.Email == dto.Email)
-                    return BadRequest("A customer with this email already exists.");
-                if (!string.IsNullOrEmpty(dto.PhoneNumber) && existing.PhoneNumber == dto.PhoneNumber)
-                    return BadRequest("A customer with this phone number already exists.");
-            }
+                return BadRequest("Email or phone number already exists.");
 
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (distributorId == null)
                 return Unauthorized("Distributor ID not found in token");
-
-
-            // 🔒 🔥 THIS IS THE LINE (YOU ARE RIGHT)
-            if (string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Password is required and must be set by distributor");
-
-
-            if (string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Password is required");
 
             var customer = new Customer
             {
@@ -167,25 +152,33 @@ namespace DSM_Application.Server.Controllers
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 Address = dto.Address,
-
                 Role = "Customer",
                 AddedByDistributorId = distributorId,
-
-                // 🔥 PASSWORD SET HERE
                 PasswordHash = ComputeHash(dto.Password),
                 IsRegistered = true,
                 MustChangePassword = true
             };
 
-
             await _db.Customers.InsertOneAsync(customer);
+
+            // ⭐⭐⭐ AUTO-CONNECT CUSTOMER TO DISTRIBUTOR ⭐⭐⭐
+            var connection = new CustomerDistributorConnection
+            {
+                CustomerId = customer.CustomerId,
+                DistributorId = distributorId,
+                Status = ConnectionStatus.Accepted,
+                ConnectedOn = DateTime.UtcNow
+            };
+
+            await _db.Connections.InsertOneAsync(connection);
 
             return Ok(new
             {
-                message = "Customer created by distributor. Customer must set password.",
+                message = "Customer created and automatically connected.",
                 customerId = customer.CustomerId
             });
         }
+
 
         //[Authorize(Roles = "Distributor")]
         //[HttpPost("create-by-distributor")]
@@ -913,6 +906,84 @@ namespace DSM_Application.Server.Controllers
         }
 
 
+        [Authorize(Roles = "CashCollector,Employee")]
+        [HttpGet("for-cash-collector")]
+        public async Task<IActionResult> GetCustomersForCashCollector()
+        {
+            // 🔑 Get employeeId from token
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing in token");
+
+            // 🔎 Find employee
+            var employee = await _db.Employees
+                .Find(e => e.EmployeeId == employeeId)
+                .FirstOrDefaultAsync();
+
+            if (employee == null)
+                return Unauthorized("Employee not found");
+
+            var distributorId = employee.DistributorId;
+
+            // 1️⃣ Customers CREATED by this distributor
+            var createdCustomers = await _db.Customers
+                .Find(c => c.AddedByDistributorId == distributorId)
+                .ToListAsync();
+
+            // 2️⃣ ACCEPTED connections
+            var connections = await _db.Connections
+                .Find(c => c.DistributorId == distributorId &&
+                           c.Status == ConnectionStatus.Accepted)
+                .ToListAsync();
+
+            var connectedCustomerIds = connections
+                .Select(c => c.CustomerId)
+                .ToList();
+
+            var connectedCustomers = await _db.Customers
+                .Find(c => connectedCustomerIds.Contains(c.CustomerId))
+                .ToListAsync();
+
+            // 3️⃣ Merge + remove duplicates
+            var customers = createdCustomers
+                .Concat(connectedCustomers)
+                .GroupBy(c => c.CustomerId)
+                .Select(g => g.First())
+                .ToList();
+
+            // 4️⃣ Attach permanent employee name (optional but useful)
+            var employeeIds = connections
+                .Where(c => !string.IsNullOrEmpty(c.PermanentEmployeeId))
+                .Select(c => c.PermanentEmployeeId)
+                .Distinct()
+                .ToList();
+
+            var employees = await _db.Employees
+                .Find(e => employeeIds.Contains(e.EmployeeId))
+                .ToListAsync();
+
+            var result = customers.Select(c =>
+            {
+                var conn = connections.FirstOrDefault(x => x.CustomerId == c.CustomerId);
+                var emp = employees.FirstOrDefault(e => e.EmployeeId == conn?.PermanentEmployeeId);
+
+                return new
+                {
+                    c.CustomerId,
+                    c.Name,
+                    c.PhoneNumber,
+                    c.Address,
+                    c.IsRegistered,
+                    PermanentEmployeeName = emp?.Name ?? "Not Assigned"
+                };
+            });
+
+            return Ok(result);
+        }
+
+
+
 
         //[Authorize(Roles = "Distributor")]
         // [Authorize(Roles = "Distributor")]
@@ -974,6 +1045,10 @@ namespace DSM_Application.Server.Controllers
                     c.PhoneNumber,
                     c.Address,
                     c.IsRegistered,
+
+                    AddedByDistributorId = c.AddedByDistributorId,
+                    IsAddedByDistributor = c.AddedByDistributorId == distributorId,
+
 
                     PermanentEmployeeId = conn?.PermanentEmployeeId,
                     PermanentEmployeeName = emp?.Name   // ✅ KEY FIX

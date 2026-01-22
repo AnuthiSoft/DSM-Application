@@ -276,68 +276,46 @@ export class AddToCartComponent implements OnInit, OnChanges {
   }
 
 
+connectDistributorFromCart(distributorId: string) {
+  this.customerApiService
+    .connectDistributor(this.customerId, distributorId)
+    .subscribe({
+      next: res => {
+        this.toastr.success(res.message);
 
-  connectDistributorFromCart(distributorId: string) {
-    const body = {
-      customerId: this.customerId,
-      distributorId: distributorId
-    };
+        this.notConnectedDistributors =
+          this.notConnectedDistributors.filter(
+            d => d.distributorId !== distributorId
+          );
 
-    this.http
-      .post<{ message: string; status: string }>(
-        'http://localhost:5164/api/customers/connect-distributor',
-        body
-      )
-      .subscribe({
-        next: (res) => {
-          alert(res.message);
-
-          // remove distributor from pending list
-          this.notConnectedDistributors =
-            this.notConnectedDistributors.filter(
-              d => d.distributorId !== distributorId
-            );
-
-          // close popup if all handled
-          if (this.notConnectedDistributors.length === 0) {
-            this.showConnectionPopup = false;
-          }
-        },
-        error: (err) => {
-          alert(err.error || 'Failed to send connection request');
+        if (this.notConnectedDistributors.length === 0) {
+          this.showConnectionPopup = false;
         }
-      });
-  }
+      },
+      error: () => {
+        this.toastr.error('Failed to send connection request');
+      }
+    });
+}
+
 
 
   connectAllDistributorsFromCart() {
-    if (!this.notConnectedDistributors.length) return;
+  const calls = this.notConnectedDistributors.map(d =>
+    this.customerApiService.connectDistributor(this.customerId, d.distributorId)
+  );
 
-    const requests = this.notConnectedDistributors.map(d => {
-      const body = {
-        customerId: this.customerId,
-        distributorId: d.distributorId
-      };
-
-      return this.http.post(
-        'http://localhost:5164/api/customers/connect-distributor',
-        body
-      );
+  Promise.all(calls.map(c => c.toPromise()))
+    .then(() => {
+      this.toastr.success('Connection requests sent');
+      this.notConnectedDistributors = [];
+      this.showConnectionPopup = false;
+    })
+    .catch(() => {
+      this.toastr.error('Some requests failed');
     });
+}
 
-    // Send all requests
-    Promise.all(requests.map(req => req.toPromise()))
-      .then(() => {
-        alert('Connection request sent to all distributors');
-
-        // Clear list & close popup
-        this.notConnectedDistributors = [];
-        this.showConnectionPopup = false;
-      })
-      .catch(() => {
-        alert('Failed to send some connection requests');
-      });
-  }
 
   checkDistributorConnections(): Promise<boolean> {
     return new Promise((resolve) => {
@@ -458,6 +436,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
 
 
 
+
   toggleCustomerDropdown() {
     this.showCustomerDropdown = !this.showCustomerDropdown;
   }
@@ -484,30 +463,10 @@ export class AddToCartComponent implements OnInit, OnChanges {
   }
 
 
-  toggleProductDropdown(productId: string) {
-    this.expandedProduct[productId] = !this.expandedProduct[productId];
-  }
+ toggleProductDropdown(productId: string) {
+  this.expandedProduct[productId] = !this.expandedProduct[productId];
+}
 
-  getImageUrl(imageUrls: string[] | string | null | undefined): string {
-    if (!imageUrls) return 'assets/no-image.png';
-
-    // Case 1: Already a string → return directly
-    if (typeof imageUrls === 'string') {
-      return this.apiBaseUrl + imageUrls;
-    }
-
-    // Case 2: Array → return first image
-    if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-      return this.apiBaseUrl + imageUrls[0];
-    }
-
-    return 'assets/no-image.png';
-  }
-
-
-  onImgError(event: any) {
-    event.target.src = 'assets/no-image.png';
-  }
 
 
   modalProduct: Product | null = null;
@@ -594,43 +553,28 @@ export class AddToCartComponent implements OnInit, OnChanges {
   }
 
 
-  loadDashboard() {
+ loadDashboard() {
+  this.customerApiService.getDashboard(this.customerId).subscribe({
+    next: data => {
+      this.dashboardData = data;
+      this.loading = false;
 
-    //     const saved = localStorage.getItem("customer_order_products");
-    // if (saved) {
-    //   this.orderProducts = JSON.parse(saved);
-    //   this.cart = [...this.orderProducts];
-    //   this.loading = true;
-    // }
-    this.http
-      .get<DashboardResponse>(`http://localhost:5164/api/customers/dashboard/${this.customerId}`)
-      .subscribe({
-        next: (data) => {
-          this.dashboardData = data;
-          this.loading = false;
+      if (!data.isGlobal && data.products) {
+        this.products = data.products;
+      } else if (data.isGlobal && data.distributors?.length) {
+        this.products = data.distributors.flatMap(
+  (d: { products: Product[] }) => d.products || []
+);
 
-          // ✅ If non-global customer, load products directly
-          if (!data.isGlobal && data.products) {
-            this.products = data.products;
-          }
+      }
+    },
+    error: () => {
+      this.loading = false;
+      this.toastr.error('Failed to load dashboard');
+    }
+  });
+}
 
-          // ✅ If global customer, gather products from each distributor
-          else if (data.isGlobal && data.distributors?.length) {
-            this.products = data.distributors.flatMap(d => d.products || []);
-          }
-
-          console.log('Loaded products:', this.products);
-        },
-        error: (err) => {
-          console.error('Error loading dashboard', err);
-          this.loading = false;
-        },
-      });
-
-
-
-
-  }
   // ---------------------------------------------------
   //  LOAD PRODUCTS
   // ---------------------------------------------------
@@ -953,7 +897,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
   loadCustomerEmail(id: string) {
     this.customerService.getCustomerById(id).subscribe({
       next: (customer) => {
-        this.customerEmail = customer.email || customer.Email;
+        this.customerEmail = customer.email ;
         localStorage.setItem('customerEmail', this.customerEmail);
       }
     })

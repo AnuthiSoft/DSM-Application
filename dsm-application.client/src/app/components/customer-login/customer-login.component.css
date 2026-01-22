@@ -65,6 +65,10 @@
   margin: 0 auto;
 }
 
+.form-control::placeholder {
+  color: var(--input-text);
+  opacity: 5;
+}
 .login-header {
   background: var(--secondary-color);
   color: var(--white-bg);

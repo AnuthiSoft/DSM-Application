@@ -1,10 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';  // ✅ Fix: Import HttpClient
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { ReturnApiService } from '../../services/return-api.service';
+
+  interface ReturnData {
+  returnType: string;
+  reason: string;
+  otherReason: string;
+  resolution: string;
+  files: FileList | null;
+  additionalNotes?: string;   // ✅ ADD
+  agreeTerms?: boolean; 
+}
 
 @Component({
   selector: 'app-customer-orders',
@@ -12,25 +23,54 @@ import Swal from 'sweetalert2';
   styleUrls: ['./customer-orders.component.css']
 })
 export class CustomerOrdersComponent {
+
+  returnData: ReturnData = {
+    returnType: 'Return',
+    reason: 'Received damaged product',
+    otherReason: '',
+    resolution: 'Refund',
+    files: null,
+    additionalNotes: '',
+  agreeTerms: false
+  };
+
+
+  // UI flags
+showProgressSteps: boolean = false;
+submitting: boolean = false;
+
+// Alert message
+returnMessage: string = '';
+returnMessageType: 'alert-success' | 'alert-error' | '' = '';
+
+
   orders: Order[] = [];
   loading = true;
   selectedOrder: any = null;
-  selectedOrderss: any = null;
+    selectedOrderss: any = null;
+
+    selectedFiles: File[] = [];
+    selectedProductId: string = '';
+returnQty: number = 1;
+selectedOrderForReturn: any = null;
+  activeTab: string = 'dashboard';
+  
+
+
+createdReturnId: string = '';
+@Output() returnSubmitted = new EventEmitter<void>();
+
+
 
   customerId = localStorage.getItem('customerId') || '';
   distributorId = localStorage.getItem('distributorId') || '';
 
-  isReturnPopupOpen = false;
-  returnData = {
-    returnType: 'Return',
-    reason: 'Received damaged product',
-    otherReason: '',
-    files: null as FileList | null
-  };
-  currentOrderId: string = '';
+isReturnPopupOpen = false;
+
+currentOrderId: string = '';
 
 
-  constructor(private orderService: OrderService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private orderService: OrderService, private returnApiService:ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -61,28 +101,27 @@ export class CustomerOrdersComponent {
     });
   }
 
-
-  onFilesSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-
-    if (input.files && input.files.length > 0) {
-      this.returnData.files = input.files;
-    }
-  }
+onFilesSelected(event: any) {
+  this.selectedFiles = Array.from(event.target.files);
+}
 
 
-  computeExpectedDelivery(orderDate: any, distributorId: string): string {
-    if (!orderDate || !distributorId) return "";
 
-    const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-    // Convert Date OR string to Date object
-    const date = new Date(orderDate);
+ computeExpectedDelivery(orderDate: any, distributorId: string): string {
+  if (!distributorId) return "";
 
-    date.setDate(date.getDate() + leadTime);
+  const leadTime =
+    Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-    return date.toISOString().split("T")[0];
-  }
+  // 🔥 IMPORTANT: Always start from TODAY for reorder
+  const baseDate = orderDate ? new Date(orderDate) : new Date();
+
+  baseDate.setDate(baseDate.getDate() + leadTime);
+
+  return baseDate.toISOString().split("T")[0];
+}
+
 
 
   // openReturnPopup(order: any) {
@@ -158,56 +197,89 @@ export class CustomerOrdersComponent {
     this.isReturnPopupOpen = false;
   }
 
-  openReturnPopup(order: any) {
-    this.currentOrderId = order.id;
-    this.isReturnPopupOpen = true;
-  }
+openReturnPopup(order: any) {
+  this.currentOrderId = order.id;
+  this.selectedOrderForReturn = order;
+
+  this.selectedProductId = order.products[0]?.productId;
+  this.returnQty = 1;
+  this.selectedFiles = [];
+
+  this.returnData = {
+    returnType: 'Return',
+    reason: 'Received damaged product',
+    otherReason: '',
+    resolution: 'Refund',
+    files: null
+  };
+
+  this.isReturnPopupOpen = true;
+}
+
+
 
 
   submitReturnRequest() {
 
-    const finalReason =
-      this.returnData.reason === 'Other'
-        ? this.returnData.otherReason
-        : this.returnData.reason;
+  const baseReason =
+    this.returnData.reason === 'Other'
+      ? this.returnData.otherReason
+      : this.returnData.reason;
 
-    const formData = new FormData();
-    formData.append("orderId", this.currentOrderId);
-    formData.append("returnType", this.returnData.returnType);
-    formData.append("reason", finalReason);
+  const finalReason =
+    `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
 
-    if (this.returnData.files) {
-      for (let i = 0; i < this.returnData.files.length; i++) {
-        formData.append("files", this.returnData.files[i]);
+  // ✅ FIX: get product from selected order
+  const selectedProduct = this.selectedOrderForReturn.products
+    .find((p: any) => p.productId === this.selectedProductId);
+
+  const payload = {
+    orderId: this.currentOrderId,
+    productId: this.selectedProductId,
+    productName: selectedProduct?.productName || '', // ✅ REQUIRED FIELD FIX
+    returnQty: this.returnQty,
+    reason: finalReason,
+    resolution: this.returnData.resolution
+  };
+
+  this.returnApiService.createReturn(payload).subscribe({
+    next: (res) => {
+      const returnId = res.id;
+
+      if (this.selectedFiles.length > 0) {
+        this.returnApiService
+          .uploadReturnImages(returnId, this.selectedFiles)
+          .subscribe();
       }
+
+      const order = this.orders.find(o => o.id === this.currentOrderId);
+      if (order) {
+        order.status = 'Return Pending';
+      }
+
+      this.toastr.success('Return request submitted');
+      this.isReturnPopupOpen = false;
+      this.activeTab = 'returns';
+    },
+    error: () => {
+      this.toastr.error('Failed to submit request');
     }
+  });
+}
 
-    this.http.post("http://localhost:5164/api/returns/create", formData)
-      .subscribe({
-        next: () => {
-          this.toastr.success("Return request submitted!");
 
-          this.isReturnPopupOpen = false;
 
-          // 🔥 Redirect to Return Orders
-          this.router.navigate(['/customer/dashboard'], {
-            queryParams: { tab: 'returns' }
-          });
-        },
-        error: () => {
-          this.toastr.error("Failed to submit return request");
-        }
-      });
-  }
+
+
 
 
 
 
 
   //   // Navigate to order details page
-  // viewOrderDetails(orderId: string): void {
-  //   this.router.navigate(['/orders', orderId]);
-  // }
+  viewOrderDetails(orderId: string): void {
+    this.router.navigate(['/orders', orderId]);
+  }
 
   // Cancel an order
   cancelOrder(orderId: string): void {
@@ -215,29 +287,47 @@ export class CustomerOrdersComponent {
 
     this.orderService.cancelOrder(orderId).subscribe({
       next: () => {
-        this.toastr.success('Order cancelled successfully');
-        this.loadOrders(); // refresh
-      },
+  this.toastr.success('Order cancelled successfully');
+
+  const order = this.orders.find(o => o.id === orderId);
+  if (order) {
+    order.status = 'Cancelled';
+  }
+},
+
       error: (err: any) => {
         console.error('Failed to cancel order', err);
         this.toastr.error('Failed to cancel order');
       }
     });
   }
+  
+
 
   // Reorder a previous order
-  reorder(orderId: string): void {
-    this.orderService.reorder(orderId).subscribe({
-      next: () => {
-        this.toastr.success('Order placed successfully');
-        this.loadOrders();
-      },
-      error: (err: any) => {
-        console.error('Failed to reorder', err);
-        this.toastr.error('Failed to place reorder');
-      }
-    });
-  }
+reorder(orderId: string): void {
+
+  const distributorId = localStorage.getItem('distributorId')!;
+  const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+
+  const today = new Date();
+  today.setDate(today.getDate() + leadTime);
+
+  const expectedDelivery = today.toISOString().split('T')[0];
+
+  this.orderService.reorder(orderId, expectedDelivery).subscribe({
+    next: () => {
+      this.toastr.success('Order placed successfully');
+      this.loadOrders();
+    },
+    error: (err) => {
+      this.toastr.error(err?.error?.message || 'Reorder failed');
+    }
+  });
+}
+
+
+
 
   // Count completed orders
   // getCompletedCount(): number {
@@ -271,113 +361,16 @@ export class CustomerOrdersComponent {
   // }
 
   // ✅ FIXED View Details for order
-  viewOrderDetails(id: string | null | undefined): void {
+viewOrderDetailss(id: string) {
+  this.orderService.getOrderById(id).subscribe({
+    next: order => {
 
-    if (!id) {
-      this.toastr.error('Invalid Order ID');
-      return;
-    }
+      const totalPrice = (order.products || []).reduce(
+        (sum: number, item: any) => sum + (item.price * item.quantity),
+        0
+      );
 
-    this.http.get<any>(`http://localhost:5164/api/orders/${id}`).subscribe({
-      next: order => {
-
-        const taxableAmount =
-          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
-
-        Swal.fire({
-          title: 'Order Summary',
-          html: `
-          <div style="text-align:left; font-size:15px; line-height:1.6">
-
-            <p><strong>Subtotal:</strong> ₹${order.subtotal?.toFixed(2)}</p>
-
-            <hr>
-
-            <p><strong>Discounts</strong></p>
-
-            <p>Price Discount (${order.priceDiscountPercent ?? 0}%):
-              <span style="color:green">
-                - ₹${((order.subtotal * (order.priceDiscountPercent ?? 0)) / 100).toFixed(2)}
-              </span>
-            </p>
-
-            <p>Quantity Discount (${order.quantityDiscountPercent ?? 0}%):
-              <span style="color:green">
-                - ₹${((order.subtotal * (order.quantityDiscountPercent ?? 0)) / 100).toFixed(2)}
-              </span>
-            </p>
-
-            <p>Special Discount (${order.specialDiscountPercent ?? 0}%):
-              <span style="color:green">
-                - ₹${((order.subtotal * (order.specialDiscountPercent ?? 0)) / 100).toFixed(2)}
-              </span>
-            </p>
-
-            <p><strong>General Discount:</strong>
-              <span style="color:green">
-                - ₹${order.products?.[0]?.generalDiscount?.toFixed(2) ?? '0.00'}
-              </span>
-            </p>
-
-            <p style="font-weight:600">
-              Total Discount:
-              <span style="color:green">
-                - ₹${order.totalDiscount?.toFixed(2)}
-              </span>
-            </p>
-
-            <hr>
-
-            <p><strong>Taxable Amount:</strong>
-              ₹${taxableAmount.toFixed(2)}
-            </p>
-
-        <p>
-        <strong>GST (${order.products?.[0]?.gstPercentage ?? 0}%):</strong>
-        ₹${Number(
-            order.products?.reduce(
-              (sum: number, p: any) => sum + (p.gstAmount ?? 0),
-              0
-            )
-          ).toFixed(2)}
-          
-          </p>
-            <hr>
-
-            <p style="font-size:17px; font-weight:700">
-              Total Amount: ₹${order.totalAmount?.toFixed(2)}
-            </p>
-
-          </div>
-        `,
-          icon: 'info',
-          width: 420,
-          confirmButtonText: 'Close'
-        });
-
-      },
-      error: () => {
-        this.toastr.error('Unable to load order details');
-      }
-    });
-  }
-
-
-
-  viewOrderDetailss(id: string | null | undefined): void {
-
-    console.log('View Items clicked. Order ID =', id);
-
-    // 🛑 STOP if ID is invalid
-    if (!id) {
-      this.toastr.error('Invalid Order ID');
-      return;
-    }
-
-    this.http.get<any>(`http://localhost:5164/api/orders/${id}`).subscribe({
-      next: order => {
-
-        const itemsHtml = (order.products || []).map((item: any) => `
+      const itemsHtml = (order.products || []).map((item: any) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <div>
             <strong>${item.productName}</strong><br>
@@ -389,16 +382,10 @@ export class CustomerOrdersComponent {
         </div>
       `).join('');
 
-        const totalPrice = (order.products || []).reduce(
-          (sum: number, item: any) => sum + (item.price * item.quantity),
-          0
-        );
-
-        Swal.fire({
-          title: 'Order Items',
-          html: `
+      Swal.fire({
+        title: 'Order Items',
+        html: `
           <div style="text-align:left; font-size:15px;">
-
             ${itemsHtml}
 
             <hr>
@@ -412,21 +399,37 @@ export class CustomerOrdersComponent {
               <strong>Final Price</strong>
               <strong>₹${order.totalAmount ?? 0}</strong>
             </div>
-
           </div>
         `,
-          icon: 'info',
-          width: 450,
-          confirmButtonText: 'Close'
-        });
+        icon: 'info',
+        width: 450,
+        confirmButtonText: 'Close'
+      });
+    },
+    error: () => {
+      Swal.fire('Error', 'Unable to load order details', 'error');
+    }
+  });
+}
 
-      },
-      error: err => {
-        console.error('Error loading order:', err);
-        Swal.fire('Error', 'Unable to load order details', 'error');
-      }
-    });
-  }
+
+getMaxReturnQuantity(): number {
+  if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
+
+  const product = this.selectedOrderForReturn.products
+    .find((p: any) => p.productId === this.selectedProductId);
+
+  return product ? product.quantity : 1;
+}
+
+getFilePreview(file: File): string {
+  return URL.createObjectURL(file);
+}
+
+removeFile(index: number) {
+  this.selectedFiles.splice(index, 1);
+}
+
 
 
 }

@@ -95,6 +95,7 @@ namespace DSM_Application.Server.Models.DTOs
         public DateTime? DeliveredOn { get; set; }
 
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
+        public string DistributorName { get; internal set; }
 
         // ⭐ REQUIRED for per-product delivery date
         //public DateTime? DeliveryEta { get; set; }

@@ -562,7 +562,13 @@ textarea.form-control {
   background: rgba(0,0,0,0.55);
   backdrop-filter: blur(2px);
   z-index: 1000;
+
+  /* FIX — ALWAYS CENTER MODALS */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 
 .modal-content, .customer-modal {
   background: var(--card-bg);

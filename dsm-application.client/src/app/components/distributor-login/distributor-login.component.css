@@ -167,4 +167,9 @@ footer {
 .password-container {
   position: relative;
 }
+.form-control::placeholder {
+  color: var(--input-text);
+  opacity: 5;
+}
+
 

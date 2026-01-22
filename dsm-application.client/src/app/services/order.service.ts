@@ -2,15 +2,20 @@ import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 import { DistributorOrder, Employee, Order } from '../models/order.model';
- 
+import { Product } from '../models/products.model';
+import { environment } from '../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
+private baseUrl = environment.apiUrl + '/orders';
+
    private readonly endpoint = 'orders';
- 
-  constructor(private api: ApiService) {}
- 
+
+  constructor(private api: ApiService,private http: HttpClient) {}
+
   placeOrder(payload: any): Observable<any> {
     // assumes ApiService posts to /api/<endpoint>
     return this.api.post<any>(`${this.endpoint}/create`, payload);
@@ -23,10 +28,28 @@ export class OrderService {
     // ✅ no baseUrl, no http, just endpoint
     return this.api.get<Employee[]>(`${this.endpoint}/${distributorId}/employees`);
   }
- 
- 
- 
- 
+  
+ // ✅ Cash Collector creates order
+createOrderByCollector(data: any) {
+  return this.api.post<any>(
+    'orders/create-by-collector',
+    data
+  );
+}
+
+// ✅ Get products by distributor
+getProductsByDistributor(distributorId: string) {
+  return this.api.get<Product[]>(
+    `products/distributor/${distributorId}`
+  );
+}
+
+getOrderById(orderId: string) {
+  return this.api.get<any>(`orders/${orderId}`);
+}
+  
+
+  
    getOrdersByDistributor(distributorId: string, status?: string): Observable<DistributorOrder[]> {
     const url = status && status !== 'All'
       ? `${this.endpoint}/distributor/${distributorId}?status=${encodeURIComponent(status)}`
@@ -65,9 +88,17 @@ collectPayment(orderId: string, payload: { collectedAmount: number; paymentMetho
   }
  
   // ✅ NEW: Reorder (Customer)
-  reorder(orderId: string): Observable<any> {
-    return this.api.post(`${this.endpoint}/${orderId}/reorder`,{});
-  }
+  reorder(orderId: string, expectedDelivery: string) {
+  const params = { expectedDelivery };
+
+  return this.http.post(
+    `${this.baseUrl}/${orderId}/reorder`,
+    {},
+    { params }
+  );
+}
+
+
   uploadDeliveryReceipt(orderId: string, formData: FormData): Observable<any> {
   return this.api.post(
     `${this.endpoint}/${orderId}/upload-receipt`,

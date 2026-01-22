@@ -162,7 +162,13 @@
             <td>{{ c.cashAmount }}</td>
             <td>{{ c.onlineAmount }}</td>
             <td>{{ c.scannerAmount }}</td>
-            <td>{{ c.lastPaymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+            <!-- In your report table row, replace the last payment date cell -->
+<td>
+  <div class="date-time-badge">
+    <span class="date">{{ c.lastPaymentDate | date:'dd/MM/yyyy' }}</span>
+    <span class="time">{{ c.lastPaymentDate | date:'HH:mm a' }}</span>
+  </div>
+</td>
             <td>
               <button (click)="viewDetails(c)">View</button>
             </td>

@@ -314,7 +314,15 @@
 
             <div class="form-group">
               <label class="form-label">Initial Stock</label>
-              <input type="number" class="form-control" formControlName="stock" [disabled]="isEdit">
+              <input type="number" class="form-control" formControlName="stock" min="0" step="1" [disabled]="isEdit"
+          [class.is-invalid]="formSubmitted && productForm.get('stock')?.invalid"
+        />
+
+        <div class="invalid-feedback"
+        *ngIf="formSubmitted && productForm.get('stock')?.hasError('min')">
+        Initial stock cannot be negative
+      </div>
+
               <small class="form-text">
                 {{ isEdit ? 'Use "Add Stock" to update quantity' : 'Initial stock quantity' }}
               </small>

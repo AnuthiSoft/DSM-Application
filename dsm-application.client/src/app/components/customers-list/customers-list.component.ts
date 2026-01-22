@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-customers-list',
@@ -43,7 +44,10 @@ export class CustomersListComponent implements OnInit {
   formSubmitted = false;
 
 
-  constructor(private customerService: CustomerService) { }
+  constructor(
+    private customerService: CustomerService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.loadAllCustomers();
@@ -53,17 +57,34 @@ export class CustomersListComponent implements OnInit {
   loadEmployees() {
     const distId = localStorage.getItem('distributorId')!;
 
-    this.customerService.getEmployees(distId).subscribe((res: any[]) => {
-      this.employees = res
-        .filter(e => e.isActive)                           // only active
-        .filter(e => e.designation === "Delivery Boy");    // only delivery boys
-    });
+  this.customerService.getEmployees(distId).subscribe((res: any[]) => {
+    this.employees = res
+      .filter(e => e.isActive)                           // only active
+      .filter(e => e.designation === "Delivery Boy");    // only delivery boys
+  });
+}
+
+reportFraudAgainstDistributor() {
+  const distributorId = localStorage.getItem('distributorId');
+
+  if (!distributorId) {
+    alert('Distributor not found');
+    return;
   }
-  openAssignModal(customerId: string) {
-    this.selectedCustomerId = customerId;
-    this.selectedEmployeeId = '';
-    this.showAssignModal = true;
-  }
+
+  // 🔴 Customer → Distributor
+  this.router.navigate([
+    '/report-fraud',
+    'DISTRIBUTOR',
+    distributorId
+  ]);
+}
+
+openAssignModal(customerId: string) {
+  this.selectedCustomerId = customerId;
+  this.selectedEmployeeId = '';
+  this.showAssignModal = true;
+}
 
   closeAssignModal() {
     this.showAssignModal = false;

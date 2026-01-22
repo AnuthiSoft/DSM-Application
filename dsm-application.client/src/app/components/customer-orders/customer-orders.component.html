@@ -55,6 +55,7 @@
       <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-value">{{ orders.length }}</div>
+        <!-- <div class="stat-value">{{ orders.length }}</div> -->
         <div class="stat-label">Total Orders</div>
       </div>
       <div class="stat-card">
@@ -98,9 +99,31 @@
             </div>
 
             <div class="detail-item">
+            <span class="detail-label">Expected Delivery:</span>
+
+              <!-- Normal orders -->
+               <span class="detail-value"
+      *ngIf="order.status?.toLowerCase() !== 'canceled' 
+          && order.status?.toLowerCase() !== 'cancelled'; 
+          else cancelledDelivery">
+        </span> 
+             <!-- <span class="detail-value"
+              *ngIf="order.status !== 'Cancelled'; else cancelledDelivery">
+              {{ order.expectedDeliveryDate | date:'mediumDate' }}
+              </span> -->
+
+            <!-- Cancelled order -->
+          <ng-template #cancelledDelivery>
+          <span class="detail-value cancelled-text">
+          {{ order.expectedDeliveryDate | date:'mediumDate' }}
+          </span>
+          </ng-template>
+        </div>
+
+            <!-- <div class="detail-item">
               <span class="detail-label">Expected Delivery:</span>
               <span class="detail-value">{{ order.expectedDeliveryDate | date:'mediumDate' }}</span>
-            </div>
+            </div> -->
             <!-- <div class="detail-item">
   <span class="detail-label">Order Date:</span>
   <span class="detail-value">
@@ -162,15 +185,43 @@
         <!-- Footer Buttons ✅ FIXED -->
         <div class="order-footer">
 
+          <!-- View Discount -->
+  <button class="btn btn-primary btn-sm action-btn"
+          (click)="viewOrderDetails(order.id)"
+          [disabled]="isCancelled(order)">
+    <i class="fas fa-eye"></i>
+    <span>View Discount</span>
+  </button>
+          <!-- View Discount
+            <button class="btn btn-primary btn-sm"
+                    (click)="viewOrderDetails(order.id)"
+                    [disabled]="isCancelled(order)">
+              <i class="fas fa-eye"></i> View Discount
+            </button> -->
+
+            <!-- View Details -->
+  <button class="btn btn-primary btn-sm action-btn"
+          (click)="viewOrderDetailss(order.id)"
+          [disabled]="isCancelled(order)">
+    <i class="fas fa-eye"></i>
+    <span>View Details</span>
+  </button>
           <!-- View Details -->
-          <button class="btn btn-primary btn-sm" (click)="viewOrderDetails(order.id)">
-            <i class="fas fa-eye"></i> View Discount
-          </button>
-
-
-          <button class="btn btn-primary btn-sm" (click)="viewOrderDetailss(order.id)">
+          <!-- <button class="btn btn-primary btn-sm"
+                  (click)="viewOrderDetailss(order.id)"
+                  [disabled]="isCancelled(order)">
             <i class="fas fa-eye"></i> View Details
-          </button>
+          </button> -->
+
+          <!-- Cancel -->
+  <!-- <button class="btn btn-outline-secondary btn-sm action-btn" -->
+        <button
+        class="btn btn-outline-secondary action-btn"
+        *ngIf="order.status === 'Pending'"
+        (click)="cancelOrder(order.id)">
+        <i class="fas fa-times"></i>
+        <span>Cancel Order</span>
+      </button>
 
 
 
@@ -178,16 +229,34 @@
 
 
           <!-- Cancel -->
-          <button class="btn btn-outline-secondary btn-sm" *ngIf="order.status === 'Pending'"
+          <!-- <button class="btn btn-outline-secondary btn-sm" *ngIf="order.status === 'Pending'"
             (click)="cancelOrder(order.id)">
             <i class="fas fa-times"></i> Cancel Order
-          </button>
+          </button> -->
+
+           <!-- Reorder -->
+          <button class="btn btn-outline-success btn-sm action-btn"
+          *ngIf="order.status === 'Delivered'"
+          (click)="reorder(order.id)">
+    <i class="fas fa-redo"></i>
+    <span>Reorder</span>
+  </button>
 
           <!-- Reorder -->
-          <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'"
+          <!-- <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'"
             (click)="reorder(order.id)">
             <i class="fas fa-redo"></i> Reorder
+          </button> -->
+
+                     <!-- Return (only for delivered orders) -->
+            <button class="btn btn-warning btn-sm action-btn"
+                  *ngIf="order.status === 'Delivered'"
+                  (click)="openReturnPopup(order)">
+            <i class="fas fa-undo"></i>
+            <span>Return</span>
           </button>
+
+
         </div>
 
         <!-- Return (only for delivered orders) -->

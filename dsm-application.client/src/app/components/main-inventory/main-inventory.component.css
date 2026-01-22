@@ -108,15 +108,35 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.06);
             margin-bottom: 30px;
         }
+        /* Layout: chart left, legend right */
+            .chart-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;   /* center chart + legend together */
+            gap: 30px;
+            max-width: 700px;         /* 🔥 prevents legend going too far */
+            margin: 0 auto;           /* 🔥 centers the block */
+            }
 
-        .inventory-charts-section canvas {
+
+
+        /* .inventory-charts-section canvas {
             max-width: 350px;
             max-height: 350px;
             width: 100%;
             height: auto;
             margin: 0 auto;
             display: block;
-        }
+        } */
+
+        .inventory-charts-section canvas {
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px;
+  max-height: 260px;
+  margin: 0 auto;
+  display: block;
+}
 
         .table {
             background: var(--card-bg);
@@ -308,3 +328,68 @@
         [data-theme="dark"] .table-dark {
             background: linear-gradient(135deg, #2c3e50, #34495e) !important;
         }
+
+
+/* ===============================
+   PIE CHART LEGEND (FINAL)
+   =============================== */
+
+/* Legend container */
+
+.custom-legend {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* .custom-legend {
+  display: flex;
+  flex-direction: row;      /* 👈 allow side-by-side */
+  /* flex-wrap: wrap;          /* 👈 wrap to next column */
+  /* max-height: 260px;        /* 👈 match pie height */
+  /* max-width: 260px; */
+  /* gap: 12px 20px;
+} */ 
+
+
+/* Legend items */
+.legend-item {
+width: 120px;  /* 👈 fixed width per label */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Legend color boxes */
+.legend-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.legend-box.green { background-color: #4caf50; }
+.legend-box.orange { background-color: #ff9800; }
+.legend-box.blue { background-color: #03a9f4; }
+
+/* 🔥 TEXT COLOR FIX */
+.custom-legend,
+.custom-legend span {
+  color: #000 !important; /* light mode */
+}
+
+/* 🔥 DARK MODE */
+[data-theme="dark"] .custom-legend,
+[data-theme="dark"] .custom-legend span {
+  color: #ffffff !important;
+}
+
+/* ===============================
+   FINAL LEGEND TEXT FIX
+   =============================== */
+
+.inventory-charts-section .custom-legend,
+.inventory-charts-section .custom-legend span {
+  color: var(--text-color) !important;
+}

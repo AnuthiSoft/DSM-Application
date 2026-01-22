@@ -118,6 +118,25 @@
   background: var(--hover-color);
 }
 
+/* ============================= */
+/* 🔘 CLEAR BUTTON STYLE */
+/* ============================= */
+
+.btn-clear {
+  background-color: #e4e4e4;          /* light grey */
+  color: #374151;                     /* dark grey text */
+  border: 1px solid #e3e3e4;           /* soft border */
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-clear:hover {
+  background-color: #e5e7eb;           /* slightly darker on hover */
+}
+
 /* Status Summary Section */
 .status-summary-section {
   margin-bottom: 30px;
@@ -453,6 +472,12 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.cancelled-text {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
 
 @media (max-width: 480px) {
   .summary-cards {

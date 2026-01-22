@@ -23,8 +23,13 @@ export class EmployeesComponent {
   isEdit = false;
   loading = false;
   selectedEmployee: any = null;
-  selectedFile: File | null = null;
-  showUploadModal = false;
+selectedFile: File | null = null;
+selectedFileName: string = '';   // ✅ ADD THIS
+showUploadModal = false;
+
+  // selectedEmployee: any = null;
+  // selectedFile: File | null = null;
+  // showUploadModal = false;
 
   // filters
   searchTerm = '';
@@ -396,13 +401,28 @@ export class EmployeesComponent {
   }
 
   closeUploadModal() {
-    this.showUploadModal = false;
-    this.selectedFile = null;
-  }
+  this.showUploadModal = false;
+  this.selectedFile = null;
+  this.selectedFileName = '';   // ✅ RESET
+}
+
+  // closeUploadModal() {
+  //   this.showUploadModal = false;
+  //   this.selectedFile = null;
+  // }
 
   onFileSelected(event: any) {
-    this.selectedFile = event.target.files[0];
+  const file = event.target.files[0];
+
+  if (file) {
+    this.selectedFile = file;
+    this.selectedFileName = file.name;   // ✅ ADD THIS
   }
+}
+
+  // onFileSelected(event: any) {
+  //   this.selectedFile = event.target.files[0];
+  // }
 
   uploadInvoice() {
     if (!this.selectedFile || !this.selectedEmployee) {

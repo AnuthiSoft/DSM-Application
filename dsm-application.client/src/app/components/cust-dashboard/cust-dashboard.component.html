@@ -119,13 +119,23 @@
 
 
           <!-- ⭐ REPORT FRAUD BUTTON (FOR CUSTOMER REPORTING DISTRIBUTOR) -->
-          <button class="btn btn-danger mt-2" [routerLink]="[
+          <!-- <button class="btn btn-danger mt-2" [routerLink]="[
                     '/report-fraud',
                     'distributor',
                     d.distributorId
                   ]">
             <i class="fas fa-flag"></i> Report
-          </button>
+          </button> -->
+          <button class="btn btn-danger mt-2"
+        [routerLink]="[
+          '/report-fraud',
+          'DISTRIBUTOR',
+          d.distributorId
+        ]">
+        <i class="fas fa-flag"></i> Report
+      </button>
+
+
           <button class="btn btn-warning mt-2" [routerLink]="[
           '/review',
           'Distributor',

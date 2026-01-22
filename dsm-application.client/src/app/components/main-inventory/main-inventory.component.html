@@ -6,12 +6,31 @@
 <div class="inventory-charts-section">
 
   <h3>Stock Distribution (Pie Chart)</h3>
-  <canvas id="pieChart"></canvas>
 
-  <h3 style="margin-top:10px;">Stock Levels (Bar Chart)</h3>
-  <canvas id="barChart"></canvas>
+  <div class="chart-layout">
 
+    <!-- Pie chart -->
+    <canvas id="pieChart"></canvas>
+
+    <!-- 🔥 DYNAMIC LEGEND -->
+    <div class="custom-legend">
+      <div
+        class="legend-item"
+        *ngFor="let item of stockList; let i = index"
+      >
+        <span
+          class="legend-box"
+          [style.backgroundColor]="pieColors[i % pieColors.length]"
+        ></span>
+
+        <span>{{ item.productName }}</span>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+
 
 <table class="table table-bordered table-striped">
   <thead class="table-dark">

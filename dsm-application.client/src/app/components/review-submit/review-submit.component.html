@@ -37,10 +37,13 @@
 
       <div class="form-group">
         <label class="form-label">Rating *</label>
-        <select class="form-control" [(ngModel)]="model.rating" name="rating" required>
-          <option value="">Select Rating</option>
-          <option *ngFor="let r of ratings" [value]="r">{{ r }} ⭐</option>
-        </select>
+        <select class="form-control rating-select" [(ngModel)]="model.rating" name="rating" required >
+        <option value="">Select Rating</option>
+        <option *ngFor="let r of ratings" [value]="r">
+          {{ r }} ⭐
+        </option>
+      </select>
+
       </div>
 
       <div class="form-actions">

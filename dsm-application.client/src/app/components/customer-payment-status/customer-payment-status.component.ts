@@ -47,6 +47,13 @@ getPaymentPercentage() {
   return Math.round((paid / total) * 100);
 }
 
+isOrderCancelled(): boolean {
+  const status = this.status?.orderStatus?.toLowerCase();
+  // const status = this.status?.status?.toLowerCase();
+  return status === 'cancelled' || status === 'canceled';
+}
+
+
   // 💳 Icon for payment mode
   getPaymentModeIcon(mode: string) {
     switch (mode) {

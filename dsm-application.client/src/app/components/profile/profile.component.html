@@ -1,54 +1,54 @@
 <!-- <div class="container mt-4">
-
+ 
   <h2>My Profile</h2>
-
+ 
   <div *ngIf="isLoading" class="alert alert-info">
     Loading profile...
   </div>
-
+ 
   <div *ngIf="errorMessage" class="alert alert-danger">
     {{ errorMessage }}
   </div>
-
+ 
   <form *ngIf="!isLoading && customer" (ngSubmit)="saveProfile()" class="mt-3">
     <div class="mb-3">
       <label class="form-label">Name</label>
       <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required>
     </div>
-
+ 
     <div class="mb-3">
       <label class="form-label">Email</label>
       <input type="email" class="form-control" [(ngModel)]="customer.email" name="email" required>
     </div>
-
+ 
     <div class="mb-3">
       <label class="form-label">Phone</label>
       <input type="text" class="form-control" [(ngModel)]="customer.phoneNumber" name="phone">
     </div>
-
+ 
     <div class="mb-3">
       <label class="form-label">Address</label>
       <textarea class="form-control" [(ngModel)]="customer.address" name="address" rows="3"></textarea>
     </div>
-
+ 
     <button class="btn btn-primary" type="submit" [disabled]="isSaving">
       {{ isSaving ? 'Saving...' : 'Save Changes' }}
     </button>
   </form>
-
+ 
 </div>
  -->
 <div class="profile-section">
   <div class="welcome-header">
     <h2>My Profile</h2>
   </div>
-
+ 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loading-state">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Loading profile...</span>
   </div>
-
+ 
   <!-- Error -->
   <div *ngIf="errorMessage" class="error-state">
     <i class="fas fa-exclamation-triangle"></i>
@@ -57,12 +57,12 @@
       <p>{{ errorMessage }}</p>
     </div>
   </div>
-
+ 
   <!-- Profile -->
   <div *ngIf="!isLoading && customer" class="profile-content">
-
+ 
     <div class="profile-card">
-
+ 
       <!-- Avatar Section -->
       <div class="profile-header">
         <div class="profile-avatar">
@@ -74,7 +74,7 @@
           </div>
           <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" style="display:none;">
         </div>
-
+ 
         <!-- ⭐ Profile Info (Name, Email, Role) -->
         <div class="profile-info">
           <h3>{{ customer.name }}</h3>
@@ -82,19 +82,19 @@
           <span class="profile-badge">{{ customer.role || 'Customer' }}</span>
         </div>
       </div>
-
-
-
+ 
+ 
+ 
       <form #profileForm="ngForm" (ngSubmit)="saveProfile()" class="profile-form">
-
-
+ 
+ 
         <div class="form-grid">
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-user"></i> Full Name</label>
             <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required
               pattern="^[A-Z][a-zA-Z ]*$" #name="ngModel" />
-
+ 
             <div class="text-danger" *ngIf="name.touched && name.errors">
               <div *ngIf="name.errors['required']">
                 Name is required
@@ -103,14 +103,14 @@
                 Name must start with a capital letter
               </div>
             </div>
-
+ 
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
             <input type="email" class="form-control" [(ngModel)]="customer.email" name="email" required email
               (blur)="checkEmailExists()" #email="ngModel" />
-
+ 
             <div class="text-danger" *ngIf="email.touched && email.errors">
               <div *ngIf="email.errors['required']">
                 Email is required
@@ -122,19 +122,20 @@
                 This email already exists
               </div>
             </div>
-
+ 
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-phone"></i> Phone</label>
             <div class="phone-wrapper">
               <span class="phone-prefix">+91</span>
-
+ 
               <input type="text" class="form-control phone-input" [(ngModel)]="customer.phoneNumber" name="phone"
-                required pattern="^[6-9]\d{9}$" maxlength="10" (input)="restrictPhoneInput($event)"
-                (blur)="checkPhoneExists()" #phone="ngModel" />
+                required pattern="^[6-9]\d{9}$" maxlength="10" (input)="restrictPhoneInput($event) "
+                (blur)="checkPhoneExists()" #phone="ngModel"  
+/>
             </div>
-
+ 
             <div class="text-danger" *ngIf="phone.touched && phone.errors">
               <div *ngIf="phone.errors['required']">
                 Phone number is required
@@ -146,91 +147,95 @@
                 This phone number already exists
               </div>
             </div>
-
+ 
           </div>
-
+ 
           <div class="form-group full-width">
             <label class="form-label"><i class="fas fa-road"></i> Street</label>
             <input type="text" class="form-control" [(ngModel)]="customer.street" name="street" />
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-city"></i> City</label>
             <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" required #city="ngModel" />
-
+ 
             <div class="text-danger" *ngIf="city.touched && city.invalid">
               City is required
             </div>
-
+ 
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-flag"></i> State</label>
             <input type="text" class="form-control" [(ngModel)]="customer.state" name="state" />
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-hashtag"></i> Pincode</label>
             <input type="text" class="form-control" [(ngModel)]="customer.pincode" name="pincode" required
               pattern="^[0-9]{6}$" maxlength="6" #pincode="ngModel" />
-
+ 
             <div class="text-danger" *ngIf="pincode.touched && pincode.errors">
               <div *ngIf="pincode.errors['required']">Pincode is required</div>
               <div *ngIf="pincode.errors['pattern']">Enter valid 6-digit pincode</div>
             </div>
-
+ 
           </div>
-
+ 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-globe"></i> Country</label>
             <input type="text" class="form-control" [(ngModel)]="customer.country" name="country" />
           </div>
-
+ 
         </div>
-
+ 
         <div class="form-actions">
           <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving">
             <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
             {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>
-
+ 
           <button class="btn btn-outline-secondary" type="button" (click)="cancelEdit()"
             *ngIf="hasChanges()">Cancel</button>
         </div>
-
+ 
       </form>
     </div>
-
+ 
     <div class="modal fade" id="profileUpdatedModal" tabindex="-1">
       <div class="modal-dialog custom-success-modal">
         <div class="modal-content custom-success-content">
-
+ 
           <div class="success-icon">
             <i class="fas fa-check-circle"></i>
           </div>
-
+ 
           <h2 class="success-title">Profile Updated</h2>
           <p class="success-message">Your profile has been updated successfully!</p>
-
+ 
           <button type="button" class="btn btn-primary success-btn" data-bs-dismiss="modal">
             OK
           </button>
-
+ 
         </div>
       </div>
     </div>
-
+ 
     <!-- Info Card -->
     <div class="info-card">
       <h4><i class="fas fa-info-circle"></i> Profile Information</h4>
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">Member Since</span>
-          <span class="info-value">{{ customer.createdDate | date:'mediumDate' || 'Not available' }}</span>
+          <span class="info-value">  {{ customer.createdDate 
+            ? (customer.createdDate | date:'mediumDate') 
+            : 'Not available' }}</span>
         </div>
         <div class="info-item">
           <span class="info-label">Last Updated</span>
-          <span class="info-value">{{ customer.updatedDate | date:'mediumDate' || 'Not available' }}</span>
+          <span class="info-value"> {{ customer.updatedDate 
+            ? (customer.updatedDate | date:'mediumDate') 
+            : 'Not available' }}</span>
         </div>
         <div class="info-item">
           <span class="info-label">Account Status</span>
@@ -238,7 +243,7 @@
         </div>
       </div>
     </div>
-
+ 
   </div>
-
+ 
 </div>

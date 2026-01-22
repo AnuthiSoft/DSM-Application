@@ -23,56 +23,33 @@ namespace DSM_Application.Server.Controllers
             _db = db;
         }
 
-        // ============================================================
-        // GET MY PROFILE (EMPLOYEE PORTAL)
-        // ============================================================
-        [HttpGet("my-profile")]
-        public async Task<IActionResult> GetMyProfile()
-        {
-            var employeeId = User.FindFirst("EmployeeId")?.Value;
-            if (string.IsNullOrEmpty(employeeId))
-                return Unauthorized("EmployeeId missing in token");
-
-            var user = await _db.Users.Find(u => u.EmployeeId == employeeId)
-                                      .FirstOrDefaultAsync();
-
-            if (user == null)
-                return NotFound("Employee profile not found");
-
-            return Ok(new
-            {
-                name = user.Name,
-                email = user.Email,
-                phoneNumber = user.PhoneNumber,
-                address = user.Address
-            });
-        }
+       
 
         // ============================================================
         // UPDATE MY PROFILE (EMPLOYEE PORTAL)
         // ============================================================
-        [HttpPut("my-profile")]
-        public async Task<IActionResult> UpdateMyProfile([FromBody] EmployeeUpdateDto dto)
-        {
-            var employeeId = User.FindFirst("EmployeeId")?.Value;
-            if (string.IsNullOrEmpty(employeeId))
-                return Unauthorized("EmployeeId missing in token");
+        //[HttpPut("my-profile")]
+        //public async Task<IActionResult> UpdateMyProfile([FromBody] EmployeeUpdateDto dto)
+        //{
+        //    var employeeId = User.FindFirst("EmployeeId")?.Value;
+        //    if (string.IsNullOrEmpty(employeeId))
+        //        return Unauthorized("EmployeeId missing in token");
 
-            var update = Builders<User>.Update
-                .Set(u => u.Name, dto.Name)
-                .Set(u => u.Email, dto.Email)
-                .Set(u => u.PhoneNumber, dto.PhoneNumber)
-                .Set(u => u.Address, dto.Address);
+        //    var update = Builders<User>.Update
+        //        .Set(u => u.Name, dto.Name)
+        //        .Set(u => u.Email, dto.Email)
+        //        .Set(u => u.PhoneNumber, dto.PhoneNumber)
+        //        .Set(u => u.Address, dto.Address);
 
-            var result = await _db.Users.UpdateOneAsync(
-                u => u.EmployeeId == employeeId, update);
+        //    var result = await _db.Users.UpdateOneAsync(
+        //        u => u.EmployeeId == employeeId, update);
 
-            // FIX HERE — do not use ModifiedCount
-            if (result.MatchedCount == 0)
-                return NotFound("Employee not found");
+        //    // FIX HERE — do not use ModifiedCount
+        //    if (result.MatchedCount == 0)
+        //        return NotFound("Employee not found");
 
-            return Ok(new { message = "Profile updated successfully" });
-        }
+        //    return Ok(new { message = "Profile updated successfully" });
+        //}
 
         // ============================================================
         // GET EMPLOYEES OF DISTRIBUTOR

@@ -248,15 +248,22 @@ namespace DSM_Application.Server.Controllers
                 RemainingAmount = totalFinalAmount,
                 TotalGst = totalGst
             };
-            // 🔥 DEDUCT STOCK FOR EACH PRODUCT
             foreach (var item in orderProducts)
             {
-                await _inventoryService.RemoveStockAsync(
+                var success = await _inventoryService.RemoveStockAsync(
                     item.ProductId,
                     dto.DistributorId,
                     item.Quantity,
                     "ORDER_PLACED"
                 );
+
+                if (!success)
+                {
+                    return BadRequest(new
+                    {
+                        message = $"Insufficient stock for product {item.ProductId}"
+                    });
+                }
             }
 
             await _orders.InsertOneAsync(order);

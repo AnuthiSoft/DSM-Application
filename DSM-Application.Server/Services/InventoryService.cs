@@ -170,11 +170,11 @@ namespace DSM_Application.Server.Services
 
 
         // 🔥 Stock Out
-        public async Task RemoveStockAsync(
-     string productId,
-     string distributorId,
-     int quantity,
-     string reason)
+        public async Task<bool> RemoveStockAsync(
+      string productId,
+      string distributorId,
+      int quantity,
+      string reason)
         {
             int remainingQty = quantity;
 
@@ -188,14 +188,13 @@ namespace DSM_Application.Server.Services
                 .ToListAsync();
 
             if (!batches.Any())
-                throw new Exception("No stock available");
+                return false;
 
             foreach (var batch in batches)
             {
                 if (remainingQty <= 0)
                     break;
 
-                // 🔹 Case 1: Batch can fully satisfy remaining qty
                 if (batch.QuantityAvailable >= remainingQty)
                 {
                     await _batches.UpdateOneAsync(
@@ -204,7 +203,6 @@ namespace DSM_Application.Server.Services
                             .Inc(b => b.QuantityAvailable, -remainingQty)
                     );
 
-                    // Log movement
                     await _movements.InsertOneAsync(new StockMovement
                     {
                         ProductId = productId,
@@ -218,19 +216,16 @@ namespace DSM_Application.Server.Services
 
                     remainingQty = 0;
                 }
-                // 🔹 Case 2: Batch is fully consumed
                 else
                 {
                     int consumedQty = batch.QuantityAvailable;
 
-                    // Set batch qty = 0 (DO NOT DELETE — safer)
                     await _batches.UpdateOneAsync(
                         b => b.BatchId == batch.BatchId,
                         Builders<InventoryBatch>.Update
                             .Set(b => b.QuantityAvailable, 0)
                     );
 
-                    // Log movement
                     await _movements.InsertOneAsync(new StockMovement
                     {
                         ProductId = productId,
@@ -248,7 +243,7 @@ namespace DSM_Application.Server.Services
 
             // 2️⃣ Final validation
             if (remainingQty > 0)
-                throw new Exception("Insufficient total stock");
+                return false;
 
             // 3️⃣ Update inventory summary (TOTAL)
             await _inventory.UpdateOneAsync(
@@ -257,6 +252,8 @@ namespace DSM_Application.Server.Services
                     .Inc(i => i.CurrentStock, -quantity)
                     .Set(i => i.UpdatedAt, DateTime.UtcNow)
             );
+
+            return true;
         }
 
 

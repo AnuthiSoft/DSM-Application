@@ -204,11 +204,14 @@ import { CustomerService } from '../../services/customer.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
+  
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
+
 export class ProfileComponent implements OnInit {
+
 
   customer: CustomerProfileDto = {} as CustomerProfileDto;
   originalCustomer: CustomerProfileDto = {} as CustomerProfileDto;
@@ -286,6 +289,7 @@ export class ProfileComponent implements OnInit {
 
   // Save profile info + image
   saveProfile(): void {
+    
     this.isSaving = true;
     if (!this.customer.name ||
       !/^[A-Z]/.test(this.customer.name) ||
@@ -293,6 +297,7 @@ export class ProfileComponent implements OnInit {
       !this.customer.pincode) {
 
       this.toastr.error('Please fill all required fields correctly', 'Validation Error');
+      this.isSaving = false; 
       return;
     }
 
@@ -335,13 +340,16 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  cancelEdit() {
-    this.customer = { ...this.originalCustomer };
-   this.previewImage = this.originalCustomer.profileImageUrl
-  ? this.apiBaseUrl + this.originalCustomer.profileImageUrl
-  : 'assets/default-user.png';
-    this.selectedFile = null;
-  }
+ cancelEdit() {
+  this.customer = { ...this.originalCustomer };
+  this.customer.phoneNumber = (this.customer.phoneNumber || '').replace(/\D/g, '');
+  this.previewImage = this.originalCustomer.profileImageUrl
+    ? this.apiBaseUrl + this.originalCustomer.profileImageUrl
+    : 'assets/default-user.png';
+  this.selectedFile = null;
+}
+
+
 
   hasChanges(): boolean {
     return JSON.stringify(this.customer) !== JSON.stringify(this.originalCustomer) ||

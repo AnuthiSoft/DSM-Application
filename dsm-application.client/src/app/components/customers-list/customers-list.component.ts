@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 
 @Component({
@@ -46,7 +47,8 @@ export class CustomersListComponent implements OnInit {
 
   constructor(
     private customerService: CustomerService,
-    private router: Router
+    private router: Router,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -108,7 +110,8 @@ openAssignModal(customerId: string) {
 
   savePermanentEmployee() {
     if (!this.selectedEmployeeId) {
-      alert("Select an employee");
+      this.toastr.warning('Please select an employee');
+
       return;
     }
 
@@ -120,12 +123,14 @@ openAssignModal(customerId: string) {
       this.selectedEmployeeId
     ).subscribe({
       next: () => {
-        alert("Permanent employee assigned successfully");
+        this.toastr.success('Permanent employee assigned successfully');
+
         this.closeAssignModal();
         this.loadAllCustomers();
       },
       error: (err) => {
-        alert("Failed to assign permanent employee");
+        this.toastr.error('Failed to assign permanent employee');
+
       }
     });
   }
@@ -185,12 +190,14 @@ openAssignModal(customerId: string) {
       !this.customer.address ||
       !this.customer.password
     ) {
-      alert('All fields are required');
+      this.toastr.error('All fields are required');
+
       return;
     }
 
     if (!this.otpVerified) {
-      alert('Please verify phone number using OTP');
+      this.toastr.warning('Please verify phone number using OTP');
+
       return;
     }
 
@@ -238,18 +245,30 @@ openAssignModal(customerId: string) {
   /* ----------------------------- DELETE ------------------------------ */
 
   deleteCustomer(customerId: string) {
-    if (!confirm('Are you sure you want to delete this customer?')) return;
+  const toast = this.toastr.warning(
+    'Click YES to delete this customer',
+    'Confirm Delete',
+    {
+      timeOut: 0,
+      extendedTimeOut: 0,
+      closeButton: true,
+      tapToDismiss: false
+    }
+  );
 
+  toast.onTap.subscribe(() => {
     this.customerService.deleteCustomer(customerId).subscribe({
       next: (res: any) => {
-        this.message = res.message;
+        this.toastr.success('Customer deleted successfully');
         this.loadAllCustomers();
       },
-      error: (err) => {
-        this.message = err.error || 'Failed to delete customer';
+      error: () => {
+        this.toastr.error('Failed to delete customer');
       }
     });
-  }
+  });
+}
+
   loadAllCustomers() {
     this.customerService.getAllCustomersForDistributor()
       .subscribe({
@@ -297,16 +316,19 @@ openAssignModal(customerId: string) {
     this.otpVerified = false;
     this.otpCode = '';
 
-    alert(`OTP sent! Your OTP is: ${this.generatedOtp}`);
+     alert(`OTP sent! Your OTP is: ${this.generatedOtp}`);
+
     // 🔥 Replace later with SMS API
   }
 
   verifyOtp() {
     if (this.otpCode === this.generatedOtp) {
       this.otpVerified = true;
-      alert('Phone verified successfully!');
+      this.toastr.success('Phone verified successfully');
+
     } else {
-      alert('Invalid OTP');
+      this.toastr.error('Invalid OTP');
+
     }
   }
 

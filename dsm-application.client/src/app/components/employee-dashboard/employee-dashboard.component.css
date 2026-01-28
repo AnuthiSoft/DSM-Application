@@ -712,12 +712,158 @@ html[data-theme="dark"] .order-date {
     align-items: flex-start;
     gap: 10px;
   }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .availability-actions {
-    flex-direction: column;
-  }
+}
+
+
+/* ===============================
+   EMPLOYEE DASHBOARD CARD FIX
+   =============================== */
+
+/* Dashboard cards container */
+.dashboard-cards,
+.cards-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Individual cards */
+.dashboard-card,
+.stat-card,
+.availability-card {
+  flex: 1 1 250px;     /* responsive width */
+  max-width: 100%;
+  min-width: 0;        /* 🔥 IMPORTANT: prevents overflow */
+  box-sizing: border-box;
+}
+
+/* Availability card specific */
+.availability-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
+/* ===============================
+   AVAILABILITY CARD BUTTON FIX
+   =============================== */
+
+.availability-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Button container */
+.availability-card .actions,
+.availability-card .availability-actions {
+  display: flex;
+  flex-wrap: wrap;          /* 🔥 allows wrapping */
+  gap: 10px;
+}
+
+/* Individual buttons */
+.availability-card button {
+  flex: 1 1 auto;           /* responsive */
+  white-space: nowrap;
+}
+
+
+/* ===== Availability card overflow FIX ===== */
+
+.availability-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* buttons must shrink properly */
+.availability-actions button {
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* 🔴 THIS IS THE MISSING PART */
+.availability-card,
+.dashboard-card,
+.card {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: unset !important;
+}
+
+
+
+
+
+/* ================================
+   Availability text – FORCE WHITE
+   Visible in BOTH light & dark
+   ================================ */
+
+.availability-card p,
+.availability-card span,
+.availability-card .status-text {
+  color: #eee9e9f6 !important;
+  font-weight: 500;
+}
+
+/* If text is inside an alert */
+.availability-card .alert,
+.availability-card .alert-success {
+  color: #ffffff !important;
+}
+
+/* FORCE availability message to white (override Bootstrap) */
+.availability-actions,
+.availability-actions *,
+.text-success {
+  color: #ffffff !important;
+}
+
+/* FINAL – FORCE availability text readable everywhere */
+.availability-card .text-success,
+.availability-card p,
+.availability-card span {
+  color: #ffffff !important;
+}
+
+
+
+
+* FORCE sidebar icon visibility */
+.dashboard-sidebar .nav-item {
+  color: #ffffff !important;
+}
+
+.dashboard-sidebar .nav-item i {
+  color: #ffffff !important;
+}
+
+/* FORCE native calendar icon visible */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Chrome / Edge */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6) contrast(1.2);
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }

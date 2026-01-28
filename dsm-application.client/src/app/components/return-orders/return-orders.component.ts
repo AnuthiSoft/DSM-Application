@@ -1,13 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
-import { ReturnApiService } from '../../services/return-api.service';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { ReturnApiService } from '../../services/return-api.service'
 
 @Component({
   selector: 'app-return-orders',
-   
   templateUrl: './return-orders.component.html',
   styleUrl: './return-orders.component.css'
 })

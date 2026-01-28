@@ -385,3 +385,59 @@ html.dark-theme .form-select option {
   align-items: center;
   justify-content: center;
 }
+
+/* Main confirm box */
+.confirm-modal,
+.toast-confirm,
+.swal2-popup {
+  width: 320px !important;   /* ✅ reduce width */
+  min-height: auto !important;
+  padding: 20px 22px !important;
+  border-radius: 10px;
+}
+
+/* Title */
+.confirm-title,
+.toast-confirm-title,
+.swal2-title {
+  font-size: 18px !important;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Message text */
+.confirm-message,
+.toast-confirm-message,
+.swal2-html-container {
+  font-size: 14px !important;
+  margin-bottom: 16px;
+}
+
+/* Button container */
+.confirm-actions,
+.swal2-actions {
+  margin-top: 10px !important;
+}
+
+/* Buttons */
+.confirm-actions button,
+.swal2-confirm,
+.swal2-cancel {
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  min-width: 70px !important;
+  border-radius: 6px;
+}
+
+/* Reduce icon spacing (if present) */
+.swal2-icon {
+  margin: 8px auto 4px !important;
+  width: 50px !important;
+  height: 50px !important;
+}
+
+/* 🚫 Disable background scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+

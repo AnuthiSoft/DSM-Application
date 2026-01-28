@@ -20,7 +20,7 @@ export class DistributorDashboardComponent implements OnInit {
   orderedDate: string = '';
   expectedDate: string = '';
   expectedDays: number = 1; // default
-  leadTime:number = 1;
+  leadTime: number = 1;
   selectedQrFile: File | null = null;
 scannerQrUrl: string | null = null;
  
@@ -316,10 +316,10 @@ toggleMobileMenu() {
 
 
 
-getScannerQrUrl(blobName: string | null): string {
-  if (!blobName) return '';
-  return `${environment.apiUrl}/distributor/scanner-qr/view/${blobName}`;
-}
+  getScannerQrUrl(blobName: string | null): string {
+    if (!blobName) return '';
+    return `${environment.apiUrl}/distributor/scanner-qr/view/${blobName}`;
+  }
 
   //   saveExpectedDays() {
   //   localStorage.setItem("expectedDays", this.expectedDays.toString());

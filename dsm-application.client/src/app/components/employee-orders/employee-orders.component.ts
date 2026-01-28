@@ -132,17 +132,25 @@ applyStatusFilter() {
   });
 }
 
-getDiscount(order: DistributorOrder): number {
-  if (order.totalDiscount && order.totalDiscount > 0) {
-    return order.totalDiscount;
-  }
+// getDiscount(order: DistributorOrder): number {
+//   if (order.totalDiscount && order.totalDiscount > 0) {
+//     return order.totalDiscount;
+//   }
 
-  if (order.subtotal && order.totalAmount) {
-    return Math.max(order.subtotal - order.totalAmount, 0);
-  }
+//   if (order.subtotal && order.totalAmount) {
+//     return Math.max(order.subtotal - order.totalAmount, 0);
+//   }
 
-  return 0;
+//   return 0;
+// }
+
+getTaxableAmount(order: any): number {
+  if (order.subtotal && order.discount !== undefined) {
+    return order.subtotal - order.discount;
+  }
+  return order.subtotal || 0;
 }
+
 openReceiptUpload(order: DistributorOrder) {
   const input = document.createElement('input');
   input.type = 'file';

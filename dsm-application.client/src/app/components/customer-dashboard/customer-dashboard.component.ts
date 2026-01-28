@@ -28,7 +28,7 @@ export class CustomerDashboardComponent {
   status: string = '';
   distributorId: string = '';
   products: Product[] = [];
-cartCount = 0;
+  cartCount = 0;
   expectedDays: number = 1;
 
   orderedDate: string = '';
@@ -187,10 +187,12 @@ cartCount = 0;
 loadDashboard() {
   this.loading = true;
 
+  // 🔹 1. LOAD DASHBOARD (distributors + products)
   this.customerApiService.getDashboard(this.customerId).subscribe({
     next: (data: CustomerDashboardResponse) => {
       this.dashboardData = data;
 
+      // ✅ CONNECTED DISTRIBUTORS
       this.connectedDistributors = data.distributors
         .filter(d => d.distributor.status === 'Accepted')
         .map(d => ({
@@ -198,11 +200,36 @@ loadDashboard() {
           name: d.distributor.companyName || d.distributor.name || 'Distributor'
         }));
 
-      const connectedIds = this.connectedDistributors.map(d => d.distributorId);
-
+      // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
       this.products = data.distributors
-        .filter(d => connectedIds.includes(d.distributor.distributorId))
+        .filter(d => d.distributor.status === 'Accepted')
         .flatMap(d => d.products || []);
+
+      // ✅ DISTRIBUTOR + PRODUCT COUNTS
+      this.distributorStats.total = this.connectedDistributors.length;
+      this.productStats.total = this.products.length;
+
+      // 🔹 2. LOAD ORDERS (THIS FIXES YOUR ISSUE)
+      this.orderService.getOrdersByCustomer(this.customerId).subscribe(orders => {
+
+        // ✅ TOTAL ORDERS
+        this.orderStats.total = orders.length;
+
+        // ✅ TOTAL SPENT
+        this.revenueStats.total = orders.reduce(
+          (sum: number, o: any) => sum + (o.totalAmount || 0),
+          0
+        );
+
+        // ✅ RECENT ORDERS (LATEST 5)
+        this.recentOrders = orders
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.orderDate).getTime() -
+              new Date(a.orderDate).getTime()
+          )
+          .slice(0, 5);
+      });
 
       this.loading = false;
     },
@@ -212,6 +239,8 @@ loadDashboard() {
     }
   });
 }
+
+
 
 
 
@@ -467,6 +496,10 @@ logout(): void {
 openCart() {
     this.updateCartBadge();   // 🔥 ADD THIS
   this.activeTab = 'cart';   // ✅ OPEN CART TAB
+}
+
+goToTab(tab: string) {
+  this.setActiveTab(tab);
 }
 
 }

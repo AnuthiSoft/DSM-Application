@@ -12,14 +12,8 @@
             <i class="fas fa-user"></i>
             Full Name
           </label>
-          <input 
-            type="text" 
-            class="form-control"
-            placeholder="Enter your full name" 
-            [(ngModel)]="request.name" 
-            name="name" 
-            required
-          />
+          <input type="text" class="form-control" placeholder="Enter your full name" [(ngModel)]="request.name"
+            name="name" required />
           <div class="form-hint">Your complete name as it should appear on orders</div>
         </div>
 
@@ -28,85 +22,58 @@
             <i class="fas fa-envelope"></i>
             Email Address
           </label>
-          <input 
-            type="email" 
-            class="form-control"
-            placeholder="Enter your email address" 
-            [(ngModel)]="request.email" 
-            name="email" 
-            required
-          />
+          <input type="email" class="form-control" placeholder="Enter your email address" [(ngModel)]="request.email"
+            name="email" required />
           <div class="form-hint">We'll send confirmation to this email</div>
         </div>
 
         <div class="form-group">
-  <label class="form-label">
-    <i class="fas fa-phone"></i> Phone Number
-  </label>
+          <label class="form-label">
+            <i class="fas fa-phone"></i> Phone Number
+          </label>
 
-  <input 
-    type="text" 
-    class="form-control"
-    placeholder="Enter your phone number" 
-    [(ngModel)]="request.phoneNumber" 
-    name="phoneNumber"
-    maxlength="10"
-    [readonly]="phoneVerifiedUI"
-    (input)="allowOnlyNumbers($event)"
-  />
+          <input type="text" class="form-control" placeholder="Enter your phone number"
+            [(ngModel)]="request.phoneNumber" name="phoneNumber" maxlength="10" [readonly]="phoneVerifiedUI"
+            (input)="allowOnlyNumbers($event)" />
 
-  <div class="form-hint">Must be a 10-digit mobile number</div>
+          <div class="form-hint">Must be a 10-digit mobile number</div>
 
-  <p *ngIf="request.phoneNumber && !isPhoneValid()" class="text-danger">
-    Phone number must be exactly 10 digits.
-  </p>
+          <p *ngIf="request.phoneNumber && !isPhoneValid()" class="text-danger">
+            Phone number must be exactly 10 digits.
+          </p>
 
-  <!-- Verified Badge -->
-  <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-    <i class="fas fa-check-circle"></i> Verified
-  </div>
+          <!-- Verified Badge -->
+          <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+            <i class="fas fa-check-circle"></i> Verified
+          </div>
 
-  <!-- SEND OTP -->
-  <button 
-    *ngIf="!otpSent && !phoneVerifiedUI"
-    type="button"
-    class="btn btn-warning w-100 mt-2"
-    (click)="sendOtp()"
-  >
-    Send OTP
-  </button>
+          <!-- SEND OTP -->
+          <button *ngIf="!otpSent && !phoneVerifiedUI" type="button" class="btn btn-warning w-100 mt-2"
+            (click)="sendOtp()">
+            Send OTP
+          </button>
 
-  <!-- OTP INPUT + VERIFY -->
-  <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
-    <label>Enter OTP</label>
+          <!-- OTP INPUT + VERIFY -->
+          <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
+            <label>Enter OTP</label>
 
-    <input 
-      type="text"
-      maxlength="6"
-      class="form-control"
-      [(ngModel)]="otpCode"
-      name="otpCode"
-    />
+            <input type="text" maxlength="6" class="form-control" [(ngModel)]="otpCode" name="otpCode" />
 
-    <button 
-      type="button"
-      class="btn btn-success w-100 mt-2"
-      (click)="verifyOtp()"
-    >
-      Verify OTP
-    </button>
+            <button type="button" class="btn btn-success w-100 mt-2" (click)="verifyOtp()">
+              Verify OTP
+            </button>
 
-    <div *ngIf="otpFailed" class="text-danger mt-2">
-      ✖ Invalid or expired OTP
-    </div>
-  </div>
-</div>
+            <div *ngIf="otpFailed" class="text-danger mt-2">
+              ✖ Invalid or expired OTP
+            </div>
+          </div>
+        </div>
 
 
-          <!-- <div class="form-hint">Must be a 10-digit mobile number</div> -->
+        <!-- <div class="form-hint">Must be a 10-digit mobile number</div> -->
 
-  <!-- ❌ Error message for wrong phone number -->
-  <!-- <p *ngIf="request.phoneNumber && !isPhoneValid()" class="text-danger">
+        <!-- ❌ Error message for wrong phone number -->
+        <!-- <p *ngIf="request.phoneNumber && !isPhoneValid()" class="text-danger">
     Phone number must be exactly 10 digits.
   </p>
 </div> -->
@@ -116,15 +83,8 @@
             <i class="fas fa-lock"></i>
             Password
           </label>
-          <input 
-            type="password" 
-            class="form-control"
-            placeholder="Create a secure password" 
-            [(ngModel)]="request.password" 
-            name="password" 
-            required
-            (input)="checkPasswordStrength()"
-          />
+          <input type="password" class="form-control" placeholder="Create a secure password"
+            [(ngModel)]="request.password" name="password" required (input)="checkPasswordStrength()" />
           <div class="password-strength">
             <div class="strength-bar" [class]="passwordStrength">
               <div class="strength-fill"></div>
@@ -135,11 +95,13 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary register-btn" [disabled]="!isFormValid() || isProcessing">
-          <i class="fas" [class.fa-user-plus]="!isProcessing" [class.fa-spinner]="isProcessing" [class.fa-spin]="isProcessing"></i>
+        <button type="button" class="btn btn-primary register-btn" [disabled]="!isFormValid() || isProcessing"
+          (click)="register()">
+          <i class="fas" [class.fa-user-plus]="!isProcessing" [class.fa-spinner]="isProcessing"
+            [class.fa-spin]="isProcessing"></i>
           {{ isProcessing ? 'Creating Account...' : 'Create Account' }}
         </button>
-        
+
         <div class="form-links">
           <a href="/customer/login" class="link-text">
             <i class="fas fa-sign-in-alt"></i>

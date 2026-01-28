@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
+import { ToastrService } from 'ngx-toastr';
+
 
 @Component({
   selector: 'app-pending-handovers',
@@ -12,9 +14,9 @@ export class PendingHandoversComponent implements OnInit {
   handovers: any[] = [];
   loading = true;
   selectedDetails: any = null;
-showModal = false;
+  showModal = false;
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.loadPendingHandovers();
@@ -36,11 +38,16 @@ showModal = false;
   }
 
   approve(h: any) {
-  this.paymentService.approveHandover(h.handoverId).subscribe(() => {
-    alert("Approved successfully!");
-    this.loadPendingHandovers();
-  });
-}
+    this.paymentService.approveHandover(h.handoverId).subscribe({
+      next: () => {
+      this.toastr.success('Approved successfully');
+      this.loadPendingHandovers();
+      },
+      error: () => {
+        this.toastr.error('Failed to approve handover')
+      }
+    });
+  }
 
 reject(h: any) {
   const reason = prompt("Enter reject reason:");

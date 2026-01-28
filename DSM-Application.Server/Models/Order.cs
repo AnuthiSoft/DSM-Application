@@ -122,6 +122,8 @@ namespace DSM_Application.Server.Models
         public decimal TotalGst { get; set; }
         public decimal GstAmount { get; set; } = 0;
 
+        public decimal TaxableAmount { get; set; }   // ✅ REQUIRED
+     
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
 
     }

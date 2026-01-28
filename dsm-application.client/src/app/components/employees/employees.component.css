@@ -456,8 +456,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 1000;
 }
 
@@ -688,6 +688,83 @@
 /* Error state */
 .phone-group.phone-error {
   border-color: #e74c3c;
+}
+
+/* ===== DELETE CONFIRM MODAL ===== */
+
+.confirm-box {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px 25px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+
+  /* 🔥 IMPORTANT FIX */
+  position: relative;
+  z-index: 1100;
+  isolation: isolate;        /* ⭐ THIS LINE fixes blur bleed */
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+
+.confirm-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 4px solid #f4b183;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-icon span {
+  font-size: 34px;
+  font-weight: bold;
+  color: #f4b183;
+}
+
+.confirm-text {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-ok {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  padding: 8px 28px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-ok:hover {
+  background: #256428;
+}
+
+.btn-cancel {
+  background: #b0b0b0;
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: #9e9e9e;
 }
 
 

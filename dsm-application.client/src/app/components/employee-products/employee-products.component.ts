@@ -15,7 +15,7 @@ import { EmployeeCartService } from '../../services/employee-cart.service';
 @Component({
   selector: 'app-employee-products',
   templateUrl: './employee-products.component.html',
-  styleUrl: './employee-products.component.css'
+  styleUrl: './employee-products.component.css',
 })
 export class EmployeeProductsComponent {
 

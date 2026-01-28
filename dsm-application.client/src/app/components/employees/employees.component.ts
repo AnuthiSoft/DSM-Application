@@ -23,9 +23,9 @@ export class EmployeesComponent {
   isEdit = false;
   loading = false;
   selectedEmployee: any = null;
-selectedFile: File | null = null;
-selectedFileName: string = '';   // ✅ ADD THIS
-showUploadModal = false;
+  selectedFile: File | null = null;
+  selectedFileName: string = '';   // ✅ ADD THIS
+  showUploadModal = false;
 
   // selectedEmployee: any = null;
   // selectedFile: File | null = null;
@@ -48,6 +48,8 @@ showUploadModal = false;
   otpCode = '';
   phoneVerifiedUI = false;
   apiUrl = environment.apiUrl;
+  showDeleteConfirm = false;
+  employeeToDelete: Employee | null = null;
 
   // isEdit = false;
   constructor(
@@ -79,7 +81,8 @@ showUploadModal = false;
       isActive: [true] // ensures value exists
     });
 
-
+    this.showModal = false;
+    this.showUploadModal = false;
     this.loadEmployees();
   }
 
@@ -309,27 +312,59 @@ showUploadModal = false;
   // }
 
 
-  deleteEmployee(emp: Employee) {
-    if (!confirm(`Delete ${emp.name}?`)) return;
+  // deleteEmployee(emp: Employee) {
+  //   if (!confirm(`Delete ${emp.name}?`)) return;
 
-    this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
+  //   this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
+  //     next: () => {
+  //       this.toastr.success("Employee deleted successfully", "Success");
+  //       this.loadEmployees();
+  //     },
+  //     error: (err) => {
+  //       // ✔ If backend returned text instead of JSON, treat 200 as success
+  //       if (err.status === 200) {
+  //         this.toastr.success("Employee deleted successfully", "Success");
+  //         this.loadEmployees();
+  //       } else {
+  //         this.toastr.error("Failed to delete employee", "Error");
+  //       }
+  //     }
+  //   });
+  // }
+
+
+  openDeleteConfirm(emp: Employee) {
+  this.employeeToDelete = emp;
+  this.showDeleteConfirm = true;
+}
+
+cancelDelete() {
+  this.showDeleteConfirm = false;
+  this.employeeToDelete = null;
+}
+
+confirmDelete() {
+  if (!this.employeeToDelete) return;
+
+  this.employeeService
+    .deleteEmployee(this.distributorId, this.employeeToDelete.employeeId!)
+    .subscribe({
       next: () => {
         this.toastr.success("Employee deleted successfully", "Success");
         this.loadEmployees();
+        this.cancelDelete();
       },
       error: (err) => {
-        // ✔ If backend returned text instead of JSON, treat 200 as success
         if (err.status === 200) {
           this.toastr.success("Employee deleted successfully", "Success");
           this.loadEmployees();
+          this.cancelDelete();
         } else {
           this.toastr.error("Failed to delete employee", "Error");
         }
       }
     });
-  }
-
-
+}
 
 
   // ✅ Toggle active/inactive
@@ -401,10 +436,10 @@ showUploadModal = false;
   }
 
   closeUploadModal() {
-  this.showUploadModal = false;
-  this.selectedFile = null;
-  this.selectedFileName = '';   // ✅ RESET
-}
+    this.showUploadModal = false;
+    this.selectedFile = null;
+    this.selectedFileName = '';   // ✅ RESET
+  }
 
   // closeUploadModal() {
   //   this.showUploadModal = false;
@@ -412,13 +447,13 @@ showUploadModal = false;
   // }
 
   onFileSelected(event: any) {
-  const file = event.target.files[0];
+    const file = event.target.files[0];
 
-  if (file) {
-    this.selectedFile = file;
-    this.selectedFileName = file.name;   // ✅ ADD THIS
+    if (file) {
+      this.selectedFile = file;
+      this.selectedFileName = file.name;   // ✅ ADD THIS
+    }
   }
-}
 
   // onFileSelected(event: any) {
   //   this.selectedFile = event.target.files[0];

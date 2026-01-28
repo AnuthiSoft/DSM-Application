@@ -128,7 +128,7 @@
     <div class="modal-body">
       <div class="form-grid">
 
-        <div class="form-group" >
+        <div class="form-group">
           <label><i class="fas fa-user"></i> Full Name</label>
           <input class="form-control" type="text" [(ngModel)]="customer.name" />
         </div>
@@ -151,7 +151,7 @@
           </div>
 
           <!-- Send / Resend OTP -->
-          <button class="btn btn-warning w-100 mt-2" *ngIf="!otpVerified"
+          <button type="button" class="btn btn-warning w-100 mt-2" *ngIf="!otpVerified"
             [disabled]="phoneError || customer.phoneNumber.length !== 10" (click)="sendOtp()">
             {{ otpSent ? 'Resend OTP' : 'Send OTP' }}
           </button>
@@ -161,7 +161,7 @@
             <label>Enter OTP</label>
             <input class="form-control" type="text" maxlength="6" [(ngModel)]="otpCode" />
 
-            <button class="btn btn-success w-100 mt-2" (click)="verifyOtp()">
+            <button type="button" class="btn btn-success w-100 mt-2" (click)="verifyOtp()">
               Verify OTP
             </button>
 

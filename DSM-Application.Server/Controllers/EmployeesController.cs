@@ -23,33 +23,75 @@ namespace DSM_Application.Server.Controllers
             _db = db;
         }
 
-       
+        // ============================================================
+        // GET MY PROFILE (EMPLOYEE PORTAL)
+        // ============================================================
+        [HttpGet("my-profile")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing");
+
+            var employee = await _db.Employees
+                .Find(e => e.EmployeeId == employeeId)
+                .FirstOrDefaultAsync();
+
+            if (employee == null)
+                return NotFound("Employee not found");
+
+            return Ok(new
+            {
+                name = employee.Name,
+                email = employee.Email,
+                phoneNumber = employee.PhoneNumber,
+
+                // ✅ ADDRESS FIELDS
+                street = employee.Street,
+                city = employee.City,
+                state = employee.State,
+                pincode = employee.Pincode,
+                country = employee.Country,
+
+                role = employee.Role,
+                isActive = employee.IsActive,
+                createdDate = employee.CreatedDate,
+                updatedDate = employee.UpdatedDate
+            });
+        }
 
         // ============================================================
         // UPDATE MY PROFILE (EMPLOYEE PORTAL)
         // ============================================================
-        //[HttpPut("my-profile")]
-        //public async Task<IActionResult> UpdateMyProfile([FromBody] EmployeeUpdateDto dto)
-        //{
-        //    var employeeId = User.FindFirst("EmployeeId")?.Value;
-        //    if (string.IsNullOrEmpty(employeeId))
-        //        return Unauthorized("EmployeeId missing in token");
+        [HttpPut("my-profile")]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] EmployeeUpdateDto dto)
+        {
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing");
 
-        //    var update = Builders<User>.Update
-        //        .Set(u => u.Name, dto.Name)
-        //        .Set(u => u.Email, dto.Email)
-        //        .Set(u => u.PhoneNumber, dto.PhoneNumber)
-        //        .Set(u => u.Address, dto.Address);
+            var update = Builders<Employee>.Update
+                .Set(e => e.Name, dto.Name)
+                .Set(e => e.PhoneNumber, dto.PhoneNumber)
+                .Set(e => e.Street, dto.Street)
+                .Set(e => e.City, dto.City)
+                .Set(e => e.State, dto.State)
+                .Set(e => e.Pincode, dto.Pincode)
+                .Set(e => e.Country, dto.Country)
+                .Set(e => e.UpdatedDate, DateTime.UtcNow);
 
-        //    var result = await _db.Users.UpdateOneAsync(
-        //        u => u.EmployeeId == employeeId, update);
+            var result = await _db.Employees.UpdateOneAsync(
+                e => e.EmployeeId == employeeId,
+                update
+            );
 
-        //    // FIX HERE — do not use ModifiedCount
-        //    if (result.MatchedCount == 0)
-        //        return NotFound("Employee not found");
+            if (result.MatchedCount == 0)
+                return NotFound("Employee not found");
 
-        //    return Ok(new { message = "Profile updated successfully" });
-        //}
+            return Ok(new { message = "Profile updated successfully" });
+        }
+
+
 
         // ============================================================
         // GET EMPLOYEES OF DISTRIBUTOR
@@ -57,48 +99,73 @@ namespace DSM_Application.Server.Controllers
         // using MongoDB.Bson; // ensure at top of the file
 
         // using MongoDB.Bson; // ensure at top of the file
+
         [HttpGet("{distributorId}")]
         public async Task<IActionResult> GetEmployees(string distributorId)
         {
- Console.WriteLine($"Incoming distributorId: '{distributorId}'");
+            Console.WriteLine($"Incoming distributorId: '{distributorId}'");
 
-            // 1) String match (most common)
             var employees = await _db.Employees
                 .Find(e => e.DistributorId == distributorId)
                 .ToListAsync();
 
-            Console.WriteLine($"String match found: {employees.Count}");
+            Console.WriteLine($"Employees found: {employees.Count}");
 
-            if (employees.Count > 0)
-                return Ok(employees);
+            return Ok(employees);
+        }
 
-            // 2) Fallback: ObjectId match
-            try
-            {
-                var objId = new ObjectId(distributorId);
 
-                var filter = Builders<DSM_Application.Server.Models.Employee>
-                    .Filter.Eq("DistributorId", objId);
 
-                employees = await _db.Employees.Find(filter).ToListAsync();
 
-                Console.WriteLine($"ObjectId match found: {employees.Count}");
 
-                if (employees.Count > 0)
-                    return Ok(employees);
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine("DistributorId is not a valid ObjectId. Skipping ObjectId lookup.");
-            }
 
-            // Debug total count (to detect wrong DB/collection)
-            long total = await _db.Employees
-                .CountDocumentsAsync(Builders<DSM_Application.Server.Models.Employee>.Filter.Empty);
 
-            Console.WriteLine($"Total employees stored: {total}");
 
-            return Ok(new List<object>());        }
+
+
+
+        //       [HttpGet("{distributorId}")]
+        //       public async Task<IActionResult> GetEmployees(string distributorId)
+        //       {
+        //Console.WriteLine($"Incoming distributorId: '{distributorId}'");
+
+        //           // 1) String match (most common)
+        //           var employees = await _db.Employees
+        //               .Find(e => e.DistributorId == distributorId)
+        //               .ToListAsync();
+
+        //           Console.WriteLine($"String match found: {employees.Count}");
+
+        //           if (employees.Count > 0)
+        //               return Ok(employees);
+
+        //           // 2) Fallback: ObjectId match
+        //           try
+        //           {
+        //               var objId = new ObjectId(distributorId);
+
+        //               var filter = Builders<DSM_Application.Server.Models.Employee>
+        //                   .Filter.Eq("DistributorId", objId);
+
+        //               employees = await _db.Employees.Find(filter).ToListAsync();
+
+        //               Console.WriteLine($"ObjectId match found: {employees.Count}");
+
+        //               if (employees.Count > 0)
+        //                   return Ok(employees);
+        //           }
+        //           catch (FormatException)
+        //           {
+        //               Console.WriteLine("DistributorId is not a valid ObjectId. Skipping ObjectId lookup.");
+        //           }
+
+        //           // Debug total count (to detect wrong DB/collection)
+        //           long total = await _db.Employees
+        //               .CountDocumentsAsync(Builders<DSM_Application.Server.Models.Employee>.Filter.Empty);
+
+        //           Console.WriteLine($"Total employees stored: {total}");
+
+        //           return Ok(new List<object>());        }
 
         // ============================================================
 

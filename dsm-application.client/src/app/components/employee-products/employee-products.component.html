@@ -1,69 +1,52 @@
-
 <div class="products-section">
   <div class="welcome-header">
     <h2>Employee Product Order</h2>
-  <div class="welcome-header d-flex justify-content-between align-items-center">
-  
+    <div class="welcome-header d-flex justify-content-between align-items-center">
 
-  <!-- 🛒 CART ICON -->
-  <div class="employee-cart-icon" (click)="goToEmployeeCart()">
-    <i class="fas fa-shopping-cart"></i>
-    <span class="cart-badge" *ngIf="cartCount">
-  {{ cartCount }}
-</span>
+
+      <!-- 🛒 CART ICON -->
+      <div class="employee-cart-icon" (click)="goToEmployeeCart()">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-badge" *ngIf="cartCount">
+          {{ cartCount }}
+        </span>
+
+      </div>
+    </div>
+
 
   </div>
-</div>
-
-
- </div>
 
 
   <!-- SEARCH & FILTERS -->
   <div class="search-section d-flex gap-3 mb-4">
 
-    
 
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Search products"
-      [(ngModel)]="searchTerm"
-      (input)="onSmartSearch()"
-      style="width: 260px;"
-    />
 
-    <select class="form-select"
-            [(ngModel)]="distributorFilter"
-            (change)="onDistributorChange(distributorFilter)"
-            style="width: 220px;">
+    <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
+      (input)="onSmartSearch()" style="width: 260px;" />
+
+    <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
+      style="width: 220px;">
       <option value="">All Distributors</option>
-      <option *ngFor="let d of connectedDistributors"
-              [value]="d.distributorId">
+      <option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
         {{ d.name }}
       </option>
     </select>
 
-    <select class="form-select"
-            [(ngModel)]="stockFilter"
-            (change)="onStockFilterChange()"
-            style="width: 180px;">
+    <select class="form-select" [(ngModel)]="stockFilter" (change)="onStockFilterChange()" style="width: 180px;">
       <option value="">All Stock</option>
       <option value="inStock">In Stock</option>
       <option value="outOfStock">Out of Stock</option>
     </select>
 
-    <select class="form-select"
-        [(ngModel)]="selectedCustomerId"
-        (change)="onCustomerChange()"
-        style="width: 220px;">
-  <option value="">Select Customer</option>
+    <select class="form-select" [(ngModel)]="selectedCustomerId" (change)="onCustomerChange()" style="width: 220px;">
+      <option value="">Select Customer</option>
 
-  <option *ngFor="let c of customers"
-          [value]="c.customerId">
-    {{ c.name }}
-  </option>
-</select>
+      <option *ngFor="let c of customers" [value]="c.customerId">
+        {{ c.name }}
+      </option>
+    </select>
 
 
   </div>
@@ -73,7 +56,7 @@
     <i class="fas fa-spinner fa-spin"></i> Loading products...
   </div>
 
-  
+
 
   <!-- PRODUCTS GRID -->
   <div *ngIf="!loading && filterProducts.length" class="products-grid">
@@ -83,37 +66,28 @@
       <div class="product-image">
 
         <!-- MULTI IMAGE -->
-        <div *ngIf="prod.imageUrls.length > 1"
-             id="carousel{{prod.productId}}"
-             class="carousel slide">
+        <div *ngIf="prod.imageUrls.length > 1" id="carousel{{prod.productId}}" class="carousel slide">
 
           <div class="carousel-inner">
-            <div *ngFor="let img of prod.imageUrls; let i = index"
-                 class="carousel-item"
-                 [class.active]="i === 0">
-              <img [src]="getFullImageUrl(img)"
-                   class="d-block w-100"
-                   style="height:200px;object-fit:contain">
+            <div *ngFor="let img of prod.imageUrls; let i = index" class="carousel-item" [class.active]="i === 0">
+              <img [src]="getFullImageUrl(img)" class="d-block w-100" style="height:200px;object-fit:contain">
             </div>
           </div>
 
-          <button class="carousel-control-prev"
-                  data-bs-slide="prev"
-                  [attr.data-bs-target]="'#carousel' + prod.productId">
+          <button class="carousel-control-prev" data-bs-slide="prev"
+            [attr.data-bs-target]="'#carousel' + prod.productId">
             <span class="carousel-control-prev-icon"></span>
           </button>
 
-          <button class="carousel-control-next"
-                  data-bs-slide="next"
-                  [attr.data-bs-target]="'#carousel' + prod.productId">
+          <button class="carousel-control-next" data-bs-slide="next"
+            [attr.data-bs-target]="'#carousel' + prod.productId">
             <span class="carousel-control-next-icon"></span>
           </button>
         </div>
 
         <!-- SINGLE -->
-        <img *ngIf="prod.imageUrls.length === 1"
-             [src]="getFullImageUrl(prod.imageUrls[0])"
-             class="single-product-image">
+        <img *ngIf="prod.imageUrls.length === 1" [src]="getFullImageUrl(prod.imageUrls[0])"
+          class="single-product-image">
 
         <!-- NONE -->
         <div *ngIf="!prod.imageUrls.length" class="product-image-placeholder">
@@ -134,11 +108,9 @@
           </span>
         </p>
 
-        <button class="btn btn-primary"
-        (click)="openAddPopup(prod)"
-        [disabled]="prod.currentStock === 0">
-  Add
-</button>
+        <button class="btn btn-primary" (click)="openAddPopup(prod)" [disabled]="prod.currentStock === 0">
+          Add
+        </button>
 
       </div>
 
@@ -162,9 +134,9 @@
       </tr>
     </table> -->
 
-    <!-- <h5 class="text-end">Grand Total: ₹ {{ getCartTotal() }}</h5> -->
+  <!-- <h5 class="text-end">Grand Total: ₹ {{ getCartTotal() }}</h5> -->
 
-    <!-- <div class="text-end">
+  <!-- <div class="text-end">
       <button class="btn btn-success" (click)="placeOrder()">
         Place Order
       </button>
@@ -172,37 +144,33 @@
   </div> -->
 
   <div class="modal-overlay" *ngIf="showAddPopup">
-  <div class="modal-box">
+    <div class="modal-box">
 
-    <button class="modal-close" (click)="closeAddPopup()">✖</button>
+      <button class="modal-close" (click)="closeAddPopup()">✖</button>
 
-    <h3>{{ popupProduct.productName }}</h3>
+      <h3>{{ popupProduct.productName }}</h3>
 
-    <img [src]="getFullImageUrl(popupProduct.imageUrls?.[0])"
-         style="height:160px; object-fit:contain" />
+      <img [src]="getFullImageUrl(popupProduct.imageUrls?.[0])" style="height:160px; object-fit:contain" />
 
-    <p><strong>Price:</strong> ₹{{ popupProduct.price }}</p>
-    <p><strong>Stock:</strong> {{ popupProduct.currentStock }}</p>
+      <p><strong>Price:</strong> ₹{{ popupProduct.price }}</p>
+      <p><strong>Stock:</strong> {{ popupProduct.currentStock }}</p>
 
-    <!-- Quantity -->
-    <div class="qty-box">
-      <button (click)="popupQty = popupQty - 1"
-              [disabled]="popupQty === 1">−</button>
+      <!-- Quantity -->
+      <div class="qty-box">
+        <button (click)="popupQty = popupQty - 1" [disabled]="popupQty === 1">−</button>
 
-      <span>{{ popupQty }}</span>
+        <span>{{ popupQty }}</span>
 
-      <button (click)="popupQty = popupQty + 1"
-              [disabled]="popupQty >= popupProduct.currentStock">+</button>
+        <button (click)="popupQty = popupQty + 1" [disabled]="popupQty >= popupProduct.currentStock">+</button>
+      </div>
+
+      <!-- 🔥 ONLY ADD TO CART -->
+      <button class="btn btn-success w-100" (click)="confirmAddToCart()">
+        Add to Cart
+      </button>
+
     </div>
-
-    <!-- 🔥 ONLY ADD TO CART -->
-    <button class="btn btn-success w-100"
-            (click)="confirmAddToCart()">
-      Add to Cart
-    </button>
-
   </div>
-</div>
 
 
 </div>

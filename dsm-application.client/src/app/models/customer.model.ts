@@ -5,20 +5,20 @@ export interface Customer {
   name: string;
   email: string;
   phoneNumber: string;
-  address:string;
+  address: string;
   passwordHash?: string | null;
   isRegistered?: boolean;
   addedByDistributorId?: string | null;
-   connectedDistributors?: string[];
-   role: 'Customer';
-    company?: string;              // ✅ Add this
+  connectedDistributors?: string[];
+  role: 'Customer';
+  company?: string;              // ✅ Add this
   registrationDate?: Date;       // ✅ Add this
   permanentEmployeeId?: string;      // 🔵 ADD THIS
   permanentEmployeeName?: string;    // 🔵 ADD THIS
 
 
-   password?: string;
-   street?: string | null;
+  password?: string;
+  street?: string | null;
   city?: string | null;
   state?: string | null;
   pincode?: string | null;
@@ -33,7 +33,7 @@ export interface CustomerRegisterRequest {
 }
 
 export interface CustomerLoginRequest {
-    email?: string;       // optional
+  email?: string;       // optional
   phoneNumber?: string; // optional
   password: string;
 }
@@ -41,7 +41,7 @@ export interface CustomerLoginRequest {
 export interface CustomerLoginResponse {
   token: string;
   customer: Customer;
-  role:string;
+  role: string;
 }
 
 export interface CustomerProfileDto {
@@ -52,7 +52,7 @@ export interface CustomerProfileDto {
 
   // IMAGE
   profileImageUrl?: string;
-  
+
 
   // Address
   street?: string;

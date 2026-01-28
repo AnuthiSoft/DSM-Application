@@ -8,14 +8,14 @@ import Swal from 'sweetalert2';
 import { ReturnApiService } from '../../services/return-api.service';
 import { environment } from '../../../environments/environment';
 
-  interface ReturnData {
+interface ReturnData {
   returnType: string;
   reason: string;
   otherReason: string;
   resolution: string;
   files: FileList | null;
   additionalNotes?: string;   // ✅ ADD
-  agreeTerms?: boolean; 
+  agreeTerms?: boolean;
 }
 
 @Component({
@@ -32,34 +32,34 @@ export class CustomerOrdersComponent {
     resolution: 'Refund',
     files: null,
     additionalNotes: '',
-  agreeTerms: false
+    agreeTerms: false
   };
 
 
   // UI flags
-showProgressSteps: boolean = false;
-submitting: boolean = false;
+  showProgressSteps: boolean = false;
+  submitting: boolean = false;
 
-// Alert message
-returnMessage: string = '';
-returnMessageType: 'alert-success' | 'alert-error' | '' = '';
+  // Alert message
+  returnMessage: string = '';
+  returnMessageType: 'alert-success' | 'alert-error' | '' = '';
 
 
   orders: Order[] = [];
   loading = true;
   selectedOrder: any = null;
-    selectedOrderss: any = null;
+  selectedOrderss: any = null;
 
-    selectedFiles: File[] = [];
-    selectedProductId: string = '';
-returnQty: number = 1;
-selectedOrderForReturn: any = null;
+  selectedFiles: File[] = [];
+  selectedProductId: string = '';
+  returnQty: number = 1;
+  selectedOrderForReturn: any = null;
   activeTab: string = 'dashboard';
-  
 
 
-createdReturnId: string = '';
-@Output() returnSubmitted = new EventEmitter<void>();
+
+  createdReturnId: string = '';
+  @Output() returnSubmitted = new EventEmitter<void>();
 
 
 
@@ -84,16 +84,16 @@ statusOptions: string[] = [
 filteredOrders: Order[] = [];
 
 
-  constructor(private orderService: OrderService, private returnApiService:ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
   isCancelled(order: any): boolean {
-  const status = order?.status?.toLowerCase();
-  return status === 'cancelled' || status === 'canceled';
-}
+    const status = order?.status?.toLowerCase();
+    return status === 'cancelled' || status === 'canceled';
+  }
 
 
 loadOrders(): void {
@@ -130,26 +130,26 @@ applyStatusFilter(): void {
 
 
 
-onFilesSelected(event: any) {
-  this.selectedFiles = Array.from(event.target.files);
-}
+  onFilesSelected(event: any) {
+    this.selectedFiles = Array.from(event.target.files);
+  }
 
 
 
 
- computeExpectedDelivery(orderDate: any, distributorId: string): string {
-  if (!distributorId) return "";
+  computeExpectedDelivery(orderDate: any, distributorId: string): string {
+    if (!distributorId) return "";
 
-  const leadTime =
-    Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+    const leadTime =
+      Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-  // 🔥 IMPORTANT: Always start from TODAY for reorder
-  const baseDate = orderDate ? new Date(orderDate) : new Date();
+    // 🔥 IMPORTANT: Always start from TODAY for reorder
+    const baseDate = orderDate ? new Date(orderDate) : new Date();
 
-  baseDate.setDate(baseDate.getDate() + leadTime);
+    baseDate.setDate(baseDate.getDate() + leadTime);
 
-  return baseDate.toISOString().split("T")[0];
-}
+    return baseDate.toISOString().split("T")[0];
+  }
 
 
 
@@ -226,75 +226,75 @@ onFilesSelected(event: any) {
     this.isReturnPopupOpen = false;
   }
 
-openReturnPopup(order: any) {
-  this.currentOrderId = order.id;
-  this.selectedOrderForReturn = order;
+  openReturnPopup(order: any) {
+    this.currentOrderId = order.id;
+    this.selectedOrderForReturn = order;
 
-  this.selectedProductId = order.products[0]?.productId;
-  this.returnQty = 1;
-  this.selectedFiles = [];
+    this.selectedProductId = order.products[0]?.productId;
+    this.returnQty = 1;
+    this.selectedFiles = [];
 
-  this.returnData = {
-    returnType: 'Return',
-    reason: 'Received damaged product',
-    otherReason: '',
-    resolution: 'Refund',
-    files: null
-  };
+    this.returnData = {
+      returnType: 'Return',
+      reason: 'Received damaged product',
+      otherReason: '',
+      resolution: 'Refund',
+      files: null
+    };
 
-  this.isReturnPopupOpen = true;
-}
+    this.isReturnPopupOpen = true;
+  }
 
 
 
 
   submitReturnRequest() {
 
-  const baseReason =
-    this.returnData.reason === 'Other'
-      ? this.returnData.otherReason
-      : this.returnData.reason;
+    const baseReason =
+      this.returnData.reason === 'Other'
+        ? this.returnData.otherReason
+        : this.returnData.reason;
 
-  const finalReason =
-    `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
+    const finalReason =
+      `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
 
-  // ✅ FIX: get product from selected order
-  const selectedProduct = this.selectedOrderForReturn.products
-    .find((p: any) => p.productId === this.selectedProductId);
+    // ✅ FIX: get product from selected order
+    const selectedProduct = this.selectedOrderForReturn.products
+      .find((p: any) => p.productId === this.selectedProductId);
 
-  const payload = {
-    orderId: this.currentOrderId,
-    productId: this.selectedProductId,
-    productName: selectedProduct?.productName || '', // ✅ REQUIRED FIELD FIX
-    returnQty: this.returnQty,
-    reason: finalReason,
-    resolution: this.returnData.resolution
-  };
+    const payload = {
+      orderId: this.currentOrderId,
+      productId: this.selectedProductId,
+      productName: selectedProduct?.productName || '', // ✅ REQUIRED FIELD FIX
+      returnQty: this.returnQty,
+      reason: finalReason,
+      resolution: this.returnData.resolution
+    };
 
-  this.returnApiService.createReturn(payload).subscribe({
-    next: (res) => {
-      const returnId = res.id;
+    this.returnApiService.createReturn(payload).subscribe({
+      next: (res) => {
+        const returnId = res.id;
 
-      if (this.selectedFiles.length > 0) {
-        this.returnApiService
-          .uploadReturnImages(returnId, this.selectedFiles)
-          .subscribe();
+        if (this.selectedFiles.length > 0) {
+          this.returnApiService
+            .uploadReturnImages(returnId, this.selectedFiles)
+            .subscribe();
+        }
+
+        const order = this.orders.find(o => o.id === this.currentOrderId);
+        if (order) {
+          order.status = 'Return Pending';
+        }
+
+        this.toastr.success('Return request submitted');
+        this.isReturnPopupOpen = false;
+        this.activeTab = 'returns';
+      },
+      error: () => {
+        this.toastr.error('Failed to submit request');
       }
-
-      const order = this.orders.find(o => o.id === this.currentOrderId);
-      if (order) {
-        order.status = 'Return Pending';
-      }
-
-      this.toastr.success('Return request submitted');
-      this.isReturnPopupOpen = false;
-      this.activeTab = 'returns';
-    },
-    error: () => {
-      this.toastr.error('Failed to submit request');
-    }
-  });
-}
+    });
+  }
 
 
 
@@ -312,48 +312,51 @@ openReturnPopup(order: any) {
 
   // Cancel an order
   cancelOrder(orderId: string): void {
-    if (!confirm('Are you sure you want to cancel this order?')) return;
-
-    this.orderService.cancelOrder(orderId).subscribe({
-      next: () => {
-  this.toastr.success('Order cancelled successfully');
-
-  const order = this.orders.find(o => o.id === orderId);
-  if (order) {
-    order.status = 'Cancelled';
-  }
-},
-
-      error: (err: any) => {
-        console.error('Failed to cancel order', err);
-        this.toastr.error('Failed to cancel order');
+    Swal.fire({
+      title: 'Are you sure you want to cancel this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ok',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#2e7d32',
+      cancelButtonColor: '#aaa',
+      backdrop: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.orderService.cancelOrder(orderId).subscribe({
+          next: () => {
+            this.toastr.success('Order cancelled successfully');
+            this.loadOrders();
+          },
+          error: () => {
+            this.toastr.error('Failed to cancel order');
+          }
+        });
       }
     });
   }
-  
-
 
   // Reorder a previous order
-reorder(orderId: string): void {
+  reorder(orderId: string): void {
 
-  const distributorId = localStorage.getItem('distributorId')!;
-  const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+    const distributorId = localStorage.getItem('distributorId')!;
+    const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-  const today = new Date();
-  today.setDate(today.getDate() + leadTime);
+    const today = new Date();
+    today.setDate(today.getDate() + leadTime);
 
-  const expectedDelivery = today.toISOString().split('T')[0];
+    const expectedDelivery = today.toISOString().split('T')[0];
 
-  this.orderService.reorder(orderId, expectedDelivery).subscribe({
-    next: () => {
-      this.toastr.success('Order placed successfully');
-      this.loadOrders();
-    },
-    error: (err) => {
-      this.toastr.error(err?.error?.message || 'Reorder failed');
-    }
-  });
-}
+    this.orderService.reorder(orderId, expectedDelivery).subscribe({
+      next: () => {
+        this.toastr.success('Order placed successfully');
+        this.loadOrders();
+      },
+      error: (err) => {
+        this.toastr.error(err?.error?.message || 'Reorder failed');
+      }
+    });
+  }
 
 
 
@@ -525,7 +528,7 @@ getTotalSpent(): number {
  
           </div>
         `,
-          icon: 'info',
+        icon: 'info',
           width: 450,
           confirmButtonText: 'Close'
         });
@@ -554,22 +557,22 @@ getStatusCount(status: string): number {
 }
 
 
-getMaxReturnQuantity(): number {
-  if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
+  getMaxReturnQuantity(): number {
+    if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
 
-  const product = this.selectedOrderForReturn.products
-    .find((p: any) => p.productId === this.selectedProductId);
+    const product = this.selectedOrderForReturn.products
+      .find((p: any) => p.productId === this.selectedProductId);
 
-  return product ? product.quantity : 1;
-}
+    return product ? product.quantity : 1;
+  }
 
-getFilePreview(file: File): string {
-  return URL.createObjectURL(file);
-}
+  getFilePreview(file: File): string {
+    return URL.createObjectURL(file);
+  }
 
-removeFile(index: number) {
-  this.selectedFiles.splice(index, 1);
-}
+  removeFile(index: number) {
+    this.selectedFiles.splice(index, 1);
+  }
 
 
 

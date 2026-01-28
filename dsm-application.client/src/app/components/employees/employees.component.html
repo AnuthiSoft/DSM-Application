@@ -230,9 +230,10 @@
       <h2><i class="fas fa-users"></i> Employee Management</h2>
 
       <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
+
+      <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
         <i class="fas fa-plus"></i> Add Employee
       </button>
-    </div>
 
 
     <!-- Search and Filter Card -->
@@ -319,10 +320,10 @@
                     <i class="fas fa-edit"></i>
                     Edit
                   </button>
-                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="deleteEmployee(emp)">
-                    <i class="fas fa-trash"></i>
-                    Delete
+                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="openDeleteConfirm(emp)">
+                    <i class="fas fa-trash"></i> Delete
                   </button>
+
 
                   <button *ngIf="(emp.designation || '').toLowerCase().trim() === 'delivery boy'"
                     class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
@@ -396,11 +397,19 @@
                 Choose PDF
                 <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
               </label>
+            <div class="file-upload-wrapper">
+              <label class="file-upload-btn">
+                <i class="fas fa-upload"></i>
+                Choose PDF
+                <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
+              </label>
 
-              <span class="file-name">
+                <span class="file-name">
                 {{ selectedFileName || 'No file chosen' }}
               </span>
             </div>
+
+  <!-- <input type="file" (change)="onFileSelected($event)" accept="application/pdf" /> -->
 
             <div class="upload-btn-center">
               <button class="btn btn-primary mt-3" (click)="uploadInvoice()">

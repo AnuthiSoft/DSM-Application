@@ -4,6 +4,8 @@ import { EmployeeCartService } from '../../services/employee-cart.service';
 import { OrderService } from '../../services/order.service';
 import { ToastrService } from 'ngx-toastr';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Distributor } from '../../services/admin.service';

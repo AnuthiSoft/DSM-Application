@@ -437,8 +437,14 @@
 }
  
 .modal-body {
+  flex: 1;
+  min-height: 0;
   padding: 20px;
   color: var(--text-color);
+  overflow-y: auto;
+  overscroll-behavior: contain;   /* 🚫 stop scroll escaping */
+  -webkit-overflow-scrolling: touch;
+  max-height: calc(90vh - 120px); /* header + footer */
 }
  
 .modal-footer {

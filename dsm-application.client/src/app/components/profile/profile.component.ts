@@ -204,7 +204,7 @@ import { CustomerService } from '../../services/customer.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  
+
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -252,9 +252,9 @@ export class ProfileComponent implements OnInit {
 
         this.originalCustomer = { ...res };
 
-       this.previewImage = res.profileImageUrl
-  ? this.apiBaseUrl + res.profileImageUrl
-  : 'assets/default-user.png';
+        this.previewImage = res.profileImageUrl
+          ? this.apiBaseUrl + res.profileImageUrl
+          : 'assets/default-user.png';
 
         this.isLoading = false;
       },
@@ -289,7 +289,7 @@ export class ProfileComponent implements OnInit {
 
   // Save profile info + image
   saveProfile(): void {
-    
+
     this.isSaving = true;
     if (!this.customer.name ||
       !/^[A-Z]/.test(this.customer.name) ||
@@ -297,7 +297,7 @@ export class ProfileComponent implements OnInit {
       !this.customer.pincode) {
 
       this.toastr.error('Please fill all required fields correctly', 'Validation Error');
-      this.isSaving = false; 
+      this.isSaving = false;
       return;
     }
 
@@ -340,14 +340,14 @@ export class ProfileComponent implements OnInit {
     });
   }
 
- cancelEdit() {
-  this.customer = { ...this.originalCustomer };
-  this.customer.phoneNumber = (this.customer.phoneNumber || '').replace(/\D/g, '');
-  this.previewImage = this.originalCustomer.profileImageUrl
-    ? this.apiBaseUrl + this.originalCustomer.profileImageUrl
-    : 'assets/default-user.png';
-  this.selectedFile = null;
-}
+  cancelEdit() {
+    this.customer = { ...this.originalCustomer };
+    this.customer.phoneNumber = (this.customer.phoneNumber || '').replace(/\D/g, '');
+    this.previewImage = this.originalCustomer.profileImageUrl
+      ? this.apiBaseUrl + this.originalCustomer.profileImageUrl
+      : 'assets/default-user.png';
+    this.selectedFile = null;
+  }
 
 
 

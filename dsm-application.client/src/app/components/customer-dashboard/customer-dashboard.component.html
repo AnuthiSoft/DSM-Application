@@ -92,19 +92,17 @@
 
       <!-- Stats Grid -->
       <div class="stats-grid">
-        <div class="stat-card">
+        <div class="stat-card clickable" (click)="goToTab('orders')">
           <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
           <div class="stat-value">{{ orderStats.total }}</div>
           <div class="stat-label">Total Orders</div>
         </div>
-
-        <div class="stat-card">
+        <div class="stat-card clickable" (click)="goToTab('products')">
           <div class="stat-icon"><i class="fas fa-box"></i></div>
           <div class="stat-value">{{ productStats.total }}</div>
           <div class="stat-label">Available Products</div>
         </div>
-
-        <div class="stat-card">
+        <div class="stat-card clickable" (click)="goToTab('distributors')">
           <div class="stat-icon"><i class="fas fa-truck"></i></div>
           <div class="stat-value">{{ distributorStats.total }}</div>
           <div class="stat-label">Distributors</div>
@@ -130,7 +128,7 @@
               {{ order.status }}
             </div>
           </div>
-        </div>
+        </div> -->
         <ng-template #noRecentOrders>
           <p class="empty-state">No recent orders found.</p>
         </ng-template>

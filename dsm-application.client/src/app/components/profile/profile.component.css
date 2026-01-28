@@ -273,8 +273,8 @@
   align-items: center;
   width: 100%;
   height: 46px;
-  background: #fff;
-  border: 1px solid #d0d5dd;
+  background: var(--card-bg);          /* ✅ */
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -289,7 +289,8 @@
   padding: 0 12px;
   font-size: 14px;
   border-radius: 0 8px 8px 0;
-  background: transparent;
+  background: var(--card-bg);     /* ✅ FIX */
+  color: var(--text-color); 
 }
 
 /* 🔵 Focus like Email field */
@@ -311,16 +312,18 @@
 /* 🌙 Dark theme phone input fix */
 
 .dark-theme .phone-wrapper {
+  background-color: var(--card-bg);   /* ✅ FIX */
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
 }
+
 
 .dark-theme .phone-prefix {
   background-color: var(--card-bg);
   color: var(--text-color);
   border: 1px solid var(--border-color);
-  border-right: none;
-
+  border-right: 1px solid var(--border-color);
   /* padding: 10px 12px; */
   border-radius: 6px 0 0 6px;
   font-weight: 500;
@@ -341,3 +344,81 @@
 .dark-theme .phone-input::placeholder {
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* =========================
+   RESPONSIVE FIXES
+   ========================= */
+
+/* Tablets & below */
+@media (max-width: 992px) {
+  .profile-content {
+    grid-template-columns: 1fr;   /* Stack cards */
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-bottom: 10px;
+  }
+
+  .profile-info {
+    align-items: center;
+    margin-top: 0;
+  }
+
+  .profile-info h3 {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;   /* Single column */
+  }
+
+  .form-group.full-width {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .phone-wrapper {
+    height: auto;
+  }
+
+  .phone-prefix {
+    padding: 10px;
+  }
+
+  .phone-input {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-card {
+    margin-top: 10px;
+  }
+
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+

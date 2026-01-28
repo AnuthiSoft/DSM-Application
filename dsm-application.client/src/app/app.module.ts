@@ -1,6 +1,7 @@
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -63,15 +64,12 @@ import { EmployeeTrackingComponent } from './components/employee-tracking/employ
  import { GoogleMapsModule } from '@angular/google-maps';
 // import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-// import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-// import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
+import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
 // import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { EmployeeInvoicesComponent } from './components/employee-invoices/employee-invoices.component';
-
-
-import { CommonModule } from '@angular/common';
 import { PaymentsComponent } from './components/payments/payments.component';
 import { DistributorSettingsComponent } from './components/distributor-settings/distributor-settings.component';
 import { PaymentCollectionForCashcollectorComponent } from './components/payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
@@ -81,7 +79,7 @@ import { DistributorReturnRequestsComponent } from './components/distributor-ret
 import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
 import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/employee-add-to-cart.component';
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
-
+import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
 
 
@@ -115,7 +113,8 @@ OrderHistoryComponent,
 DistributorOrdersComponent,
 CustomerOrdersComponent,
 EmployeeOrdersComponent,
-
+AddPaymentNoteComponent,
+DistributorViewComponent,
 CustDashboardComponent,
 DistributorConnectionRequestsComponent,
 TestComponent,
@@ -124,7 +123,7 @@ EmployeeLoginComponent,
 EmployeeSignupComponent,
 AddToCartComponent,
 EmployeeProfileComponent,
-
+EmployeeProductsComponent,
 FraudReportComponent,
 FraudHistoryComponent,
 AdminFraudListComponent,
@@ -176,7 +175,7 @@ EmployeeTrackingComponent,
   imports: [
     BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,          // ✅ ADD THIS      // ✅ you already imported but forgot here 
     AppRoutingModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
-      timeOut: 1500,
+      timeOut: 1000,
       positionClass: 'toast-top-right',
       preventDuplicates: true,
  

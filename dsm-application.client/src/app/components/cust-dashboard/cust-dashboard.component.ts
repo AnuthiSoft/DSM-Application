@@ -5,6 +5,9 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ProductService } from '../../services/product.service';
 import { Product } from '../../models/products.model';
+import { ToastrService } from 'ngx-toastr';
+
+
 interface Distributor {
   distributorId: string;
   companyName: string;
@@ -89,7 +92,7 @@ export class CustDashboardComponent {
   }
 
 
-  constructor(private http: HttpClient,private customerService: CustomerService,  private router: Router) {}
+  constructor(private http: HttpClient,private customerService: CustomerService,  private router: Router, private toastr: ToastrService ) {}
 
   ngOnInit(): void {
     this.customerId = localStorage.getItem('customerId') || '';
@@ -153,7 +156,11 @@ loadDistributors() {
     .connectDistributor(this.customerId, distributorId)
     .subscribe({
       next: (res: any) => {
-        alert(res.message);
+        // ✅ TOASTR SUCCESS
+        this.toastr.success(
+          res.message || 'Connection request sent successfully',
+          'Success'
+        );
 
         const distributor = this.distributors.find(
           d => d.distributorId === distributorId
@@ -165,7 +172,11 @@ loadDistributors() {
         }
       },
       error: (err) => {
-        alert('Error connecting: ' + err.message);
+        // ✅ TOASTR ERROR
+        this.toastr.error(
+          err.error?.message || 'Failed to send connection request',
+          'Error'
+        );
       }
     });
 }

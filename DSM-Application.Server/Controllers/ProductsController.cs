@@ -226,13 +226,18 @@ namespace DSM_Application.Server.Controllers
             Console.WriteLine("FINAL GST SAVED = " + product.GST);
 
             await _productService.CreateAsync(product);
-            // 🔥 AUTO CREATE INVENTORY BATCH
-            //await _inventoryService.CreateInitialBatch(
-            //    product.ProductId,
-            //    product.ProductCode,
-            //    dto.DistributorId,
-            //    dto.Stock
-            //);
+            // ✅ CREATE INITIAL STOCK (SAME AS ADD STOCK)
+            if (dto.Stock > 0)
+            {
+                await _inventoryService.AddStockAsync(
+                    product.ProductId,          // product id
+                    dto.DistributorId,          // distributor
+                    dto.Stock,                  // initial stock
+                    DateTime.UtcNow,            // manufacture date
+                    DateTime.UtcNow.AddMonths(6), // expiry date
+                    "Initial stock on product creation"
+                );
+            }
             return Ok(product);
         }
 

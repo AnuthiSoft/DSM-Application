@@ -957,5 +957,28 @@ textarea.form-control {
   align-items: center;
   gap: 6px;
 }
- 
- 
+
+/* 🔐 OTP BLOCK VISIBILITY FIX */
+.mt-3 {
+  display: block !important;
+}
+
+.mt-3 label {
+  color: var(--text-color) !important;
+}
+
+.mt-3 .form-control {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .mt-3 label {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .mt-3 .form-control {
+  background: #1e1e1e !important;
+  color: #ffffff !important;
+  border-color: #444 !important;
+}

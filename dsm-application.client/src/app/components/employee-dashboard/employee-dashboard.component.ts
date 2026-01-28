@@ -169,18 +169,30 @@ setActiveTab(tab: string) {
   }
 
   loadDashboardData(): void {
-    if (!this.employeeId) return;
+  if (!this.employeeId) return;
 
-    this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
-      next: (orders) => {
-        this.recentOrders = orders.slice(0, 5);
-        this.orderStats.assigned = orders.filter(o => o.status === 'Assigned').length;
-        this.orderStats.completed = orders.filter(o => o.status === 'Delivered').length;
-        this.orderStats.pending = orders.filter(o => o.status !== 'Delivered').length;
-      },
-      error: (err) => console.error('Error loading orders:', err)
-    });
-  }
+  this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
+    next: (orders) => {
+      this.recentOrders = orders.slice(0, 5);
+
+      // ✅ ASSIGNED = SHIPPED (not delivered yet)
+      this.orderStats.assigned = orders.filter(
+        o => o.status === 'Shipped'
+      ).length;
+
+      // ✅ COMPLETED = DELIVERED
+      this.orderStats.completed = orders.filter(
+        o => o.status === 'Delivered'
+      ).length;
+
+      // ✅ PENDING = everything not delivered
+      this.orderStats.pending = orders.filter(
+        o => o.status !== 'Delivered'
+      ).length;
+    },
+    error: err => console.error('Error loading orders:', err)
+  });
+}
 
   refreshTasks(): void {
     this.toastr.success('Tasks refreshed successfully!');
@@ -278,5 +290,9 @@ logout(): void {
     this.showReasonInput = false;
     this.reasonText = "";
   }
+
+  goToTab(tab: string) {
+  this.setActiveTab(tab);
+}
 
 }

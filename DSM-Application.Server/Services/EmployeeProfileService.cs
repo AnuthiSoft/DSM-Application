@@ -72,7 +72,6 @@ namespace DSM_Application.Server.Services
 
             return new EmployeeProfileDto
             {
-                EmployeeId = employee.EmployeeId,
                 Name = employee.Name,
                 Email = employee.Email,
                 PhoneNumber = employee.PhoneNumber,
@@ -85,6 +84,7 @@ namespace DSM_Application.Server.Services
                 IsActive = employee.IsActive,
                 CreatedDate = employee.CreatedDate,
                 UpdatedDate = employee.UpdatedDate
+          
             };
         }
 

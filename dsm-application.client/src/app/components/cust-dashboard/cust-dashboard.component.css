@@ -456,7 +456,28 @@
   border-color: #27ae60;
 }
 
+.distributor-card {
+  animation: fadeInUp 0.5s ease-out;
+}
 
+/* Hover Effects for Interactive Elements */
+.distributor-avatar {
+  transition: transform 0.3s ease;
+}
+
+.distributor-card:hover .distributor-avatar {
+  transform: scale(1.05);
+}
+
+/* Status badge hover effect */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+.distributor-card:hover .status-badge {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -548,25 +569,86 @@
   }
 }
 
-.distributor-card {
-  animation: fadeInUp 0.5s ease-out;
+/* =========================
+   MOBILE RESPONSIVE FIXES
+   (NO STRUCTURE CHANGES)
+========================= */
+
+@media (max-width: 768px) {
+
+  /* Grid → single column */
+  .distributors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Card spacing */
+  .distributor-card {
+    padding: 16px;
+    margin: 0;
+  }
+
+  /* HEADER FIX */
+  .distributor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    padding-top: 36px; /* space for status badge */
+  }
+
+  .distributor-avatar {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .distributor-title {
+    width: 100%;
+  }
+
+  .distributor-title h4 {
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  /* STATUS BADGE */
+  .status-badge {
+    top: 8px;
+    right: 8px;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+
+  /* ACTION BUTTONS STACK */
+  .distributor-actions {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .distributor-actions .btn {
+    width: 100%;
+    flex: unset;
+    font-size: 0.85rem;
+  }
 }
 
-/* Hover Effects for Interactive Elements */
-.distributor-avatar {
-  transition: transform 0.3s ease;
+/* EXTRA SMALL SCREENS */
+@media (max-width: 480px) {
+
+  .distributor-card {
+    padding: 14px;
+  }
+
+  .distributor-info {
+    padding: 14px;
+  }
+
+  .distributor-title h4 {
+    font-size: 1rem;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
 }
 
-.distributor-card:hover .distributor-avatar {
-  transform: scale(1.05);
-}
-
-/* Status badge hover effect */
-.status-badge {
-  transition: all 0.3s ease;
-}
-
-.distributor-card:hover .status-badge {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}

@@ -322,10 +322,10 @@
 </div>
  
 <!-- 📌 PRODUCT DETAILS POPUP -->
-<div *ngIf="showProductPopup" class="modal-overlay">
- 
-  <div class="modal-backdrop" (click)="closeProductPopup()"></div>
- 
+<div *ngIf="showProductPopup" class="modal-overlay" (click)="closeProductPopup()">
+
+  <!-- <div class="modal-backdrop" (click)="closeProductPopup()"></div> -->
+
   <div class="modal-content" (click)="$event.stopPropagation()">
  
     <div class="modal-header">

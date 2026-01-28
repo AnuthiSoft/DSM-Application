@@ -292,15 +292,17 @@ connectDistributorFromCart(distributorId: string) {
             d => d.distributorId !== distributorId
           );
 
-        if (this.notConnectedDistributors.length === 0) {
-          this.showConnectionPopup = false;
+          // close popup if all handled
+          if (this.notConnectedDistributors.length === 0) {
+            this.showConnectionPopup = false;
+          }
+        },
+        error: (err) => {
+         this.toastr.error(err.error || 'Failed to send connection request');
+
         }
-      },
-      error: () => {
-        this.toastr.error('Failed to send connection request');
-      }
-    });
-}
+      });
+  }
 
 
 
@@ -380,7 +382,7 @@ connectDistributorFromCart(distributorId: string) {
             resolve(true);
           },
           error: () => {
-            alert('Server not reachable');
+            this.toastr.error('Server not reachable');
             resolve(false);
           }
         });
@@ -826,12 +828,12 @@ connectDistributorFromCart(distributorId: string) {
 
     try {
       if (!this.customerId) {
-        alert('Please login first');
+        this.toastr.error('Please login first');
         return;
       }
 
       if (this.orderProducts.length === 0) {
-        alert('Cart is empty');
+        this.toastr.warning('Your cart is empty');
         return;
       }
 
@@ -864,7 +866,7 @@ connectDistributorFromCart(distributorId: string) {
         await this.orderService.placeOrder(payload).toPromise();
       }
 
-      alert('Orders placed successfully');
+      this.toastr.success('Orders placed successfully');
       this.resetOrder();
       this.router.navigate(['/customerOrder']);
 
@@ -937,6 +939,10 @@ connectDistributorFromCart(distributorId: string) {
     this.showConnectionPopup = false;
     this.router.navigate(['/customer/distributors']);
   }
+
+//   closeCustomerPopup(): void {
+//   this.showCustomerDropdown = false;
+// }
 
 
 

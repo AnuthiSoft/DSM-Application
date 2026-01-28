@@ -203,7 +203,7 @@ loadOrders(): void {
  
     // 🔥 CLOSE assign modal if it is open
     this.showAssignModal = false;
- 
+    document.body.style.overflow = 'hidden';
     // small delay so DOM updates cleanly
     setTimeout(() => {
       this.selectedOrder = order;
@@ -513,6 +513,7 @@ loadOrders(): void {
   closeProductPopup() {
     this.showProductPopup = false;
     this.nextAction = "";   // 🔥 prevents unwanted opening
+    document.body.style.overflow = '';
   }
  
   // 🧮 Subtotal (before discount)

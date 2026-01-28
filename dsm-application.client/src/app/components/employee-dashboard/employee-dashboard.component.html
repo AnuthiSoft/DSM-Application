@@ -75,17 +75,18 @@
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
+
+        <div class="stat-card clickable" (click)="goToTab('orders')">
           <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
           <div class="stat-value">{{orderStats.assigned || 0}}</div>
           <div class="stat-label">Assigned Orders</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" (click)="goToTab('orders')">
           <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
           <div class="stat-value">{{orderStats.completed || 0}}</div>
           <div class="stat-label">Completed</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card clickable" (click)="goToTab('orders')">
           <div class="stat-icon"><i class="fas fa-clock"></i></div>
           <div class="stat-value">{{orderStats.pending || 0}}</div>
           <div class="stat-label">Pending</div>

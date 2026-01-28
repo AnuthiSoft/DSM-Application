@@ -3,45 +3,35 @@
 
 
   <!-- Status Filter -->
-<div class="row mb-3">
-  <div class="col-md-4">
-    <label class="form-label fw-bold">Filter by Status</label>
-    <select
-      class="form-select"
-      [(ngModel)]="selectedStatus"
-      (change)="applyStatusFilter()"
-    >
-      <option value="All">All</option>
-      <option value="Pending">Pending</option>
-      <option value="Shipped">Shipped</option>
-      <option value="Delivered">Delivered</option>
-    </select>
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <label class="form-label fw-bold">Filter by Status</label>
+      <select class="form-select" [(ngModel)]="selectedStatus" (change)="applyStatusFilter()">
+        <option value="All">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+    </div>
   </div>
-</div>
 
   <div *ngIf="loading" class="alert alert-info">Loading orders...</div>
-<div *ngIf="!loading && filteredOrders.length === 0" class="alert alert-warning">
-  No orders found for selected status.
-</div>
+  <div *ngIf="!loading && filteredOrders.length === 0" class="alert alert-warning">
+    No orders found for selected status.
+  </div>
 
-<div *ngFor="let o of filteredOrders" class="card mb-3 shadow-sm">
+  <div *ngFor="let o of filteredOrders" class="card mb-3 shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
       <div>
         <strong>Order #{{ o.id }}</strong> —
         <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
       </div>
-  <button *ngIf="o.status === 'Shipped'"
-        class="btn btn-success btn-sm"
-        (click)="openReceiptUpload(o)">
-  📸 Upload Receipt & Deliver
-</button>
+      <button *ngIf="o.status === 'Shipped'" class="btn btn-success btn-sm" (click)="openReceiptUpload(o)">
+        📸 Upload Receipt & Deliver
+      </button>
 
-<input type="file"
-       accept="image/*"
-       capture="environment"
-       hidden
-       #receiptInput
- (change)="onReceiptSelected($event, o)" />
+      <input type="file" accept="image/*" capture="environment" hidden #receiptInput
+        (change)="onReceiptSelected($event, o)" />
 
     </div>
     <div class="card-body">
@@ -80,22 +70,30 @@
       </div> -->
       <div class="text-end">
         <div><strong>Subtotal:</strong> {{ o.subtotal | currency:'INR' }}</div>
-        <div *ngIf="getDiscount(o) > 0">
+
+        <div>
           <strong>Discount:</strong>
-          -{{ getDiscount(o) | currency:'INR' }}
+          -{{ o.discount | currency:'INR' }}
         </div>
 
-        <div *ngIf="getDiscount(o) === 0">
-          <strong>Discount:</strong> -
+        <div>
+          <strong>Taxable Amount:</strong>
+          {{ getTaxableAmount(o) | currency:'INR' }}
         </div>
 
+        <div>
+          <strong>GST:</strong>
+          {{ o.gstAmount | currency:'INR' }}
+        </div>
 
         <hr />
-        <div class="fs-5">
+        <div class="fs-5 text-success">
           <strong>Amount to Collect:</strong>
           {{ o.totalAmount | currency:'INR' }}
         </div>
       </div>
+
+
 
     </div>
   </div>

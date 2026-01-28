@@ -17,6 +17,18 @@ export interface DashboardDistributor {
 
 export interface CustomerDashboardResponse {
   isGlobal: boolean;
+  // 🔹 COUNTS
+  totalOrders: number;
+  totalSpent: number;
+
+  // 🔹 RECENT ORDERS
+  recentOrders: {
+    orderId: string;
+    orderDate: string;
+    status: string;
+    totalAmount?: number;
+  }[];
+
   distributors: DashboardDistributor[];
 }
 
@@ -34,25 +46,25 @@ export interface DistributorDto {
   providedIn: 'root'
 })
 export class CustomerApiService {
- 
+
   private base = `${environment.apiUrl}/customers`;
- 
-  constructor(private http: HttpClient) {}
- 
+
+  constructor(private http: HttpClient) { }
+
   private getHeaders() {
     const token = localStorage.getItem('token');
     return token
       ? { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) }
       : {};
   }
- 
+
   getDashboard(customerId: string): Observable<any> {
     return this.http.get<any>(
       `${this.base}/dashboard/${customerId}`,
       this.getHeaders()
     );
   }
- 
+
   connectDistributor(customerId: string, distributorId: string): Observable<any> {
     return this.http.post(
       `${this.base}/connect-distributor`,
@@ -60,20 +72,20 @@ export class CustomerApiService {
       this.getHeaders()
     );
   }
- 
+
   getDistributorProducts(distributorId: string): Observable<Product[]> {
     return this.http.get<Product[]>(
       `${this.base}/products/${distributorId}`,
       this.getHeaders()
     );
   }
- 
+
 
 
   getConnectedDistributors(customerId: string): Observable<any> {
-  return this.http.get<any>(
-    `${this.base}/${customerId}/connected-distributors`,
-    this.getHeaders()
-  );
-}
+    return this.http.get<any>(
+      `${this.base}/${customerId}/connected-distributors`,
+      this.getHeaders()
+    );
+  }
 }

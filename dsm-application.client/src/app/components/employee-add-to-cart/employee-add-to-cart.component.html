@@ -6,9 +6,7 @@
     <!-- Ordered Date -->
     <div class="form-group">
       <label>Ordered Date *</label>
-      <input type="date"
-             [(ngModel)]="orderedDate"
-             (change)="updateExpectedDate()" />
+      <input type="date" [(ngModel)]="orderedDate" (change)="updateExpectedDate()" />
     </div>
 
     <!-- Retailer -->
@@ -16,20 +14,16 @@
       <label>Retailer *</label>
 
       <div class="customer-box">
-        <div class="customer-display"
-             (click)="toggleCustomerDropdown()">
+        <div class="customer-display" (click)="toggleCustomerDropdown()">
           {{ customerDisplay || customerName }}
           <span class="arrow">▼</span>
         </div>
 
-        <div class="customer-dropdown"
-             *ngIf="showCustomerDropdown">
+        <div class="customer-dropdown" *ngIf="showCustomerDropdown">
           <small>ID: {{ customerId }}</small><br />
           <small>Email: {{ customerEmail }}</small><br />
 
-          <div class="customer-item"
-               *ngFor="let c of customers"
-               (click)="selectCustomer(c)">
+          <div class="customer-item" *ngFor="let c of customers" (click)="selectCustomer(c)">
             <strong>{{ c.customerName }}</strong><br />
             <small>ID: {{ c.customerId }}</small><br />
             <small>Email: {{ c.email }}</small><br />
@@ -42,9 +36,7 @@
     <!-- Expected Delivery -->
     <div class="form-group">
       <label>Expected Delivery Date *</label>
-      <input type="date"
-             [(ngModel)]="expectedDate"
-             readonly />
+      <input type="date" [(ngModel)]="expectedDate" readonly />
     </div>
 
     <!-- Products -->
@@ -66,18 +58,14 @@
                 {{ item.product.productName }}
               </span>
 
-              <button class="remove-btn"
-                      (click)="removeFromCart(item.product.productId!)"
->
+              <button class="remove-btn" (click)="removeFromCart(item.product.productId!)">
                 ✖
               </button>
             </div>
           </td>
 
           <td class="quantity-cell">
-            <input type="number"
-                   [(ngModel)]="item.quantity"
-                   min="1" />
+            <input type="number" [(ngModel)]="item.quantity" min="1" />
           </td>
         </tr>
       </tbody>
@@ -85,21 +73,19 @@
 
     <!-- Actions -->
     <div class="actions">
-      <button class="submit-btn"
-              (click)="placeOrder()">
+      <button class="submit-btn" (click)="placeOrder()">
         Submit
       </button>
 
-      <button class="reset-btn"
-              (click)="resetOrder()">
+      <button class="reset-btn" (click)="resetOrder()">
         Reset
       </button>
 
-       <!-- ⬅️ BACK TO PRODUCTS (Floating) -->
-<div class="floating-back-btn" (click)="close.emit()">
-  <i class="fas fa-arrow-left"></i>
-  <span>Back to Products</span>
-</div>
+      <!-- ⬅️ BACK TO PRODUCTS (Floating) -->
+      <div class="floating-back-btn" (click)="close.emit()">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Products</span>
+      </div>
 
     </div>
 

@@ -107,10 +107,9 @@
               {{ order.orderDate | date:'medium' }}
             </span>
           </div>
-          <span class="status-badge"
-      [class]="order.status.toLowerCase().replace(' ', '-')">
-  {{ order.status }}
-</span>
+          <span class="status-badge" [class]="order.status.toLowerCase().replace(' ', '-')">
+            {{ order.status }}
+          </span>
 
         </div>
 
@@ -123,37 +122,36 @@
             </div>
 
             <div *ngIf="order.status === 'Return Pending'" class="return-info">
-  <i class="fas fa-clock"></i>
-  Return request is under review
-</div>
+              <i class="fas fa-clock"></i>
+              Return request is under review
+            </div>
 
-<div *ngIf="order.status === 'Return Completed'" class="return-info success">
-  <i class="fas fa-check-circle"></i>
-  Return order completed
-</div>
+            <div *ngIf="order.status === 'Return Completed'" class="return-info success">
+              <i class="fas fa-check-circle"></i>
+              Return order completed
+            </div>
 
 
             <div class="detail-item">
-            <span class="detail-label">Expected Delivery:</span>
+              <span class="detail-label">Expected Delivery:</span>
 
               <!-- Normal orders -->
-               <span class="detail-value"
-      *ngIf="order.status?.toLowerCase() !== 'canceled' 
+              <span class="detail-value" *ngIf="order.status?.toLowerCase() !== 'canceled' 
           && order.status?.toLowerCase() !== 'cancelled'; 
           else cancelledDelivery">
-        </span> 
-             <!-- <span class="detail-value"
+              </span>
+              <!-- <span class="detail-value"
               *ngIf="order.status !== 'Cancelled'; else cancelledDelivery">
               {{ order.expectedDeliveryDate | date:'mediumDate' }}
               </span> -->
 
-            <!-- Cancelled order -->
-          <ng-template #cancelledDelivery>
-          <span class="detail-value cancelled-text">
-          {{ order.expectedDeliveryDate | date:'mediumDate' }}
-          </span>
-          </ng-template>
-        </div>
+              <!-- Cancelled order -->
+              <ng-template #cancelledDelivery>
+                <span class="detail-value cancelled-text">
+                  {{ order.expectedDeliveryDate | date:'mediumDate' }}
+                </span>
+              </ng-template>
+            </div>
 
             <!-- <div class="detail-item">
               <span class="detail-label">Expected Delivery:</span>
@@ -174,7 +172,7 @@
               </span>
             </div>
 
-            
+
 
             <div class="detail-item">
               <span class="detail-label">Subtotal:</span>
@@ -206,12 +204,12 @@
           <div class="order-items">
             <h5><i class="fas fa-boxes"></i> Order Items</h5>
             <!-- ⭐ SHOW DISTRIBUTOR NAME -->
-<div class="detail-item" style="margin-bottom: 10px;">
-  <span class="detail-label">
-    <i class="fas fa-store"></i> Distributor:
-  </span>
-  <span class="detail-value">{{ order.distributorName }}</span>
-</div>
+            <div class="detail-item" style="margin-bottom: 10px;">
+              <span class="detail-label">
+                <i class="fas fa-store"></i> Distributor:
+              </span>
+              <span class="detail-value">{{ order.distributorName }}</span>
+            </div>
 
             <div class="items-list">
               <div class="item-card" *ngFor="let item of order.products">
@@ -232,12 +230,11 @@
         <div class="order-footer">
 
           <!-- View Discount -->
-  <button class="btn btn-primary btn-sm action-btn"
-          (click)="viewOrderDetails(order.id)"
-          [disabled]="isCancelled(order)">
-    <i class="fas fa-eye"></i>
-    <span>View Discount</span>
-  </button>
+          <button class="btn btn-primary btn-sm action-btn" (click)="viewOrderDetails(order.id)"
+            [disabled]="isCancelled(order)">
+            <i class="fas fa-eye"></i>
+            <span>View Discount</span>
+          </button>
           <!-- View Discount
             <button class="btn btn-primary btn-sm"
                     (click)="viewOrderDetails(order.id)"
@@ -245,13 +242,12 @@
               <i class="fas fa-eye"></i> View Discount
             </button> -->
 
-            <!-- View Details -->
-  <button class="btn btn-primary btn-sm action-btn"
-          (click)="viewOrderDetailss(order.id)"
-          [disabled]="isCancelled(order)">
-    <i class="fas fa-eye"></i>
-    <span>View Details</span>
-  </button>
+          <!-- View Details -->
+          <button class="btn btn-primary btn-sm action-btn" (click)="viewOrderDetailss(order.id)"
+            [disabled]="isCancelled(order)">
+            <i class="fas fa-eye"></i>
+            <span>View Details</span>
+          </button>
           <!-- View Details -->
           <!-- <button class="btn btn-primary btn-sm"
                   (click)="viewOrderDetailss(order.id)"
@@ -260,14 +256,12 @@
           </button> -->
 
           <!-- Cancel -->
-  <!-- <button class="btn btn-outline-secondary btn-sm action-btn" -->
-        <button
-        class="btn btn-outline-secondary action-btn"
-        *ngIf="order.status === 'Pending'"
-        (click)="cancelOrder(order.id)">
-        <i class="fas fa-times"></i>
-        <span>Cancel Order</span>
-      </button>
+          <!-- <button class="btn btn-outline-secondary btn-sm action-btn" -->
+          <button class="btn btn-outline-secondary action-btn" *ngIf="order.status === 'Pending'"
+            (click)="cancelOrder(order.id)">
+            <i class="fas fa-times"></i>
+            <span>Cancel Order</span>
+          </button>
 
 
 
@@ -280,13 +274,12 @@
             <i class="fas fa-times"></i> Cancel Order
           </button> -->
 
-           <!-- Reorder -->
-          <button class="btn btn-outline-success btn-sm action-btn"
-          *ngIf="order.status === 'Delivered'"
-          (click)="reorder(order.id)">
-    <i class="fas fa-redo"></i>
-    <span>Reorder</span>
-  </button>
+          <!-- Reorder -->
+          <button class="btn btn-outline-success btn-sm action-btn" *ngIf="order.status === 'Delivered'"
+            (click)="reorder(order.id)">
+            <i class="fas fa-redo"></i>
+            <span>Reorder</span>
+          </button>
 
           <!-- Reorder -->
          <!-- <button class="btn btn-outline-success btn-sm"
@@ -298,13 +291,14 @@
 
         </div>
 
-           <!-- Return (only for delivered orders) -->
+              <!-- Return (only for delivered orders) -->
  <button class="btn btn-warning btn-sm action-btn"
                   *ngIf="order.status === 'Delivered'"
                   (click)="openReturnPopup(order)">
             <i class="fas fa-undo"></i>
             <span>Return</span>
           </button>
+
 
 
 
@@ -348,286 +342,207 @@
 
     </div>
 
-
-
-    <!-- ✅ Order Details(after clicking View Details) -->
-    <div *ngIf="selectedOrderss" class="selected-order-summary card p-4 mt-4 shadow">
-
-      <h3 class="mb-3">Order Details</h3>
-      <hr>
-
-      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
-      <p><strong>Total Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
-      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
-
-      <hr>
-
-      <p><strong>Special Discount (%):</strong> {{ selectedOrder.specialDiscountPercent }}</p>
-      <p><strong>Quantity Discount (%):</strong> {{ selectedOrder.quantityDiscountPercent }}</p>
-      <p><strong>Price Discount (%):</strong> {{ selectedOrder.priceDiscountPercent }}</p>
-      <p><strong>Total Discount (%):</strong> {{ selectedOrder.totalDiscountPercent }}</p>
-
-    </div>
-
-
-
-    <!-- ✅ Order Details(after clicking View Details) -->
-    <div *ngIf="selectedOrderss" class="selected-order-summary card p-4 mt-4 shadow">
-
-      <h3 class="mb-3">Order Details</h3>
-      <hr>
-
-      <p><strong>Subtotal:</strong> ₹{{ selectedOrder.subtotal }}</p>
-      <p><strong>Total Discount:</strong> ₹{{ selectedOrder.totalDiscount }}</p>
-      <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
-
-      <hr>
-
-      <p><strong>Special Discount (%):</strong> {{ selectedOrder.specialDiscountPercent }}</p>
-      <p><strong>Quantity Discount (%):</strong> {{ selectedOrder.quantityDiscountPercent }}</p>
-      <p><strong>Price Discount (%):</strong> {{ selectedOrder.priceDiscountPercent }}</p>
-      <p><strong>Total Discount (%):</strong> {{ selectedOrder.totalDiscountPercent }}</p>
-
-    </div>
-
   </div>
 
   <!-- ============================== -->
-<!--        RETURN POPUP MODAL      -->
-<!-- ============================== -->
-<!-- ============================== -->
-<!--        RETURN POPUP MODAL      -->
-<!-- ============================== -->
+  <!--        RETURN POPUP MODAL      -->
+  <!-- ============================== -->
+  <!-- ============================== -->
+  <!--        RETURN POPUP MODAL      -->
+  <!-- ============================== -->
 
-<div class="modal-overlay" *ngIf="isReturnPopupOpen">
-  <div class="modal-box">
-    
-    <!-- Close Button -->
-    <button class="modal-close" (click)="closeReturnPopup()">
-      <i class="fas fa-times"></i>
-    </button>
-    
-    <!-- Progress Steps (Optional) -->
-    <div class="return-progress" *ngIf="showProgressSteps">
-      <div class="progress-step active">
-        <div class="step-number">1</div>
-        <div class="step-label">Reason</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-number">2</div>
-        <div class="step-label">Resolution</div>
-      </div>
-      <div class="progress-step">
-        <div class="step-number">3</div>
-        <div class="step-label">Review</div>
-      </div>
-    </div>
-    
-    <!-- Modal Header -->
-    <h2>
-      <i class="fas fa-undo-alt"></i>
-      Return Request
-    </h2>
-    
-    <!-- Success/Error Message -->
-    <div *ngIf="returnMessage" class="alert-message" [class]="returnMessageType">
-      <i class="fas" [ngClass]="returnMessageType === 'alert-success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
-      {{ returnMessage }}
-    </div>
-    
-    <!-- Return Type Selection -->
-    <div class="return-type-indicator">
-      <button class="return-type-btn" 
-              [class.active]="returnData.returnType === 'Return'"
-              (click)="returnData.returnType = 'Return'">
-        <i class="fas fa-undo"></i> Return
+  <div class="modal-overlay" *ngIf="isReturnPopupOpen">
+    <div class="modal-box">
+
+      <!-- Close Button -->
+      <button class="modal-close" (click)="closeReturnPopup()">
+        <i class="fas fa-times"></i>
       </button>
-      <button class="return-type-btn" 
-              [class.active]="returnData.returnType === 'Exchange'"
-              (click)="returnData.returnType = 'Exchange'">
-        <i class="fas fa-exchange-alt"></i> Exchange
-      </button>
-      <button class="return-type-btn" 
-              [class.active]="returnData.returnType === 'Replace'"
-              (click)="returnData.returnType = 'Replace'">
-        <i class="fas fa-sync-alt"></i> Replace
-      </button>
-    </div>
-    
-    <form (ngSubmit)="submitReturnRequest()">
-      <!-- Product Selection -->
-      <div class="form-group">
-        <label for="productSelect" class="required">
-          <i class="fas fa-box"></i> Select Product
-        </label>
-        <select id="productSelect" 
-                [(ngModel)]="selectedProductId" 
-                name="product"
-                required
-                class="form-select">
-          <option value="" disabled>Choose a product</option>
-          <option *ngFor="let p of selectedOrderForReturn?.products" 
-                  [value]="p.productId"
-                  [disabled]="p.returnedQty >= p.quantity">
-            {{ p.productName }}
-            <span *ngIf="p.returnedQty >= p.quantity">(Already returned)</span>
-          </option>
-        </select>
-        <span class="form-note">
-          <i class="fas fa-info-circle"></i> Select the product you want to return
-        </span>
+
+      <!-- Progress Steps (Optional) -->
+      <div class="return-progress" *ngIf="showProgressSteps">
+        <div class="progress-step active">
+          <div class="step-number">1</div>
+          <div class="step-label">Reason</div>
+        </div>
+        <div class="progress-step">
+          <div class="step-number">2</div>
+          <div class="step-label">Resolution</div>
+        </div>
+        <div class="progress-step">
+          <div class="step-number">3</div>
+          <div class="step-label">Review</div>
+        </div>
       </div>
-      
-      <!-- Return Quantity -->
-      <div class="form-group">
-        <label for="returnQty" class="required">
-          <i class="fas fa-hashtag"></i> Return Quantity
-        </label>
-        <input type="number" 
-               id="returnQty" 
-               [(ngModel)]="returnQty" 
-               name="quantity"
-               min="1" 
-               [max]="getMaxReturnQuantity()"
-               required
-               class="form-control">
-        <span class="form-note">
-          <i class="fas fa-info-circle"></i> Max available: {{ getMaxReturnQuantity() }} units
-        </span>
+
+      <!-- Modal Header -->
+      <h2>
+        <i class="fas fa-undo-alt"></i>
+        Return Request
+      </h2>
+
+      <!-- Success/Error Message -->
+      <div *ngIf="returnMessage" class="alert-message" [class]="returnMessageType">
+        <i class="fas"
+          [ngClass]="returnMessageType === 'alert-success' ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+        {{ returnMessage }}
       </div>
-      
-      <!-- Return Reason -->
-      <div class="form-group">
-        <label for="returnReason" class="required">
-          <i class="fas fa-question-circle"></i> Reason for Return
-        </label>
-        <select id="returnReason" 
-                [(ngModel)]="returnData.reason" 
-                name="reason"
-                required
-                class="form-select">
-          <option value="" disabled>Select a reason</option>
-          <option>Received damaged product</option>
-          <option>Wrong item received</option>
-          <option>Item not as described</option>
-          <option>Size/fit issue</option>
-          <option>Quality issue</option>
-          <option>Changed my mind</option>
-          <option>Ordered by mistake</option>
-          <option>Other</option>
-        </select>
+
+      <!-- Return Type Selection -->
+      <div class="return-type-indicator">
+        <button class="return-type-btn" [class.active]="returnData.returnType === 'Return'"
+          (click)="returnData.returnType = 'Return'">
+          <i class="fas fa-undo"></i> Return
+        </button>
+        <button class="return-type-btn" [class.active]="returnData.returnType === 'Exchange'"
+          (click)="returnData.returnType = 'Exchange'">
+          <i class="fas fa-exchange-alt"></i> Exchange
+        </button>
+        <button class="return-type-btn" [class.active]="returnData.returnType === 'Replace'"
+          (click)="returnData.returnType = 'Replace'">
+          <i class="fas fa-sync-alt"></i> Replace
+        </button>
       </div>
-      
-      <!-- Other Reason Textarea -->
-      <div class="form-group" *ngIf="returnData.reason === 'Other'">
-        <label for="otherReason">
-          <i class="fas fa-comment-alt"></i> Please specify
-        </label>
-        <textarea id="otherReason"
-                  [(ngModel)]="returnData.otherReason"
-                  name="otherReason"
-                  placeholder="Please provide more details about your return reason..."
-                  rows="3"
-                  class="form-control">
+
+      <form (ngSubmit)="submitReturnRequest()">
+        <!-- Product Selection -->
+        <div class="form-group">
+          <label for="productSelect" class="required">
+            <i class="fas fa-box"></i> Select Product
+          </label>
+          <select id="productSelect" [(ngModel)]="selectedProductId" name="product" required class="form-select">
+            <option value="" disabled>Choose a product</option>
+            <option *ngFor="let p of selectedOrderForReturn?.products" [value]="p.productId"
+              [disabled]="p.returnedQty >= p.quantity">
+              {{ p.productName }}
+              <span *ngIf="p.returnedQty >= p.quantity">(Already returned)</span>
+            </option>
+          </select>
+          <span class="form-note">
+            <i class="fas fa-info-circle"></i> Select the product you want to return
+          </span>
+        </div>
+
+        <!-- Return Quantity -->
+        <div class="form-group">
+          <label for="returnQty" class="required">
+            <i class="fas fa-hashtag"></i> Return Quantity
+          </label>
+          <input type="number" id="returnQty" [(ngModel)]="returnQty" name="quantity" min="1"
+            [max]="getMaxReturnQuantity()" required class="form-control">
+          <span class="form-note">
+            <i class="fas fa-info-circle"></i> Max available: {{ getMaxReturnQuantity() }} units
+          </span>
+        </div>
+
+        <!-- Return Reason -->
+        <div class="form-group">
+          <label for="returnReason" class="required">
+            <i class="fas fa-question-circle"></i> Reason for Return
+          </label>
+          <select id="returnReason" [(ngModel)]="returnData.reason" name="reason" required class="form-select">
+            <option value="" disabled>Select a reason</option>
+            <option>Received damaged product</option>
+            <option>Wrong item received</option>
+            <option>Item not as described</option>
+            <option>Size/fit issue</option>
+            <option>Quality issue</option>
+            <option>Changed my mind</option>
+            <option>Ordered by mistake</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- Other Reason Textarea -->
+        <div class="form-group" *ngIf="returnData.reason === 'Other'">
+          <label for="otherReason">
+            <i class="fas fa-comment-alt"></i> Please specify
+          </label>
+          <textarea id="otherReason" [(ngModel)]="returnData.otherReason" name="otherReason"
+            placeholder="Please provide more details about your return reason..." rows="3" class="form-control">
         </textarea>
-      </div>
-      
-      <!-- Return Resolution -->
-      <div class="form-group">
-        <label for="returnResolution" class="required">
-          <i class="fas fa-check-circle"></i> Preferred Resolution
-        </label>
-        <select id="returnResolution" 
-                [(ngModel)]="returnData.resolution" 
-                name="resolution"
-                required
-                class="form-select">
-          <option value="" disabled>Select resolution</option>
-          <option value="Refund">Refund to original payment method</option>
-          <option value="Wallet">Store credit / Wallet refund</option>
-          <option value="Exchange">Exchange </option>
-          <option value="Replacement">Replacement (defective item)</option>
-        </select>
-        <span class="form-note" *ngIf="returnData.resolution === 'Refund'">
-          <i class="fas fa-clock"></i> Refunds are processed within 5-7 business days
-        </span>
-        <span class="form-note" *ngIf="returnData.resolution === 'Wallet'">
-          <i class="fas fa-wallet"></i> Store credit is added instantly to your account
-        </span>
-      </div>
-      
-      <!-- File Upload -->
-      <div class="form-group">
-        <label for="returnPhotos">
-          <i class="fas fa-camera"></i> Upload Photos (Optional)
-        </label>
-        <input type="file" 
-               id="returnPhotos" 
-               (change)="onFilesSelected($event)"
-               multiple
-               accept="image/*"
-               class="form-control">
-        <span class="form-note">
-          <i class="fas fa-info-circle"></i> Upload clear photos of the product (max 5 files)
-        </span>
-        
-        <!-- File Preview -->
-        <div class="file-preview" *ngIf="selectedFiles.length">
-          <div class="file-preview-item" *ngFor="let file of selectedFiles; let i = index">
-            <img [src]="getFilePreview(file)" alt="Preview">
-            <button class="remove-file" (click)="removeFile(i)">
-              <i class="fas fa-times"></i>
-            </button>
+        </div>
+
+        <!-- Return Resolution -->
+        <div class="form-group">
+          <label for="returnResolution" class="required">
+            <i class="fas fa-check-circle"></i> Preferred Resolution
+          </label>
+          <select id="returnResolution" [(ngModel)]="returnData.resolution" name="resolution" required
+            class="form-select">
+            <option value="" disabled>Select resolution</option>
+            <option value="Refund">Refund to original payment method</option>
+            <option value="Wallet">Store credit / Wallet refund</option>
+            <option value="Exchange">Exchange </option>
+            <option value="Replacement">Replacement (defective item)</option>
+          </select>
+          <span class="form-note" *ngIf="returnData.resolution === 'Refund'">
+            <i class="fas fa-clock"></i> Refunds are processed within 5-7 business days
+          </span>
+          <span class="form-note" *ngIf="returnData.resolution === 'Wallet'">
+            <i class="fas fa-wallet"></i> Store credit is added instantly to your account
+          </span>
+        </div>
+
+        <!-- File Upload -->
+        <div class="form-group">
+          <label for="returnPhotos">
+            <i class="fas fa-camera"></i> Upload Photos (Optional)
+          </label>
+          <input type="file" id="returnPhotos" (change)="onFilesSelected($event)" multiple accept="image/*"
+            class="form-control">
+          <span class="form-note">
+            <i class="fas fa-info-circle"></i> Upload clear photos of the product (max 5 files)
+          </span>
+
+          <!-- File Preview -->
+          <div class="file-preview" *ngIf="selectedFiles.length">
+            <div class="file-preview-item" *ngFor="let file of selectedFiles; let i = index">
+              <img [src]="getFilePreview(file)" alt="Preview">
+              <button class="remove-file" (click)="removeFile(i)">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Additional Notes -->
-      <div class="form-group">
-        <label for="additionalNotes">
-          <i class="fas fa-sticky-note"></i> Additional Notes (Optional)
-        </label>
-        <textarea id="additionalNotes"
-                  [(ngModel)]="returnData.additionalNotes"
-                  name="additionalNotes"
-                  placeholder="Any other information that might help us process your return..."
-                  rows="3"
-                  class="form-control">
-        </textarea>
-      </div>
-      
-      <!-- Terms and Conditions -->
-      <div class="form-group">
-        <div class="checkbox-group">
-          <label class="custom-checkbox">
-            <input type="checkbox" 
-                   [(ngModel)]="returnData.agreeTerms" 
-                   name="agreeTerms"
-                   required>
-            <span class="checkmark"></span>
-            <span class="label-text">
-              I agree to the return policy and understand that returns must be initiated within 7 days of delivery
-            </span>
+
+        <!-- Additional Notes -->
+        <div class="form-group">
+          <label for="additionalNotes">
+            <i class="fas fa-sticky-note"></i> Additional Notes (Optional)
           </label>
+          <textarea id="additionalNotes" [(ngModel)]="returnData.additionalNotes" name="additionalNotes"
+            placeholder="Any other information that might help us process your return..." rows="3" class="form-control">
+        </textarea>
         </div>
-      </div>
-      
-      <!-- Modal Actions -->
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeReturnPopup()">
-          <i class="fas fa-times"></i> Cancel
-        </button>
-        <button type="submit" 
-                class="btn btn-primary" 
-                [disabled]="!returnData.agreeTerms || submitting"
-                [class.loading]="submitting">
-          <i class="fas fa-paper-plane"></i>
-          {{ submitting ? 'Submitting...' : 'Submit Return Request' }}
-        </button>
-      </div>
-    </form>
+
+        <!-- Terms and Conditions -->
+        <div class="form-group">
+          <div class="checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" [(ngModel)]="returnData.agreeTerms" name="agreeTerms" required>
+              <span class="checkmark"></span>
+              <span class="label-text">
+                I agree to the return policy and understand that returns must be initiated within 7 days of delivery
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeReturnPopup()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="!returnData.agreeTerms || submitting"
+            [class.loading]="submitting">
+            <i class="fas fa-paper-plane"></i>
+            {{ submitting ? 'Submitting...' : 'Submit Return Request' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
 
 

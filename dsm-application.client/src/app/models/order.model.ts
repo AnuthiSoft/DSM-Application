@@ -4,7 +4,7 @@ export interface OrderProduct {
   price: number;
   quantity: number;
 }
- 
+
 // export interface Order {
 //  id?: string;
 //  orderId :string;
@@ -24,31 +24,32 @@ export interface DistributorOrder {
   customerPhone?: string;
   customerAddress?: string;
   products: OrderProduct[];
-  totalAmount: number;
   orderDate: string;
   status: string;
   // ✅ Add these for assigned employee
   employeeId?: string;
   name?: string;
   assignedOn?: string; // optional if you want to show assignment date
- 
+
   // ✅ Add these two fields to fix errors
   shippingAddress?: string;
   shippingFee?: number;// ✅ Payment fields
   // ✅ ADD THESE (FROM BACKEND)
   subtotal: number;
+  discount: number;
   totalDiscount: number;
- 
+  taxableAmount: number;
+  gstAmount: number;
+  totalAmount: number;
   // totalAmount: number;
- 
+
   paymentCollectedByEmployee?: boolean;
   collectedAmount?: number;
   paymentMethod?: string;
   collectedOn?: string; // ISO string
   loading?: boolean;
-    deliveryReceiptUrl?: string;
+  deliveryReceiptUrl?: string;
   deliveredOn?: Date;
-    discount?: number; // ✅ ADD THIS
 }
 // export interface OrderProduct {
 //   productId: string;
@@ -56,14 +57,14 @@ export interface DistributorOrder {
 //   price: number;
 //   quantity: number;
 // }
- 
+
 export interface Order {
 
   id: string;
   customerId: string;
   customerName: string;
   distributorId: string;
-   distributorName?: string; 
+  distributorName?: string;
   EmployeeId?: string;
   Name?: string;
   assignedOn?: Date;
@@ -84,15 +85,15 @@ export interface Order {
   paymentMethod?: string;
   collectedOn?: Date;
   deliveryRemarks?: string;
- 
- 
- 
+
+
+
   // ➕ Add this field
   // deliveryEta?: string;
- 
+
 }
 export interface Employee {
- 
+
   id?: string;           // <-- Backend usually sends this
   _id?: string;          // <-- MongoDB style ID (sometimes)
   employeeId?: string;   // <-- Use this in UI
@@ -102,4 +103,16 @@ export interface Employee {
   distributorId?: string;
   designation?: string;   // <-- Add this line
 }
- 
+
+export interface EmployeeProfileDto extends Employee {
+  phoneNumber?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+
+  profileImageUrl?: string;
+  createdDate?: string;
+  updatedDate?: string;
+}

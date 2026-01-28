@@ -878,3 +878,32 @@ textarea.form-control {
     padding: 15px 20px;
   }
 }
+
+@media (max-width: 576px) {
+
+  .card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .card-header > div {
+    width: 100%;
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+
+  /* 🔥 Bigger, thumb-friendly button */
+  .card-header .btn {
+    width: 100%;
+    min-height: 40px;          /* ✅ KEY FIX */
+    padding: 10px 10px;        /* more vertical space */
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}

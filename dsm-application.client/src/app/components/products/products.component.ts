@@ -32,16 +32,16 @@ export class ProductsComponent {
   distributorId: string | null = null;
   mainCategories: any[] = [];
   subCategories: any[] = [];
-// ===== Sorting =====
-sortBy: string = 'name';
+  // ===== Sorting =====
+  sortBy: string = 'name';
 
-// ===== Pagination =====
-currentPage = 1;
-pageSize = 8;
-totalPages = 1;
+  // ===== Pagination =====
+  currentPage = 1;
+  pageSize = 8;
+  totalPages = 1;
 
-// ===== Modal =====
-showModal = false;
+  // ===== Modal =====
+  showModal = false;
 
   // ==============================================
   // FORM & STATE
@@ -55,8 +55,8 @@ showModal = false;
   previewUrls: string[] = [];
   selectedProduct: any = null;
   selectedFiles: File[] = [];
-imageIndexMap: Record<string, number> = {};
-imageIntervals: Record<string, any> = {};
+  imageIndexMap: Record<string, number> = {};
+  imageIntervals: Record<string, any> = {};
   // ==============================================
   // FILTERS
   // ==============================================
@@ -189,31 +189,31 @@ imageIntervals: Record<string, any> = {};
       });
   }
 
-loadProducts(_: string) {
-  this.productService.getMyProducts().subscribe({
-    next: (products) => {
-      this.products = products;
-      this.filteredProducts = [...products];
+  loadProducts(_: string) {
+    this.productService.getMyProducts().subscribe({
+      next: (products) => {
+        this.products = products;
+        this.filteredProducts = [...products];
 
-      // 🔥 init slider
-      products.forEach(p => {
-        this.imageIndexMap[p.productId!] = 0;
-        this.startAutoSlide(p);
-      });
-    },
-    error: (err) => console.error(err)
+        // 🔥 init slider
+        products.forEach(p => {
+          this.imageIndexMap[p.productId!] = 0;
+          this.startAutoSlide(p);
+        });
+      },
+      error: (err) => console.error(err)
 
-  });
-}
-startAutoSlide(product: any) {
-  if (!product.imageUrls || product.imageUrls.length <= 1) return;
+    });
+  }
+  startAutoSlide(product: any) {
+    if (!product.imageUrls || product.imageUrls.length <= 1) return;
 
-  this.imageIntervals[product.productId] = setInterval(() => {
-    const current = this.imageIndexMap[product.productId] || 0;
-    this.imageIndexMap[product.productId] =
-      (current + 1) % product.imageUrls.length;
-  }, 3000); // ⏱ 3 sec
-}
+    this.imageIntervals[product.productId] = setInterval(() => {
+      const current = this.imageIndexMap[product.productId] || 0;
+      this.imageIndexMap[product.productId] =
+        (current + 1) % product.imageUrls.length;
+    }, 3000); // ⏱ 3 sec
+  }
 
 
   loadMeasures() {
@@ -332,85 +332,91 @@ startAutoSlide(product: any) {
   //   });
   // }
 
-submitForm() {
-  this.formSubmitted = true;
-  this.productForm.markAllAsTouched();
+  submitForm() {
+    this.formSubmitted = true;
+    this.productForm.markAllAsTouched();
 
-  if (this.productForm.invalid) {
-    this.toastr.error('Please fill all required fields');
-    return;
-  }
+    if (this.productForm.invalid) {
+      this.toastr.error('Please fill all required fields');
+      return;
+    }
 
-  const data = this.productForm.getRawValue();
-  const distributorId = this.distributorId!;
-  const formData = new FormData();
+    const data = this.productForm.getRawValue();
+    const distributorId = this.distributorId!;
+    const formData = new FormData();
 
-  // ---------- COMMON FIELDS ----------
-  formData.append('productName', data.productName);
-  formData.append('productCode', data.productCode);
-  formData.append('color', data.color);
-  formData.append('description', data.description);
-  formData.append('measure', data.measure);
-  formData.append('price', data.price.toString());
-  formData.append('costPrice', data.costPrice.toString());
-  formData.append('discount', data.discount.toString());
-  formData.append('brand', data.brand);
+    // ---------- COMMON FIELDS ----------
+    formData.append('productName', data.productName);
+    formData.append('productCode', data.productCode);
+    formData.append('color', data.color);
+    formData.append('description', data.description);
+    formData.append('measure', data.measure);
+    formData.append('price', data.price.toString());
+    formData.append('costPrice', data.costPrice.toString());
+    formData.append('discount', data.discount.toString());
+    formData.append('brand', data.brand);
 
-  // ✅ REQUIRED BY BACKEND
-  formData.append('CategoryId', data.category);
-  formData.append('Category', data.category);
-  formData.append('DistributorId', distributorId);
+    // ✅ REQUIRED BY BACKEND
+    formData.append('CategoryId', data.category);
+    formData.append('Category', data.category);
+    formData.append('DistributorId', distributorId);
 
-  // ---------- NEW IMAGES ----------
-  for (let file of this.selectedFiles) {
-    formData.append('Images', file);
-  }
+    // ---------- NEW IMAGES ----------
+    for (let file of this.selectedFiles) {
+      formData.append('Images', file);
+    }
 
-  // ---------- KEEP OLD IMAGES ----------
-  for (let img of this.existingImageUrls) {
-    formData.append('ExistingImages', img);
-  }
+    // ---------- KEEP OLD IMAGES ----------
+    for (let img of this.existingImageUrls) {
+      formData.append('ExistingImages', img);
+    }
 
-  // =====================================
-  // 🔥 EDIT MODE (STOP HERE)
-  // =====================================
-  if (this.isEdit && this.selectedProductId) {
-    this.productService.update(this.selectedProductId, formData).subscribe({
-      next: () => {
-        this.toastr.success('Product updated successfully');
-        this.loadProducts(distributorId);
+    // =====================================
+    // 🔥 EDIT MODE (STOP HERE)
+    // =====================================
+    if (this.isEdit && this.selectedProductId) {
+      this.productService.update(this.selectedProductId, formData).subscribe({
+        next: () => {
+          this.toastr.success('Product updated successfully');
+          this.loadProducts(distributorId);
+          this.closeModal();
+          this.resetForm();
+        },
+        error: () => this.toastr.error('Update failed')
+      });
+      return; // 🚨 THIS LINE IS MANDATORY
+    }
+
+    // =====================================
+    // 🔥 CREATE MODE
+    // =====================================
+    const initialStock = Number(data.stock || 0);
+
+    this.productService.create(formData).subscribe({
+      next: (created) => {
+        if (initialStock > 0) {
+          this.inventoryService.stockIn({
+            productId: created.productId,
+            distributorId,
+            quantity: initialStock,
+            reason: 'Initial stock'
+          }).subscribe({
+            next: () => {
+              this.loadProducts(distributorId); // ✅ NOW correct
+            }
+          });
+        } else {
+          // No stock → just reload
+          this.loadProducts(distributorId);
+        }
+
+        this.toastr.success('Product created successfully');
         this.closeModal();
         this.resetForm();
       },
-      error: () => this.toastr.error('Update failed')
+      error: () => this.toastr.error('Failed to save product')
     });
-    return; // 🚨 THIS LINE IS MANDATORY
   }
-
-  // =====================================
-  // 🔥 CREATE MODE
-  // =====================================
-  const initialStock = Number(data.stock || 0);
-
-  this.productService.create(formData).subscribe({
-    next: (created) => {
-      if (initialStock > 0) {
-        this.inventoryService.stockIn({
-          productId: created.productId,
-          distributorId,
-          quantity: initialStock,
-          reason: 'Initial stock'
-        }).subscribe();
-      }
-
-      this.toastr.success('Product created successfully');
-      this.loadProducts(distributorId);
-      this.closeModal();
-      this.resetForm();
-    },
-    error: () => this.toastr.error('Failed to save product')
-  });
-}
 
 
   editProduct(product: Product) {
@@ -690,29 +696,29 @@ submitForm() {
   // ==============================================
   // MODAL HANDLING
   // ==============================================
- openModal() {
-  this.formSubmitted = false;
-  this.isEdit = false;
-  this.selectedProductId = null;
-  this.selectedProduct = null;
+  openModal() {
+    this.formSubmitted = false;
+    this.isEdit = false;
+    this.selectedProductId = null;
+    this.selectedProduct = null;
 
-  this.selectedFiles = [];
-  this.existingImageUrls = [];
-  this.previewUrls = [];
+    this.selectedFiles = [];
+    this.existingImageUrls = [];
+    this.previewUrls = [];
 
-  this.productForm.reset({
-    discount: 0,
-    stock: 0,
-    gst: 0
-  });
+    this.productForm.reset({
+      discount: 0,
+      stock: 0,
+      gst: 0
+    });
 
-  // ✅ THIS IS THE KEY
-  this.showModal = true;
-}
+    // ✅ THIS IS THE KEY
+    this.showModal = true;
+  }
 
   closeModal() {
-  this.showModal = false;
-}
+    this.showModal = false;
+  }
   getFullImageUrl(img: string) {
     if (!img) return 'assets/no-image.png';
 
@@ -789,117 +795,117 @@ submitForm() {
     );
   }
 
-clearSearch() {
-  this.searchTerm = '';
-  this.filteredProducts = [...this.products];
-}
+  clearSearch() {
+    this.searchTerm = '';
+    this.filteredProducts = [...this.products];
+  }
 
-hasActiveFilters(): boolean {
-  return !!(
-    this.searchTerm ||
-    this.categoryFilter ||
-    this.stockFilter ||
-    this.color ||
-    this.minPriceFilter ||
-    this.maxPriceFilter
-  );
-}
-
-clearCategoryFilter() {
-  this.categoryFilter = '';
-  this.filteredProducts = [...this.products];
-}
-
-clearStockFilter() {
-  this.stockFilter = '';
-  this.filteredProducts = [...this.products];
-}
-
-clearAllFilters() {
-  this.searchTerm = '';
-  this.categoryFilter = '';
-  this.stockFilter = '';
-  this.color = '';
-  this.minPriceFilter = undefined;
-  this.maxPriceFilter = undefined;
-  this.filteredProducts = [...this.products];
-}
-
-getStockFilterLabel(filter: string) {
-  if (filter === 'inStock') return 'In Stock';
-  if (filter === 'lowStock') return 'Low Stock';
-  if (filter === 'outOfStock') return 'Out of Stock';
-  return 'All';
-}
-
-applySort() {
-  if (this.sortBy === 'name') {
-    this.filteredProducts.sort((a, b) =>
-      a.productName.localeCompare(b.productName)
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.categoryFilter ||
+      this.stockFilter ||
+      this.color ||
+      this.minPriceFilter ||
+      this.maxPriceFilter
     );
   }
 
-  if (this.sortBy === 'priceLow') {
-    this.filteredProducts.sort((a, b) => a.price - b.price);
+  clearCategoryFilter() {
+    this.categoryFilter = '';
+    this.filteredProducts = [...this.products];
   }
 
-  if (this.sortBy === 'priceHigh') {
-    this.filteredProducts.sort((a, b) => b.price - a.price);
+  clearStockFilter() {
+    this.stockFilter = '';
+    this.filteredProducts = [...this.products];
   }
 
-  if (this.sortBy === 'stock') {
-    this.filteredProducts.sort(
-      (a, b) => (b.currentStock || 0) - (a.currentStock || 0)
+  clearAllFilters() {
+    this.searchTerm = '';
+    this.categoryFilter = '';
+    this.stockFilter = '';
+    this.color = '';
+    this.minPriceFilter = undefined;
+    this.maxPriceFilter = undefined;
+    this.filteredProducts = [...this.products];
+  }
+
+  getStockFilterLabel(filter: string) {
+    if (filter === 'inStock') return 'In Stock';
+    if (filter === 'lowStock') return 'Low Stock';
+    if (filter === 'outOfStock') return 'Out of Stock';
+    return 'All';
+  }
+
+  applySort() {
+    if (this.sortBy === 'name') {
+      this.filteredProducts.sort((a, b) =>
+        a.productName.localeCompare(b.productName)
+      );
+    }
+
+    if (this.sortBy === 'priceLow') {
+      this.filteredProducts.sort((a, b) => a.price - b.price);
+    }
+
+    if (this.sortBy === 'priceHigh') {
+      this.filteredProducts.sort((a, b) => b.price - a.price);
+    }
+
+    if (this.sortBy === 'stock') {
+      this.filteredProducts.sort(
+        (a, b) => (b.currentStock || 0) - (a.currentStock || 0)
+      );
+    }
+  }
+  getInStockCount() {
+    return this.products.filter(p => p.currentStock > 10).length;
+  }
+
+  getLowStockCount() {
+    return this.products.filter(p => p.currentStock > 0 && p.currentStock <= 10).length;
+  }
+
+  getTotalStockValue() {
+    return this.products.reduce(
+      (sum, p) => sum + (p.currentStock || 0) * p.price,
+      0
     );
   }
-}
-getInStockCount() {
-  return this.products.filter(p => p.currentStock > 10).length;
-}
-
-getLowStockCount() {
-  return this.products.filter(p => p.currentStock > 0 && p.currentStock <= 10).length;
-}
-
-getTotalStockValue() {
-  return this.products.reduce(
-    (sum, p) => sum + (p.currentStock || 0) * p.price,
-    0
-  );
-}
-getStockPercentage(current: number, max = 100): number {
-  if (!current || current <= 0) return 0;
-  return Math.min(100, (current / max) * 100);
-}
-updatePagination() {
-  this.totalPages = Math.ceil(this.filteredProducts.length / this.pageSize);
-  if (this.currentPage > this.totalPages) {
-    this.currentPage = 1;
+  getStockPercentage(current: number, max = 100): number {
+    if (!current || current <= 0) return 0;
+    return Math.min(100, (current / max) * 100);
   }
-}
+  updatePagination() {
+    this.totalPages = Math.ceil(this.filteredProducts.length / this.pageSize);
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
+    }
+  }
 
-getPageNumbers(): number[] {
-  return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-}
+  getPageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
 
-goToPage(page: number) {
-  this.currentPage = page;
-}
+  goToPage(page: number) {
+    this.currentPage = page;
+  }
 
-prevPage() {
-  if (this.currentPage > 1) this.currentPage--;
-}
+  prevPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
 
-nextPage() {
-  if (this.currentPage < this.totalPages) this.currentPage++;
-}
-removePreview(img: string) {
-  this.previewUrls = this.previewUrls.filter(i => i !== img);
-}
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+  removePreview(img: string) {
+    this.previewUrls = this.previewUrls.filter(i => i !== img);
+  }
 
-removeExistingImage(img: string) {
-  this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
-}
+  removeExistingImage(img: string) {
+    this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
+  }
 
 }
 

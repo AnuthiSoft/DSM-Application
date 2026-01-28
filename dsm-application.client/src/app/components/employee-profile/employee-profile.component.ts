@@ -13,6 +13,10 @@ export class EmployeeProfileComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
 
   profile: any = {};
+  showOtpInput = false;
+  otp = '';
+ isVerifyingOtp = false;
+ receivedOtp: string | null = null;
   selectedImage: File | null = null;
   profileImageUrl: string = '';
 
@@ -64,8 +68,10 @@ loadProfile() {
         name: res.name,
         email: res.email,
         phoneNumber: res.phoneNumber,
+        phoneVerified: res.phoneVerified,
         street: res.street,
         city: res.city,
+        
         state: res.state,
         pincode: res.pincode,
         country: res.country,
@@ -76,8 +82,67 @@ loadProfile() {
     }
   });
 }
+originalPhoneNumber: string | null = null;
+sendOtp() {
+  if (!this.profile.phoneNumber) {
+    this.toastr.error('Enter phone number first');
+    return;
+  }
+
+  const phone = '+91' + this.profile.phoneNumber;
+
+  this.employeeService.sendOtp(phone).subscribe({
+    next: (res: any) => {
+      this.showOtpInput = true;
+
+      // ✅ SAME AS CUSTOMER (DEV ONLY POPUP)
+      alert(`OTP sent! Your OTP is: ${res.otp}`);
+
+      this.toastr.success('OTP sent');
+    },
+    error: () => {
+      this.toastr.error('Failed to send OTP');
+    }
+  });
+}
 
 
+verifyOtp() {
+  if (!this.otp) {
+    this.toastr.error('Enter OTP');
+    return;
+  }
+
+  const phone = '+91' + this.profile.phoneNumber;
+
+  this.isVerifyingOtp = true;
+
+  this.employeeService.verifyOtp(phone, this.otp).subscribe({
+    next: () => {
+      // ✅ IMPORTANT: update UI immediately
+      this.profile.phoneVerified = true;
+
+      this.showOtpInput = false;
+      this.otp = '';
+
+      this.toastr.success('Phone number verified');
+
+      this.isVerifyingOtp = false;
+    },
+    error: () => {
+      this.toastr.error('Invalid OTP');
+      this.isVerifyingOtp = false;
+    }
+  });
+}
+
+onPhoneChange() {
+  if (this.profile.phoneNumber !== this.originalPhoneNumber) {
+    this.profile.phoneVerified = false;
+    this.showOtpInput = false;
+    this.otp = '';
+  }
+}
 
 
 
@@ -185,6 +250,9 @@ updateProfile() {
         this.toastr.error('Image upload failed', 'Error');
       }
     });
+    
   }
+
+  
 }
 

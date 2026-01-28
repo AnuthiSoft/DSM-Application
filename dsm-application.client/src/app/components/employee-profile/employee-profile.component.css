@@ -33,7 +33,7 @@
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
 }
 
-* {
+.profile-container * {
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
@@ -41,8 +41,10 @@
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
-  padding: 20px;
   min-height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
 .title {
@@ -61,6 +63,7 @@
   max-width: 900px;
   margin: 0 auto;
 }
+
 
 .profile-header {
   display: flex;
@@ -269,10 +272,7 @@ textarea.ng-invalid.ng-touched {
     padding: 15px;
   }
   
-  .profile-card {
-    padding: 20px;
-  }
-  
+
   .profile-header {
     flex-direction: column;
     text-align: center;
@@ -309,44 +309,54 @@ textarea.ng-invalid.ng-touched {
   }
 }
 
-.profile-page {
+
+
+.profile-content {
   display: grid;
-  grid-template-columns: 2.5fr 1fr;
+  grid-template-columns: 2fr 2.2fr; /* 👈 THIS IS THE KEY */
   gap: 24px;
-  align-items: start;
+  align-items: flex-start;
 }
 
-/* Left side */
+
+/* LEFT */
 .profile-main {
   width: 100%;
 }
 
-/* Right side */
+/* RIGHT */
 .profile-side {
   position: sticky;
-  top: 20px;
+  top: 24px;
 }
 
-.info-card {
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 20px;
-}
 
-/* Mobile */
-@media (max-width: 992px) {
-  .profile-page {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 980px) {
   .profile-side {
     position: static;
   }
 }
 
-.profile-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-  align-items: flex-start; /* 🔥 IMPORTANT */
+
+
+.profile-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 30px;
+  border: 1px solid var(--border-color);
+  width: 100%;
 }
+
+.info-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  width: 100%;
+}
+
+
+
+

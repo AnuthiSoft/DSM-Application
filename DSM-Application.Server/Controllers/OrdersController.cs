@@ -89,7 +89,7 @@ namespace DSM_Application.Server.Controllers
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
             if (dto == null || dto.Products == null || dto.Products.Count == 0)
-                return BadRequest("No products provided");
+                return BadRequest(new { message = "No products provided" });
 
             var distributorId = dto.DistributorId;
 
@@ -101,25 +101,29 @@ namespace DSM_Application.Server.Controllers
             decimal totalFinalAmount = 0;
             decimal totalGst = 0;
 
-            var orderProducts = new List<OrderProduct>();
+                var orderProducts = new List<OrderProduct>();
 
-            int leadTime = 1;
-            bool leadTimeCaptured = false;
+                int leadTime = 1;
+                bool leadTimeCaptured = false;
 
-            foreach (var p in dto.Products)
-            {
-                var product = await _products
-                    .Find(x => x.ProductId == p.ProductId)
-                    .FirstOrDefaultAsync();
-
-                if (product == null)
-                    return NotFound("Product not found");
-
-                if (!leadTimeCaptured)
+                foreach (var p in dto.Products)
                 {
-                    leadTime = product.LeadTimeDays ?? 1;
-                    leadTimeCaptured = true;
-                }
+                    var product = await _products
+                        .Find(x => x.ProductId == p.ProductId)
+                        .FirstOrDefaultAsync();
+
+                    if (product == null)
+                        return BadRequest(new
+                        {
+                            message = "Product not found",
+                            productId = p.ProductId
+                        });
+
+                    if (!leadTimeCaptured)
+                    {
+                        leadTime = product.LeadTimeDays ?? 1;
+                        leadTimeCaptured = true;
+                    }
 
                 decimal unitPrice = product.Price;
                 decimal subtotal = unitPrice * p.Quantity;
@@ -128,82 +132,68 @@ namespace DSM_Application.Server.Controllers
                 // ✅ FIX 1: NULL-SAFE general discount
                 decimal generalDiscountPercent = product.Discount;
 
-                // 🔹 EXISTING discount service (UNCHANGED)
-                var calc = _discountService.Calculate(
-                    p.Quantity,
-                    subtotal,
-                    dto.SpecialDiscountPercent
-                );
+                    var calc = _discountService.Calculate(
+                        p.Quantity,
+                        subtotal,
+                        dto.SpecialDiscountPercent
+                    );
 
-                // 🔹 General discount from PRODUCT
-                decimal generalDiscountAmount =
-                    (subtotal * generalDiscountPercent) / 100m;
+                    decimal generalDiscountAmount =
+                        (subtotal * generalDiscountPercent) / 100m;
 
-                // 🔹 TOTAL discount (existing + general)
-                decimal totalDiscountForItem =
-                    calc.discountAmount + generalDiscountAmount;
+                    decimal totalDiscountForItem =
+                        calc.discountAmount + generalDiscountAmount;
 
-                // 🔹 TAXABLE AMOUNT
-                decimal taxableAmount =
-                    subtotal - totalDiscountForItem;
+                    decimal taxableAmount =
+                        subtotal - totalDiscountForItem;
 
-                // ✅ FIX 2: NULL-SAFE GST
-                // ✅ GST FROM HSN TABLE
-                var category = await _mongo.Categories
-       .Find(c => c.CategoryId == product.Category)
-       .FirstOrDefaultAsync();
-                if (category == null)
-                    return BadRequest("Category not found for product");
+                    var category = await _mongo.Categories
+                        .Find(c => c.CategoryId == product.Category)
+                        .FirstOrDefaultAsync();
 
-                // ===============================
-                // ✅ FETCH HSN USING CATEGORY
-                // ===============================
-                var hsn = await _mongo.HsnCodes
-                    .Find(h => h.HsnCode == category.HsnCode)
-                    .FirstOrDefaultAsync();
+                    if (category == null)
+                        return BadRequest(new
+                        {
+                            message = "Category not found",
+                            productId = product.ProductId
+                        });
 
+                    var hsn = await _mongo.HsnCodes
+                        .Find(h => h.HsnCode == category.HsnCode)
+                        .FirstOrDefaultAsync();
 
+                    decimal gstPercent = hsn?.Gst ?? 0m;
+                    decimal gstAmount = (taxableAmount * gstPercent) / 100m;
 
-                decimal gstPercent = hsn?.Gst ?? 0m;
-                decimal gstAmount =
-                    (taxableAmount * gstPercent) / 100m;
+                    decimal finalPrice = taxableAmount + gstAmount;
 
-                // 🔹 FINAL PRICE
-                decimal finalPrice =
-                    taxableAmount + gstAmount;
+                    orderProducts.Add(new OrderProduct
+                    {
+                        ProductId = p.ProductId,
+                        ProductName = product.ProductName,
+                        DistributorId = product.DistributorId,
+                        Price = unitPrice,
+                        Quantity = p.Quantity,
 
+                        QuantityDiscountPercent = calc.qtyPct,
+                        PriceDiscountPercent = calc.pricePct,
+                        SpecialDiscountPercent = dto.SpecialDiscountPercent,
 
-                orderProducts.Add(new OrderProduct
-                {
-                    ProductId = p.ProductId,
-                    ProductName = product.ProductName,
-                    DistributorId = product.DistributorId,
-                    Price = unitPrice,
-                    Quantity = p.Quantity,
+                        GeneralDiscount = generalDiscountAmount,
+                        TotalDiscountPercent = calc.totalPercent + generalDiscountPercent,
 
-                    QuantityDiscountPercent = calc.qtyPct,
-                    PriceDiscountPercent = calc.pricePct,
-                    SpecialDiscountPercent = dto.SpecialDiscountPercent,
+                        DiscountAmount = totalDiscountForItem,
+                        FinalPrice = finalPrice,
 
-                    // 🔹 INCLUDE GENERAL DISCOUNT
-                    GeneralDiscount = generalDiscountAmount,
+                        GstPercentage = gstPercent,
+                        GstAmount = gstAmount
+                    });
 
-                    TotalDiscountPercent =
-                        calc.totalPercent + generalDiscountPercent,
-
-                    DiscountAmount = totalDiscountForItem,
-
-                    FinalPrice = finalPrice,
-
-                    GstPercentage = gstPercent,
-                    GstAmount = gstAmount
-                });
-
-                totalSubtotal += subtotal;
-                totalDiscountAmount += totalDiscountForItem;
-                totalGst += gstAmount;
-                totalFinalAmount += finalPrice;
-            }
+                    totalSubtotal += subtotal;
+                    totalDiscountAmount += totalDiscountForItem;
+                    totalGst += gstAmount;
+                    totalFinalAmount += finalPrice;
+                }
 
             // -----------------------------------------------------
             // EMPLOYEE ASSIGNMENT (UNCHANGED)
@@ -243,40 +233,45 @@ namespace DSM_Application.Server.Controllers
                 OrderedDate = DateTime.UtcNow,
                 ExpectedDeliveryDate = expectedDelivery,
 
-                Products = orderProducts,
-                Subtotal = totalSubtotal,
-                TotalDiscount = totalDiscountAmount,
-                TotalAmount = totalFinalAmount,
+                    Products = orderProducts,
+                    Subtotal = totalSubtotal,
+                    TotalDiscount = totalDiscountAmount,
+                    TotalAmount = totalFinalAmount,
 
-                OrderDate = DateTime.UtcNow,
-                Status = "Pending",
+                    OrderDate = DateTime.UtcNow,
+                    Status = "Pending",
+                    RemainingAmount = totalFinalAmount,
+                    TotalGst = totalGst
+                };
 
-                EmployeeId = assignedEmployeeId,
-                RemainingAmount = totalFinalAmount,
-                TotalGst = totalGst
-            };
-            foreach (var item in orderProducts)
-            {
-                var success = await _inventoryService.RemoveStockAsync(
-                    item.ProductId,
-                    dto.DistributorId,
-                    item.Quantity,
-                    "ORDER_PLACED"
-                );
-
-                if (!success)
+                //  STOCK DEDUCTION (SAFE)
+                foreach (var item in orderProducts)
                 {
-                    return BadRequest(new
-                    {
-                        message = $"Insufficient stock for product {item.ProductId}"
-                    });
+                    await _inventoryService.RemoveStockAsync(
+                        item.ProductId,
+                        dto.DistributorId,
+                        item.Quantity,
+                        "ORDER_PLACED"
+                    );
                 }
+
+                await _orders.InsertOneAsync(order);
+
+                return Ok(new
+                {
+                    message = "Order placed successfully",
+                    orderId = order.Id
+                });
             }
-
-            await _orders.InsertOneAsync(order);
-
-            return Ok(new { message = "Order placed successfully", orderId = order.Id });
-        }
+        //    catch (Exception ex)
+        //    {
+        //        // 🔥 THIS IS THE KEY FIX
+        //        return BadRequest(new);
+        //        {
+        //            message = ex.Message
+        //        });
+        //    }
+        //}
 
 
 
@@ -500,6 +495,8 @@ namespace DSM_Application.Server.Controllers
                     subtotal = order.Subtotal,
                     discount = order.TotalDiscount,
                     payableAmount = order.TotalAmount,
+                     // ✅ ADD
+                    gstAmount = order.TotalGst,
                     totalAmount = order.TotalAmount,
                     status = order.Status,
                     paymentCollectedByEmployee = order.PaymentCollectedByEmployee,
@@ -876,11 +873,11 @@ namespace DSM_Application.Server.Controllers
             if (existingOrder == null)
                 return NotFound("Order not found");
 
-            if (existingOrder.CustomerId != customerId)
-                return Forbid("Not authorized to reorder this order");
+        //    if (existingOrder.CustomerId != customerId)
+        //        return Forbid("Not authorized to reorder this order");
 
-            if (existingOrder.Status != "Delivered")
-                return BadRequest($"Only delivered orders can be reordered. Current status: '{existingOrder.Status}'");
+        //    if (existingOrder.Status != "Delivered")
+        //        return BadRequest($"Only delivered orders can be reordered. Current status: '{existingOrder.Status}'");
 
             // 🔹 Set expected delivery date
             DateTime deliveryDate = expectedDelivery ?? DateTime.UtcNow.AddDays(1);
@@ -962,6 +959,7 @@ namespace DSM_Application.Server.Controllers
 
             await _mongo.Orders.InsertOneAsync(newOrder);
 
+           
             return Ok(new
             {
                 message = "Order placed successfully",
@@ -971,6 +969,24 @@ namespace DSM_Application.Server.Controllers
                 discount = newOrder.TotalDiscount,
                 finalAmount = newOrder.TotalAmount
             });
+        }
+
+        [Authorize(Roles = "Customer")]
+        [HttpGet("customer/cart")]
+        public async Task<IActionResult> GetCart()
+        {
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized();
+
+            var cart = await _mongo.Carts
+                .Find(c => c.CustomerId == customerId)
+                .FirstOrDefaultAsync();
+
+            if (cart == null)
+                return Ok(new { items = new List<CartItem>() });
+
+            return Ok(cart);
         }
 
         [HttpGet("delivered-for-cashier/{distributorId}")]
@@ -1285,6 +1301,32 @@ namespace DSM_Application.Server.Controllers
                 return NotFound();
 
             return File(data, "image/jpeg");
+        }
+        [Authorize(Roles = "Customer")]
+        [HttpGet("customer/{customerId}/last-quantities")]
+        public async Task<IActionResult> GetLastBoughtQuantities(string customerId)
+        {
+            var customerIdFromToken = User.FindFirst("CustomerId")?.Value;
+            if (customerIdFromToken != customerId)
+                return Unauthorized();
+
+            var orders = await _mongo.Orders
+                .Find(o => o.CustomerId == customerId)
+                .SortByDescending(o => o.OrderDate)
+                .ToListAsync();
+            var result = orders
+                .SelectMany(o => o.Products.Select(p => new {
+                    p.ProductId,
+                    p.Quantity,
+                    OrderDate = o.OrderDate
+                }))
+                .GroupBy(x => x.ProductId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(x => x.OrderDate).First().Quantity
+                );
+
+            return Ok(result); // { productId : lastQuantity }
         }
 
     }

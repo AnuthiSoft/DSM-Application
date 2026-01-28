@@ -121,7 +121,7 @@ showCustomerPopup = false;
     private productService: ProductService,
     private orderService: OrderService,
     private router: Router,
-    private customerService: CustomerService,  // 👈 ADD THIS
+    private customerService: CustomerService,  //  ADD THIS
     private http: HttpClient,
     private distributorService: DistributorService,
     private customerApiService: CustomerApiService,
@@ -165,7 +165,7 @@ showCustomerPopup = false;
         this.loadProducts();
 
         // Load THIS distributor’s saved cart
-        this.restoreProductTable();
+        // this.restoreProductTable();
 
         // Recompute expected date
         this.computeExpectedDateForDistributor(this.distributorId);
@@ -199,6 +199,7 @@ showCustomerPopup = false;
     if (this.customerId) {
       this.loadCustomerName(this.customerId);
       this.loadCustomerEmail(this.customerId);
+      this.loadCartFromBackend();
 
     }
 
@@ -943,6 +944,37 @@ connectDistributorFromCart(distributorId: string) {
 //   closeCustomerPopup(): void {
 //   this.showCustomerDropdown = false;
 // }
+
+
+
+loadCartFromBackend(): void {
+  this.orderService.getCart().subscribe({
+    next: (cart: any) => {
+      console.log('✅ DB CART LOADED:', cart);
+
+      if (!cart || !cart.items || cart.items.length === 0) return;
+
+      this.orderProducts = cart.items.map((i: any) => ({
+        product: {
+          productId: i.productId,
+          productName: i.productName,
+          price: i.price,
+          distributorId: cart.distributorId
+        },
+        quantity: i.quantity
+      }));
+
+      this.cart = [...this.orderProducts];
+
+      const key = `${this.CART_KEY}_${cart.distributorId}`;
+      localStorage.setItem(key, JSON.stringify(this.orderProducts));
+      localStorage.setItem('cart', JSON.stringify(this.cart));
+    },
+    error: err => {
+      console.error('FAILED TO LOAD CART FROM DB', err);
+    }
+  });
+}
 
 
 

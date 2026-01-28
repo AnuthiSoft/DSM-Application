@@ -75,6 +75,10 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<InvoiceUpload> InvoiceUploads =>
             _db.GetCollection<InvoiceUpload>("InvoiceUploads");
 
+
+        public IMongoCollection<Cart> Carts =>
+    _db.GetCollection<Cart>("Carts");
+
     }
 
     public class MongoDbSettings

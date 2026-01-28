@@ -156,7 +156,7 @@ namespace DSM_Application.Server.Controllers
                 Address = dto.Address,
                 Role = "Customer",
                 AddedByDistributorId = distributorId,
-                PasswordHash = ComputeHash(dto.Password),
+      
                 IsRegistered = true,
                 MustChangePassword = true
             };
@@ -716,6 +716,8 @@ namespace DSM_Application.Server.Controllers
                 Name = customer.Name,
                 Email = customer.Email,
                 PhoneNumber = customer.PhoneNumber,
+                PhoneVerified = customer.PhoneVerified,
+
                 ProfileImageUrl = customer.ProfileImageUrl,
                 Street = customer.Street,
                 City = customer.City,
@@ -725,10 +727,15 @@ namespace DSM_Application.Server.Controllers
                 Role = customer.Role,
                 IsRegistered = customer.IsRegistered,
                 AddedByDistributorId = customer.AddedByDistributorId
+
             };
 
             return Ok(dto);
         }
+
+
+       
+
 
         //[HttpGet("profile")]
         //public async Task<ActionResult<Customer>> GetProfile()
@@ -761,11 +768,21 @@ namespace DSM_Application.Server.Controllers
             if (customer == null)
                 return NotFound("Customer not found");
 
+            if (
+             dto.PhoneNumber != null &&
+             dto.PhoneNumber != customer.PhoneNumber &&
+             customer.PhoneVerified == false
+)
+            {
+                return BadRequest("Please verify phone number before saving");
+            }
+
+
 
             // Update fields
             customer.Name = dto.Name ?? customer.Name;
             customer.Email = dto.Email ?? customer.Email;  // ✅ ADD THIS
-            customer.PhoneNumber = dto.PhoneNumber ?? customer.PhoneNumber;
+            //customer.PhoneNumber = dto.PhoneNumber ?? customer.PhoneNumber;
             customer.Street = dto.Street ?? customer.Street;
             customer.City = dto.City ?? customer.City;
             customer.State = dto.State ?? customer.State;

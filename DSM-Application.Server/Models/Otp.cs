@@ -14,5 +14,6 @@ namespace DSM_Application.Server.Models
         public string Code { get; set; }
 
         public DateTime ExpiresAt { get; set; }
+        public string CustomerId { get; set; }
     }
 }

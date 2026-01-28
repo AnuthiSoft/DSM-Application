@@ -19,6 +19,7 @@ export interface Employee {
   country?: string;
   profileImageUrl?: string;
   invoicePdfUrl?: string;
+   phoneVerified: boolean;
 }
  
 
@@ -188,4 +189,17 @@ checkPhoneExists(phone: string): Observable<boolean> {
   );
 }
 
+sendOtp(phoneNumber: string): Observable<any> {
+  return this.http.post(
+    `${this.apiUrl}/otp/send`,
+    { phoneNumber }
+  );
+}
+
+verifyOtp(phoneNumber: string, code: string): Observable<any> {
+  return this.http.post(
+    `${this.apiUrl}/otp/verify`,
+    { phoneNumber, code }
+  );
+}
 }

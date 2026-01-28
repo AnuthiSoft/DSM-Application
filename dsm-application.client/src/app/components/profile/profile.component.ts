@@ -206,6 +206,7 @@ import { environment } from '../../../environments/environment';
 @Component({
 
   selector: 'app-profile',
+   
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
@@ -218,12 +219,16 @@ export class ProfileComponent implements OnInit {
 
   previewImage: string | null = null;
   selectedFile: File | null = null;
-
+  phoneChanged = false;
+  showOtpInput = false;
+  otp = '';
+  isVerifyingOtp = false;
   isSaving = false;
   isLoading = false;
   errorMessage = '';
   emailExists = false;
   phoneExists = false;
+  receivedOtp: string | null = null;
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
 
@@ -375,7 +380,65 @@ export class ProfileComponent implements OnInit {
 
     event.target.value = value;
     this.customer.phoneNumber = value;
+
+    // 🔥 detect phone change
+    this.phoneChanged =
+      ('+91' + value) !== this.originalCustomer.phoneNumber;
+
+    // If phone changed, mark unverified
+    if (this.phoneChanged) {
+      this.customer.phoneVerified = false;
+    }
   }
+
+  sendOtp() {
+  if (!this.customer.phoneNumber) {
+    alert('Enter phone number first');
+    return;
+  }
+
+  this.customerService
+    .sendOtp('+91' + this.customer.phoneNumber)
+    .subscribe({
+      next: (res: any) => {
+        // 🔥 THIS CREATES THE SAME POPUP YOU SHOWED
+        alert(`OTP sent! Your OTP is: ${res.otp}`);
+
+        this.showOtpInput = true;
+      },
+      error: () => {
+        alert('Failed to send OTP');
+      }
+    });
+}
+
+
+
+  verifyOtp() {
+  if (!this.otp || this.otp.trim() === '') {
+    this.toastr.error('Enter OTP');
+    return;
+  }
+
+  this.profileService.verifyOtp({
+    phoneNumber: '+91' + this.customer.phoneNumber,
+    code: this.otp.trim()
+  }).subscribe({
+    next: () => {
+      this.customer.phoneVerified = true; // 🔥 THIS HIDES SEND OTP
+      this.showOtpInput = false;
+      this.otp = '';
+      this.toastr.success('Phone number verified');
+    },
+    error: () => {
+      this.toastr.error('Invalid OTP');
+    }
+  });
+}
+
+
+
+
 
   checkPhoneExists() {
     if (!this.customer.phoneNumber) return;

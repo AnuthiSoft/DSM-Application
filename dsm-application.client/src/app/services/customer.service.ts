@@ -217,6 +217,31 @@ checkPhoneExists(phoneNumber: string): Observable<boolean> {
     });
   }
 
+  // ================= OTP =================
+
+sendOtp(phoneNumber: string): Observable<any> {
+  const token = localStorage.getItem('token');
+  return this.http.post(
+    `${this.apiUrl}/otp/send`,
+    { phoneNumber },
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+}
+
+verifyOtp(phoneNumber: string, code: string): Observable<any> {
+  const token = localStorage.getItem('token');
+  return this.http.post(
+    `${this.apiUrl}/otp/verify`,
+    { phoneNumber, code },
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+}
+
+  
 }
 
 

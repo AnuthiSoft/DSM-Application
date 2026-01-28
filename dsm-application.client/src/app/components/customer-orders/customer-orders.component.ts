@@ -248,53 +248,65 @@ applyStatusFilter(): void {
 
 
 
-  submitReturnRequest() {
+ submitReturnRequest(): void {
 
-    const baseReason =
-      this.returnData.reason === 'Other'
-        ? this.returnData.otherReason
-        : this.returnData.reason;
+  const baseReason =
+    this.returnData.reason === 'Other'
+      ? this.returnData.otherReason
+      : this.returnData.reason;
 
-    const finalReason =
-      `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
+  const finalReason =
+    `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
 
-    // ✅ FIX: get product from selected order
-    const selectedProduct = this.selectedOrderForReturn.products
-      .find((p: any) => p.productId === this.selectedProductId);
+  const selectedProduct = this.selectedOrderForReturn.products
+    .find((p: any) => p.productId === this.selectedProductId);
 
-    const payload = {
-      orderId: this.currentOrderId,
-      productId: this.selectedProductId,
-      productName: selectedProduct?.productName || '', // ✅ REQUIRED FIELD FIX
-      returnQty: this.returnQty,
-      reason: finalReason,
-      resolution: this.returnData.resolution
-    };
-
-    this.returnApiService.createReturn(payload).subscribe({
-      next: (res) => {
-        const returnId = res.id;
-
-        if (this.selectedFiles.length > 0) {
-          this.returnApiService
-            .uploadReturnImages(returnId, this.selectedFiles)
-            .subscribe();
-        }
-
-        const order = this.orders.find(o => o.id === this.currentOrderId);
-        if (order) {
-          order.status = 'Return Pending';
-        }
-
-        this.toastr.success('Return request submitted');
-        this.isReturnPopupOpen = false;
-        this.activeTab = 'returns';
-      },
-      error: () => {
-        this.toastr.error('Failed to submit request');
-      }
-    });
+  if (!selectedProduct) {
+    this.toastr.error('Invalid product selected');
+    return;
   }
+
+  const payload = {
+    orderId: this.currentOrderId,
+    productId: this.selectedProductId,
+    productName: selectedProduct.productName,
+    returnQty: this.returnQty,
+    reason: finalReason,
+    resolution: this.returnData.resolution
+  };
+
+  this.submitting = true;
+
+  this.returnApiService.createReturn(payload).subscribe({
+    next: (res: any) => {
+      const returnId = res.id;
+
+      // upload images if any
+      if (this.selectedFiles.length > 0) {
+        this.returnApiService
+          .uploadReturnImages(returnId, this.selectedFiles)
+          .subscribe();
+      }
+
+      const order = this.orders.find(o => o.id === this.currentOrderId);
+      if (order) {
+        order.status = 'Return Pending';
+      }
+
+      this.toastr.success('Return request submitted');
+      this.isReturnPopupOpen = false;
+      this.submitting = false;
+
+      this.router.navigate(['/customer/dashboard'], {
+        queryParams: { tab: 'returns' }
+      });
+    },
+    error: () => {
+      this.submitting = false;
+      this.toastr.error('Failed to submit return request');
+    }
+  });
+}
 
 
 
@@ -312,94 +324,94 @@ applyStatusFilter(): void {
 
   // Cancel an order
   cancelOrder(orderId: string): void {
-    Swal.fire({
-      title: 'Are you sure you want to cancel this order?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Ok',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#2e7d32',
-      cancelButtonColor: '#aaa',
-      backdrop: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.orderService.cancelOrder(orderId).subscribe({
-          next: () => {
-            this.toastr.success('Order cancelled successfully');
-            this.loadOrders();
-          },
-          error: () => {
-            this.toastr.error('Failed to cancel order');
+              Swal.fire({
+                  title: 'Are you sure you want to cancel this order?',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Ok',
+                  cancelButtonText: 'Cancel',
+                  confirmButtonColor: '#2e7d32',
+                  cancelButtonColor: '#aaa',
+                  backdrop: true
+              }).then((result) => {
+                  if (result.isConfirmed) {
+                      this.orderService.cancelOrder(orderId).subscribe({
+                          next: () => {
+                              this.toastr.success('Order cancelled successfully');
+                              this.loadOrders();
+                          },
+                          error: () => {
+                              this.toastr.error('Failed to cancel order');
+                          }
+                      });
+                  }
+              });
           }
-        });
-      }
-    });
-  }
 
   // Reorder a previous order
   reorder(orderId: string): void {
 
-    const distributorId = localStorage.getItem('distributorId')!;
-    const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+              const distributorId = localStorage.getItem('distributorId')!;
+              const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
 
-    const today = new Date();
-    today.setDate(today.getDate() + leadTime);
+              const today = new Date();
+              today.setDate(today.getDate() + leadTime);
 
-    const expectedDelivery = today.toISOString().split('T')[0];
+              const expectedDelivery = today.toISOString().split('T')[0];
 
-    this.orderService.reorder(orderId, expectedDelivery).subscribe({
-      next: () => {
-        this.toastr.success('Order placed successfully');
-        this.loadOrders();
-      },
-      error: (err) => {
-        this.toastr.error(err?.error?.message || 'Reorder failed');
-      }
-    });
-  }
+              this.orderService.reorder(orderId, expectedDelivery).subscribe({
+                  next: () => {
+                      this.toastr.success('Order placed successfully');
+                      this.loadOrders();
+                  },
+                  error: (err) => {
+                      this.toastr.error(err?.error?.message || 'Reorder failed');
+                  }
+              });
+          }
 
 
 
 
   // Count completed orders
 getCompletedCount(): number {
-  return this.filteredOrders.filter(
-    o => o.status?.toLowerCase() === 'delivered'
-  ).length;
-}
+              return this.filteredOrders.filter(
+                  o => o.status?.toLowerCase() === 'delivered'
+              ).length;
+          }
 
   // Count pending orders
 getPendingCount(): number {
-  return this.filteredOrders.filter(
-    o => o.status?.toLowerCase() === 'pending'
-  ).length;
-}
+              return this.filteredOrders.filter(
+                  o => o.status?.toLowerCase() === 'pending'
+              ).length;
+          }
 
   // Calculate total spent
 getTotalSpent(): number {
-  return this.filteredOrders.reduce(
-    (sum, o) => sum + (o.totalAmount || 0),
-    0
-  );
-}
+              return this.filteredOrders.reduce(
+                  (sum, o) => sum + (o.totalAmount || 0),
+                  0
+              );
+          }
 
   // ✅ FIXED View Details for order
   viewOrderDetails(id: string | null | undefined): void {
- 
-    if (!id) {
-      this.toastr.error('Invalid Order ID');
-      return;
-    }
- 
-    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
-      next: order => {
- 
-        const taxableAmount =
-          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
- 
-        Swal.fire({
-          title: 'Order Summary',
-          html: `
+
+              if (!id) {
+                  this.toastr.error('Invalid Order ID');
+                  return;
+              }
+
+              this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+                  next: order => {
+
+                      const taxableAmount =
+                          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
+
+                      Swal.fire({
+                          title: 'Order Summary',
+                          html: `
           <div style="text-align:left; font-size:15px; line-height:1.6">
  
             <p><strong>Subtotal:</strong> ₹${order.subtotal?.toFixed(2)}</p>
@@ -448,11 +460,11 @@ getTotalSpent(): number {
         <p>
         <strong>GST (${order.products?.[0]?.gstPercentage ?? 0}%):</strong>
         ₹${Number(
-            order.products?.reduce(
-              (sum: number, p: any) => sum + (p.gstAmount ?? 0),
-              0
-            )
-          ).toFixed(2)}
+                              order.products?.reduce(
+                                  (sum: number, p: any) => sum + (p.gstAmount ?? 0),
+                                  0
+                              )
+                          ).toFixed(2)}
          
           </p>
             <hr>
@@ -463,34 +475,34 @@ getTotalSpent(): number {
  
           </div>
         `,
-          icon: 'info',
-          width: 420,
-          confirmButtonText: 'Close'
-        });
- 
-      },
-      error: () => {
-        this.toastr.error('Unable to load order details');
-      }
-    });
-  }
+                          icon: 'info',
+                          width: 420,
+                          confirmButtonText: 'Close'
+                      });
+
+                  },
+                  error: () => {
+                      this.toastr.error('Unable to load order details');
+                  }
+              });
+          }
  
  
  
   viewOrderDetailss(id: string | null | undefined): void {
- 
-    console.log('View Items clicked. Order ID =', id);
- 
-    // 🛑 STOP if ID is invalid
-    if (!id) {
-      this.toastr.error('Invalid Order ID');
-      return;
-    }
- 
-    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
-      next: order => {
- 
-        const itemsHtml = (order.products || []).map((item: any) => `
+
+              console.log('View Items clicked. Order ID =', id);
+
+              // 🛑 STOP if ID is invalid
+              if (!id) {
+                  this.toastr.error('Invalid Order ID');
+                  return;
+              }
+
+              this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+                  next: order => {
+
+                      const itemsHtml = (order.products || []).map((item: any) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <div>
             <strong>${item.productName}</strong><br>
@@ -501,15 +513,15 @@ getTotalSpent(): number {
           </div>
         </div>
       `).join('');
- 
-        const totalPrice = (order.products || []).reduce(
-          (sum: number, item: any) => sum + (item.price * item.quantity),
-          0
-        );
- 
-        Swal.fire({
-          title: 'Order Items',
-          html: `
+
+                      const totalPrice = (order.products || []).reduce(
+                          (sum: number, item: any) => sum + (item.price * item.quantity),
+                          0
+                      );
+
+                      Swal.fire({
+                          title: 'Order Items',
+                          html: `
           <div style="text-align:left; font-size:15px;">
  
             ${itemsHtml}
@@ -528,52 +540,52 @@ getTotalSpent(): number {
  
           </div>
         `,
-        icon: 'info',
-          width: 450,
-          confirmButtonText: 'Close'
-        });
- 
-      },
-      error: err => {
-        console.error('Error loading order:', err);
-        Swal.fire('Error', 'Unable to load order details', 'error');
-      }
-    });
-  }
+                          icon: 'info',
+                          width: 450,
+                          confirmButtonText: 'Close'
+                      });
+
+                  },
+                  error: err => {
+                      console.error('Error loading order:', err);
+                      Swal.fire('Error', 'Unable to load order details', 'error');
+                  }
+              });
+          }
  
  setStatusFilter(status: string) {
-  this.statusFilter = status;
-  this.applyStatusFilter();
-}
+              this.statusFilter = status;
+              this.applyStatusFilter();
+          }
 getStatusCount(status: string): number {
-  if (status === 'All') return this.orders.length;
+              if (status === 'All') return this.orders.length;
 
-  return this.orders.filter(
-    o => o.status?.toLowerCase() === status.toLowerCase()
-  ).length;
-}
+              return this.orders.filter(
+                  o => o.status?.toLowerCase() === status.toLowerCase()
+              ).length;
+          }
  goBackToDashboard() {
-  this.router.navigate(['/customer-dashboard']);
-}
+              this.router.navigate(['/customer-dashboard']);
+          }
 
 
   getMaxReturnQuantity(): number {
-    if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
+              if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
 
-    const product = this.selectedOrderForReturn.products
-      .find((p: any) => p.productId === this.selectedProductId);
+              const product = this.selectedOrderForReturn.products
+                  .find((p: any) => p.productId === this.selectedProductId);
 
-    return product ? product.quantity : 1;
-  }
+              return product ? product.quantity : 1;
+          }
 
   getFilePreview(file: File): string {
-    return URL.createObjectURL(file);
-  }
+              return URL.createObjectURL(file);
+          }
 
   removeFile(index: number) {
-    this.selectedFiles.splice(index, 1);
-  }
+              this.selectedFiles.splice(index, 1);
+          }
 
-
-
-}
+      
+        }
+      

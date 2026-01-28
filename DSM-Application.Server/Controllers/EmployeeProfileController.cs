@@ -34,7 +34,7 @@ public class EmployeeProfileController : ControllerBase
             name = profile.Name,
             email = profile.Email,
             phoneNumber = profile.PhoneNumber,
-
+            phoneVerified = profile.PhoneVerified,
             // 🔥 CRITICAL FIX — camelCase
             street = profile.Street,
             city = profile.City,
@@ -67,11 +67,24 @@ public class EmployeeProfileController : ControllerBase
         if (string.IsNullOrEmpty(email))
             return Unauthorized("Invalid token");
 
+        var employee = await _profileService.GetProfileByEmailAsync(email);
+
+        if (
+            !employee.PhoneVerified &&
+            !string.IsNullOrEmpty(dto.PhoneNumber) &&
+            dto.PhoneNumber != employee.PhoneNumber
+        )
+        {
+            return BadRequest("Please verify phone number before saving");
+        }
+
+
         await _profileService.UpdateProfileByEmailAsync(
             email,
             dto,
             profileImage
         );
+
 
         return Ok(new { message = "Profile updated successfully" });
     }

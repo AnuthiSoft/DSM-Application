@@ -58,6 +58,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   distributorFilter: string = '';
   distributors: string[] = [];
 
+previousQtyMap: { [productId: string]: number } = {};
 
 
   @Output() addToCartClicked = new EventEmitter<Product>();
@@ -95,7 +96,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   ngOnInit(): void {
 
     this.extractConnectedDistributors();
-
+    this.loadPreviousQuantities();
   }
   ngAfterViewInit(): void {
     this.initCarousels();
@@ -504,11 +505,15 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
 
 
 
-  openAddPopup(product: Product) {
-    this.selectedProduct = product;
-    this.selectedQuantity = 1;
-    this.showPopup = true;
-  }
+openAddPopup(prod: Product) {
+  this.selectedProduct = prod;
+  this.selectedQuantity =
+    this.previousQtyMap[prod.productId as string] ?? 1;
+  this.showPopup = true;
+}
+
+
+
 
   popupIncrease() {
     if (!this.selectedProduct) return;
@@ -523,8 +528,21 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     }
   }
 
-confirmAddToCart() {
-  if (!this.selectedProduct) return;
+onPopupQtyChange(value: number): void {
+  if (!value || value < 1) {
+    this.selectedQuantity = 1;
+    return;
+  }
+
+  if (this.selectedProduct && value > this.selectedProduct.currentStock) {
+    this.selectedQuantity = this.selectedProduct.currentStock;
+  }
+}
+
+
+
+  confirmAddToCart() {
+    if (!this.selectedProduct) return;
 
   // Reduce UI stock instantly
   this.selectedProduct.currentStock -= this.selectedQuantity;
@@ -649,5 +667,17 @@ confirmAddToCart() {
     const item = this.cart.find(c => c.product.productId === prod.productId);
     if (item && item.quantity > 1) item.quantity--;
   }
+   loadPreviousQuantities() {
+  if (!this.customerId) return;
+
+  this.orderService
+    .getLastBoughtQuantities(this.customerId)
+    .subscribe((res: { [productId: string]: number }) => {
+      this.previousQtyMap = res;
+    });
+}
+
+
+
 
 }

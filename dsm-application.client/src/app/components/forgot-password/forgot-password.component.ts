@@ -18,6 +18,7 @@ export class ForgotPasswordComponent implements OnDestroy {
   private timerInterval: any;
   showPassword = false; 
   showConfirmPassword=false;
+  isVerifying = false;
 
   constructor(private authService: AuthService) {}
 sendOtp() {
@@ -39,8 +40,17 @@ sendOtp() {
   });
 }
 
+  
 
+  // ✅ Step 2: Verify OTP
 verifyOtp() {
+  console.log('Verify OTP clicked');
+
+  if (this.isVerifying) {
+    console.log('Blocked: already verifying');
+    return;
+  }
+
   if (!this.otp || this.otp.length !== 6) {
     this.message = 'Please enter a valid 6-digit OTP.';
     return;

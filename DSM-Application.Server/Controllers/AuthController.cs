@@ -346,6 +346,37 @@ namespace DistributorManagementSystem.Server.Controllers
         // ============================================================
         // OTP + RESET PASSWORD
         // ============================================================
+        //[HttpPost("forgot-password")]
+        //public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        //{
+
+
+        //    if (string.IsNullOrWhiteSpace(request.Email))
+        //        return BadRequest("Email is required");
+
+        //    var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
+        //    if (user == null)
+        //    {
+        //        // Do NOT reveal user existence
+        //        return Ok("If the email exists, an OTP has been sent.");
+        //    }
+
+
+        //    var otp = new Random().Next(100000, 999999).ToString();
+        //    Console.WriteLine($"[OTP] Generated OTP {otp} for {request.Email}");
+        //    OtpStore.SaveOtp(request.Email, otp);
+
+        //    try
+        //    {
+        //        await _emailService.SendOtpEmailAsync(request.Email, otp);
+        //        return Ok("OTP sent.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, "Failed to send OTP: " + ex.Message);
+        //    }
+        //}
+
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
@@ -357,6 +388,8 @@ namespace DistributorManagementSystem.Server.Controllers
                 return NotFound(new { message = "User not found" });
 
             var otp = new Random().Next(100000, 999999).ToString();
+            Console.WriteLine($"[OTP] Generated OTP {otp} for {request.Email}");
+
             OtpStore.SaveOtp(request.Email, otp);
 
             try
@@ -380,6 +413,7 @@ namespace DistributorManagementSystem.Server.Controllers
             return BadRequest(new { message = "Invalid or expired OTP" });
         }
 
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
@@ -390,15 +424,20 @@ namespace DistributorManagementSystem.Server.Controllers
             if (user == null)
                 return NotFound(new { message = "User not found" });
 
-            user.PasswordHash = ComputeHash(request.NewPassword);
-            user.IsRegistered = true;
+            if (user != null)
+            {
+                user.PasswordHash = ComputeHash(request.NewPassword);
+                user.IsRegistered = true;
 
-            await _db.Users.UpdateOneAsync(
-                u => u.Id == user.Id,
-                Builders<User>.Update
-                    .Set(u => u.PasswordHash, user.PasswordHash)
-                    .Set(u => u.IsRegistered, true));
+                await _db.Users.UpdateOneAsync(
+                    u => u.Id == user.Id,
+                    Builders<User>.Update
+                        .Set(u => u.PasswordHash, user.PasswordHash)
+                        .Set(u => u.IsRegistered, true)
+                );
+            }
 
+            // ✅ OTP CONSUMED HERE
             OtpStore.RemoveOtp(request.Email);
 
             return Ok(new { message = "Password reset successfully" });

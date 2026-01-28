@@ -52,7 +52,7 @@ export interface CustomerProfileDto {
 
   // IMAGE
   profileImageUrl?: string;
-
+  phoneVerified: boolean;
 
   // Address
   street?: string;

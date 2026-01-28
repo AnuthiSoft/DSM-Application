@@ -158,8 +158,7 @@ loadStock(distributorId: string) {
 //   });
 // }
 
-pieChart!: Chart<'pie', number[], string>;
-
+private pieChart?: Chart<'pie', number[], unknown>;
 
 createPieChart() {
   const labels = this.stockList.map(x => x.productName);

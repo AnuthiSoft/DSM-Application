@@ -1,11 +1,13 @@
 ﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
 using DSM_Application.Server.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Security.Claims;
 
 
 namespace DSM_Application.Server.Controllers
@@ -46,7 +48,13 @@ namespace DSM_Application.Server.Controllers
                 new UpdateOptions { IsUpsert = true }
             );
 
-            return Ok(new { otp, message = "OTP generated and saved to MongoDB" });
+            return Ok(new
+            {
+                message = "OTP sent successfully",
+                otp = otp   //  THIS LINE
+            });
+
+            //return Ok(new { otp, message = "OTP generated and saved to MongoDB" });
         }
 
         // ---------------- VERIFY OTP ----------------

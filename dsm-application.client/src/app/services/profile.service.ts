@@ -21,4 +21,17 @@ export class ProfileService {
   updateProfile(formData: FormData): Observable<any> {
     return this.api.put<any>(this.endpoint, formData);
   }
+  
+  // ================= OTP =================
+
+// SEND OTP
+sendOtp(data: { phoneNumber: string }) {
+  return this.api.post<any>('otp/send', data);
+}
+
+// VERIFY OTP
+verifyOtp(data: { phoneNumber: string; code: string }) {
+  return this.api.post<any>('otp/verify', data);
+}
+
 }

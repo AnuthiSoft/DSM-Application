@@ -25,6 +25,6 @@ namespace DSM_Application.Server.Models.DTOs
 
         public DateTime CreatedDate { get; set; }
         public DateTime UpdatedDate { get; set; }
-
+        public bool PhoneVerified { get; set; } = false;
     }
 }

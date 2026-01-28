@@ -99,6 +99,7 @@ export interface Employee {
   employeeId?: string;   // <-- Use this in UI
   name: string;
   email: string;
+   phoneVerified: boolean;   // ✅ ADD THIS
   isActive: boolean;
   distributorId?: string;
   designation?: string;   // <-- Add this line

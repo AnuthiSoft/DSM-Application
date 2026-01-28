@@ -263,7 +263,9 @@
             <button class="btn-qty" (click)="popupDecrease()">
               <i class="fas fa-minus"></i>
             </button>
-            <span class="qty-display">{{ selectedQuantity }}</span>
+           <input type="number" class="qty-input" [(ngModel)]="selectedQuantity" [min]="1" [max]="selectedProduct?.currentStock || 1" (ngModelChange)="onPopupQtyChange($event)" />
+
+
             <button class="btn-qty" (click)="popupIncrease()"
               [disabled]="selectedQuantity >= (selectedProduct?.currentStock || 0)">
               <i class="fas fa-plus"></i>

@@ -13,8 +13,19 @@ export class OrderService {
 private baseUrl = environment.apiUrl + '/orders';
 
    private readonly endpoint = 'orders';
+ apiUrl = environment.apiUrl;
+  constructor(private api: ApiService) {}
 
-  constructor(private api: ApiService,private http: HttpClient) {}
+  reorderToCart(orderId: string) {
+  return this.api.post(`${this.endpoint}/${orderId}/reorder-to-cart`, {});
+}
+getCart() {
+  return this.api.get('orders/customer/cart');
+}
+
+ 
+
+  
 
   placeOrder(payload: any): Observable<any> {
     // assumes ApiService posts to /api/<endpoint>
@@ -25,9 +36,21 @@ private baseUrl = environment.apiUrl + '/orders';
   return this.api.get<Order[]>(`${this.endpoint}/customer/${customerId}`);
 }
  getOrderEmployees(distributorId: string): Observable<Employee[]> {
-    // ✅ no baseUrl, no http, just endpoint
+    //  no baseUrl, no http, just endpoint
     return this.api.get<Employee[]>(`${this.endpoint}/${distributorId}/employees`);
   }
+ 
+getLastBoughtQuantities(customerId: string) {
+  return this.api.get<Record<string, number>>(
+    `${this.endpoint}/customer/${customerId}/last-quantities`
+  );
+}
+
+
+
+
+ 
+ 
   
  // ✅ Cash Collector creates order
 createOrderByCollector(data: any) {
@@ -89,14 +112,13 @@ collectPayment(orderId: string, payload: { collectedAmount: number; paymentMetho
  
   // ✅ NEW: Reorder (Customer)
   reorder(orderId: string, expectedDelivery: string) {
-  const params = { expectedDelivery };
-
-  return this.http.post(
-    `${this.baseUrl}/${orderId}/reorder`,
+  return this.api.post(
+    `orders/${orderId}/reorder`,
     {},
-    { params }
+    { params: { expectedDelivery } }
   );
 }
+
 
 
   uploadDeliveryReceipt(orderId: string, formData: FormData): Observable<any> {
@@ -105,6 +127,8 @@ collectPayment(orderId: string, payload: { collectedAmount: number; paymentMetho
     formData
   );
 }
+
+
 
 }
  

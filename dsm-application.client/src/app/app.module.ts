@@ -64,8 +64,8 @@ import { EmployeeTrackingComponent } from './components/employee-tracking/employ
  import { GoogleMapsModule } from '@angular/google-maps';
 // import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+//import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
+//import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
 // import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
@@ -81,13 +81,13 @@ import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/em
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
 import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 @NgModule({
   declarations: [
 AppComponent,
@@ -108,17 +108,17 @@ SetPasswordComponent,
 ProfileComponent,
 ThemeToggleComponent,
 ProductsByDistComponent,
-
+ 
 OrderHistoryComponent,
 DistributorOrdersComponent,
 CustomerOrdersComponent,
 EmployeeOrdersComponent,
-AddPaymentNoteComponent,
-DistributorViewComponent,
+//AddPaymentNoteComponent,
+//DistributorViewComponent,
 CustDashboardComponent,
 DistributorConnectionRequestsComponent,
 TestComponent,
-
+ 
 EmployeeLoginComponent,
 EmployeeSignupComponent,
 AddToCartComponent,
@@ -129,10 +129,10 @@ FraudHistoryComponent,
 AdminFraudListComponent,
 AdminReviewListComponent,
 AdminReviewHistoryComponent,
-
+ 
 ReviewSubmitComponent,
 TruncatePipe,
-
+ 
 CashCollectionComponent,
 CashSummaryComponent,
 PaymentSummaryComponent,
@@ -141,29 +141,29 @@ CustomerPaymentStatusComponent,
 PaymentReportComponent,
 PendingPaymentsComponent,
 PendingHandoversComponent,
-
+ 
 MainInventoryComponent,
 // InventoryBatchesComponent,
 CustomersListComponent,
 CustomerSearchComponent,
-
+ 
 InvoiceCreateComponent,
 InvoiceDetailComponent,
 EmployeeInvoicesComponent,
-
+ 
 EmployeeTrackingComponent,
   PaymentsComponent,
   DistributorSettingsComponent,
   PaymentCollectionForCashcollectorComponent,
-
+ 
  InventoryBatchesComponent  , // ✅ ADD THIS
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
     // AdminDistributorsComponent
-  
+ 
     DistributorReturnRequestsComponent,
     EmployeeReturnOrdersComponent,
      ReturnOrdersComponent,
@@ -173,7 +173,7 @@ EmployeeTrackingComponent,
  
   ],
   imports: [
-    BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,          // ✅ ADD THIS      // ✅ you already imported but forgot here 
+    BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,          // ✅ ADD THIS      // ✅ you already imported but forgot here
     AppRoutingModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
       timeOut: 1000,
       positionClass: 'toast-top-right',
@@ -189,5 +189,6 @@ EmployeeTrackingComponent,
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+ 
  
  

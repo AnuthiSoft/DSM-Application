@@ -37,5 +37,8 @@ public class Employee
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 
 
+       
+        public bool PhoneVerified { get; set; } = false;
+
 }
 

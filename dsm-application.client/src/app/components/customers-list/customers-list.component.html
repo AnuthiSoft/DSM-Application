@@ -67,7 +67,7 @@
           <td class="md">{{ c.email }}</td>
           <td class="md">{{ c.phoneNumber }}</td>
           <td class="md">
-            {{ c.addedByDistributorId ? c.address : c.city ||c.street}}
+             {{  c.address || c.city ||c.street}}
           </td>
 
 

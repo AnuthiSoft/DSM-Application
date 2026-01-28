@@ -22,8 +22,8 @@ namespace DSM_Application.Server.Models
         [BsonRepresentation(BsonType.ObjectId)]
 
         public string CustomerId { get; set; }
-
         [BsonRepresentation(BsonType.ObjectId)]
+
         public string DistributorId { get; set; }
 
         public List<OrderProduct> Products { get; set; } = new List<OrderProduct>();
@@ -117,11 +117,11 @@ namespace DSM_Application.Server.Models
 
         public string OrderSource { get; set; }       // "RETAILER" or "CASH_COLLECTOR"
 
-       
+
         public decimal BasicDiscount { get; set; }
         public decimal TotalGst { get; set; }
         public decimal GstAmount { get; set; } = 0;
-    
+
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
 
     }

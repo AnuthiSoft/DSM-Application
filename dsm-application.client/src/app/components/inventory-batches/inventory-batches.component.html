@@ -1,61 +1,63 @@
-<div class="container mt-4">
-  <h4>Inventory Batches</h4>
+<div class="dashboard-main">
+  <div class="dashboard-card">
+    <h2 class="page-title">Inventory Batches</h2>
 
-  <table class="table table-bordered table-striped mt-3">
-    <thead class="table-dark">
-      <tr>
-        <th>#</th>
-        <th>Product</th>
-        <th>Code</th>
-        <th>Initial Qty</th>
-        <th>Available Qty</th>
-        <th>MFG</th>
-        <th>EXP</th>
-        <th>Status</th>
-      </tr>
-    </thead>
- 
-    <tbody>
-      <tr *ngFor="let row of rows; let i = index">
-        <td>{{ i + 1 }}</td>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Code</th>
+            <th>Initial Qty</th>
+            <th>Available Qty</th>
+            <th>MFG</th>
+            <th>EXP</th>
+            <th>Status</th>
+          </tr>
+        </thead>
 
-        <td>{{ row.productName }}</td>
-
-        <td>{{ row.productCode }}</td>
-
-        <!-- ✅ Initial Quantity -->
-        <td>{{ row.initialQuantity }}</td>
-        <td>
-          <strong [class.text-danger]="row.quantityAvailable === 0"
-            [class.text-warning]="row.availableQuantity <= 5 && row.availableQuantity > 0"
-            [class.text-success]="row.availableQuantity > 5">
-            {{ row.quantityAvailable }}
-          </strong>
-        </td>
-
-
-        <td>
-          <input type="date" class="form-control form-control-sm" [ngModel]="row.manufactureDate | date:'yyyy-MM-dd'"
-            (ngModelChange)="updateBatchDates(row, $event, 'mfg')" />
-        </td>
-
-        <td>
-          <input type="date" class="form-control form-control-sm" [ngModel]="row.expiryDate | date:'yyyy-MM-dd'"
-            (ngModelChange)="updateBatchDates(row, $event, 'exp')" />
-        </td>
-
-
-        <td>
-          <span class="badge" [ngClass]="{
-        'bg-danger': getStatus(row.expiryDate) === 'Expired',
-        'bg-warning text-dark': getStatus(row.expiryDate) === 'Near Expiry',
-        'bg-success': getStatus(row.expiryDate) === 'Valid'
-      }">
-            {{ getStatus(row.expiryDate) }}
-          </span>
-        </td>
-      </tr>
-    </tbody>
-
-  </table>
+        <tbody>
+          <tr *ngFor="let row of rows; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ row.productName }}</td>
+            <td>{{ row.productCode }}</td>
+            <td>{{ row.initialQuantity }}</td>
+            <td>
+              <span class="quantity-badge" 
+                [class.danger]="row.quantityAvailable === 0"
+                [class.warning]="row.availableQuantity <= 5 && row.availableQuantity > 0"
+                [class.success]="row.availableQuantity > 5">
+                {{ row.quantityAvailable }}
+              </span>
+            </td>
+            <td>
+              <input 
+                type="date" 
+                class="form-control form-control-sm date-input" 
+                [ngModel]="row.manufactureDate | date:'yyyy-MM-dd'"
+                (ngModelChange)="updateBatchDates(row, $event, 'mfg')" 
+              />
+            </td>
+            <td>
+              <input 
+                type="date" 
+                class="form-control form-control-sm date-input" 
+                [ngModel]="row.expiryDate | date:'yyyy-MM-dd'"
+                (ngModelChange)="updateBatchDates(row, $event, 'exp')" 
+              />
+            </td>
+            <td>
+              <span class="status-badge" 
+                [class.expired]="getStatus(row.expiryDate) === 'Expired'"
+                [class.near-expiry]="getStatus(row.expiryDate) === 'Near Expiry'"
+                [class.valid]="getStatus(row.expiryDate) === 'Valid'">
+                {{ getStatus(row.expiryDate) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

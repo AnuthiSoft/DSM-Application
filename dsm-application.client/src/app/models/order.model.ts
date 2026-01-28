@@ -48,6 +48,7 @@ export interface DistributorOrder {
   loading?: boolean;
     deliveryReceiptUrl?: string;
   deliveredOn?: Date;
+    discount?: number; // ✅ ADD THIS
 }
 // export interface OrderProduct {
 //   productId: string;

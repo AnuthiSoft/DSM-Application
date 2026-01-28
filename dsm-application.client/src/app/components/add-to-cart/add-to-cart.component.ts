@@ -53,7 +53,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
   popupMessage: string = '';
 
   isPlacingOrder = false;
-
+showCustomerPopup = false;
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
   @Input() distributorId?: string;
@@ -100,7 +100,7 @@ export class AddToCartComponent implements OnInit, OnChanges {
   connectedDistributorIds: string[] = [];
 
   showCustomerDropdown = false;
-  showCustomerPopup = false;
+ 
 
 
   expectedDays: number = 1;
@@ -274,8 +274,12 @@ export class AddToCartComponent implements OnInit, OnChanges {
 
 
   }
-
-
+// closeCustomerPopup() {
+//   this.showCustomerPopup = false;
+// }
+closeCustomerPopup(): void {
+  this.showCustomerDropdown = false;
+}
 connectDistributorFromCart(distributorId: string) {
   this.customerApiService
     .connectDistributor(this.customerId, distributorId)
@@ -862,7 +866,7 @@ connectDistributorFromCart(distributorId: string) {
 
       alert('Orders placed successfully');
       this.resetOrder();
-      this.router.navigate(['/customer/orders']);
+      this.router.navigate(['/customerOrder']);
 
     } finally {
       this.isPlacingOrder = false;   // 🔓 RELEASE LOCK
@@ -934,9 +938,6 @@ connectDistributorFromCart(distributorId: string) {
     this.router.navigate(['/customer/distributors']);
   }
 
-  closeCustomerPopup(): void {
-  this.showCustomerPopup = false;
-}
 
 
 }

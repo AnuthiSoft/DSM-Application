@@ -1,20 +1,21 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { ConnectionRequestDto, DistributorService } from '../../services/distributor.service';
 import { CustomerService } from '../../services/customer.service';
 import { HttpClient } from '@angular/common/http';
-
+ 
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-
-
+import Swal from 'sweetalert2';
+ 
+ 
 @Component({
   selector: 'app-distributor-dashboard',
   templateUrl: './distributor-dashboard.component.html',
   styleUrl: './distributor-dashboard.component.css'
 })
 export class DistributorDashboardComponent implements OnInit {
-
+  isSidebarCollapsed: boolean = false;
 
   orderedDate: string = '';
   expectedDate: string = '';
@@ -22,9 +23,9 @@ export class DistributorDashboardComponent implements OnInit {
   leadTime:number = 1;
   selectedQrFile: File | null = null;
 scannerQrUrl: string | null = null;
-
+ 
   constructor(
-
+ 
     private auth: AuthService,
     private distributorService: DistributorService,
     private router: Router,   // ✅ ADD THIS
@@ -48,10 +49,10 @@ scannerQrUrl: string | null = null;
   selectedEmployeeId: string = "";     // ⬅ added
   employees: any[] = [];               // ⬅ added
   //polylinePath: any[] =[];
-
+ 
   @ViewChild('trackingComp') trackingComp: any;
-
-
+ 
+ 
   submenuState: { [key: string]: boolean } = {
     inventory: false,
     orders: false,
@@ -68,18 +69,50 @@ scannerQrUrl: string | null = null;
   // }
   ngOnInit() {
     this.distributorId = localStorage.getItem('distributorId') || '';
+     // ✅ RESTORE ACTIVE TAB
+  const savedTab = localStorage.getItem('distributorActiveTab');
+  this.activeTab = savedTab ? savedTab : 'dashboard';
+
+  // ✅ RESTORE SUBMENU STATE (optional)
+  const savedSubmenus = localStorage.getItem('distributorOpenSubmenus');
+  if (savedSubmenus) {
+    this.openSubmenus = JSON.parse(savedSubmenus);
+  }
+
     // this.loadRequests();
     // this.loadAcceptedCustomers();
     // this.distributorId = localStorage.getItem('distributorId') || '';
-
+  // Load sidebar state from localStorage
+    const savedSidebarState = localStorage.getItem('sidebarCollapsed');
+    if (savedSidebarState !== null) {
+      this.isSidebarCollapsed = savedSidebarState === 'true';
+    }
   // Load only ONCE when component is created
   const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
   this.expectedDays = stored ? Number(stored) : 1;
        this.loadRetailerCount();
         this.loadEmployees();              // ⬅ added
         this.loadScannerQr();
+            // Check screen width on init
+    this.checkScreenWidth();
   }
-  
+    @HostListener('window:resize', ['$event'])
+ 
+
+  checkScreenWidth() {
+    if (window.innerWidth <= 768) {
+     this.isSidebarCollapsed = false; // disable collapse on mobile
+    }
+  }
+
+  // Add this method to toggle sidebar
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    // Save state to localStorage
+    localStorage.setItem('sidebarCollapsed', this.isSidebarCollapsed.toString());
+  }
+
+ 
 loadRetailerCount() {
   this.customerService.getAllCustomersForDistributor().subscribe({
     next: (res) => {
@@ -93,7 +126,7 @@ loadRetailerCount() {
 }
 loadScannerQr() {
   if (!this.distributorId) return;
-
+ 
   this.distributorService.getScannerQr(this.distributorId)
     .subscribe({
       next: res => {
@@ -183,7 +216,7 @@ loadScannerQr() {
   // toggleMobileMenu() {
   //   this.isMobileMenuOpen = !this.isMobileMenuOpen;
   // }
-
+ 
   // closeMobileMenu() {
   //   if (this.isMobileMenuOpen) {
   //     this.isMobileMenuOpen = false;
@@ -191,26 +224,31 @@ loadScannerQr() {
   // }
   // Update these methods in your component
   
-  toggleSubmenu(menu: string) {
-    // Check if the clicked menu is already open
-    const isCurrentlyOpen = this.isSubmenuOpen(menu);
+toggleSubmenu(menu: string) {
+  const isCurrentlyOpen = this.isSubmenuOpen(menu);
 
-    // Close all submenus first
-    this.closeAllSubmenus();
+  this.closeAllSubmenus();
 
-    // If the clicked menu wasn't already open, open it
-    if (!isCurrentlyOpen) {
-      this.openSubmenus.push(menu);
-    }
+  if (!isCurrentlyOpen) {
+    this.openSubmenus.push(menu);
   }
 
+  // ✅ SAVE SUBMENU STATE
+  localStorage.setItem(
+    'distributorOpenSubmenus',
+    JSON.stringify(this.openSubmenus)
+  );
+}
 
+ 
+ 
   // isSubmenuOpen(menu: string): boolean {
   //   return this.openSubmenus.includes(menu);
   // }
-  closeAllSubmenus() {
-    this.openSubmenus = [];
-  }
+closeAllSubmenus() {
+  this.openSubmenus = [];
+  localStorage.removeItem('distributorOpenSubmenus');
+}
 
   // // Update the setActiveTab method to close submenus when switching tabs
   // setActiveTab(tab: string) {
@@ -218,8 +256,13 @@ loadScannerQr() {
   //   // Don't close submenus here to allow navigation within the same section
   // }
 
-  setActiveTab(tab: string, invoiceId?: string) {
+setActiveTab(tab: string, invoiceId?: string) {
   this.activeTab = tab;
+
+  // ✅ SAVE ACTIVE TAB
+  localStorage.setItem('distributorActiveTab', tab);
+
+  // Close submenus (your existing logic)
   this.closeAllSubmenus();
 
   if (invoiceId) {
@@ -227,11 +270,18 @@ loadScannerQr() {
   }
 }
 
+ 
   // Update the toggleMobileMenu method
+ 
+toggleMobileMenu() {
+  this.isMobileMenuOpen = !this.isMobileMenuOpen;
 
-  toggleMobileMenu() {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  // 🔥 force expanded sidebar on mobile
+  if (this.isMobileMenuOpen && window.innerWidth <= 768) {
+    this.isSidebarCollapsed = false;
   }
+}
+
   // Update the closeMobileMenu method
   closeMobileMenu() {
     if (this.isMobileMenuOpen) {
@@ -278,11 +328,11 @@ getScannerQrUrl(blobName: string | null): string {
 
   //   loadRequests() {
   //     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
-
+ 
   //       this.pendingRequests = res;
   //     });
   //   }
-
+ 
   // respond(request: any, accept: boolean) {
   //   if (!request.connectionId) {
   //     console.error('No connectionId found!', request);
@@ -315,25 +365,73 @@ getScannerQrUrl(blobName: string | null): string {
   // setActiveTab(tab: string): void {
   //   this.activeTab = tab;
   // }
-
+ 
   // Check if a tab is active
   isActive(tab: string): boolean {
     return this.activeTab === tab;
   }
+logout(): void {
+  Swal.fire({
+    title: 'Logout Confirmation',
+    text: 'Are you sure you want to logout?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Logout',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true,
+    allowOutsideClick: false,
 
-  logout(): void {
-    this.auth.logout();
-    window.location.href = "/distributor-login";
-  }
+    // 🌙 Dark / Light mode support
+    background: getComputedStyle(document.documentElement)
+      .getPropertyValue('--card-bg'),
+    color: getComputedStyle(document.documentElement)
+      .getPropertyValue('--text-color'),
 
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d'
+  }).then((result) => {
+    if (result.isConfirmed) {
 
+      // ✅ CLEAR DISTRIBUTOR UI STATE
+      localStorage.removeItem('distributorActiveTab');
+      localStorage.removeItem('distributorOpenSubmenus');
+      localStorage.removeItem('sidebarCollapsed');
+
+      // ✅ AUTH CLEANUP
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('distributorId');
+
+      this.auth.logout();
+
+      // ✅ SUCCESS FEEDBACK
+      Swal.fire({
+        icon: 'success',
+        title: 'Logged out',
+        text: 'You have been logged out successfully',
+        timer: 1200,
+        showConfirmButton: false,
+        background: getComputedStyle(document.documentElement)
+          .getPropertyValue('--card-bg'),
+        color: getComputedStyle(document.documentElement)
+          .getPropertyValue('--text-color')
+      });
+
+      setTimeout(() => {
+        this.router.navigate(['/distributor-login']);
+      }, 1200);
+    }
+  });
+}
+ 
+ 
   onExpectedDate() {
     if (!this.orderedDate) return;
     const date = new Date(this.orderedDate);
     date.setDate(date.getDate() + 1);
     this.expectedDate = date.toISOString().split('T')[0];
   }
-
+ 
   onOrderedDate() {
     console.log("Ordered Date button clicked");
   }
@@ -353,10 +451,10 @@ getScannerQrUrl(blobName: string | null): string {
 onQrSelected(event: any) {
   this.selectedQrFile = event.target.files[0];
 }
-
+ 
 uploadScannerQr() {
   if (!this.selectedQrFile || !this.distributorId) return;
-
+ 
   this.distributorService
     .uploadScannerQr(this.distributorId, this.selectedQrFile)
     .subscribe({
@@ -370,6 +468,14 @@ uploadScannerQr() {
       }
     });
 }
-
+ 
+ @HostListener('window:resize')
+onResize() {
+  if (window.innerWidth <= 768) {
+    this.isSidebarCollapsed = false;
+  }
+}
 
 }
+ 
+ 

@@ -160,5 +160,13 @@ getDistributorScanner(distributorId: string) {
   );
 }
 
-
+// 🔥 NEW — All receipts pending for handover (NO DATE FILTER)
+getAllReceiptsForHandover(
+  cashierId: string
+): Observable<any[]> {
+  return this.api.get(
+    `${this.endpoint}/receipts-for-handover`,
+    { params: { cashierId } } // ❌ no date param
+  );
+}
 }

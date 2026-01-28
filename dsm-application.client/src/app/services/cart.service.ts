@@ -53,4 +53,46 @@ export class CartService {
   getCount(): number {
     return this.getCart().reduce((s, c) => s + c.quantity, 0);
   }
+   addToCart(product: Product) {
+    const raw = localStorage.getItem('cart');
+    let cart: any[] = [];
+
+    try {
+      cart = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(cart)) cart = [];
+    } catch {
+      cart = [];
+    }
+
+    const existing = cart.find(
+      c => c.product.productId === product.productId
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ product, quantity: 1 });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    this.updateCartCount();
+  }
+
+  updateCartCount() {
+    const raw = localStorage.getItem('cart');
+    let cart: any[] = [];
+
+    try {
+      cart = raw ? JSON.parse(raw) : [];
+    } catch {
+      cart = [];
+    }
+
+    const count = cart.reduce(
+      (sum, c) => sum + (c?.quantity || 0),
+      0
+    );
+
+    this.cartCountSubject.next(count);
+  }
 }

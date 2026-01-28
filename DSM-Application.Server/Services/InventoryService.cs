@@ -169,93 +169,195 @@ namespace DSM_Application.Server.Services
         //}
 
 
-        // 🔥 Stock Out
         public async Task<bool> RemoveStockAsync(
-      string productId,
-      string distributorId,
-      int quantity,
-      string reason)
+            string productId,
+            string distributorId,
+            int quantity,
+            string reason)
+
         {
+
+            // ----------------------------------------
+
+            // 0️⃣ ENSURE BATCH EXISTS (🔥 MAIN FIX)
+
+            // ----------------------------------------
+
+            var existingBatches = await _batches.Find(b =>
+
+                b.ProductId == productId &&
+
+                b.DistributorId == distributorId &&
+
+                b.QuantityAvailable > 0 &&
+
+                b.IsActive
+
+            ).ToListAsync();
+
+            if (!existingBatches.Any())
+
+            {
+
+                // 🔥 Fallback: create batch from InventoryItems
+
+                var inventory = await _inventory.Find(i =>
+
+                    i.ProductId == productId &&
+
+                    i.DistributorId == distributorId
+
+                ).FirstOrDefaultAsync();
+
+                if (inventory == null || inventory.CurrentStock <= 0)
+                    return false;
+
+                var autoBatch = new InventoryBatch
+
+                {
+
+                    ProductId = productId,
+
+                    DistributorId = distributorId,
+
+                    InitialQuantity = inventory.CurrentStock,
+
+                    QuantityAvailable = inventory.CurrentStock,
+
+                    ManufactureDate = DateTime.UtcNow,
+
+                    ExpiryDate = DateTime.UtcNow.AddMonths(6),
+
+                    IsActive = true,
+
+                    CreatedAt = DateTime.UtcNow
+
+                };
+
+                await _batches.InsertOneAsync(autoBatch);
+
+                existingBatches.Add(autoBatch);
+
+            }
+
+            // ----------------------------------------
+
+            // 1️⃣ FIFO STOCK DEDUCTION
+
+            // ----------------------------------------
+
             int remainingQty = quantity;
 
-            // 1️⃣ Get ALL available batches (FIFO)
-            var batches = await _batches.Find(b =>
-                    b.ProductId == productId &&
-                    b.DistributorId == distributorId &&
-                    b.QuantityAvailable > 0
-                )
-                .SortBy(b => b.CreatedAt) // FIFO
-                .ToListAsync();
+            foreach (var batch in existingBatches.OrderBy(b => b.CreatedAt))
 
-            if (!batches.Any())
-                return false;
-
-            foreach (var batch in batches)
             {
+
                 if (remainingQty <= 0)
+
                     break;
 
                 if (batch.QuantityAvailable >= remainingQty)
+
                 {
+
                     await _batches.UpdateOneAsync(
+
                         b => b.BatchId == batch.BatchId,
+
                         Builders<InventoryBatch>.Update
+
                             .Inc(b => b.QuantityAvailable, -remainingQty)
+
                     );
 
                     await _movements.InsertOneAsync(new StockMovement
+
                     {
+
                         ProductId = productId,
+
                         DistributorId = distributorId,
+
                         BatchId = batch.BatchId,
+
                         Quantity = remainingQty,
+
                         Type = "OUT",
+
                         Reason = reason,
+
                         Date = DateTime.UtcNow
+
                     });
 
                     remainingQty = 0;
+
                 }
+
                 else
+
                 {
-                    int consumedQty = batch.QuantityAvailable;
+
+                    int consumed = batch.QuantityAvailable;
 
                     await _batches.UpdateOneAsync(
+
                         b => b.BatchId == batch.BatchId,
+
                         Builders<InventoryBatch>.Update
+
                             .Set(b => b.QuantityAvailable, 0)
+
                     );
 
                     await _movements.InsertOneAsync(new StockMovement
+
                     {
+
                         ProductId = productId,
+
                         DistributorId = distributorId,
+
                         BatchId = batch.BatchId,
-                        Quantity = consumedQty,
+
+                        Quantity = consumed,
+
                         Type = "OUT",
+
                         Reason = reason,
+
                         Date = DateTime.UtcNow
+
                     });
 
-                    remainingQty -= consumedQty;
+                    remainingQty -= consumed;
+
                 }
+
             }
 
-            // 2️⃣ Final validation
             if (remainingQty > 0)
                 return false;
+            // ----------------------------------------
 
-            // 3️⃣ Update inventory summary (TOTAL)
+            // 2️⃣ UPDATE INVENTORY SUMMARY
+
+            // ----------------------------------------
+
             await _inventory.UpdateOneAsync(
-                i => i.ProductId == productId && i.DistributorId == distributorId,
-                Builders<InventoryItem>.Update
-                    .Inc(i => i.CurrentStock, -quantity)
-                    .Set(i => i.UpdatedAt, DateTime.UtcNow)
-            );
 
+         i => i.ProductId == productId && i.DistributorId == distributorId,
+
+         Builders<InventoryItem>.Update
+
+             .Inc(i => i.CurrentStock, -quantity)
+
+             .Set(i => i.UpdatedAt, DateTime.UtcNow)
+
+     );
             return true;
-        }
 
+        }
 
 
 
@@ -365,11 +467,11 @@ namespace DSM_Application.Server.Services
                     .Set(i => i.UpdatedAt, DateTime.UtcNow),
                 new UpdateOptions { IsUpsert = true }
             );
-        
 
 
-        // 3️⃣ Movement
-        await _movements.InsertOneAsync(new StockMovement
+
+            // 3️⃣ Movement
+            await _movements.InsertOneAsync(new StockMovement
             {
                 ProductId = dto.ProductId,
                 DistributorId = distributorId,

@@ -1,0 +1,45 @@
+<div class="payment-page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h2><i class="fas fa-rupee-sign"></i> Payment Collection</h2>
+    <p>Manage cash collection, summary and handovers</p>
+  </div>
+
+  <!-- INTERNAL NAVIGATION - Now Horizontal -->
+  <div class="section-nav">
+    <button
+      [class.active]="activeSection === 'collect'"
+      (click)="switch('collect')">
+      <i class="fas fa-coins"></i> Collect Cash
+    </button>
+
+    <button
+      [class.active]="activeSection === 'summary'"
+      (click)="switch('summary')">
+      <i class="fas fa-file-alt"></i> Daily Summary
+    </button>
+
+    <button
+      [class.active]="activeSection === 'handover'"
+      (click)="switch('handover')">
+      <i class="fas fa-hand-holding-usd"></i> Handover Cash
+    </button>
+  </div>
+
+  <!-- SECTION CONTENT -->
+  <div class="section-content">
+    <app-cash-collection
+      *ngIf="activeSection === 'collect'">
+    </app-cash-collection>
+
+    <app-cash-summary
+      *ngIf="activeSection === 'summary'">
+    </app-cash-summary>
+
+    <app-collector-reports
+      *ngIf="activeSection === 'handover'">
+    </app-collector-reports>
+  </div>
+
+</div>

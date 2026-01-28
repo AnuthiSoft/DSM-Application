@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';  // ✅ Fix: Import HttpClien
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ReturnApiService } from '../../services/return-api.service';
+import { environment } from '../../../environments/environment';
 
   interface ReturnData {
   returnType: string;
@@ -65,9 +66,22 @@ createdReturnId: string = '';
   customerId = localStorage.getItem('customerId') || '';
   distributorId = localStorage.getItem('distributorId') || '';
 
-isReturnPopupOpen = false;
+  isReturnPopupOpen = false;
 
-currentOrderId: string = '';
+  currentOrderId: string = '';
+  statusFilter: string = 'All';
+
+statusOptions: string[] = [
+  'All',
+  'Pending',
+  'Confirmed',
+  'Shipped',
+  'Delivered',
+  'Cancelled',
+  'Rejected'
+];
+
+filteredOrders: Order[] = [];
 
 
   constructor(private orderService: OrderService, private returnApiService:ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
@@ -82,24 +96,39 @@ currentOrderId: string = '';
 }
 
 
-  loadOrders(): void {
-    if (!this.customerId) return;
-    this.loading = true;
+loadOrders(): void {
+  if (!this.customerId) return;
+  this.loading = true;
 
-    this.orderService.getOrdersByCustomer(this.customerId).subscribe({
-      next: (data: Order[]) => {
-        this.orders = data.map(order => ({
-          ...order,
-          expectedDeliveryDate: this.computeExpectedDelivery(order.orderedDate, order.distributorId)
-        }));
-        this.loading = false;
-      },
-      error: (err: any) => {
-        console.error("Failed to load orders", err);
-        this.loading = false;
-      }
-    });
+  this.orderService.getOrdersByCustomer(this.customerId).subscribe({
+    next: (data: Order[]) => {
+      this.orders = data.map(order => ({
+        ...order,
+        expectedDeliveryDate: this.computeExpectedDelivery(
+          order.orderedDate,
+          order.distributorId
+        )
+      }));
+
+      this.applyStatusFilter(); // ✅ IMPORTANT
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+}
+applyStatusFilter(): void {
+  if (this.statusFilter === 'All') {
+    this.filteredOrders = [...this.orders];
+  } else {
+    this.filteredOrders = this.orders.filter(
+      o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
+    );
   }
+}
+
+
 
 onFilesSelected(event: any) {
   this.selectedFiles = Array.from(event.target.files);
@@ -277,9 +306,9 @@ openReturnPopup(order: any) {
 
 
   //   // Navigate to order details page
-  viewOrderDetails(orderId: string): void {
-    this.router.navigate(['/orders', orderId]);
-  }
+  // viewOrderDetails(orderId: string): void {
+  //   this.router.navigate(['/orders', orderId]);
+  // }
 
   // Cancel an order
   cancelOrder(orderId: string): void {
@@ -330,47 +359,135 @@ reorder(orderId: string): void {
 
 
   // Count completed orders
-  // getCompletedCount(): number {
-  //   return this.orders.filter(o => o.status === 'Delivered').length;
-  // }
-  getCompletedCount(): number {
-  return this.orders.filter(
+getCompletedCount(): number {
+  return this.filteredOrders.filter(
     o => o.status?.toLowerCase() === 'delivered'
   ).length;
 }
 
   // Count pending orders
-  getPendingCount(): number {
-  return this.orders.filter(
+getPendingCount(): number {
+  return this.filteredOrders.filter(
     o => o.status?.toLowerCase() === 'pending'
   ).length;
 }
-  // getPendingCount(): number {
-  //   return this.orders.filter(o => o.status === 'Pending').length;
-  // }
 
   // Calculate total spent
-  getTotalSpent(): number {
-  return this.orders.reduce(
+getTotalSpent(): number {
+  return this.filteredOrders.reduce(
     (sum, o) => sum + (o.totalAmount || 0),
     0
   );
 }
-  // getTotalSpent(): number {
-  //   return this.orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  // }
 
   // ✅ FIXED View Details for order
-viewOrderDetailss(id: string) {
-  this.orderService.getOrderById(id).subscribe({
-    next: order => {
-
-      const totalPrice = (order.products || []).reduce(
-        (sum: number, item: any) => sum + (item.price * item.quantity),
-        0
-      );
-
-      const itemsHtml = (order.products || []).map((item: any) => `
+  viewOrderDetails(id: string | null | undefined): void {
+ 
+    if (!id) {
+      this.toastr.error('Invalid Order ID');
+      return;
+    }
+ 
+    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+      next: order => {
+ 
+        const taxableAmount =
+          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
+ 
+        Swal.fire({
+          title: 'Order Summary',
+          html: `
+          <div style="text-align:left; font-size:15px; line-height:1.6">
+ 
+            <p><strong>Subtotal:</strong> ₹${order.subtotal?.toFixed(2)}</p>
+ 
+            <hr>
+ 
+            <p><strong>Discounts</strong></p>
+ 
+            <p>Price Discount (${order.priceDiscountPercent ?? 0}%):
+              <span style="color:green">
+                - ₹${((order.subtotal * (order.priceDiscountPercent ?? 0)) / 100).toFixed(2)}
+              </span>
+            </p>
+ 
+            <p>Quantity Discount (${order.quantityDiscountPercent ?? 0}%):
+              <span style="color:green">
+                - ₹${((order.subtotal * (order.quantityDiscountPercent ?? 0)) / 100).toFixed(2)}
+              </span>
+            </p>
+ 
+            <p>Special Discount (${order.specialDiscountPercent ?? 0}%):
+              <span style="color:green">
+                - ₹${((order.subtotal * (order.specialDiscountPercent ?? 0)) / 100).toFixed(2)}
+              </span>
+            </p>
+ 
+            <p><strong>General Discount:</strong>
+              <span style="color:green">
+                - ₹${order.products?.[0]?.generalDiscount?.toFixed(2) ?? '0.00'}
+              </span>
+            </p>
+ 
+            <p style="font-weight:600">
+              Total Discount:
+              <span style="color:green">
+                - ₹${order.totalDiscount?.toFixed(2)}
+              </span>
+            </p>
+ 
+            <hr>
+ 
+            <p><strong>Taxable Amount:</strong>
+              ₹${taxableAmount.toFixed(2)}
+            </p>
+ 
+        <p>
+        <strong>GST (${order.products?.[0]?.gstPercentage ?? 0}%):</strong>
+        ₹${Number(
+            order.products?.reduce(
+              (sum: number, p: any) => sum + (p.gstAmount ?? 0),
+              0
+            )
+          ).toFixed(2)}
+         
+          </p>
+            <hr>
+ 
+            <p style="font-size:17px; font-weight:700">
+              Total Amount: ₹${order.totalAmount?.toFixed(2)}
+            </p>
+ 
+          </div>
+        `,
+          icon: 'info',
+          width: 420,
+          confirmButtonText: 'Close'
+        });
+ 
+      },
+      error: () => {
+        this.toastr.error('Unable to load order details');
+      }
+    });
+  }
+ 
+ 
+ 
+  viewOrderDetailss(id: string | null | undefined): void {
+ 
+    console.log('View Items clicked. Order ID =', id);
+ 
+    // 🛑 STOP if ID is invalid
+    if (!id) {
+      this.toastr.error('Invalid Order ID');
+      return;
+    }
+ 
+    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+      next: order => {
+ 
+        const itemsHtml = (order.products || []).map((item: any) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <div>
             <strong>${item.productName}</strong><br>
@@ -381,35 +498,59 @@ viewOrderDetailss(id: string) {
           </div>
         </div>
       `).join('');
-
-      Swal.fire({
-        title: 'Order Items',
-        html: `
+ 
+        const totalPrice = (order.products || []).reduce(
+          (sum: number, item: any) => sum + (item.price * item.quantity),
+          0
+        );
+ 
+        Swal.fire({
+          title: 'Order Items',
+          html: `
           <div style="text-align:left; font-size:15px;">
+ 
             ${itemsHtml}
-
+ 
             <hr>
-
+ 
             <div style="display:flex; justify-content:space-between; font-size:16px;">
               <strong>Total Price</strong>
               <strong>₹${totalPrice.toFixed(2)}</strong>
             </div>
-
+ 
             <div style="display:flex; justify-content:space-between; margin-top:6px;">
               <strong>Final Price</strong>
               <strong>₹${order.totalAmount ?? 0}</strong>
             </div>
+ 
           </div>
         `,
-        icon: 'info',
-        width: 450,
-        confirmButtonText: 'Close'
-      });
-    },
-    error: () => {
-      Swal.fire('Error', 'Unable to load order details', 'error');
-    }
-  });
+          icon: 'info',
+          width: 450,
+          confirmButtonText: 'Close'
+        });
+ 
+      },
+      error: err => {
+        console.error('Error loading order:', err);
+        Swal.fire('Error', 'Unable to load order details', 'error');
+      }
+    });
+  }
+ 
+ setStatusFilter(status: string) {
+  this.statusFilter = status;
+  this.applyStatusFilter();
+}
+getStatusCount(status: string): number {
+  if (status === 'All') return this.orders.length;
+
+  return this.orders.filter(
+    o => o.status?.toLowerCase() === status.toLowerCase()
+  ).length;
+}
+ goBackToDashboard() {
+  this.router.navigate(['/customer-dashboard']);
 }
 
 

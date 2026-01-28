@@ -228,10 +228,12 @@
     <!-- Page Header -->
     <div class="welcome-header">
       <h2><i class="fas fa-users"></i> Employee Management</h2>
-      <button *ngIf="!loading && filteredEmployees.length > 0" class="btn btn-primary" (click)="openEmployeeModal()">
+
+      <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
         <i class="fas fa-plus"></i> Add Employee
       </button>
     </div>
+
 
     <!-- Search and Filter Card -->
     <div class="dashboard-card">
@@ -369,242 +371,220 @@
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- ================= Upload Invoice Modal ================= -->
-    <div *ngIf="showUploadModal" class="modal-overlay">
-      <div class="modal-backdrop" (click)="closeUploadModal()"></div>
+      <!-- ================= Upload Invoice Modal ================= -->
+      <div *ngIf="showUploadModal" class="modal-overlay">
+        <div class="modal-backdrop" (click)="closeUploadModal()"></div>
 
-      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3><i class="fas fa-file-upload"></i> Upload Invoice PDF</h3>
+            <button class="modal-close" (click)="closeUploadModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
 
-        <div class="modal-header">
-          <h3><i class="fas fa-file-upload"></i> Upload Invoice PDF</h3>
-          <button class="modal-close" (click)="closeUploadModal()">
-            <i class="fas fa-times"></i>
-          </button>
+          <div class="modal-body">
+            <p class="employee-label">
+              <span class="employee-title">Employee:</span>
+              <span class="employee-name">{{ selectedEmployee?.name }}</span>
+            </p>
+
+            <div class="file-upload-wrapper">
+              <label class="file-upload-btn">
+                <i class="fas fa-upload"></i>
+                Choose PDF
+                <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
+              </label>
+
+              <span class="file-name">
+                {{ selectedFileName || 'No file chosen' }}
+              </span>
+            </div>
+
+            <div class="upload-btn-center">
+              <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
+                Upload PDF
+              </button>
+            </div>
+          </div>
         </div>
-
-        <!-- <div class="modal-body">
-          <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p>
-
-          <input type="file" (change)="onFileSelected($event)" accept="application/pdf" />
-
-          <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
-            Upload PDF
-          </button>
-        </div>
-
-      </div> -->
-
-      <div class="modal-body">
-        <p class="employee-label">
-  <span class="employee-title">Employee:</span>
-  <span class="employee-name">{{ selectedEmployee?.name }}</span>
-</p>
-
-        <!-- <p class="employee-label">
-  <strong>Employee:</strong> {{ selectedEmployee?.name }}
-</p> -->
-
-  <!-- <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p> -->
-
-  <div class="file-upload-wrapper">
-  <label class="file-upload-btn">
-    <i class="fas fa-upload"></i>
-    Choose PDF
-    <input
-      type="file"
-      accept="application/pdf"
-      hidden
-      (change)="onFileSelected($event)"
-    />
-  </label>
-
-  <span class="file-name">
-    {{ selectedFileName || 'No file chosen' }}
-  </span>
-</div>
-
-  <!-- <input type="file" (change)="onFileSelected($event)" accept="application/pdf" /> -->
-
-  <div class="upload-btn-center">
-    <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
-      Upload PDF
-    </button>
-  </div>
-</div>
-
-    </div>
-    <!-- ========================================================== -->
+      </div>
 
 
-    <!-- Employee Modal -->
-    <div *ngIf="showModal" class="modal-overlay">
-      <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
-
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>
-            <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
-            {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
-          </h3>
-          <button class="modal-close" (click)="closeEmployeeModal()">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-user"></i>
-                  Full Name
-                </label>
-                <input type="text" class="form-control" formControlName="name" placeholder="Enter employee name" />
-                <div *ngIf="employeeForm.get('name')?.touched && employeeForm.get('name')?.invalid" class="text-danger">
-                  Name is required
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-envelope"></i>
-                  Email Address
-                </label>
-                <input type="email" class="form-control" formControlName="email" placeholder="Enter email address"
-                  (blur)="checkEmployeeEmailExists()" />
-                <div class="text-danger" *ngIf="employeeForm.get('email')?.touched">
-                  <div *ngIf="employeeForm.get('email')?.errors?.['required']">
-                    Email is required
-                  </div>
-                  <div *ngIf="employeeForm.get('email')?.errors?.['email']">
-                    Enter a valid email address
-                  </div>
-                  <div class="text-danger" *ngIf="employeeForm.get('email')?.errors?.['exists']">
-                    This email already exists
-                  </div>
-
-                </div>
 
 
-              </div>
 
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-phone"></i> Phone Number
-                </label>
+      <!-- Employee Modal -->
+      <div *ngIf="showModal" class="modal-overlay">
+        <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
 
-                <!-- Phone Input -->
-                <div class="phone-group"
-                  [class.phone-error]="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>
+              <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
+              {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
+            </h3>
+            <button class="modal-close" (click)="closeEmployeeModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
 
-                  <span class="phone-prefix">+91</span>
-
-                  <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
-                    inputmode="numeric" autocomplete="off" placeholder="Enter phone number" [readonly]="phoneVerifiedUI"
-                    (input)="restrictPhoneInput($event)" />
-                </div>
-
-                <!-- ❗ Error message OUTSIDE input -->
-                <div class="text-danger mt-1" *ngIf="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
-                  Enter a valid 10-digit Mobile Number
-                </div>
-
-                <!-- Verified -->
-                <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-                  <i class="fas fa-check-circle"></i> Verified
-                </div>
-
-
-                <!-- Send OTP button -->
-                <div class="mt-2" *ngIf="!phoneVerifiedUI">
-                  <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
-                    Send OTP
-                  </button>
-                </div>
-
-                <!-- OTP input -->
-                <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
-                  <label>Enter OTP</label>
-
-                  <input type="text" class="form-control" maxlength="6" [(ngModel)]="otpCode"
-                    [ngModelOptions]="{ standalone: true }" />
-
-                  <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
-                    Verify OTP
-                  </button>
-
-                  <div *ngIf="otpFailed" class="text-danger mt-2">
-                    ✖ Invalid or expired OTP
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-briefcase"></i>
-                  Designation
-                </label>
-
-                <select class="form-select" formControlName="designation">
-                  <option value="">Select Designation</option>
-                  <option value="Administrator">Administrator</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Sales Representative">Sales Representative</option>
-                  <option value="Delivery Boy">Delivery Boy</option>
-                  <option value="Cash Collector">Cash Collector</option>
-                </select>
-                <div *ngIf="employeeForm.get('designation')?.touched && employeeForm.get('designation')?.invalid"
-                  class="text-danger">
-                  Designation is required
-                </div>
-
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-user-tag"></i>
-                  Role
-                </label>
-                <input type="text" class="form-control" formControlName="role" />
-                <div *ngIf="employeeForm.get('role')?.touched && employeeForm.get('role')?.invalid" class="text-danger">
-                  Role is required
-                </div>
-
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-toggle-on"></i>
-                  Status
-                </label>
-                <div class="status-toggle">
-                  <label class="toggle-switch">
-                    <input type="checkbox" class="toggle-input" formControlName="isActive" />
-                    <span class="toggle-slider"></span>
+          <div class="modal-body">
+            <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-user"></i>
+                    Full Name
                   </label>
-                  <span class="toggle-label">
-                    {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
-                  </span>
+                  <input type="text" class="form-control" formControlName="name" placeholder="Enter employee name" />
+                  <div *ngIf="employeeForm.get('name')?.touched && employeeForm.get('name')?.invalid"
+                    class="text-danger">
+                    Name is required
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Email Address
+                  </label>
+                  <input type="email" class="form-control" formControlName="email" placeholder="Enter email address"
+                    (blur)="checkEmployeeEmailExists()" />
+                  <div class="text-danger" *ngIf="employeeForm.get('email')?.touched">
+                    <div *ngIf="employeeForm.get('email')?.errors?.['required']">
+                      Email is required
+                    </div>
+                    <div *ngIf="employeeForm.get('email')?.errors?.['email']">
+                      Enter a valid email address
+                    </div>
+                    <div class="text-danger" *ngIf="employeeForm.get('email')?.errors?.['exists']">
+                      This email already exists
+                    </div>
+
+                  </div>
+
+
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-phone"></i> Phone Number
+                  </label>
+
+                  <!-- Phone Input -->
+                  <div class="phone-group"
+                    [class.phone-error]="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+
+                    <span class="phone-prefix">+91</span>
+
+                    <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
+                      inputmode="numeric" autocomplete="off" placeholder="Enter phone number"
+                      [readonly]="phoneVerifiedUI" (input)="restrictPhoneInput($event)" />
+                  </div>
+
+                  <!-- ❗ Error message OUTSIDE input -->
+                  <div class="text-danger mt-1" *ngIf="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+                    Enter a valid 10-digit Mobile Number
+                  </div>
+
+                  <!-- Verified -->
+                  <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+                    <i class="fas fa-check-circle"></i> Verified
+                  </div>
+
+
+                  <!-- Send OTP button -->
+                  <div class="mt-2" *ngIf="!phoneVerifiedUI">
+                    <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                      Send OTP
+                    </button>
+                  </div>
+
+                  <!-- OTP input -->
+                  <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
+                    <label>Enter OTP</label>
+
+                    <input type="text" class="form-control" maxlength="6" [(ngModel)]="otpCode"
+                      [ngModelOptions]="{ standalone: true }" />
+
+                    <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
+                      Verify OTP
+                    </button>
+
+                    <div *ngIf="otpFailed" class="text-danger mt-2">
+                      ✖ Invalid or expired OTP
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-briefcase"></i>
+                    Designation
+                  </label>
+
+                  <select class="form-select" formControlName="designation">
+                    <option value="">Select Designation</option>
+                    <option value="Administrator">Administrator</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Sales Representative">Sales Representative</option>
+                    <option value="Delivery Boy">Delivery Boy</option>
+                    <option value="Cash Collector">Cash Collector</option>
+                  </select>
+                  <div *ngIf="employeeForm.get('designation')?.touched && employeeForm.get('designation')?.invalid"
+                    class="text-danger">
+                    Designation is required
+                  </div>
+
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-user-tag"></i>
+                    Role
+                  </label>
+                  <input type="text" class="form-control" formControlName="role" />
+                  <div *ngIf="employeeForm.get('role')?.touched && employeeForm.get('role')?.invalid"
+                    class="text-danger">
+                    Role is required
+                  </div>
+
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-toggle-on"></i>
+                    Status
+                  </label>
+                  <div class="status-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" formControlName="isActive" />
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">
+                      {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
-                <i class="fas fa-times"></i> Cancel
-              </button>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
 
-              <button type="submit" class="btn btn-primary">
-                <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
-                {{ isEdit ? 'Update Employee' : 'Save Employee' }}
-              </button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
+                  {{ isEdit ? 'Update Employee' : 'Save Employee' }}
+                </button>
 
-            </div>
-          </form>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+

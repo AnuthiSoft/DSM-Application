@@ -1,11 +1,11 @@
 /* DISTRIBUTOR ORDERS STYLING - MATCHING THE DASHBOARD THEME */
-
+ 
 /* Orders Section Container */
 .orders-section {
   padding: 0;
   background-color: var(--bg-color);
 }
-
+ 
 /* Welcome Header */
 .orders-section .welcome-header {
   display: flex;
@@ -14,14 +14,14 @@
   margin-bottom: 24px;
   padding: 0;
 }
-
+ 
 .orders-section .welcome-header h2 {
   color: var(--text-color);
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
 }
-
+ 
 /* Dashboard Cards Styling */
 .orders-section .dashboard-card {
   background: var(--card-bg);
@@ -32,11 +32,11 @@
   box-shadow: var(--shadow);
   transition: all 0.3s ease;
 }
-
+ 
 .orders-section .dashboard-card:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
-
+ 
 /* Filter Header */
 .filter-header {
   display: flex;
@@ -45,7 +45,7 @@
   padding-bottom: 15px;
   border-bottom: 1px solid var(--border-color);
 }
-
+ 
 .filter-header h3 {
   color: var(--text-color);
   font-size: 1.25rem;
@@ -55,11 +55,11 @@
   align-items: center;
   gap: 10px;
 }
-
+ 
 .filter-header h3 i {
   color: var(--primary-color);
 }
-
+ 
 /* Filter Controls */
 .filter-controls {
   display: flex;
@@ -67,13 +67,13 @@
   gap: 15px;
   flex-wrap: wrap;
 }
-
+ 
 .filter-label {
   color: var(--text-color);
   font-weight: 600;
   font-size: 0.95rem;
 }
-
+ 
 .form-select {
   padding: 10px 12px;
   border-radius: 6px;
@@ -84,13 +84,13 @@
   min-width: 200px;
   transition: all 0.3s ease;
 }
-
+ 
 .form-select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
-
+ 
 /* Card Header */
 .card-header {
   display: flex;
@@ -100,7 +100,7 @@
   padding-bottom: 15px;
   border-bottom: 1px solid var(--border-color);
 }
-
+ 
 .card-header h3 {
   color: var(--text-color);
   font-size: 1.25rem;
@@ -110,11 +110,11 @@
   align-items: center;
   gap: 10px;
 }
-
+ 
 .card-header h3 i {
   color: var(--primary-color);
 }
-
+ 
 .orders-count {
   background: var(--primary-color);
   color: white;
@@ -123,25 +123,25 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
-
+ 
 /* Table Container */
 .table-container {
   overflow-x: auto;
   border-radius: 8px;
   border: 1px solid var(--border-color);
 }
-
+ 
 /* Orders Table */
 .orders-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--card-bg);
 }
-
+ 
 .orders-table thead {
   background: var(--sidebar-bg);
 }
-
+ 
 .orders-table th {
   color: var(--sidebar-text);
   font-weight: 600;
@@ -152,40 +152,40 @@
   letter-spacing: 0.5px;
   border-bottom: 2px solid var(--border-color);
 }
-
+ 
 .orders-table tbody tr {
   border-bottom: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
-
+ 
 .orders-table tbody tr:hover {
   background-color: var(--hover-color);
 }
-
+ 
 .orders-table td {
   padding: 15px 12px;
   color: var(--text-color);
   vertical-align: middle;
 }
-
+ 
 /* Order ID */
 .order-id {
   font-weight: 600;
   color: var(--primary-color);
 }
-
+ 
 /* Customer Name */
 .customer-name {
   font-weight: 500;
   color: var(--text-color);
 }
-
+ 
 /* Order Total */
 .order-total {
   font-weight: 700;
   color: var(--primary-color);
 }
-
+ 
 /* Status Badges */
 .status-badge {
   display: inline-block;
@@ -196,39 +196,39 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
-
+ 
 /* Status Colors */
 .status-badge.Pending {
   background-color: rgba(243, 156, 18, 0.1);
   color: #f39c12;
   border: 1px solid rgba(243, 156, 18, 0.3);
 }
-
+ 
 .status-badge.Confirmed {
   background-color: rgba(52, 152, 219, 0.1);
   color: var(--primary-color);
   border: 1px solid rgba(52, 152, 219, 0.3);
 }
-
+ 
 .status-badge.Shipped {
   background-color: rgba(155, 89, 182, 0.1);
   color: #9b59b6;
   border: 1px solid rgba(155, 89, 182, 0.3);
 }
-
+ 
 .status-badge.Delivered {
   background-color: rgba(46, 204, 113, 0.1);
   color: #2ecc71;
   border: 1px solid rgba(46, 204, 113, 0.3);
 }
-
+ 
 /* Action Buttons */
 .action-buttons {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
-
+ 
 .btn {
   padding: 6px 12px;
   border-radius: 6px;
@@ -241,49 +241,49 @@
   align-items: center;
   gap: 5px;
 }
-
+ 
 .btn-sm {
   padding: 5px 10px;
   font-size: 0.8rem;
 }
-
+ 
 .btn-success {
   background-color: #27ae60;
   color: white;
 }
-
+ 
 .btn-success:hover {
   background-color: #219955;
 }
-
+ 
 .btn-danger {
   background-color: #e74c3c;
   color: white;
 }
-
+ 
 .btn-danger:hover {
   background-color: #c0392b;
 }
-
+ 
 .btn-primary {
   background-color: var(--primary-color);
   color: white;
 }
-
+ 
 .btn-primary:hover {
   background-color: #2980b9;
 }
-
+ 
 .btn-outline-secondary {
   background-color: transparent;
   color: var(--text-color);
   border: 1px solid var(--border-color);
 }
-
+ 
 .btn-outline-secondary:hover {
   background-color: var(--hover-color);
 }
-
+ 
 .view-details-btn {
   background-color: rgba(52, 152, 219, 0.1);
   color: var(--primary-color);
@@ -298,20 +298,20 @@
   align-items: center;
   gap: 5px;
 }
-
+ 
 .view-details-btn:hover {
   background-color: rgba(52, 152, 219, 0.2);
 }
-
+ 
 /* Payment Status */
 .text-success {
   color: #27ae60 !important;
 }
-
+ 
 .text-warning {
   color: #f39c12 !important;
 }
-
+ 
 /* Badges */
 .badge {
   display: inline-block;
@@ -320,86 +320,86 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
-
+ 
 .bg-info {
   background-color: rgba(52, 152, 219, 0.1);
   color: var(--primary-color);
 }
-
+ 
 .bg-success {
   background-color: rgba(46, 204, 113, 0.1);
   color: #27ae60;
 }
-
+ 
 /* Empty State */
 .empty-state {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-color);
 }
-
+ 
 .empty-state i {
   font-size: 3rem;
   color: var(--border-color);
   margin-bottom: 15px;
 }
-
+ 
 .empty-state h4 {
   font-size: 1.2rem;
   margin-bottom: 10px;
   color: var(--text-color);
 }
-
+ 
 .empty-state p {
   color: var(--text-color);
   opacity: 0.7;
   margin: 0;
 }
-
+ 
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
   inset: 0;
-
+ 
   /* ✅ very light blur */
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(3px);
-
+ 
   /* ✅ very light dim (NOT dark) */
   background: rgba(0, 0, 0, 0.15);
-
+ 
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
 }
-
-
+ 
+ 
 /* optional but safe */
 .modal-backdrop {
   position: absolute;
   inset: 0;
   background: transparent;
 }
-
-
+ 
+ 
 .modal-content {
   background: var(--card-bg);
   color: var(--text-color);
-
+ 
   border-radius: 12px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   z-index: 2;
-
+ 
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.6),
     0 0 0 1px var(--border-color);
 }
-
-
+ 
+ 
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -407,7 +407,7 @@
   padding: 20px;
   border-bottom: 1px solid var(--border-color);
 }
-
+ 
 .modal-header h3 {
   color: var(--text-color);
   margin: 0;
@@ -416,11 +416,11 @@
   align-items: center;
   gap: 10px;
 }
-
+ 
 .modal-header h3 i {
   color: var(--primary-color);
 }
-
+ 
 .modal-close {
   background: none;
   border: none;
@@ -431,16 +431,16 @@
   border-radius: 4px;
   transition: all 0.2s ease;
 }
-
+ 
 .modal-close:hover {
   background-color: var(--hover-color);
 }
-
+ 
 .modal-body {
   padding: 20px;
   color: var(--text-color);
 }
-
+ 
 .modal-footer {
   padding: 20px;
   border-top: 1px solid var(--border-color);
@@ -448,7 +448,7 @@
   justify-content: flex-end;
   gap: 10px;
 }
-
+ 
 /* Availability Box */
 .availability-box {
   background: var(--hover-color);
@@ -457,21 +457,21 @@
   border-left: 4px solid var(--primary-color);
   margin-bottom: 20px;
 }
-
+ 
 .availability-box h5 {
   color: var(--text-color);
   margin-bottom: 15px;
 }
-
+ 
 .availability-box p {
   margin-bottom: 10px;
   line-height: 1.5;
 }
-
+ 
 .availability-box strong {
   color: var(--text-color);
 }
-
+ 
 /* Order Info */
 .order-info {
   background: var(--hover-color);
@@ -479,17 +479,17 @@
   border-radius: 8px;
   margin-bottom: 20px;
 }
-
+ 
 .order-info h4 {
   color: var(--text-color);
   margin-bottom: 10px;
 }
-
+ 
 .order-info p {
   margin-bottom: 5px;
   color: var(--text-color);
 }
-
+ 
 /* Alert Box */
 .alert {
   padding: 15px;
@@ -497,18 +497,18 @@
   border: 1px solid var(--border-color);
   background-color: rgba(52, 152, 219, 0.1);
 }
-
+ 
 .alert-info {
   color: var(--text-color);
   background-color: rgba(52, 152, 219, 0.1);
   border-color: rgba(52, 152, 219, 0.3);
 }
-
+ 
 /* Form Group */
 .form-group {
   margin-bottom: 20px;
 }
-
+ 
 .form-label {
   display: block;
   margin-bottom: 8px;
@@ -518,7 +518,7 @@
   align-items: center;
   gap: 8px;
 }
-
+ 
 /* Product Box in Modal */
 .product-box {
   background: var(--hover-color);
@@ -526,82 +526,130 @@
   border-radius: 8px;
   border: 1px solid var(--border-color);
 }
-
+ 
 .product-img {
   border-radius: 6px;
   background: white;
 }
-
+ 
 .product-info h5 {
   color: var(--text-color);
   margin-bottom: 10px;
 }
-
+ 
 .product-info p {
   margin-bottom: 5px;
   color: var(--text-color);
   font-size: 0.9rem;
 }
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s ease-in-out infinite;
+}
 
+.spinner-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+}
+
+.loading-text {
+  color: var(--text-color);
+  margin-top: 15px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading Overlay for Table */
+.table-loading {
+  position: relative;
+  min-height: 300px;
+}
+
+.table-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--card-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+}
+ 
 /* Responsive Design */
 @media (max-width: 768px) {
   .orders-section .dashboard-card {
     padding: 15px;
   }
-  
+ 
   .filter-controls {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+ 
   .form-select {
     width: 100%;
   }
-  
+ 
   .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+ 
   .orders-table {
     font-size: 0.85rem;
   }
-  
+ 
   .orders-table th,
   .orders-table td {
     padding: 10px 8px;
   }
-  
+ 
   .action-buttons {
     flex-direction: column;
     gap: 5px;
   }
-  
+ 
   .modal-content {
     width: 95%;
     margin: 10px;
   }
 }
-
+ 
 @media (max-width: 480px) {
   .orders-section .welcome-header h2 {
     font-size: 1.5rem;
   }
-  
+ 
   .filter-header h3,
   .card-header h3 {
     font-size: 1.1rem;
   }
-  
+ 
   .orders-table {
     display: block;
   }
-  
+ 
   .orders-table thead {
     display: none;
   }
-  
+ 
   .orders-table tbody tr {
     display: block;
     margin-bottom: 15px;
@@ -609,7 +657,7 @@
     border-radius: 8px;
     padding: 10px;
   }
-  
+ 
   .orders-table td {
     display: flex;
     justify-content: space-between;
@@ -617,11 +665,11 @@
     padding: 8px 0;
     border-bottom: 1px solid var(--border-color);
   }
-  
+ 
   .orders-table td:last-child {
     border-bottom: none;
   }
-  
+ 
   .orders-table td::before {
     content: attr(data-label);
     font-weight: 600;
@@ -629,10 +677,10 @@
     margin-right: 10px;
     flex: 1;
   }
-  
+ 
   /* Add data-label attributes to your HTML or use JavaScript */
 }
-
+ 
 /* Animations */
 @keyframes fadeIn {
   from {
@@ -644,28 +692,28 @@
     transform: translateY(0);
   }
 }
-
+ 
 .orders-section .dashboard-card {
   animation: fadeIn 0.3s ease-out;
 }
-
+ 
 /* Utility Classes */
 .fw-bold {
   font-weight: 700 !important;
 }
-
+ 
 .mt-3 {
   margin-top: 1rem !important;
 }
-
+ 
 .mb-3 {
   margin-bottom: 1rem !important;
 }
-
+ 
 .d-flex {
   display: flex !important;
 }
-
+ 
 .gap-3 {
   gap: 1rem !important;
 }

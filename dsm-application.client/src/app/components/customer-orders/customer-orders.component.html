@@ -33,29 +33,49 @@
 <div class="orders-section">
   <div class="welcome-header">
     <h2>My Orders</h2>
+ <button class="btn btn-outline-primary"
+          (click)="goBackToDashboard()">
+    <i class="fas fa-arrow-left"></i>
+    Back to Dashboard
+  </button>
   </div>
+        <!-- 🔽 STATUS FILTER -->
+<div class="orders-filter-tabs">
+
+  <button
+    *ngFor="let s of statusOptions"
+    class="status-tab"
+    [class.active]="statusFilter === s"
+    (click)="setStatusFilter(s)">
+
+    {{ s }}
+
+    <span class="tab-count">
+      {{ getStatusCount(s) }}
+    </span>
+
+  </button>
+
+</div>
+
 
   <div *ngIf="loading" class="loading-state">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Loading orders...</span>
   </div>
 
-  <div *ngIf="!loading && (!orders || orders.length === 0)" class="no-orders">
+  <div *ngIf="!loading && filteredOrders.length === 0" class="no-orders">
     <i class="fas fa-shopping-bag"></i>
     <h3>No Orders Found</h3>
-    <p>You haven't placed any orders yet.</p>
-    <button class="btn btn-primary" routerLink="/products">
-      <i class="fas fa-shopping-cart"></i>
-      Start Shopping
-    </button>
+    <p>No orders found for selected status.</p>
   </div>
 
-  <div *ngIf="!loading && orders.length > 0" class="orders-content">
+
+  <div *ngIf="!loading && filteredOrders.length > 0" class="orders-content">
     <div class="orders-stats">
       <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-        <div class="stat-value">{{ orders.length }}</div>
-        <!-- <div class="stat-value">{{ orders.length }}</div> -->
+        <div class="stat-value">{{ filteredOrders.length }}</div>
         <div class="stat-label">Total Orders</div>
       </div>
       <div class="stat-card">
@@ -73,10 +93,12 @@
         <div class="stat-value">₹{{ getTotalSpent() | number:'1.0-2' }}</div>
         <div class="stat-label">Total Spent</div>
       </div>
+      
     </div>
 
+
     <div class="orders-grid">
-      <div class="order-card" *ngFor="let order of orders">
+     <div class="order-card" *ngFor="let order of filteredOrders">
         <div class="order-header">
           <div class="order-title">
             <h4>Order #{{ order.id }}</h4>
@@ -267,21 +289,23 @@
   </button>
 
           <!-- Reorder -->
-         <button class="btn btn-outline-success btn-sm"
+         <!-- <button class="btn btn-outline-success btn-sm"
         *ngIf="order.status === 'Delivered'"
         (click)="reorder(order.id)">
   <i class="fas fa-redo"></i> Reorder
-</button>
+</button> -->
 
 
         </div>
 
            <!-- Return (only for delivered orders) -->
-<button class="btn btn-warning btn-sm"
-        *ngIf="order.status === 'Delivered'"
-        (click)="openReturnPopup(order)">
-  <i class="fas fa-undo"></i> Return
-</button>
+ <button class="btn btn-warning btn-sm action-btn"
+                  *ngIf="order.status === 'Delivered'"
+                  (click)="openReturnPopup(order)">
+            <i class="fas fa-undo"></i>
+            <span>Return</span>
+          </button>
+
 
 
       </div>

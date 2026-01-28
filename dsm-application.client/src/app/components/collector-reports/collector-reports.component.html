@@ -4,19 +4,19 @@
   </div>
 
   <!-- DATE FILTER -->
-  <div class="filter-section">
+  <!-- <div class="filter-section">
     <label><i class="fas fa-calendar-alt"></i> Select Date</label>
     <input type="date"
            class="form-input date-input"
            [(ngModel)]="form.date"
            [max]="todayDate"
-           (change)="onDateChange()">
-
+           (change)="onDateChange()"> -->
+<!-- 
     <button class="btn btn-warning" style="width:100%; margin:10px 0"
             (click)="goToPendingPayments()">
       <i class="fas fa-list"></i> Show All Pending Payments
-    </button>
-  </div>
+    </button> -->
+  <!-- </div> -->
 
   <!-- HEADER -->
   <div class="section-header">
@@ -34,12 +34,10 @@
       <thead>
         <tr>
           <th>
-       <input type="checkbox"
-  [checked]="isAllSelected()"
-  [disabled]="hasPendingReceipts()"
-  (change)="toggleSelectAll($any($event.target).checked)">
-
-
+            <input type="checkbox"
+                   [checked]="isAllSelected()"
+                   [disabled]="hasPendingReceipts()"
+                   (change)="toggleSelectAll($any($event.target).checked)">
             Select All
           </th>
           <th>Receipt ID</th>
@@ -53,27 +51,22 @@
       <tbody>
         <tr *ngFor="let p of unhandedReceipts"
             [class.selected]="isSelected(p)">
-
           <td>
-<input type="checkbox"
-  [checked]="isSelected(p)"
-  [disabled]="p.handoverStatus === 'Pending'"
-  (change)="toggleReceiptSelection(p, $any($event.target).checked)">
-
-
+            <input type="checkbox"
+                   [checked]="isSelected(p)"
+                   [disabled]="p.handoverStatus === 'Pending'"
+                   (change)="toggleReceiptSelection(p, $any($event.target).checked)">
           </td>
 
-      <td>
-  <span class="payment-id">#{{ p.receiptId }}</span>
-
-  <div *ngIf="p.handoverStatus === 'Pending'" class="status pending">
-    ⏳ Waiting for distributor approval
-  </div>
-
-  <div *ngIf="p.handoverStatus === 'Rejected'" class="status rejected">
-    ❌ Rejected – {{ p.rejectReason }}
-  </div>
-</td>
+          <td>
+            <span class="payment-id">#{{ p.receiptId }}</span>
+            <div *ngIf="p.handoverStatus === 'Pending'" class="status pending">
+              ⏳ Waiting for distributor approval
+            </div>
+            <div *ngIf="p.handoverStatus === 'Rejected'" class="status rejected">
+              ❌ Rejected – {{ p.rejectReason }}
+            </div>
+          </td>
 
           <td>
             <span class="amount-badge">
@@ -94,7 +87,6 @@
               {{ p.paymentMode }}
             </span>
           </td>
-
         </tr>
       </tbody>
     </table>
@@ -109,55 +101,81 @@
     </div>
   </ng-template>
 
-  <!-- HANDOVER SUMMARY -->
-  <div *ngIf="selectedReceipts.length > 0" class="handover-summary-section">
+  <!-- FLOATING SUBMIT BUTTON (Only shows when receipts are selected) -->
+  <button *ngIf="selectedReceipts.length > 0" 
+          class="floating-submit-btn"
+          (click)="openHandoverModal()"
+          [disabled]="!canSubmit()">
+    <i class="fas fa-hand-holding-usd"></i>
+    Handover {{ selectedReceipts.length }} Receipt(s)
+    <span class="amount-total">₹{{ form.totalAmountSubmitted | number:'1.2-2' }}</span>
+  </button>
 
-    <div class="section-header">
-      <h4><i class="fas fa-file-invoice-dollar"></i> Handover Summary</h4>
-    </div>
-
-    <div class="summary-grid">
-
-      <!-- BREAKDOWN -->
-      <div class="summary-card">
-        <h5>Selected Receipts</h5>
-
-        <div *ngFor="let r of selectedReceipts" class="breakdown-item">
-          <span>#{{ r.receiptId }}</span>
-          <span>{{ r.customerName }}</span>
-          <strong>₹{{ r.amountPaid }}</strong>
-        </div>
-      </div>
-
-      <!-- FORM -->
-      <div class="summary-card">
-
-        <div class="form-group">
-          <label>Cash Amount</label>
-          <input type="number"
-                 [(ngModel)]="form.cashAmountSubmitted"
-                 readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Total Amount</label>
-          <input type="number"
-                 [(ngModel)]="form.totalAmountSubmitted"
-                 readonly>
-        </div>
-
-        <div class="form-group">
-          <label>Notes</label>
-          <textarea [(ngModel)]="form.notes"></textarea>
-        </div>
-
-        <button class="btn btn-primary"
-                (click)="submit()"
-                [disabled]="!canSubmit()">
-          Submit Handover
+  <!-- MODAL POPUP -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h3><i class="fas fa-hand-holding-usd"></i> Handover Summary</h3>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fas fa-times"></i>
         </button>
-
       </div>
+      
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- Selected Receipts -->
+        <div class="modal-summary-card">
+          <h5><i class="fas fa-receipt"></i> Selected Receipts ({{ selectedReceipts.length }})</h5>
+          <div class="selected-receipts-list">
+            <div *ngFor="let r of selectedReceipts" class="selected-receipt-item">
+              <div class="receipt-info">
+                <span class="receipt-id">#{{ r.receiptId }}</span>
+                <span class="customer-name">{{ r.customerName }}</span>
+              </div>
+              <span class="amount">₹{{ r.amountPaid | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Amount Summary -->
+        <div class="modal-summary-card">
+          <h5><i class="fas fa-calculator"></i> Amount Summary</h5>
+          <div class="amount-summary">
+            <div class="amount-summary-item">
+              <span class="label">Total Cash Amount:</span>
+              <span class="value cash">₹{{ form.cashAmountSubmitted | number:'1.2-2' }}</span>
+            </div>
+            <div class="amount-summary-item">
+              <span class="label">Total Amount:</span>
+              <span class="value total">₹{{ form.totalAmountSubmitted | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Notes -->
+        <div class="modal-form-group">
+          <label><i class="fas fa-sticky-note"></i> Additional Notes (Optional)</label>
+          <textarea [(ngModel)]="form.notes" 
+                    placeholder="Add any notes or remarks for this handover..."></textarea>
+        </div>
+        
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary" (click)="closeModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button class="btn btn-primary" 
+                (click)="submitHandover()"
+                [disabled]="!canSubmit()">
+          <i class="fas fa-check"></i> Confirm Handover
+        </button>
+      </div>
+      
     </div>
   </div>
 </div>

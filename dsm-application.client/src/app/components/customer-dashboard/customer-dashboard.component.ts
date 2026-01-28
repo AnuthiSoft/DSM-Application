@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output, SimpleChanges } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
@@ -22,6 +22,7 @@ import { CartService } from '../../services/cart.service';
 })
 export class CustomerDashboardComponent {
   customerEmail: string | null = '';
+    customerName: string | null = '';
  dashboardData!: CustomerDashboardResponse;
   loading = true;
   status: string = '';
@@ -36,7 +37,10 @@ cartCount = 0;
   @Input() selectedProduct: Product | null = null;
   @Output() cartUpdated = new EventEmitter<any[]>();
   cart: any[] = [];
-
+  // Sidebar state
+  isSidebarCollapsed: boolean = false;
+  isMobileMenuOpen = false;
+  isDarkTheme = false;
   activeTab: string = 'dashboard';
   currentDate: Date = new Date();
   orderStats: { total: number } = { total: 0 };
@@ -62,7 +66,7 @@ cartCount = 0;
     private http: HttpClient,
     private toastr: ToastrService,
     private productservice: ProductService,
-    private inventoryService: InventoryService,private cartService : CartService) {
+    private inventoryService: InventoryService,public cartService : CartService) {
     this.productForm = this.fb.group({
       productName: [''],
       productCode: [''],
@@ -83,11 +87,25 @@ cartCount = 0;
   }
 
   ngOnInit(): void {
+     // Load sidebar state
+    const savedSidebarState = localStorage.getItem('customerSidebarCollapsed');
+    if (savedSidebarState !== null) {
+      this.isSidebarCollapsed = savedSidebarState === 'true';
+    }
+
+    // Load active tab
+    const savedTab = localStorage.getItem('customerActiveTab');
+    this.activeTab = savedTab ? savedTab : 'dashboard';
+
+    // Check screen width
+    this.checkScreenWidth();
      this.cartService.cartCount$.subscribe(count => {
     this.cartCount = count; // 🔥 auto updates UI
   });
     
     this.customerEmail = localStorage.getItem('customerEmail');
+   this.customerName  = localStorage.getItem('customerName'); // ✅ FIXED
+    
     this.customerId = localStorage.getItem('customerId') || '';
     this.distributorId = localStorage.getItem('distributorId') || '';
       this.updateCartBadge();
@@ -113,6 +131,45 @@ cartCount = 0;
   }
 
 
+ @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenWidth();
+  }
+
+  checkScreenWidth() {
+    if (window.innerWidth <= 768) {
+      this.isSidebarCollapsed = true;
+    }
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    localStorage.setItem('customerSidebarCollapsed', this.isSidebarCollapsed.toString());
+  }
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
+
+  toggleTheme() {
+    this.isDarkTheme = !this.isDarkTheme;
+    if (this.isDarkTheme) {
+      document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.removeAttribute('data-theme');
+    }
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+    localStorage.setItem('customerActiveTab', tab);
+    this.closeMobileMenu();
+  }
 
 
   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
@@ -340,30 +397,63 @@ updateCartBadge() {
     localStorage.setItem('cart', JSON.stringify(this.cart));
   }
 
+logout(): void {
+  Swal.fire({
+    title: 'Logout Confirmation',
+    text: 'Are you sure you want to logout?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Logout',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true,
+    allowOutsideClick: false,
 
-  logout() {
-    Swal.fire({
-      title: 'Logout?',
-      text: 'Are you sure you want to log out?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, logout',
-      cancelButtonText: 'Cancel'
-    }).then(result => {
-      if (result.isConfirmed) {
+    // 🌙 Dark / Light theme support
+    background: getComputedStyle(document.documentElement)
+      .getPropertyValue('--card-bg'),
+    color: getComputedStyle(document.documentElement)
+      .getPropertyValue('--text-color'),
+
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d'
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      // ✅ CLEAR CUSTOMER UI STATE
+      localStorage.removeItem('customerActiveTab');
+      localStorage.removeItem('customerSidebarCollapsed');
+
+      // (optional auth cleanup if used later)
+      localStorage.removeItem('token');
+      localStorage.removeItem('customerId');
+
+      // ✅ SUCCESS MESSAGE
+      Swal.fire({
+        icon: 'success',
+        title: 'Logged out',
+        text: 'You have been logged out successfully',
+        timer: 1200,
+        
+    width: '360px',              // ✅ smaller width
+    padding: '1.2rem',           // ✅ tighter spacing
+
+        showConfirmButton: false,
+        background: getComputedStyle(document.documentElement)
+          .getPropertyValue('--card-bg'),
+        color: getComputedStyle(document.documentElement)
+          .getPropertyValue('--text-color')
+      });
+
+      setTimeout(() => {
         this.router.navigate(['/customer/login']);
-      }
-
-    });
-  }
-
+      }, 1200);
+    }
+  });
+}
   switchToProducts() {
     this.activeTab = 'products';
   }
 
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-  }
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;

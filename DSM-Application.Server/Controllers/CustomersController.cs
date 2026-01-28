@@ -101,7 +101,9 @@ namespace DSM_Application.Server.Controllers
                 customer,
                 role = customer.Role,
                 customerId = customer.CustomerId,
-                mustChangePassword = customer.MustChangePassword
+                mustChangePassword = customer.MustChangePassword,
+
+                addedByDistributorId = customer.AddedByDistributorId // 🔥 ADD THIS
             });
         }
 
@@ -473,35 +475,40 @@ namespace DSM_Application.Server.Controllers
             foreach (var dist in allDistributors)
             {
                 var conn = connections.FirstOrDefault(c => c.DistributorId == dist.DistributorId);
+                bool isCreatorDistributor = customer.AddedByDistributorId == dist.DistributorId;
+                bool isAcceptedConnection = conn != null && conn.Status == ConnectionStatus.Accepted;
+
 
                 // Set status
-                if (conn != null)
-                    dist.Status = conn.Status.ToString(); // Accepted / Pending / Disconnected
+                if (isCreatorDistributor)
+                {
+                    dist.Status = "Connected";
+                }
+                else if (conn != null)
+                {
+                    dist.Status = conn.Status.ToString(); // Accepted / Pending / Rejected
+                }
                 else
+                {
                     dist.Status = "Available";
+                }
+
 
                 // ✅ LOAD PRODUCTS CONDITIONALLY
                 List<object> products = new();
 
-                if (
-                    customer.AddedByDistributorId == dist.DistributorId ||
-                    (conn != null && conn.Status == ConnectionStatus.Accepted)
-                )
+                if (isCreatorDistributor || isAcceptedConnection)
                 {
-                    // 1️⃣ Load products
                     var distributorProducts =
                         await _productService.GetProductsByDistributorAsync(dist.DistributorId);
 
-                    // 2️⃣ Load inventory
                     var inventoryItems = await _inventory
                         .Find(i => i.DistributorId == dist.DistributorId)
                         .ToListAsync();
 
-                    // 3️⃣ Merge product + stock
                     products = distributorProducts.Select(p =>
                     {
-                        var stock = inventoryItems
-                            .FirstOrDefault(i => i.ProductId == p.ProductId);
+                        var stock = inventoryItems.FirstOrDefault(i => i.ProductId == p.ProductId);
 
                         return new
                         {
@@ -515,21 +522,18 @@ namespace DSM_Application.Server.Controllers
                             p.Color,
                             p.DistributorId,
                             p.DistributorName,
-
-                            // 🔥 THIS IS THE FIX
                             currentStock = stock?.CurrentStock ?? 0
                         };
-                    })
-                    // OPTIONAL (recommended)
-                    //.Where(p => p.currentStock > 0)
-                    .ToList<object>();
+                    }).ToList<object>();
                 }
 
-
                 bool canConnect =
-                    conn == null ||
-                    conn.Status == ConnectionStatus.Disconnected ||
-                    conn.Status == ConnectionStatus.Rejected;
+                    !isCreatorDistributor &&
+                    (
+                        conn == null ||
+                        conn.Status == ConnectionStatus.Disconnected ||
+                        conn.Status == ConnectionStatus.Rejected
+                    );
 
                 distributorsWithProducts.Add(new
                 {

@@ -1239,55 +1239,55 @@ namespace DSM_Application.Server.Controllers
             //    return Ok(order);
             //}
         }
-            [Authorize(Roles = "Employee")]
-            [HttpPost("{orderId}/upload-receipt")]
-            public async Task<IActionResult> UploadDeliveryReceipt(
-                string orderId,
-                IFormFile receipt)
+        [Authorize(Roles = "Employee")]
+        [HttpPost("{orderId}/upload-receipt")]
+        public async Task<IActionResult> UploadDeliveryReceipt(
+            string orderId,
+            IFormFile receipt)
+        {
+            if (receipt == null || receipt.Length == 0)
+                return BadRequest("Receipt image is required");
+
+            var employeeId = User.FindFirst("EmployeeId")?.Value;
+            if (string.IsNullOrEmpty(employeeId))
+                return Unauthorized("EmployeeId missing");
+
+            var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
+            if (order == null)
+                return NotFound("Order not found");
+
+            if (order.EmployeeId != employeeId)
+                return Unauthorized("Not your assigned order");
+
+            // ✅ Upload to Azure Blob (FULL URL)
+            var blobName = await _blobService.UploadAsync(receipt);
+
+            var update = Builders<Order>.Update
+                .Set(o => o.DeliveryReceiptUrl, blobName)
+                            .Set(o => o.Status, "Delivered")
+                .Set(o => o.DeliveredOn, DateTime.UtcNow);
+
+            await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
+
+            return Ok(new
             {
-                if (receipt == null || receipt.Length == 0)
-                    return BadRequest("Receipt image is required");
-
-                var employeeId = User.FindFirst("EmployeeId")?.Value;
-                if (string.IsNullOrEmpty(employeeId))
-                    return Unauthorized("EmployeeId missing");
-
-                var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-                if (order == null)
-                    return NotFound("Order not found");
-
-                if (order.EmployeeId != employeeId)
-                    return Unauthorized("Not your assigned order");
-
-                // ✅ Upload to Azure Blob (FULL URL)
-                var blobName = await _blobService.UploadAsync(receipt);
-
-                var update = Builders<Order>.Update
-                    .Set(o => o.DeliveryReceiptUrl, blobName)
-                                .Set(o => o.Status, "Delivered")
-                    .Set(o => o.DeliveredOn, DateTime.UtcNow);
-
-                await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
-
-                return Ok(new
-                {
-                    message = "Receipt uploaded & order delivered",
-                    deliveryReceiptUrl = blobName
-                });
-            }
-
-            [AllowAnonymous]
-            [HttpGet("receipt/{blobName}")]
-            public async Task<IActionResult> GetReceipt(string blobName)
-            {
-                var data = await _blobService.DownloadAsync(blobName);
-                if (data == null)
-                    return NotFound();
-
-                return File(data, "image/jpeg");
-            }
-
+                message = "Receipt uploaded & order delivered",
+                deliveryReceiptUrl = blobName
+            });
         }
+
+        [AllowAnonymous]
+        [HttpGet("receipt/{blobName}")]
+        public async Task<IActionResult> GetReceipt(string blobName)
+        {
+            var data = await _blobService.DownloadAsync(blobName);
+            if (data == null)
+                return NotFound();
+
+            return File(data, "image/jpeg");
+        }
+
     }
+}
 
 

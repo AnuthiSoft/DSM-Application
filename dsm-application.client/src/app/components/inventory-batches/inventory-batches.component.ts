@@ -28,6 +28,10 @@ export class InventoryBatchesComponent implements OnInit {
           productCode: b.productCode,
           // 👇 MUST match backend property names
           initialQuantity: b.initialQuantity,
+
+
+
+          
           quantityAvailable: b.quantityAvailable,
           manufactureDate: b.manufactureDate,
           expiryDate: b.expiryDate

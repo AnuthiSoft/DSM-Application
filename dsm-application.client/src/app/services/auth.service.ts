@@ -110,16 +110,20 @@ refreshAccessToken(): Observable<any> {
   authStatus$(): Observable<boolean> {
     return this.authStatus.asObservable();
   }
-  forgotPassword(email: string) {
-  return this.api.post(`auth/forgot-password`, { email });
+ forgotPassword(email: string) {
+  return this.api.post('auth/forgot-password', { email });
 }
 
 verifyOtp(email: string, otp: string) {
-  return this.api.post(`auth/verify-otp`, { email, otp });
+  return this.api.post('auth/verify-otp', { email, otp });
 }
 
 resetPassword(email: string, otp: string, newPassword: string) {
-  return this.api.post(`auth/reset-password`, { email, otp, newPassword });
+  return this.api.post('auth/reset-password', {
+    email,
+    otp,
+    newPassword
+  });
 }
 
   // ✅ NEW METHOD

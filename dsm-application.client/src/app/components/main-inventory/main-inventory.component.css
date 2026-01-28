@@ -165,7 +165,7 @@
 
         .table-dark th {
             background: transparent !important;
-           color: var(--text-color) !important;
+           color: #ffffff !important;
             font-weight: 600;
             font-size: 0.9rem;
             text-transform: uppercase;

@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { DistributorOrder } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { Router } from '@angular/router';
 import { EmployeeService } from '../../services/employee.service';
 import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
 interface Task {
   title: string;
@@ -30,8 +31,12 @@ export class EmployeeDashboardComponent implements OnInit {
   designation = '';
   canSeeInvoices = false;
   isCashCollector = false;
-
-
+  isDeliveryBoy= false;
+// Add these properties for sidebar functionality
+  isSidebarCollapsed: boolean = false;
+  isMobileMenuOpen = false;
+  isDarkTheme = false;
+  showLogoutConfirm = false;
   // ✅ Fix: Define as Task[]
   todayTasks: Task[] = [
     { title: 'Check pending deliveries', dueTime: '09:30 AM', priority: 'High' },
@@ -58,6 +63,18 @@ export class EmployeeDashboardComponent implements OnInit {
   // 
 
 ngOnInit(): void {
+  // Load sidebar state
+    const savedSidebarState = localStorage.getItem('employeeSidebarCollapsed');
+    if (savedSidebarState !== null) {
+      this.isSidebarCollapsed = savedSidebarState === 'true';
+    }
+
+    // Load active tab
+    const savedTab = localStorage.getItem('employeeActiveTab');
+    this.activeTab = savedTab ? savedTab : 'dashboard';
+
+    // Check screen width
+    this.checkScreenWidth();
   this.employeeName = localStorage.getItem('employeeName') || 'Employee';
   this.employeeId = localStorage.getItem('employeeId') || '';
 
@@ -68,16 +85,44 @@ ngOnInit(): void {
   // ✅ ROLE FLAGS
   this.isCashCollector = this.designation.includes('cash');
   this.canSeeInvoices = this.designation.includes('delivery');
+    this.isDeliveryBoy = this.designation.includes('delivery');
 
   this.loadDashboardData();
   this.loadAvailability();
 }
-
-
-  setActiveTab(tab: string) {
-    console.log("Switched to tab:", tab);
-    this.activeTab = tab;
+ @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenWidth();
   }
+
+  checkScreenWidth() {
+    if (window.innerWidth <= 768) {
+      this.isSidebarCollapsed = true;
+    }
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    localStorage.setItem('employeeSidebarCollapsed', this.isSidebarCollapsed.toString());
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
+
+setActiveTab(tab: string) {
+  console.log("Switched to tab:", tab);
+  this.activeTab = tab;
+  // Save active tab to localStorage
+  localStorage.setItem('employeeActiveTab', tab);
+  this.closeMobileMenu();
+}
 
 
   isActive(tab: string): boolean {
@@ -148,15 +193,66 @@ ngOnInit(): void {
   viewSchedule(): void {
     this.toastr.success('Schedule viewed successfully!');
   }
+  openLogoutConfirm(): void {
+  this.showLogoutConfirm = true;
+}
+
+cancelLogout(): void {
+  this.showLogoutConfirm = false;
+}
   // ✅ Proper logout functionality
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('employeeName');
-    localStorage.removeItem('employeeId');
-    localStorage.removeItem('distributorId');
-    localStorage.removeItem('designation');
-    this.router.navigate(['/employee-login']);
-  }
+logout(): void {
+  Swal.fire({
+    title: 'Logout Confirmation',
+    text: 'Are you sure you want to logout?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Logout',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true,
+
+    // Dark mode support
+    background: getComputedStyle(document.documentElement)
+      .getPropertyValue('--card-bg'),
+    color: getComputedStyle(document.documentElement)
+      .getPropertyValue('--text-color'),
+
+    confirmButtonColor: '#dc3545',
+    cancelButtonColor: '#6c757d'
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      // Clear UI state
+      localStorage.removeItem('employeeActiveTab');
+      localStorage.removeItem('employeeSidebarCollapsed');
+
+      // Clear auth data
+      localStorage.removeItem('token');
+      localStorage.removeItem('employeeName');
+      localStorage.removeItem('employeeId');
+      localStorage.removeItem('distributorId');
+      localStorage.removeItem('designation');
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Logged out',
+        text: 'You have been logged out successfully',
+        timer: 1200,
+        showConfirmButton: false,
+        background: getComputedStyle(document.documentElement)
+          .getPropertyValue('--card-bg'),
+        color: getComputedStyle(document.documentElement)
+          .getPropertyValue('--text-color')
+      });
+
+      setTimeout(() => {
+        this.router.navigate(['/employee-login']);
+      }, 1200);
+    }
+  });
+}
+
+
   submitReason() {
     if (!this.reasonText.trim()) {
       this.toastr.warning("Please enter a valid reason.", "warning");

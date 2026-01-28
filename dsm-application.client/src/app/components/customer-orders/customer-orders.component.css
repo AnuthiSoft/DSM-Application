@@ -579,6 +579,20 @@ color: var(--text-color);
   font-family: inherit;
   line-height: 1.5;
 }
+.btn-primary {
+  background: #007bff;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 5px;
+}
+.btn-secondary {
+  background: #888;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
 
 /* Form Groups */
 .form-group {
@@ -805,6 +819,67 @@ html[data-theme="dark"] .modal-box input[type="file"]:hover {
 
 html[data-theme="dark"] .modal-close {
   background: rgba(255, 255, 255, 0.1);
+}
+/* ============================== */
+/* 📌 STATUS FILTER TABS */
+/* ============================== */
+
+.orders-filter-tabs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.status-tab {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.status-tab:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+/* ACTIVE TAB */
+.status-tab.active {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    #3498db
+  );
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(52,152,219,0.3);
+}
+
+.tab-count {
+  background: rgba(255,255,255,0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  margin-left: 6px;
+}
+
+/* Mobile horizontal scroll */
+@media (max-width: 600px) {
+  .orders-filter-tabs {
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .status-tab {
+    flex-shrink: 0;
+  }
 }
 
 /* Animations */

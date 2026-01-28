@@ -50,17 +50,24 @@ import { PendingHandoversComponent } from './components/pending-handovers/pendin
  
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
-import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+import { PaymentsComponent } from './components/payments/payments.component';
+import { DistributorSettingsComponent } from './components/distributor-settings/distributor-settings.component';
+import { PaymentCollectionForCashcollectorComponent } from './components/payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
+import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
+import { DistributorReturnRequestsComponent } from './components/distributor-return-requests/distributor-return-requests.component';
+import { EmployeeReturnOrdersComponent } from './components/employee-return-orders/employee-return-orders.component';
+import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
+import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/employee-add-to-cart.component';
+
+
+
+
+
+
+
+
+
+
 const routes: Routes = [
   { path: 'product', component: ProductsComponent, canActivate: [AuthGuard] },
   { path: 'customer/register', component: CustomerRegisterComponent },
@@ -69,63 +76,76 @@ const routes: Routes = [
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
   { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
   { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
-  { path: 'customer-dashboard', component: CustomerDashboardComponent },
+  { path: 'customer-dashboard', component: CustomerDashboardComponent, canActivate: [AuthGuard] },
   { path: 'main-page', component: MainPageComponent },
   { path: 'distributor-login', component: DistributorLoginComponent },
   { path: 'distributor-signup', component: DistributorSignupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   // { path: 'employees', component: EmployeesComponent },
   { path: 'set-password', component: SetPasswordComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: 'products/:distributorId', component: ProductsByDistComponent },
-  { path: 'orders', component: OrderHistoryComponent },
-  { path: 'customerOrder', component: CustomerOrdersComponent },
-  { path: 'employee-orders', component: EmployeeOrdersComponent },
-  { path: 'cust-dash', component: CustDashboardComponent },
-  { path: 'connectionrequests', component: DistributorConnectionRequestsComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'products/:distributorId', component: ProductsByDistComponent, canActivate: [AuthGuard] },
+  { path: 'orders', component: OrderHistoryComponent, canActivate: [AuthGuard] },
+  { path: 'customerOrder', component: CustomerOrdersComponent, canActivate: [AuthGuard] },
+  { path: 'employee-orders', component: EmployeeOrdersComponent, canActivate: [AuthGuard] },
+  { path: 'cust-dash', component: CustDashboardComponent , canActivate: [AuthGuard]},
+  { path: 'connectionrequests', component: DistributorConnectionRequestsComponent, canActivate: [AuthGuard] },
   { path: 'test', component: TestComponent },
   { path: 'employee-login', component: EmployeeLoginComponent },
   { path: 'employee-signup', component: EmployeeSignupComponent },
- 
- 
-  { path: 'admin-fruad-list', component: AdminFraudListComponent },
- 
- 
+
+
+  { path: 'admin-fruad-list', component: AdminFraudListComponent, canActivate: [AuthGuard] },
+
+
   {
     path: 'report-fraud/:targetType/:targetId',
-    component: FraudReportComponent
+    component: FraudReportComponent, canActivate: [AuthGuard]
   },
-  { path: 'review/:targetType/:targetId', component: ReviewSubmitComponent },
-  { path: 'admin/reviews', component: AdminReviewListComponent },
+  { path: 'review/:targetType/:targetId', component: ReviewSubmitComponent, canActivate: [AuthGuard] },
+  { path: 'admin/reviews', component: AdminReviewListComponent, canActivate: [AuthGuard] },
   {
     path: 'admin/fraud-history',
-    component: FraudHistoryComponent
+    component: FraudHistoryComponent, canActivate: [AuthGuard]
   },
-  { path: 'admin/review-history', component: AdminReviewHistoryComponent },
+  { path: 'admin/review-history', component: AdminReviewHistoryComponent, canActivate: [AuthGuard] },
+
+  { path: 'add-to-cart', component: AddToCartComponent, canActivate: [AuthGuard] },
+  { path: 'employee-profile', component: EmployeeProfileComponent, canActivate: [AuthGuard] },
+  { path: 'cash-collection', component: CashCollectionComponent, canActivate: [AuthGuard] },
+  { path: 'cash-summary', component: CashSummaryComponent, canActivate: [AuthGuard] },
+  { path: 'collector-reports', component: CollectorReportsComponent, canActivate: [AuthGuard] },
+  { path: ' payment-summary', component: PaymentSummaryComponent, canActivate: [AuthGuard] },
+  { path: ' customer-payment-status', component: CustomerPaymentStatusComponent, canActivate: [AuthGuard] },
+
+  { path: 'payment-report', component: PaymentReportComponent, canActivate: [AuthGuard] },
+  { path: 'pending-payments', component: PendingPaymentsComponent, canActivate: [AuthGuard] },
+  { path: 'pending-handovers', component: PendingHandoversComponent, canActivate: [AuthGuard] },
+
+
+
  
-  { path: 'add-to-cart', component: AddToCartComponent },
-  { path: 'employee-profile', component: EmployeeProfileComponent },
-  { path: 'cash-collection', component: CashCollectionComponent },
-  { path: 'cash-summary', component: CashSummaryComponent },
-  { path: 'collector-reports', component: CollectorReportsComponent },
-  { path: ' payment-summary', component: PaymentSummaryComponent },
-  { path: ' customer-payment-status', component: CustomerPaymentStatusComponent },
  
-  { path: 'payment-report', component: PaymentReportComponent },
-  { path: 'pending-payments', component: PendingPaymentsComponent },
-  { path: 'pending-handovers', component: PendingHandoversComponent },
- 
- 
- 
- 
- 
-  { path: 'customers', component: CustomersListComponent },
- 
-  { path: 'distributor-orders', component: DistributorOrdersComponent },
- 
-  // ✅ ADD THIS
-  { path: 'invoice-detail/:id', component: InvoiceDetailComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
- 
+  { path: 'customers', component: CustomersListComponent , canActivate: [AuthGuard]},
+
+ { path: 'distributor-orders', component: DistributorOrdersComponent , canActivate: [AuthGuard]},
+ { path: 'payment', component: PaymentsComponent, canActivate: [AuthGuard] },
+  { path: 'distributor-settings', component: DistributorSettingsComponent , canActivate: [AuthGuard]},
+   { path: 'payment-collection', component: PaymentCollectionForCashcollectorComponent, canActivate: [AuthGuard] },
+    { path: 'inventry-batches', component: InventoryBatchesComponent, canActivate: [AuthGuard] },
+
+  {path:'return-requests', component:DistributorReturnRequestsComponent},
+ {
+    path: 'returns',
+    component: ReturnOrdersComponent
+  },
+
+  {
+  path: 'employee-add-to-cart',
+  component: EmployeeAddToCartComponent
+},
+
+  {path:'return-orders',component:EmployeeReturnOrdersComponent},
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
 ];
  

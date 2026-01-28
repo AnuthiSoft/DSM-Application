@@ -9,8 +9,8 @@ namespace DSM_Application.Server.Services
 {
     public class PaymentService
     {
-        
-           private readonly MongoDbService _db;
+
+        private readonly MongoDbService _db;
 
         public PaymentService(MongoDbService db)
         {
@@ -60,7 +60,7 @@ namespace DSM_Application.Server.Services
 
                 PaymentDate = DateTime.UtcNow,
                 IsHandedOver = false,
-                 
+
                 IsSubmittedForHandover = false,
                 HandoverStatus = null,
                 RejectReason = null
@@ -507,9 +507,9 @@ namespace DSM_Application.Server.Services
                 PaymentMode = dto.PaymentMode,
                 TransactionReference = dto.TransactionReference,
                 PaidOn = DateTime.UtcNow,
-                 Orders = new List<OrderPaymentSplit>() // ✅ REQUIRED
-            
-        };
+                Orders = new List<OrderPaymentSplit>() // ✅ REQUIRED
+
+            };
 
             decimal remaining = dto.AmountPaid;
 
@@ -666,23 +666,38 @@ namespace DSM_Application.Server.Services
         }
 
         public async Task<List<CustomerPaymentReceipt>> GetReceiptsForHandover(
-    string cashierId,
-    string date)
+         string cashierId,
+         string? date
+     )
         {
-            DateTime selected = DateTime.Parse(date).Date;
-            DateTime next = selected.AddDays(1);
+            var filter = Builders<CustomerPaymentReceipt>.Filter.And(
+                Builders<CustomerPaymentReceipt>.Filter.Eq(r => r.CashierId, cashierId),
+                Builders<CustomerPaymentReceipt>.Filter.Or(
+                    Builders<CustomerPaymentReceipt>.Filter.Eq(r => r.HandoverStatus, null),
+                    Builders<CustomerPaymentReceipt>.Filter.Eq(r => r.HandoverStatus, "Rejected")
+                )
+            );
+
+            // ✅ Apply date filter ONLY if date is sent
+            if (!string.IsNullOrEmpty(date))
+            {
+                DateTime selected = DateTime.Parse(date).Date;
+                DateTime next = selected.AddDays(1);
+
+                var dateFilter = Builders<CustomerPaymentReceipt>.Filter.And(
+                    Builders<CustomerPaymentReceipt>.Filter.Gte(r => r.PaidOn, selected),
+                    Builders<CustomerPaymentReceipt>.Filter.Lt(r => r.PaidOn, next)
+                );
+
+                filter = Builders<CustomerPaymentReceipt>.Filter.And(filter, dateFilter);
+            }
 
             return await _db.CustomerPaymentReceipts
-    .Find(r =>
-        r.CashierId == cashierId &&
-        r.PaidOn >= selected &&
-        r.PaidOn < next &&
-        (r.HandoverStatus == null || r.HandoverStatus == "Rejected")
-    )
-    .SortByDescending(r => r.PaidOn)
-    .ToListAsync();
-
+                .Find(filter)
+                .SortByDescending(r => r.PaidOn)
+                .ToListAsync();
         }
+
         public async Task<List<object>> GetCustomerWisePaymentReport(
      string distributorId,
      DateTime fromDate,

@@ -58,6 +58,26 @@ viewDetails(h: any) {
       this.showModal = true;
     });
 }
+closeModal() {
+  this.showModal = false;
+  this.selectedDetails = null;
+}
+
+// ✅ Payment mode icon helper
+getPaymentModeIcon(mode: string): string {
+  switch ((mode || '').toLowerCase()) {
+    case 'cash':
+      return 'fas fa-money-bill-wave text-success';
+    case 'upi':
+      return 'fas fa-mobile-alt text-primary';
+    case 'card':
+      return 'fas fa-credit-card text-info';
+    case 'bank':
+      return 'fas fa-university text-warning';
+    default:
+      return 'fas fa-question-circle text-muted';
+  }
+}
 
 
 }

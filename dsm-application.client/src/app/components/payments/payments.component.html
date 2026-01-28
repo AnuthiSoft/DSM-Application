@@ -1,0 +1,188 @@
+<div class="tab-content active" *ngIf="isActive('payments')">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">
+        <i class="fas fa-credit-card"></i> Payments Management
+      </h2>
+      <div class="page-subtitle">
+        Manage payments, handovers, and customer payment status
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="date-display">{{currentDate | date:'fullDate'}}</div>
+    </div>
+  </div>
+
+  <!-- Main Payments Container -->
+  <div class="payments-dashboard">
+    
+    <!-- Left Side Navigation (Same style as dashboard sidebar) -->
+    <div class="payments-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-header">
+          <h3><i class="fas fa-bars"></i> Payments Navigation</h3>
+        </div>
+        
+        <div class="sidebar-nav">
+          <!-- Reports Navigation -->
+          <div class="nav-item" 
+               [class.active]="activeSection === 'reports'"
+               (click)="switch('reports')">
+            <div class="nav-icon">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Payment Reports</span>
+              <span class="nav-subtitle">View payment analytics</span>
+            </div>
+            <div class="nav-badge" *ngIf="getReportCount() > 0">
+              {{getReportCount()}}
+            </div>
+          </div>
+
+          <!-- Handovers Navigation -->
+          <div class="nav-item" 
+               [class.active]="activeSection === 'handovers'"
+               (click)="switch('handovers')">
+            <div class="nav-icon">
+              <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Pending Handovers</span>
+              <span class="nav-subtitle">Manage cash handovers</span>
+            </div>
+            <div class="nav-badge" *ngIf="getHandoverCount() > 0">
+              {{getHandoverCount()}}
+            </div>
+          </div>
+
+          <!-- Customers Navigation -->
+          <div class="nav-item" 
+               [class.active]="activeSection === 'customers'"
+               (click)="switch('customers')">
+            <div class="nav-icon">
+              <i class="fas fa-user-friends"></i>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Customer Status</span>
+              <span class="nav-subtitle">Track customer payments</span>
+            </div>
+            <div class="nav-badge" *ngIf="getCustomerCount() > 0">
+              {{getCustomerCount()}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="sidebar-stats">
+          <h4><i class="fas fa-chart-pie"></i> Quick Stats</h4>
+          <div class="stats-grid">
+            <div class="stat-card small">
+              <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">{{getCompletedCount()}}</div>
+                <div class="stat-label">Completed</div>
+              </div>
+            </div>
+            <div class="stat-card small">
+              <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value">{{getPendingCount()}}</div>
+                <div class="stat-label">Pending</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="sidebar-actions">
+          <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+          <div class="action-buttons">
+            <button class="action-btn" (click)="generateReport()">
+              <i class="fas fa-file-pdf"></i>
+              <span>Generate Report</span>
+            </button>
+            <button class="action-btn" (click)="sendReminders()">
+              <i class="fas fa-bell"></i>
+              <span>Send Reminders</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="payments-main">
+      
+      <!-- Content Header -->
+      <div class="content-header">
+        <div class="content-title">
+          <h3><i [class]="getActiveIcon()"></i> {{getActiveTitle()}}</h3>
+          <div class="content-subtitle">{{getActiveSubtitle()}}</div>
+        </div>
+        
+        <div class="content-tools">
+          <button class="tool-btn" (click)="refreshContent()" [disabled]="loading" title="Refresh">
+            <i class="fas fa-sync-alt" [class.spin]="loading"></i>
+            <span class="tool-text">Refresh</span>
+          </button>
+          <button class="tool-btn" (click)="exportData()" title="Export Data">
+            <i class="fas fa-download"></i>
+            <span class="tool-text">Export</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content Body -->
+      <div class="content-body">
+        
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading {{getActiveLabel()}}...</p>
+        </div>
+
+        <!-- Component Content -->
+        <div *ngIf="!loading" class="component-content">
+          <!-- Payment Reports -->
+          <div *ngIf="activeSection === 'reports'" class="component-section">
+            <div class="section-header">
+              <h4><i class="fas fa-chart-line"></i> Payment Analytics & Reports</h4>
+              <!-- <button class="btn btn-sm btn-primary" (click)="generateReport()">
+                <i class="fas fa-plus"></i> New Report
+              </button> -->
+            </div>
+            <app-payment-report></app-payment-report>
+          </div>
+
+          <!-- Pending Handovers -->
+          <div *ngIf="activeSection === 'handovers'" class="component-section">
+            <div class="section-header">
+              <h4><i class="fas fa-exchange-alt"></i> Manage Cash Handovers</h4>
+              <button class="btn btn-sm btn-primary" (click)="refreshHandovers()">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+            <app-pending-handovers></app-pending-handovers>
+          </div>
+
+          <!-- Customer Payment Status -->
+          <div *ngIf="activeSection === 'customers'" class="component-section">
+            <div class="section-header">
+              <h4><i class="fas fa-user-check"></i> Customer Payment Status</h4>
+              <button class="btn btn-sm btn-primary" (click)="refreshCustomers()">
+                <i class="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+            <app-customer-payment-status></app-customer-payment-status>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

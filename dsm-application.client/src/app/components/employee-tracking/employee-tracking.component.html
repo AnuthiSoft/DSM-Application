@@ -29,3 +29,26 @@
     {{ empId.value | number:'1.2-2' }} km
   </div>
 </div> -->
+<google-map
+  height="100%"
+  width="100%"
+  [center]="center"
+  [zoom]="zoom">
+ 
+  <!-- 🔵 Employee live markers -->
+  <map-marker
+    *ngFor="let m of markers"
+    [position]="m.position"
+    [label]="m.label">
+  </map-marker>
+ 
+  <!-- 🔵 Employee route lines -->
+  <map-polyline
+    *ngFor="let emp of (polylines | keyvalue)"
+    [path]="emp.value"
+    [options]="polylineOptions">
+  </map-polyline>
+ 
+</google-map>
+ 
+ 

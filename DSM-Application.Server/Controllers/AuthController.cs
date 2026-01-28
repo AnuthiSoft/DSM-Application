@@ -350,43 +350,45 @@ namespace DistributorManagementSystem.Server.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Email))
-                return BadRequest("Email is required");
+                return BadRequest(new { message = "Email is required" });
 
             var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
             if (user == null)
-                return NotFound("User not found");
+                return NotFound(new { message = "User not found" });
 
             var otp = new Random().Next(100000, 999999).ToString();
             OtpStore.SaveOtp(request.Email, otp);
 
             try
             {
-                _emailService.SendOtpEmailAsync(request.Email, otp);
-                return Ok("OTP sent.");
+                await _emailService.SendOtpEmailAsync(request.Email, otp); // ✅ await
+                return Ok(new { message = "OTP sent successfully" });      // ✅ JSON
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "Failed to send OTP: " + ex.Message);
+                return StatusCode(500, new { message = "Failed to send OTP", error = ex.Message });
             }
         }
+
 
         [HttpPost("verify-otp")]
         public IActionResult VerifyOtp([FromBody] VerifyOtpRequest request)
         {
             if (OtpStore.VerifyOtp(request.Email, request.Otp))
-                return Ok("OTP verified.");
-            return BadRequest("Invalid/Expired OTP.");
+                return Ok(new { message = "OTP verified successfully" });
+
+            return BadRequest(new { message = "Invalid or expired OTP" });
         }
 
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
             if (!OtpStore.VerifyOtp(request.Email, request.Otp))
-                return BadRequest("Invalid or expired OTP.");
+                return BadRequest(new { message = "Invalid or expired OTP" });
 
             var user = await _db.Users.Find(u => u.Email == request.Email).FirstOrDefaultAsync();
             if (user == null)
-                return NotFound("User not found");
+                return NotFound(new { message = "User not found" });
 
             user.PasswordHash = ComputeHash(request.NewPassword);
             user.IsRegistered = true;
@@ -399,8 +401,9 @@ namespace DistributorManagementSystem.Server.Controllers
 
             OtpStore.RemoveOtp(request.Email);
 
-            return Ok("Password reset successfully.");
+            return Ok(new { message = "Password reset successfully" });
         }
+
 
         // ============================================================
         // REFRESH TOKEN

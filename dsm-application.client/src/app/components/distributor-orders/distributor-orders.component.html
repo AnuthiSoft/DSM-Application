@@ -1,6 +1,6 @@
 <!-- <div class="container mt-3">
   <h2>Distributor Orders</h2>
-
+ 
  
   <div class="mb-3">
     <label>Status Filter:</label>
@@ -8,7 +8,7 @@
       <option *ngFor="let s of statuses">{{ s }}</option>
     </select>
   </div>
-
+ 
   <table class="table table-bordered table-hover">
     <thead class="table-light">
       <tr>
@@ -49,24 +49,24 @@
     </tbody>
   </table>
 </div>
-
+ 
 <div *ngIf="selectedOrder" class="modal-overlay">
-
+ 
   <div class="modal-backdrop" (click)="closeAssignModal()"></div>
-
-
+ 
+ 
   <div class="modal-content-box bg-white p-4 rounded shadow" (click)="$event.stopPropagation()">
     <h4>Assign Order to Employee</h4>
-
+ 
     <select *ngIf="employees.length > 0"
             [(ngModel)]="employeeId"
             class="form-select mt-3">
       <option value="">-- Select Employee --</option>
       <option *ngFor="let e of employees" [value]="e.employeeId">{{ e.name }}</option>
     </select>
-
+ 
     <p *ngIf="!employees || employees.length === 0" class="text-muted mt-2">No employees found.</p>
-
+ 
     <div class="mt-4 d-flex justify-content-end">
       <button class="btn btn-secondary me-2" (click)="closeAssignModal()">Cancel</button>
       <button class="btn btn-primary" (click)="assignAndShip()">Assign & Ship</button>
@@ -77,7 +77,7 @@
   <div class="welcome-header">
     <h2>Distributor Orders</h2>
   </div>
-
+ 
   <!-- Status Filter Card -->
   <div class="dashboard-card">
     <div class="filter-header">
@@ -91,15 +91,26 @@
       </select>
     </div>
   </div>
-
+ 
   <!-- Orders Table Card -->
-  <div class="dashboard-card">
-    <div class="card-header">
-      <h3><i class="fas fa-shopping-cart"></i> Orders Management</h3>
-      <span class="orders-count">{{ orders.length }} order(s)</span>
-    </div>
+ <!-- Orders Table Card -->
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3><i class="fas fa-shopping-cart"></i> Orders Management</h3>
+    <span class="orders-count">{{ orders.length }} order(s)</span>
+  </div>
 
-    <div class="table-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="spinner-center">
+    <div class="text-center">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading orders...</p>
+    </div>
+  </div>
+
+  <!-- Orders Table (only show when not loading) -->
+  <div *ngIf="!loading">
+    <div class="table-container" *ngIf="orders.length > 0">
       <table class="orders-table">
         <thead>
           <tr>
@@ -137,19 +148,13 @@
               </button>
             </td>
 
-
-
-
-
             <td class="order-actions">
               <div class="action-buttons">
-
                 <!-- Pending -->
                 <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm"
                   (click)="confirmOrderWithCheck(o)">
                   Confirm
                 </button>
-
 
                 <button *ngIf="o.status === 'Pending'" class="btn btn-danger btn-sm" (click)="rejectOrder(o)">
                   <i class="fas fa-times"></i> Reject
@@ -160,7 +165,6 @@
                   <i class="fas fa-truck"></i> Check & Assign
                 </button>
 
-
                 <!-- Shipped → Distributor cannot do anything -->
                 <span *ngIf="o.status === 'Shipped'" class="badge bg-info">
                   Delivery in progress
@@ -170,7 +174,6 @@
                 <span *ngIf="o.status === 'Delivered'" class="badge bg-success">
                   Delivered
                 </span>
-
               </div>
             </td>
 
@@ -193,29 +196,28 @@
                 </button>
               </div>
             </td>
-            <ng-template #notCollected>
-              <!-- <span class="text-warning">Payment not collected</span> -->
-            </ng-template>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div *ngIf="orders.length === 0" class="empty-state">
+    <!-- Empty State (only show when not loading AND no orders) -->
+    <div *ngIf="orders.length === 0 && !loading" class="empty-state">
       <i class="fas fa-shopping-cart"></i>
       <h4>No Orders Found</h4>
       <p>There are no orders matching the current filter.</p>
     </div>
   </div>
-
 </div>
-
-
+ 
+</div>
+ 
+ 
 <!-- ✅ Assign Modal -->
 <div *ngIf="showAssignModal" class="modal-overlay">
   <div class="modal-backdrop" (click)="closeAssignModal()"></div>
-
-
+ 
+ 
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3><i class="fas fa-user-tie"></i> Assign Order</h3>
@@ -223,13 +225,13 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-
+ 
     <div class="modal-body">
       <!-- EMPLOYEE AVAILABILITY SECTION -->
       <div class="availability-box mt-3">
-
+ 
         <h5 class="fw-bold">Employee Availability</h5>
-
+ 
         <!-- Permanent Availability -->
         <p>
           <strong>Permanent Employee:</strong>
@@ -248,7 +250,7 @@
             <span style="color: gray;">Not Assigned</span>
           </span>
         </p>
-
+ 
         <!-- Temporary Availability -->
         <p>
           <strong>Temporary Employee (Today):</strong>
@@ -261,46 +263,50 @@
             <small *ngIf="!employeeAvailability[selectedOrder.customerId]?.permanentEmployeeAvailable"
               style="color:red">
               (Reason: {{ employeeAvailability[selectedOrder.customerId]?.temporaryReason }})
-
+ 
             </small>
-
+ 
           </span>
           <span *ngIf="!employeeAvailability[selectedOrder.customerId]?.temporaryEmployeeId">
             <span style="color: gray;">No temporary employee assigned today</span>
           </span>
         </p>
-
+ 
       </div>
-
+ 
       <!-- ORDER INFO -->
       <div class="order-info">
         <h4>Order #{{ selectedOrder.id }}</h4>
         <p><strong>Customer:</strong> {{ selectedOrder.customerName }}</p>
         <p><strong>Total Amount:</strong> {{ selectedOrder?.totalAmount | currency:'INR' }}</p>
-
+ 
       </div>
-
+ 
       <!-- ACTIVE EMPLOYEE -->
       <div class="alert alert-info mt-3">
         <strong>Active Employee for Today:</strong><br>
         {{ activeEmployeeName }}
       </div>
-
+ 
       <!-- TEMPORARY EMPLOYEE DROPDOWN -->
       <div class="form-group mt-3" *ngIf="showTempDropdown">
         <label class="form-label fw-bold">
           <i class="fas fa-user-clock"></i> Assign Temporary Employee (ONLY for today)
         </label>
+ 
+    <select class="form-select"
+        [(ngModel)]="tempEmployeeId"
+        (click)="$event.stopPropagation()"
+        (mousedown)="$event.stopPropagation()">
 
-        <select class="form-select" [(ngModel)]="tempEmployeeId">
           <option value="">-- Select Temp Employee --</option>
           <option *ngFor="let e of getTempEmployees(selectedOrder)" [value]="e.employeeId">
             {{ e.name }}
           </option>
-
+ 
         </select>
       </div>
-
+ 
       <div class="modal-footer">
         <button class="btn btn-outline-secondary" (click)="closeAssignModal()">
           Cancel
@@ -310,34 +316,34 @@
         </button>
       </div>
     </div>
-
-
+ 
+ 
   </div>
 </div>
-
+ 
 <!-- 📌 PRODUCT DETAILS POPUP -->
 <div *ngIf="showProductPopup" class="modal-overlay">
-
+ 
   <div class="modal-backdrop" (click)="closeProductPopup()"></div>
-
+ 
   <div class="modal-content" (click)="$event.stopPropagation()">
-
+ 
     <div class="modal-header">
       <h3><i class="fas fa-box">
-
+ 
         </i> Product Details</h3>
       <button class="modal-close" (click)="closeProductPopup()">
         <i class="fas fa-times"></i>
       </button>
     </div>
-
+ 
     <div class="modal-body">
-
+ 
       <div *ngFor="let item of selectedOrder?.products" class="product-box d-flex gap-3 mb-3">
-
+ 
         <img [src]="item.imageUrl || 'assets/no-image.png'" class="product-img"
           style="width:80px;height:80px;object-fit:contain;" />
-
+ 
         <div class="product-info">
           <h5>{{ item.productName }}</h5>
           <p><strong>Brand:</strong> {{ item.brand }}</p>
@@ -346,64 +352,64 @@
           <p><strong>Quantity:</strong> {{ item.quantity }}</p>
           <!-- <p><strong>Item Total:</strong> ₹{{ item.price * item.quantity }}</p> -->
         </div>
-
+ 
       </div>
-
-
-
+ 
+ 
+ 
       <!-- 🧾 ORDER SUMMARY -->
       <div class="order-summary" style="font-size:14px; line-height:1.6">
-
+ 
         <p><strong>Subtotal:</strong>
           ₹{{ selectedOrder.subtotal | number:'1.2-2' }}
         </p>
-
+ 
         <hr>
-
+ 
         <p><strong>Discounts</strong></p>
-
+ 
         <p>
           Price Discount ({{ selectedOrder.priceDiscountPercent ?? 0 }}%):
           <span class="text-success">
             - ₹{{ (selectedOrder.subtotal * (selectedOrder.priceDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
           </span>
         </p>
-
+ 
         <p>
           Quantity Discount ({{ selectedOrder.quantityDiscountPercent ?? 0 }}%):
           <span class="text-success">
             - ₹{{ (selectedOrder.subtotal * (selectedOrder.quantityDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
           </span>
         </p>
-
+ 
         <p>
           Special Discount ({{ selectedOrder.specialDiscountPercent ?? 0 }}%):
           <span class="text-success">
             - ₹{{ (selectedOrder.subtotal * (selectedOrder.specialDiscountPercent ?? 0) / 100) | number:'1.2-2' }}
           </span>
         </p>
-
+ 
         <p>
           General Discount:
           <span class="text-success">
             - ₹{{ selectedOrder.products?.[0]?.generalDiscount | number:'1.2-2' }}
           </span>
         </p>
-
+ 
         <p style="font-weight:600">
           Total Discount:
           <span class="text-success">
             - ₹{{ selectedOrder.totalDiscount | number:'1.2-2' }}
           </span>
         </p>
-
+ 
         <hr>
-
+ 
         <p>
           <strong>Taxable Amount:</strong>
           ₹{{ (selectedOrder.subtotal - selectedOrder.totalDiscount) | number:'1.2-2' }}
         </p>
-
+ 
         <p>
           <strong>
             GST ({{ selectedOrder.products?.[0]?.gstPercentage ?? 0 }}%):
@@ -415,31 +421,32 @@
           ) | number:'1.2-2'
           }}
         </p>
-
-
+ 
+ 
         <hr>
-
+ 
         <h5 class="text-success">
           <strong>Total Amount:</strong>
           ₹{{ selectedOrder.totalAmount | number:'1.2-2' }}
         </h5>
-
+ 
       </div>
-
+ 
     </div>
-
+ 
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeProductPopup()">Close</button>
     </div>
-
+ 
   </div>
 </div>
-
-
-
+ 
+ 
+ 
 <div class="modal-footer">
   <!-- Continue Button Based on Action -->
   <button class="btn btn-primary" (click)="continueAction()">
     Continue
   </button>
 </div>
+ 

@@ -103,7 +103,7 @@ public class OrderService
     private readonly IMongoCollection<CustomerDistributorConnection> _connections;
     private readonly MongoDbService _mongo;
     private readonly InventoryService _inventoryService;
-        
+
 
     public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo, InventoryService inventoryService)
 
@@ -259,7 +259,7 @@ public class OrderService
     //    return order;
     //}
 
-    public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role,string distributorId)
+    public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role, string distributorId)
     {
         if (string.IsNullOrEmpty(userId))
             throw new Exception("Invalid user");
@@ -267,14 +267,13 @@ public class OrderService
         if (dto == null || dto.Products == null || !dto.Products.Any())
 
             throw new Exception("Invalid order data");
-
-        decimal subtotal = 0;
+        decimal subTotal = 0;
         decimal totalDiscount = 0;
-        decimal totalAmount = 0;
+        decimal totalGstAmount = 0;
+
 
         var orderProducts = new List<OrderProduct>();
-        decimal subTotal = 0;
-         decimal totalGstAmount = 0;
+
         decimal generalDiscountPercent = dto.SpecialDiscountPercent;
 
 
@@ -353,12 +352,10 @@ public class OrderService
             ExpectedDeliveryDate =
                 dto.ExpectedDelivery ?? DateTime.UtcNow.AddDays(1),
 
-            Subtotal = subtotal,
+
             TotalDiscount = totalDiscount,
             GstAmount = totalGstAmount,
-
-         
-            // ✅ GST APPLIED AFTER DISCOUNT
+            Subtotal = subTotal,
             TotalAmount = (subTotal - totalDiscount) + totalGstAmount,
 
             // Audit fields

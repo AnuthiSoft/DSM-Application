@@ -3,7 +3,7 @@
     public class UpdateBatchDatesDto
     {
         public string BatchId { get; set; }
-        public DateTime ManufactureDate { get; set; }
-        public DateTime ExpiryDate { get; set; }
+        public DateTime? ManufactureDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
     }
 }

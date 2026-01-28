@@ -19,7 +19,8 @@ showSuccessToast = false;
 pendingPayments: any[] = [];
 unhandedReceipts: any[] = [];
 selectedReceipts: any[] = [];
-
+ showModal: boolean = false;
+  
   // Extra required fields for HTML template
   todayDate: string = new Date().toISOString().split("T")[0];
   selectedDistributorId = localStorage.getItem('distributorId') || "";
@@ -53,18 +54,19 @@ goToPendingPayments() {
   // Load payments
 loadPendingPayments() {
   const cashierId = localStorage.getItem('employeeId')!;
-  const selectedDate = this.form.date;
-  const rejected = this.unhandedReceipts.filter(p => p.handoverStatus === 'Rejected');
-
-if (rejected.length > 0) {
-  alert(`⚠️ ${rejected.length} payment(s) were rejected by distributor. Please check the reason.`);
-}
-
 
   this.paymentService
-    .getReceiptsForHandover(cashierId, selectedDate)
+    .getAllReceiptsForHandover(cashierId)
     .subscribe(receipts => {
       this.unhandedReceipts = receipts;
+
+      const rejected = receipts.filter(
+        r => r.handoverStatus === 'Rejected'
+      );
+
+      if (rejected.length > 0) {
+        alert(`⚠️ ${rejected.length} payment(s) were rejected by distributor.`);
+      }
     });
 }
 
@@ -185,5 +187,36 @@ getOnlinePaymentCount() {
     }
   });
 }
-
+ // Open the modal popup
+  openHandoverModal(): void {
+    this.showModal = true;
+    // Prevent body scrolling when modal is open
+    document.body.style.overflow = 'hidden';
+  }
+  
+  // Close the modal popup
+  closeModal(): void {
+    this.showModal = false;
+    // Restore body scrolling
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Handle the final submission
+  submitHandover(): void {
+    // Call your existing submit function
+    this.submit();
+    // Close the modal after submission
+    this.closeModal();
+  }
+  
+  // ... rest of your existing methods ...
+  
+  // Modify your existing submit method to show success message
+  // submit(): void {
+  //   // Your existing submit logic here
+    
+  //   // After successful submission, show success message
+  //   this.toastr.success('Handover submitted successfully!', 'Success');
+  // }
+  
 }

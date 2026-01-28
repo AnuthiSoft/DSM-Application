@@ -23,18 +23,24 @@ export class CustomerService {
   register(request: CustomerRegisterRequest): Observable<any> {
     return this.api.post(`customers/register`, request);
   }
- 
-  login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
-    return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
-      tap(res => {
-        if (res.token) {
-          localStorage.setItem('token', res.token);
-          localStorage.setItem('role', res.role);
-          console.log('Role from API:', res.role);
-        }
-      })
-    );
-  }
+login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
+  return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
+    tap(res => {
+      if (res.token && res.customer) {
+        localStorage.setItem('token', res.token);
+
+       // CustomerService.login()
+localStorage.setItem('customerId', res.customer.customerId!);
+localStorage.setItem('customerName', res.customer.name!);
+localStorage.setItem('customerEmail', res.customer.email!);
+localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
+
+
+        localStorage.setItem('role', res.role!);
+      }
+    })
+  );
+}
  
   // ---------------------- CUSTOMER CREATION ----------------------
   createByDistributor(customer: Customer): Observable<any> {

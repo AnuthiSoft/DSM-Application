@@ -115,10 +115,11 @@ submitNewPassword() {
         // Save new data
         localStorage.setItem("token", res.token);
         localStorage.setItem("role", res.role);
-        localStorage.setItem("customerId", res.customerId);
-        localStorage.setItem("customerName", res.name);
-        localStorage.setItem("customerEmail", res.email);
-        localStorage.setItem("customerPhoneNumber", res.phoneNumber);
+ localStorage.setItem('customerId', res.customer.customerId!);
+localStorage.setItem('customerName', res.customer.name!);
+localStorage.setItem('customerEmail', res.customer.email!);
+localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
+
 
  if (res.mustChangePassword) {
   this.showChangePasswordModal = true;

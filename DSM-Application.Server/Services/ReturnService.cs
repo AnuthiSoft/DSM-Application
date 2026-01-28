@@ -25,7 +25,7 @@ namespace DSM_Application.Server.Services
             MongoDbService db,
             InventoryService inventoryService,
             IHttpContextAccessor httpContextAccessor,
-            IWebHostEnvironment env ,// ✅ ADD THIS
+            IWebHostEnvironment env,// ✅ ADD THIS
             BlobService blobService
 
         )
@@ -236,7 +236,7 @@ namespace DSM_Application.Server.Services
                 ReturnQty = dto.ReturnQty,
                 Reason = dto.Reason,
 
-             
+
                 CustomerName = customer?.Name, // optional cache
 
                 DistributorId = order.DistributorId,
@@ -355,7 +355,7 @@ namespace DSM_Application.Server.Services
             inventory.ReturnedQty += ret.ReturnQty;
             inventory.UpdatedAt = DateTime.UtcNow;
 
-            await _inventory.ReplaceOneAsync(i => i.Id == inventory.Id, inventory);
+            await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
             // 2️⃣ UPDATE RETURN STATUS
             ret.Status = "Completed";
@@ -483,7 +483,7 @@ namespace DSM_Application.Server.Services
             ret.Status = "Rejected";
             ret.RejectedBy = rejectedBy;
             ret.RejectionReason = reason;
-            
+
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
 
@@ -499,9 +499,9 @@ namespace DSM_Application.Server.Services
             }
         }
 
-       
 
-       
+
+
 
 
 
@@ -568,31 +568,31 @@ namespace DSM_Application.Server.Services
 
 
         public async Task MarkPickedUpAsync(string returnId)
-{
-    // 1️⃣ Find return
-    var ret = await _returns
-        .Find(r => r.Id == returnId)
-        .FirstOrDefaultAsync();
+        {
+            // 1️⃣ Find return
+            var ret = await _returns
+                .Find(r => r.Id == returnId)
+                .FirstOrDefaultAsync();
 
-    if (ret == null)
-        throw new Exception("Return not found");
+            if (ret == null)
+                throw new Exception("Return not found");
 
-    // 2️⃣ Validate current state
-    if (ret.Status != "PickupConfirmed")
-        throw new Exception(
-            $"Pickup not scheduled. Current status: {ret.Status}"
-        );
+            // 2️⃣ Validate current state
+            if (ret.Status != "PickupConfirmed")
+                throw new Exception(
+                    $"Pickup not scheduled. Current status: {ret.Status}"
+                );
 
-    // 3️⃣ Update return status
-    ret.Status = "Received";
-    ret.ReceivedAt = DateTime.UtcNow;
+            // 3️⃣ Update return status
+            ret.Status = "Received";
+            ret.ReceivedAt = DateTime.UtcNow;
 
-    // 4️⃣ Persist change
-    await _returns.ReplaceOneAsync(
-        r => r.Id == ret.Id,
-        ret
-    );
-}
+            // 4️⃣ Persist change
+            await _returns.ReplaceOneAsync(
+                r => r.Id == ret.Id,
+                ret
+            );
+        }
 
 
 

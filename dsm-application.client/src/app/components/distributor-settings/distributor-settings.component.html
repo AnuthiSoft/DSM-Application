@@ -1,0 +1,184 @@
+<div class="tab-content active" *ngIf="isActive('distributor-settings')">
+  <div class="page-header">
+    <h2 class="page-title">Distributor Settings</h2>
+    <div class="date-display">{{currentDate | date:'fullDate'}}</div>
+  </div>
+  
+  <div class="settings-grid">
+    
+    <!-- Delivery Settings Card -->
+    <div class="dashboard-card settings-card">
+      <div class="card-header">
+        <h3 class="section-title">
+          <i class="fas fa-truck"></i> Delivery Settings
+        </h3>
+      </div>
+      
+      <div class="card-body">
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-calendar-alt"></i> Expected Delivery Days *
+          </label>
+          <input 
+            type="number" 
+            [(ngModel)]="expectedDays" 
+            min="1" 
+            max="30"
+            class="form-control"
+            placeholder="Enter number of days"
+          />
+          <small class="form-hint">Enter the number of days for expected delivery</small>
+        </div>
+        
+        <div class="form-actions">
+          <button class="btn btn-primary" (click)="saveExpectedDayss()" [disabled]="!expectedDays">
+            <i class="fas fa-save"></i> Save Settings
+          </button>
+          <div class="status-indicator" *ngIf="expectedDays">
+            <span class="status-badge">Current: {{expectedDays}} days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Scanner QR Configuration Card -->
+    <div class="dashboard-card settings-card">
+      <div class="card-header">
+        <h3 class="section-title">
+          <i class="fas fa-qrcode"></i> Scanner QR Configuration
+        </h3>
+      </div>
+      
+      <div class="card-body">
+        <!-- Upload Section -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-upload"></i> Upload Scanner QR Image
+          </label>
+          <div class="file-upload-wrapper">
+            <input 
+              type="file" 
+              accept="image/*" 
+              (change)="onQrSelected($event)"
+              class="file-input"
+              id="qrUpload"
+            />
+            <label for="qrUpload" class="file-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span class="file-text">
+                {{selectedQrFile ? selectedQrFile.name : 'Choose QR image file'}}
+              </span>
+            </label>
+          </div>
+          <small class="form-hint">Supported formats: PNG, JPG, JPEG (Max: 5MB)</small>
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            class="btn btn-primary" 
+            (click)="uploadScannerQr()" 
+            [disabled]="!selectedQrFile"
+            [class.btn-loading]="uploading"
+          >
+            <i class="fas fa-upload"></i> 
+            <span *ngIf="!uploading">Upload QR</span>
+            <span *ngIf="uploading">Uploading...</span>
+          </button>
+          
+          <button 
+            class="btn btn-secondary" 
+            *ngIf="selectedQrFile"
+            (click)="selectedQrFile = null"
+          >
+            <i class="fas fa-times"></i> Clear
+          </button>
+        </div>
+        
+        <!-- Preview Section -->
+        <div *ngIf="scannerQrUrl" class="qr-preview-section">
+          <h4 class="preview-title">
+            <i class="fas fa-eye"></i> Current Scanner QR
+          </h4>
+          <div class="qr-image-container">
+            <img 
+              [src]="getScannerQrUrl(scannerQrUrl)" 
+              alt="Scanner QR" 
+              class="qr-image"
+              (load)="onImageLoad()"
+              (error)="onImageError()"
+            />
+            <div class="qr-overlay">
+              <button class="btn-icon" (click)="downloadQr()" title="Download QR">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="btn-icon" (click)="viewFullscreen()" title="View Fullscreen">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <p class="qr-info">
+            <i class="fas fa-info-circle"></i>
+            Retailers can scan this QR code to connect with your distributor account
+          </p>
+        </div>
+
+        <!-- No QR Uploaded State -->
+        <div *ngIf="!scannerQrUrl" class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-qrcode"></i>
+          </div>
+          <p>No QR code uploaded yet</p>
+          <small>Upload a QR code image to enable scanner functionality</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Information Card -->
+    <div class="dashboard-card info-card">
+      <div class="card-header">
+        <h3 class="section-title">
+          <i class="fas fa-info-circle"></i> Settings Information
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="info-item">
+          <i class="fas fa-truck"></i>
+          <div class="info-content">
+            <h4>Delivery Settings</h4>
+            <p>Set the expected delivery time that will be shown to your retailers.</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-qrcode"></i>
+          <div class="info-content">
+            <h4>Scanner QR</h4>
+            <p>Upload a QR code that retailers can scan to connect with your distributor account.</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-sync-alt"></i>
+          <div class="info-content">
+            <h4>Real-time Updates</h4>
+            <p>Changes are saved immediately and reflected across all retailer accounts.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Fullscreen QR Modal -->
+<div class="modal-overlay" *ngIf="showFullscreen" (click)="showFullscreen = false">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Scanner QR Code</h3>
+      <button class="modal-close" (click)="showFullscreen = false">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <img [src]="getScannerQrUrl(scannerQrUrl)" alt="QR Code" class="fullscreen-qr" *ngIf="scannerQrUrl" />
+    </div>
+  </div>
+</div>

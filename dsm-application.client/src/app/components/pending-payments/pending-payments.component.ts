@@ -63,4 +63,33 @@ export class PendingPaymentsComponent implements OnInit {
       default: return '';
     }
   }
+  // ✅ Highlight recent payments (last 24 hours)
+isRecent(paymentDate: string | Date): boolean {
+  if (!paymentDate) return false;
+
+  const paymentTime = new Date(paymentDate).getTime();
+  const now = Date.now();
+
+  const diffHours = (now - paymentTime) / (1000 * 60 * 60);
+  return diffHours <= 24;
+}
+
+// ✅ Total pending amount summary
+getTotalPending(): number {
+  return this.filteredPayments.reduce((sum, p) => {
+    return sum + (Number(p.amount) || 0);
+  }, 0);
+}
+
+// ✅ Refresh list (re-fetch from backend)
+refreshPayments() {
+  this.loadPendingPayments();
+}
+
+// ✅ Export stub (can wire Excel later)
+exportToExcel() {
+  alert('Export to Excel feature coming soon');
+}
+
+  
 }

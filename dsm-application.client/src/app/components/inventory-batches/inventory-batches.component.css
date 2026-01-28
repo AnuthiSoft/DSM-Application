@@ -1,13 +1,205 @@
-.table-danger {
-  background-color: #f8d7da !important;
+/* Inventory Batches Styles */
+.dashboard-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
 }
 
-.empty-state {
-  height: calc(100vh - 80px); /* adjust for header */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #5b6c7c;
-  font-size: 25px;
-  font-weight: 800;
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text-color);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+  background-color: transparent;
+  color: var(--text-color);
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table thead th {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: var(--text-color);
+  font-weight: 600;
+  padding: 16px 12px;
+  border-bottom: 2px solid var(--border-color);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: var(--hover-color);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Quantity badge styles */
+.quantity-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.quantity-badge.danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+.quantity-badge.warning {
+  background-color: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+}
+
+.quantity-badge.success {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+}
+
+/* Date input styles */
+.date-input {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 0.875rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  max-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Status badge styles */
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 90px;
+  text-align: center;
+}
+
+.status-badge.expired {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.status-badge.near-expiry {
+  background-color: rgba(241, 196, 15, 0.1);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.status-badge.valid {
+  background-color: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+/* Dark mode adjustments */
+html[data-theme="dark"] .table thead th {
+  background-color: rgba(52, 152, 219, 0.15);
+  border-color: #2a2f38;
+}
+
+html[data-theme="dark"] .table tbody td {
+  border-color: #2a2f38;
+}
+
+html[data-theme="dark"] .date-input {
+  background-color: #1f2530;
+  border-color: #2a2f38;
+}
+
+html[data-theme="dark"] .date-input:focus {
+  background-color: #1f2530;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .dashboard-card {
+    padding: 16px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+  }
+  
+  .quantity-badge,
+  .status-badge {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    min-width: auto;
+  }
+  
+  .date-input {
+    max-width: 120px;
+    font-size: 0.8rem;
+    padding: 5px 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-main {
+    padding: 20px 15px;
+  }
+  
+  .table-responsive {
+    margin: 0 -15px;
+    border: none;
+    border-radius: 0;
+  }
+  
+  .date-input {
+    max-width: 100px;
+  }
+  
+  .status-badge {
+    min-width: 80px;
+    font-size: 0.7rem;
+    padding: 4px 6px;
+  }
 }

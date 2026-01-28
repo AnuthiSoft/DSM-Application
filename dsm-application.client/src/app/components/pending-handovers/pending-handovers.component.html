@@ -1,86 +1,238 @@
-<div class="container">
-
-  <h2>Pending Handovers</h2>
-
-  <div *ngIf="loading">Loading...</div>
-
-  <table *ngIf="!loading && handovers.length > 0" class="handover-table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Total Amount</th>
-        <th>Cashier</th>
-        <!-- <th>Remarks</th> -->
-        <th>Actions</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let h of handovers">
-        <td>{{ h.handoverDate | date:'short' }}</td>
-        <td>₹{{ h.totalAmountSubmitted }}</td>
-        <td>{{ h.cashierName }}</td>
-        <!-- <td>{{ h.notes || '—' }}</td> -->
-
-        <td>
-          <button class="btn-approve" (click)="approve(h)">Approve</button>
-          <button class="btn-reject" (click)="reject(h)">Reject</button>
-          <button class="btn-details" (click)="viewDetails(h)">Details</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div *ngIf="!loading && handovers.length === 0">
-    <p>No pending handovers.</p>
+<div class="dashboard-card">
+  
+  <!-- HEADER -->
+  <div class="card-header">
+    <h3><i class="fas fa-clock"></i> Pending Handovers</h3>
   </div>
 
-</div>
-<!-- ================== DETAILS MODAL ================== -->
-<div class="modal-backdrop" *ngIf="showModal"></div>
+  <!-- LOADING STATE -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading handovers...</p>
+  </div>
 
-<div class="details-modal" *ngIf="showModal">
-  <div class="modal-content">
-
-    <h3>Handover Details</h3>
-
-    <p><strong>Date:</strong> {{ selectedDetails?.date | date:'short' }}</p>
-    <p><strong>Cashier:</strong> {{ selectedDetails?.cashierName }}</p>
-    <p><strong>Total Amount:</strong> ₹{{ selectedDetails?.totalAmount }}</p>
-
-    <h4>Breakdown</h4>
-    <ul>
-      <li>Cash: ₹{{ selectedDetails?.cashAmount }}</li>
-      <li>UPI: ₹{{ selectedDetails?.upiAmount }}</li>
-      <li>Scanner: ₹{{ selectedDetails?.scannerAmount }}</li>
-    </ul>
-
-    <h4>Customer → Order Split</h4>
-
-    <table class="payment-table">
+  <!-- DATA TABLE -->
+  <div *ngIf="!loading && handovers.length > 0" class="table-container">
+    <table class="handover-table">
       <thead>
         <tr>
-          <th>Customer</th>
-          <th>Receipt</th>
-          <th>Order ID</th>
-          <th>Mode</th>
-          <th>Amount</th>
           <th>Date</th>
+          <th>Total Amount</th>
+          <th>Cashier</th>
+          <th>Actions</th>
         </tr>
       </thead>
+
       <tbody>
-        <tr *ngFor="let p of selectedDetails?.payments">
-          <td>{{ p.customerName }}</td>
-          <td>{{ p.receiptId }}</td>
-          <td>{{ p.orderId }}</td>
-          <td>{{ p.paymentMode }}</td>
-          <td>₹{{ p.amountPaid }}</td>
-          <td>{{ p.paidOn | date:'short' }}</td>
+        <tr *ngFor="let h of handovers">
+          <td class="date-cell">
+            <div class="date-icon">
+              <i class="fas fa-calendar-alt"></i>
+              {{ h.handoverDate | date:'dd/MM/yyyy' }}
+            </div>
+            <div class="time-text">
+              {{ h.handoverDate | date:'hh:mm a' }}
+            </div>
+          </td>
+          
+          <td class="amount-cell">
+            <span class="amount-badge">
+              <i class="fas fa-rupee-sign"></i>
+              {{ h.totalAmountSubmitted | number:'1.2-2' }}
+            </span>
+          </td>
+          
+          <td class="cashier-cell">
+            <div class="cashier-info">
+              <i class="fas fa-user-tie"></i>
+              <span>{{ h.cashierName }}</span>
+            </div>
+          </td>
+
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <button class="btn-action btn-approve" (click)="approve(h)" title="Approve">
+                <i class="fas fa-check"></i>
+                <span class="btn-text">Approve</span>
+              </button>
+              
+              <button class="btn-action btn-reject" (click)="reject(h)" title="Reject">
+                <i class="fas fa-times"></i>
+                <span class="btn-text">Reject</span>
+              </button>
+              
+              <button class="btn-action btn-details" (click)="viewDetails(h)" title="View Details">
+                <i class="fas fa-eye"></i>
+                <span class="btn-text">Details</span>
+              </button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
+  </div>
 
-    <button class="close-btn" (click)="showModal = false">Close</button>
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && handovers.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h4>No Pending Handovers</h4>
+    <p>All handovers have been processed</p>
+  </div>
 
+</div>
+
+<!-- ================== DETAILS MODAL ================== -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h3><i class="fas fa-file-invoice-dollar"></i> Handover Details</h3>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <!-- Modal Body -->
+    <div class="modal-body">
+      
+      <!-- Basic Info -->
+      <div class="info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <label><i class="fas fa-calendar-alt"></i> Date</label>
+            <div class="info-value">{{ selectedDetails?.date | date:'fullDate' }}</div>
+          </div>
+          
+          <div class="info-item">
+            <label><i class="fas fa-user-tie"></i> Cashier</label>
+            <div class="info-value">{{ selectedDetails?.cashierName }}</div>
+          </div>
+          
+          <div class="info-item">
+            <label><i class="fas fa-rupee-sign"></i> Total Amount</label>
+            <div class="info-value total-amount">
+              ₹{{ selectedDetails?.totalAmount | number:'1.2-2' }}
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <label><i class="fas fa-clock"></i> Time</label>
+            <div class="info-value">{{ selectedDetails?.date | date:'shortTime' }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Payment Breakdown -->
+      <div class="section-card">
+        <h4><i class="fas fa-chart-pie"></i> Payment Breakdown</h4>
+        <div class="breakdown-grid">
+          <div class="breakdown-item cash">
+            <div class="breakdown-label">
+              <i class="fas fa-money-bill-wave"></i> Cash
+            </div>
+            <div class="breakdown-value">
+              ₹{{ selectedDetails?.cashAmount | number:'1.2-2' }}
+            </div>
+          </div>
+          
+          <div class="breakdown-item upi">
+            <div class="breakdown-label">
+              <i class="fas fa-mobile-alt"></i> UPI
+            </div>
+            <div class="breakdown-value">
+              ₹{{ selectedDetails?.upiAmount | number:'1.2-2' }}
+            </div>
+          </div>
+          
+          <div class="breakdown-item scanner">
+            <div class="breakdown-label">
+              <i class="fas fa-qrcode"></i> Scanner
+            </div>
+            <div class="breakdown-value">
+              ₹{{ selectedDetails?.scannerAmount | number:'1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Payment Details -->
+      <div class="section-card">
+        <div class="section-header">
+          <h4><i class="fas fa-list-alt"></i> Customer Payment Details</h4>
+          <span class="badge">{{ selectedDetails?.payments?.length || 0 }} payments</span>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="payment-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Receipt</th>
+                <th>Order</th>
+                <th>Mode</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of selectedDetails?.payments">
+                <td class="customer-cell">
+                  <i class="fas fa-user"></i>
+                  <span>{{ p.customerName }}</span>
+                </td>
+                
+                <td class="receipt-cell">
+                  <span class="receipt-badge">#{{ p.receiptId }}</span>
+                </td>
+                
+                <td class="order-cell">
+                  <span class="order-badge">#{{ p.orderId }}</span>
+                </td>
+                
+                <td class="mode-cell">
+                  <span class="mode-badge" [ngClass]="p.paymentMode?.toLowerCase()">
+                    <i [class]="getPaymentModeIcon(p.paymentMode)"></i>
+                    {{ p.paymentMode }}
+                  </span>
+                </td>
+                
+                <td class="amount-cell">
+                  <span class="amount-badge">
+                    ₹{{ p.amountPaid | number:'1.2-2' }}
+                  </span>
+                </td>
+                
+                <td class="date-cell">
+                  <div>{{ p.paidOn | date:'dd/MM/yy' }}</div>
+                  <small>{{ p.paidOn | date:'hh:mm a' }}</small>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        <i class="fas fa-times"></i> Close
+      </button>
+      
+      <div class="action-buttons" *ngIf="selectedDetails">
+        <button class="btn btn-success" (click)="approve(selectedDetails)">
+          <i class="fas fa-check"></i> Approve Handover
+        </button>
+        
+        <button class="btn btn-danger" (click)="reject(selectedDetails)">
+          <i class="fas fa-times"></i> Reject Handover
+        </button>
+      </div>
+    </div>
+    
   </div>
 </div>

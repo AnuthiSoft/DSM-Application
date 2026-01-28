@@ -1,135 +1,72 @@
-<!-- <p>employee-dashboard works!</p>
-<app-employee-orders></app-employee-orders> -->
-<!-- employee-dashboard.component.html -->
-<!-- <nav>
-  <ul>
-    <li><a routerLink="/employee-orders"><i class="fas fa-list"></i> My Orders</a></li>
-  </ul>
-</nav>
-
-<router-outlet></router-outlet> -->
 <div class="body">
-  <!-- Sidebar Navigation -->
-  <div class="dashboard-sidebar">
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Updated Sidebar -->
+  <div class="dashboard-sidebar" [class.mobile-open]="isMobileMenuOpen" [class.collapsed]="isSidebarCollapsed">
     <div class="sidebar-header">
-      <h3><i class="fas fa-user-tie"></i> <span>EmployeePortal</span></h3>
+      <!-- <h3>
+        <i class="fas fa-user-tie"></i> 
+        <span>Employee Portal</span>
+      </h3> -->
+      <button class="collapse-toggle" (click)="toggleSidebar()" title="Toggle Sidebar">
+        <i class="fas" [class.fa-chevron-left]="!isSidebarCollapsed" [class.fa-chevron-right]="isSidebarCollapsed"></i>
+      </button>
     </div>
-    <!-- <div class="nav-items">
-      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')">
-        <i class="fas fa-th-large"></i> <span>Dashboard</span>
-      </div>
-
-      <div class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')">
-        <i class="fas fa-shopping-cart"></i> <span>My Orders</span>
-      </div>
-      <div *ngIf="designation === 'cash collector'" class="nav-item" [class.active]="isActive('cash-collection')"
-        (click)="setActiveTab('cash-collection')">
-        <i class="fas fa-rupee-sign"></i> <span>Collect Cash</span>
-      </div>
-      <div *ngIf="employeeRole.includes('cash')" class="nav-item" [class.active]="isActive('cash-summary')"
-        (click)="setActiveTab('cash-summary')">
-        <i class="fas fa-file-alt"></i>
-        <span>My Daily Summary</span>
-      </div>
-
-      <div *ngIf="employeeRole.includes('cash')" class="nav-item" [class.active]="isActive('handover')"
-        (click)="setActiveTab('handover')">
-        <i class="fas fa-hand-holding-usd"></i>
-        <span>Handover Cash</span>
-      </div>
-
-
-      <div class="nav-item" [class.active]="isActive('customer-status')" (click)="setActiveTab('customer-status')">
-        <i class="fas fa-info-circle"></i> <span>Customer Payment Status</span>
-      </div>
-      <div class="nav-item" *ngIf="canSeeInvoices" [class.active]="isActive('invoices')"
-        (click)="setActiveTab('invoices')">
-        <i class="fas fa-file-pdf"></i> <span>Invoices</span>
-      </div>
-
-
-
-
-      <div class="nav-item" [class.active]="isActive('tasks')" (click)="setActiveTab('tasks')">
-        <i class="fas fa-tasks"></i> <span>Tasks</span>
-      </div>
-
-      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')">
-        <i class="fas fa-user"></i> <span>My Profile</span>
-      </div>
-
-      <div class="nav-item" (click)="logout()">
-        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-      </div>
-    </div> -->
 
     <div class="nav-items">
-
-      <!-- Common -->
-      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')">
-        <i class="fas fa-th-large"></i> <span>Dashboard</span>
+      <!-- Dashboard -->
+      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')" data-title="Dashboard">
+        <i class="fas fa-th-large"></i>
+        <span>Dashboard</span>
       </div>
 
-      <div class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')">
-        <i class="fas fa-shopping-cart"></i> <span>My Orders</span>
+      <!-- Orders (Delivery Boy only) -->
+      <div *ngIf="isDeliveryBoy" class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')" data-title="My Orders">
+        <i class="fas fa-shopping-cart"></i>
+        <span>My Orders</span>
       </div>
-
-      <!-- 💰 CASH COLLECTOR -->
-      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('cash-collection')"
-        (click)="setActiveTab('cash-collection')">
-        <i class="fas fa-rupee-sign"></i> <span>Collect Cash</span>
-      </div>
-
-      <!-- <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('cash-summary')"
-        (click)="setActiveTab('cash-summary')">
-        <i class="fas fa-file-alt"></i> <span>My Daily Summary</span>
-      </div> -->
-
-<div *ngIf="isCashCollector"
+          <div *ngIf="isDeliveryBoy"
      class="nav-item"
-     [class.active]="isActive('cash-summary')"
-     (click)="setActiveTab('cash-summary')">
-
-  <span class="nav-icon">
-    <i class="fas fa-file-alt"></i>
-  </span>
-
-  <span class="nav-text">My Daily Summary</span>
+     [class.active]="isActive('return-orders')"
+     (click)="setActiveTab('return-orders')">
+  <i class="fas fa-undo"></i>
+  <span>Return Pickups</span>
 </div>
-
-
-
-
-      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('handover')"
-        (click)="setActiveTab('handover')">
-        <i class="fas fa-hand-holding-usd"></i> <span>Handover Cash</span>
+ 
+      <!-- Payment Collection (Cash Collector only) -->
+      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('payment-collection')" (click)="setActiveTab('payment-collection')" data-title="Payment Collection">
+        <i class="fas fa-rupee-sign"></i>
+        <span>Payment Collection</span>
       </div>
 
-      <!-- 🚚 DELIVERY BOY -->
-      <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('invoices')"
-        (click)="setActiveTab('invoices')">
-        <i class="fas fa-file-pdf"></i> <span>Invoices</span>
+      <!-- Invoices (Delivery Boy only) -->
+      <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('invoices')" (click)="setActiveTab('invoices')" data-title="Invoices">
+        <i class="fas fa-file-pdf"></i>
+        <span>Invoices</span>
       </div>
 
-      <!-- Common -->
-      <div class="nav-item" [class.active]="isActive('tasks')" (click)="setActiveTab('tasks')">
-        <i class="fas fa-tasks"></i> <span>Tasks</span>
+      <!-- Profile (Common) -->
+      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')" data-title="My Profile">
+        <i class="fas fa-user"></i>
+        <span>My Profile</span>
       </div>
-
-      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')">
-        <i class="fas fa-user"></i> <span>My Profile</span>
-      </div>
-
-      <div class="nav-item" (click)="logout()">
-        <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
-      </div>
-
     </div>
+
+    <!-- Logout fixed at bottom -->
+    <div class="sidebar-footer">
+      <div class="nav-item logout-fixed" (click)="logout()" data-title="Logout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+    
   </div>
 
   <!-- Main Content -->
   <div class="dashboard-main">
-    <router-outlet></router-outlet>
     <!-- Dashboard Tab -->
     <div class="tab-content active" *ngIf="isActive('dashboard')">
       <div class="welcome-header">
@@ -138,7 +75,6 @@
       </div>
 
       <div class="stats-grid">
-
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
           <div class="stat-value">{{orderStats.assigned || 0}}</div>
@@ -159,8 +95,9 @@
           <div class="stat-value">{{performanceRating || '4.5'}}</div>
           <div class="stat-label">Performance</div>
         </div>
+        
         <!-- Employee Availability Section -->
-        <div class="dashboard-card" style="margin-top: 20px;">
+        <div class="dashboard-card" style="margin-top: 20px; grid-column: span 2;">
           <div class="card-header">
             <h3><i class="fas fa-user-check"></i> Availability for Today</h3>
           </div>
@@ -200,9 +137,7 @@
               <button class="btn btn-secondary ms-2" (click)="cancelReason()">Cancel</button>
             </div>
           </div>
-
         </div>
-
       </div>
 
       <div class="dashboard-grid">
@@ -210,7 +145,7 @@
         <div class="dashboard-card">
           <div class="card-header">
             <h3>Recent Orders</h3>
-            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('orders')">
+            <button *ngIf="isDeliveryBoy" class="btn btn-outline-primary btn-sm" (click)="setActiveTab('orders')">
               View All
             </button>
           </div>
@@ -229,15 +164,11 @@
             <p class="no-data">No recent orders assigned.</p>
           </ng-template>
         </div>
-        <!-- <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders> -->
 
         <!-- Tasks -->
         <div class="dashboard-card">
           <div class="card-header">
             <h3>Today's Tasks</h3>
-            <button class="btn btn-outline-primary btn-sm" (click)="setActiveTab('tasks')">
-              View All
-            </button>
           </div>
           <div *ngIf="todayTasks?.length; else noTasks">
             <div class="task-item" *ngFor="let task of todayTasks">
@@ -259,21 +190,21 @@
         <div class="dashboard-card">
           <h3>Quick Actions</h3>
           <div class="quick-actions">
-            <button class="action-btn" (click)="setActiveTab('orders')">
+            <button *ngIf="isDeliveryBoy" class="action-btn" (click)="setActiveTab('orders')">
               <i class="fas fa-list"></i>
               <span>View Orders</span>
             </button>
-            <button class="action-btn" (click)="updateStatus()">
-              <i class="fas fa-edit"></i>
-              <span>Update Status</span>
+            <button *ngIf="isCashCollector" class="action-btn" (click)="setActiveTab('payment-collection')">
+              <i class="fas fa-rupee-sign"></i>
+              <span>Collect Payments</span>
+            </button>
+            <button *ngIf="canSeeInvoices" class="action-btn" (click)="setActiveTab('invoices')">
+              <i class="fas fa-file-pdf"></i>
+              <span>View Invoices</span>
             </button>
             <button class="action-btn" (click)="setActiveTab('profile')">
               <i class="fas fa-user-cog"></i>
               <span>Profile Settings</span>
-            </button>
-            <button class="action-btn" (click)="viewSchedule()">
-              <i class="fas fa-calendar"></i>
-              <span>View Schedule</span>
             </button>
           </div>
         </div>
@@ -302,42 +233,37 @@
         </div>
       </div>
     </div>
-    <app-cash-collection *ngIf="activeTab === 'cash-collection'"></app-cash-collection>
-    <app-cash-summary *ngIf="activeTab === 'cash-summary'"></app-cash-summary>
-    <app-collector-reports *ngIf="isActive('handover')"></app-collector-reports>
-    <app-customer-payment-status *ngIf="isActive('customer-status')"></app-customer-payment-status>
 
-
-    <!-- Orders Tab -->
-
-    <app-employee-orders *ngIf="activeTab === 'orders'"></app-employee-orders>
-    <!-- Invoices Tab -->
-    <div *ngIf="activeTab === 'invoices'">
-      <app-employee-invoices></app-employee-invoices>
+    <!-- Orders Tab (Delivery Boy) -->
+    <div *ngIf="activeTab === 'orders' && isDeliveryBoy">
+      <app-employee-orders></app-employee-orders>
     </div>
 
+    <!-- Payment Collection Tab (Cash Collector) -->
+    <app-payment-collection-for-cashcollector 
+      *ngIf="activeTab === 'payment-collection' && isCashCollector">
+    </app-payment-collection-for-cashcollector>
 
+    <!-- Invoices Tab (Delivery Boy) -->
+    <div *ngIf="activeTab === 'invoices' && canSeeInvoices">
+      <app-employee-invoices></app-employee-invoices>
+    </div>
+<app-employee-return-orders *ngIf="activeTab === 'return-orders'"></app-employee-return-orders>
+ 
+    <!-- Profile Tab -->
+    <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
 
-    <!-- Tasks Tab -->
-    <div class="tab-content" *ngIf="isActive('tasks')">
+    <!-- Tasks Tab (Optional - if you want to keep it) -->
+    <div class="tab-content" *ngIf="isActive('tasks') && false"> <!-- Set to false to hide for now -->
       <div class="welcome-header">
         <h2>My Tasks</h2>
         <button class="btn btn-primary" (click)="refreshTasks()">
-          <i class="fas fa-sync-alt"></i> Refresh </button>
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
       </div>
       <div class="tasks-content">
         <p>Task management content will be implemented here...</p>
       </div>
     </div>
-
-
-
-    <!-- Profile Tab -->
-
-    <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
-
-
-
-
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { AdminService, Distributor } from '../../services/admin.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -45,6 +45,9 @@ export function firstLetterCapitalValidator(
 
 
 export class AdminDashboardComponent implements OnInit {
+   isSidebarCollapsed: boolean = false;
+  isMobileMenuOpen = false;
+  
   // ⭐ Required for tab switching
   activeTab: string = 'dashboard';
 otpSent = false;
@@ -138,6 +141,11 @@ pendingCategories: any[] = [];
 
 
   ngOnInit(): void {
+     // Load sidebar state from localStorage
+    const savedSidebarState = localStorage.getItem('adminSidebarCollapsed');
+    if (savedSidebarState !== null) {
+      this.isSidebarCollapsed = savedSidebarState === 'true';
+    }
     this.loadDistributors();
     this.initForm();
     this.role = this.auth.getRole();
@@ -155,7 +163,32 @@ pendingCategories: any[] = [];
       this.distributorModal = new bootstrap.Modal(modalEl);
     }
   }
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenWidth();
+  }
 
+  checkScreenWidth() {
+    if (window.innerWidth <= 768) {
+      this.isSidebarCollapsed = true;
+    }
+  }
+
+  // Toggle sidebar collapse/expand
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    localStorage.setItem('adminSidebarCollapsed', this.isSidebarCollapsed.toString());
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    if (this.isMobileMenuOpen) {
+      this.isMobileMenuOpen = false;
+    }
+  }
 
   loadCategories() {
     this.categoryService.getAll().subscribe(res => {

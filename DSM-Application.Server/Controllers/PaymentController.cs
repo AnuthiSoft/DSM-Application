@@ -17,7 +17,7 @@ namespace DSM_Application.Server.Controllers
         {
             _paymentService = paymentService;
         }
-        
+
 
         // ================================================================
         // 1️⃣ COLLECT PAYMENT (Cashier collects customer payment)
@@ -111,7 +111,7 @@ namespace DSM_Application.Server.Controllers
         {
             var result = await _paymentService.GetPendingHandovers(distributorId);
             return Ok(result);
-        } 
+        }
         [HttpGet("all-pending-payments")]
         public async Task<IActionResult> GetAllPendingPayments()
         {
@@ -146,9 +146,13 @@ namespace DSM_Application.Server.Controllers
         }
         [HttpGet("receipts-for-handover")]
         public async Task<IActionResult> GetReceiptsForHandover(
-    [FromQuery] string cashierId,
-    [FromQuery] string date)
+          [FromQuery] string cashierId,
+          [FromQuery] string? date   // ✅ optional
+      )
         {
+            if (string.IsNullOrEmpty(cashierId))
+                return BadRequest("cashierId is required");
+
             var result = await _paymentService.GetReceiptsForHandover(cashierId, date);
             return Ok(result);
         }

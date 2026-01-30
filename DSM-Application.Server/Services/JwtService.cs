@@ -172,26 +172,81 @@ namespace DistributorManagementSystem.Server.Services
 
             var claims = new List<Claim>
 
-    {
-        new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
-        new Claim("UserId", user.Id ?? ""),
-        new Claim("Role", user.Role ?? "User"),
-        new Claim(ClaimTypes.Role, user.Role ?? "User"),
-          //new Claim("employeeId", user.EmployeeId ?? ""), // ✅ ADD THIS
-    };
+{
 
-            // Distributor — always include the claim
-            if (user.Role == "Distributor")
-                claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
+    new Claim(ClaimTypes.NameIdentifier, user.Id),
 
-            // ✅ Include EmployeeId if this is an Employee
-            if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
+    new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
+
+    new Claim("UserId", user.Id ?? ""),
+
+    new Claim("Role", user.Role ?? "User"),
+
+    new Claim(ClaimTypes.Role, user.Role ?? "User")
+
+};
+
+            // ✅ ADD DistributorId FOR BOTH Distributor AND Employee
+
+            if (!string.IsNullOrEmpty(user.DistributorId))
+
+            {
+
+                claims.Add(new Claim("DistributorId", user.DistributorId));
+
+            }
+
+            // ✅ Add EmployeeId if exists
+
+            if (!string.IsNullOrEmpty(user.EmployeeId))
+
+            {
+
                 claims.Add(new Claim("EmployeeId", user.EmployeeId));
+
+            }
 
             return BuildToken(claims);
         }
 
 
+
+        //    public string GenerateToken(User user)
+
+        //    {
+
+        //        var claims = new List<Claim>
+
+        //{
+        //    new Claim(ClaimTypes.NameIdentifier, user.Id),
+
+        //    new Claim(ClaimTypes.Name, user.Email ?? user.PhoneNumber ?? ""),
+
+        //    new Claim("UserId", user.Id ?? ""),
+
+        //    new Claim("Role", user.Role ?? "User"),
+
+        //    new Claim(ClaimTypes.Role, user.Role ?? "User"),
+
+        //      //new Claim("employeeId", user.EmployeeId ?? ""), // ✅ ADD THIS
+
+        //};
+
+        //        // Distributor — always include the claim
+
+        //        if (user.Role == "Distributor")
+
+        //            claims.Add(new Claim("DistributorId", user.DistributorId ?? ""));
+
+        //        // ✅ Include EmployeeId if this is an Employee
+
+        //        if (user.Role == "Employee" && !string.IsNullOrEmpty(user.EmployeeId))
+
+        //            claims.Add(new Claim("EmployeeId", user.EmployeeId));
+
+        //        return BuildToken(claims);
+
+        //    }
 
 
 

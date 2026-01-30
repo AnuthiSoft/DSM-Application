@@ -365,7 +365,7 @@ namespace DSM_Application.Server.Controllers
             try
             {
                 var products = await _productService.GetProductsByDistributorAsync(distributorId);
-                return Ok(products); // always return list, even if empty
+                return Ok(products);
             }
             catch (Exception ex)
             {

@@ -126,6 +126,7 @@ pendingCategories: any[] = [];
   premiumDistributors = 0;
   formSubmitted = false;
   pendingDeleteId: string | null = null;
+  isDarkMode = false;
 
   private distributorModal: bootstrap.Modal | null = null;
 
@@ -409,14 +410,14 @@ pendingCategories: any[] = [];
 
   saveDistributor(): void {
   this.formSubmitted = true;
-
+ 
   if (this.distributorForm.invalid) {
     this.distributorForm.markAllAsTouched();
     return;
   }
-
+ 
   const dist = { ...this.distributorForm.value };
-
+ 
   if (this.isEdit && this.selectedDistributor) {
     this.adminService
       .updateDistributor(this.selectedDistributor.distributorId, dist)
@@ -449,8 +450,6 @@ pendingCategories: any[] = [];
     });
   }
 }
-
-
   deactivate(id: string): void {
     this.adminService.deactivateDistributor(id).subscribe({
       next: () => {

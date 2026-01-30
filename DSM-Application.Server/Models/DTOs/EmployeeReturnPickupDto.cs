@@ -7,6 +7,9 @@
         public string ProductName { get; set; }
         public int ReturnQty { get; set; }
 
+        public decimal ProductPrice { get; set; }
+
+
         public DateTime PickupDate { get; set; }
         public string PickupSlot { get; set; }
 

@@ -36,7 +36,6 @@ import { EmployeeLoginComponent } from './components/employee-login/employee-log
 import { EmployeeSignupComponent } from './components/employee-signup/employee-signup.component';
 import { AddToCartComponent } from './components/add-to-cart/add-to-cart.component';
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
- 
 import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
  
@@ -55,6 +54,7 @@ import { PaymentReportComponent } from './components/payment-report/payment-repo
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
  
+
  
  
  
@@ -95,7 +95,6 @@ ProductsComponent,
 CustomerRegisterComponent,
 CustomerLoginComponent,
 CreateCustomerDistributorComponent,
-CustomerDashboardComponent,
 AdminDashboardComponent,
 DistributorDashboardComponent,
 EmployeeDashboardComponent,
@@ -109,71 +108,83 @@ ProfileComponent,
 ThemeToggleComponent,
 ProductsByDistComponent,
  
-OrderHistoryComponent,
-DistributorOrdersComponent,
-CustomerOrdersComponent,
-EmployeeOrdersComponent,
 //AddPaymentNoteComponent,
 //DistributorViewComponent,
-CustDashboardComponent,
-DistributorConnectionRequestsComponent,
-TestComponent,
  
-EmployeeLoginComponent,
-EmployeeSignupComponent,
-AddToCartComponent,
-EmployeeProfileComponent,
-EmployeeProductsComponent,
-FraudReportComponent,
+
 FraudHistoryComponent,
-AdminFraudListComponent,
 AdminReviewListComponent,
 AdminReviewHistoryComponent,
  
-ReviewSubmitComponent,
-TruncatePipe,
  
-CashCollectionComponent,
-CashSummaryComponent,
-PaymentSummaryComponent,
-CollectorReportsComponent,
-CustomerPaymentStatusComponent,
-PaymentReportComponent,
-PendingPaymentsComponent,
-PendingHandoversComponent,
+
  
-MainInventoryComponent,
 // InventoryBatchesComponent,
-CustomersListComponent,
-CustomerSearchComponent,
  
 InvoiceCreateComponent,
 InvoiceDetailComponent,
 EmployeeInvoicesComponent,
  
-EmployeeTrackingComponent,
-  PaymentsComponent,
-  DistributorSettingsComponent,
-  PaymentCollectionForCashcollectorComponent,
- 
- InventoryBatchesComponent  , // ✅ ADD THIS
- 
- 
- 
- 
  
     // AdminDistributorsComponent
  
-    DistributorReturnRequestsComponent,
+    OrderHistoryComponent,
+    DistributorOrdersComponent,
+    CustomerOrdersComponent,
+    EmployeeOrdersComponent,
+    CustDashboardComponent,
+    DistributorConnectionRequestsComponent,
+    TestComponent,
+    EmployeeLoginComponent,
+    EmployeeSignupComponent,
+    AddToCartComponent,
+    EmployeeProfileComponent,
+CustomerDashboardComponent,
+    FraudReportComponent,
+ 
+    AdminFraudListComponent,
+ 
+    TruncatePipe,
+    ReviewSubmitComponent,
+ 
+ 
+    FraudHistoryComponent,
+    AdminReviewHistoryComponent,
+    CashCollectionComponent,
+    CashSummaryComponent,
+    PaymentSummaryComponent,
+    CollectorReportsComponent,
+    CustomerPaymentStatusComponent,
+    PaymentReportComponent,
+    PendingPaymentsComponent,
+    PendingHandoversComponent,
+    PaymentsComponent,
+    DistributorSettingsComponent,
+PaymentCollectionForCashcollectorComponent,
+    MainInventoryComponent,
+    CustomersListComponent,
+    EmployeeTrackingComponent,
+    InventoryBatchesComponent,
+    CustomerSearchComponent,
     EmployeeReturnOrdersComponent,
-     ReturnOrdersComponent,
-      EmployeeAddToCartComponent
+    EmployeeProductsComponent,
+    EmployeeAddToCartComponent,
+    ReturnOrdersComponent,
+
+
+
+
+
+
+    // AdminDistributorsComponent
+ 
+    DistributorReturnRequestsComponent,
  
  
  
   ],
   imports: [
-    BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,          // ✅ ADD THIS      // ✅ you already imported but forgot here
+    BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,           // ✅ ADD THIS      // ✅ you already imported but forgot here
     AppRoutingModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
       timeOut: 1000,
       positionClass: 'toast-top-right',

@@ -737,6 +737,31 @@ html[data-theme="dark"] .product-image {
   color: white;
 }
 
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: rgba(var(--primary-color-rgb), 0.03);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  flex: 1;                     /* ✅ allow equal width boxes */
+  min-width: 0;                /* ✅ prevents text overflow */
+}
+
+.detail-item div {
+  flex: 1;                     /* make text container flexible */
+  min-width: 0;                /* IMPORTANT: prevents overflow */
+}
+
+.order-id {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  word-break: break-all;       /* ✅ ensures long IDs wrap inside the box */
+}
+
+
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
   .custom-swal-popup {

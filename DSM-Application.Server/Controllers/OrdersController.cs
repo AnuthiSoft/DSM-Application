@@ -302,25 +302,33 @@ namespace DSM_Application.Server.Controllers
                     .Find(d => d.DistributorId == o.DistributorId)
                     .FirstOrDefaultAsync();
 
+                // 🔥 Fix status based on returned quantity
+                if (o.Products.Any(p => p.ReturnedQty > 0) && o.Status != "Return Completed")
+                    o.Status = "Return Initiated";
+
                 return new DistributorOrderDto
                 {
                     Id = o.Id,
                     CustomerId = o.CustomerId,
 
-                    Products = o.Products,
+                    Products = o.Products.Select(p => new OrderProduct
+                    {
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductName,
+                        Quantity = p.Quantity,
+                        Price = p.Price,
+                        ReturnedQty = p.ReturnedQty
+                    }).ToList(),
+
                     OrderedDate = o.OrderedDate,
                     ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     DistributorId = o.DistributorId,
-
-                    // ⭐ ADD THIS
                     DistributorName = distributor?.Name ?? "Unknown Distributor",
 
-                    // Discount totals
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
 
-                    // Discount breakdown per item
                     SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                     QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
                     PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
@@ -909,7 +917,7 @@ namespace DSM_Application.Server.Controllers
             // 🆕 Create cloned order
             var newOrder = new Order
             {
-                Id = Guid.NewGuid().ToString(),
+                //Id = Guid.NewGuid().ToString(),
 
                 CustomerId = existingOrder.CustomerId,
                 DistributorId = existingOrder.DistributorId,

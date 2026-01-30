@@ -10,7 +10,9 @@
         public int InitialQuantity { get; set; }     // ✅ Added stock
         public int QuantityAvailable { get; set; }
         public DateTime? ManufactureDate { get; set; }
-            public DateTime? ExpiryDate { get; set; }
+
+        public int CurrentStock { get; set; }
+        public DateTime? ExpiryDate { get; set; }
             public bool IsExpired { get; set; }
         }
 

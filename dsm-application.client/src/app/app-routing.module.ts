@@ -37,8 +37,14 @@ import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fra
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
  
 // //import { DashboardComponent } from './components/dashboard/dashboard.component';
- 
- 
+
+// import { DashboardComponent } from './components/dashboard/dashboard.component';
+// import { DashboardComponent } from './components/dashboard/dashboard.component';
+
+// import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
+// import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
+// import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
+// import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
 import { CashSummaryComponent } from './components/cash-summary/cash-summary.component';
 import { CollectorReportsComponent } from './components/collector-reports/collector-reports.component';
@@ -147,6 +153,8 @@ const routes: Routes = [
 
   {path:'return-orders',component:EmployeeReturnOrdersComponent},
   { path: '', redirectTo: 'main-page', pathMatch: 'full' }
+
+  
 ];
  
 @NgModule({

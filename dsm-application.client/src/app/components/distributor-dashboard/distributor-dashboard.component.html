@@ -95,15 +95,19 @@
              data-title="Order List">
           <span>Order List</span>
         </div>
-          <div class="submenu-item"
+
+        <div class="submenu-item"
      [class.active]="isActive('return-requests')"
      (click)="setActiveTab('return-requests') ">
   <span>Return Requests</span>
 </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('order-tracking')"
-             (click)="setActiveTab('order-tracking'); closeMobileMenu()"
-             data-title="Order Tracking">
+
+        <!-- <div class="submenu-item" [class.active]="isActive('distributor-orders')"
+             (click)="setActiveTab('distributor-orders'); closeMobileMenu()">
+          <span>Distributor Orders</span>
+        </div> -->
+        <div class="submenu-item" [class.active]="isActive('order-tracking')"
+          (click)="setActiveTab('order-tracking'); closeMobileMenu()">
           <span>Order Tracking</span>
         </div>
         <div class="submenu-item" 
@@ -114,6 +118,8 @@
         </div>
       </div>
 
+      
+ 
       <!-- Sales -->
       <div class="nav-item has-submenu" 
            [class.active]="isActive('sales') || isSubmenuOpen('sales')"
@@ -227,6 +233,8 @@
     </div>
   </div>
 
+  
+ 
   <!-- Main Content -->
   <div class="dashboard-main">
     <!-- 🔧 UNDER DEVELOPMENT PLACEHOLDERS -->
@@ -387,6 +395,14 @@
     </div>
     <app-employees *ngIf="isActive('employees')"></app-employees>
 
+<!-- return request -->
+    <app-distributor-return-requests
+  *ngIf="isActive('return-requests')">
+</app-distributor-return-requests>
+
+   
+    <!-- <app-test-page *ngIf="isActive('test-page')"></app-test-page> -->
+    <!-- <app-reports *ngIf="isActive('reports')"></app-reports> -->
     <div *ngIf="isActive('test-page')" class="dashboard-under-dev">
       🚧 Test Page is under development
     </div>
@@ -395,6 +411,31 @@
     </div>
 
     <!-- LIVE TRACKING PAGE -->
+    <!-- <div *ngIf="isActive('live-tracking')" style="padding: 15px;">
+
+    <h2 style="margin-bottom:15px; font-weight:bold;">📍 Live Employee Tracking</h2>
+
+    <div class="d-flex align-items-center mb-3">
+
+  <select [(ngModel)]="selectedEmployeeId" class="form-control w-auto me-2">
+    <option value="">Select Employee</option>
+    <option *ngFor="let e of employees" [value]="e.employeeId">
+      {{ e.name }}
+    </option>
+  </select>
+
+  <button class="btn btn-success mx-2" (click)="startTrip()" [disabled]="!selectedEmployeeId">
+    Start Trip
+  </button>
+
+  <button class="btn btn-danger" (click)="stopTrip()" [disabled]="!selectedEmployeeId">
+    Stop Trip
+  </button>
+
+</div> -->
+
+
+
     <div *ngIf="isActive('live-tracking')" class="live-tracking-container">
       <h2 class="tracking-title">📍 Live Employee Tracking</h2>
 

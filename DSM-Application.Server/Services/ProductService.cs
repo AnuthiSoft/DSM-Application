@@ -138,12 +138,35 @@ namespace DSM_Application.Server.Services
                 Builders<Product>.Filter.Eq(p => p.IsActive, true),
                 Builders<Product>.Filter.Or(
                     Builders<Product>.Filter.Eq(p => p.IsDeleted, false),
-                    Builders<Product>.Filter.Exists(p => p.IsDeleted, false) // ✅ include if missing
+                    Builders<Product>.Filter.Exists(p => p.IsDeleted, false)
                 )
             );
 
-            return await _products.Find(filter).ToListAsync();
+            var products = await _products.Find(filter).ToListAsync();
+
+            // Load inventory
+            var inventory = await _inventory
+                .Find(i => i.DistributorId == distributorId)
+                .ToListAsync();
+
+            var stockMap = inventory
+                .GroupBy(i => i.ProductId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(x => x.CurrentStock)
+                );
+
+            // Inject current stock into each product object
+            foreach (var p in products)
+            {
+                p.CurrentStock = stockMap.ContainsKey(p.ProductId)
+                    ? stockMap[p.ProductId]
+                    : 0;
+            }
+
+            return products;
         }
+
 
 
         //public async Task<List<Product>> GetProductsByDistributorAsync(string distributorId)

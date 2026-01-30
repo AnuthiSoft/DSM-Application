@@ -59,22 +59,33 @@ namespace DSM_Application.Server.Services
                 .SortByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
-            return returns.Select(r => new ReturnHistoryDto
+            return returns.Select(r =>
             {
-                Id = r.Id,
-                OrderId = r.OrderId,
-                ProductId = r.ProductId,
-                ProductName = _orders
+                // 1️⃣ Fetch Order
+                var order = _orders
                     .Find(o => o.Id == r.OrderId)
-                    .FirstOrDefault()?
-                    .Products.FirstOrDefault(p => p.ProductId == r.ProductId)?
-                    .ProductName,
-                ReturnQty = r.ReturnQty,
-                Status = r.Status,
-                Reason = r.Reason,
-                CreatedAt = r.CreatedAt
+                    .FirstOrDefault();
+
+                // 2️⃣ Fetch Product from order
+                var product = order?.Products
+                    ?.FirstOrDefault(p => p.ProductId == r.ProductId);
+
+                // 3️⃣ Construct DTO
+                return new ReturnHistoryDto
+                {
+                    Id = r.Id,
+                    OrderId = r.OrderId,
+                    ProductId = r.ProductId,
+                    ProductName = product?.ProductName ?? "Unknown",
+                    Price = product?.Price,          // ✔ PRICE added safely
+                    ReturnQty = r.ReturnQty,
+                    Status = r.Status,
+                    Reason = r.Reason,
+                    CreatedAt = r.CreatedAt
+                };
             }).ToList();
         }
+
 
         public async Task<List<ReturnHistoryDto>> GetAllReturnsForDistributorAsync(string distributorId)
         {
@@ -123,6 +134,7 @@ namespace DSM_Application.Server.Services
                         ?? "Unknown Product",
 
                     ReturnQty = r.ReturnQty,
+                    Price = product?.Price,
                     Reason = r.Reason,
                     Status = r.Status,
                     DistributorId = r.DistributorId,
@@ -219,9 +231,26 @@ namespace DSM_Application.Server.Services
             if (string.IsNullOrEmpty(customerId))
                 throw new Exception("Customer not authenticated");
 
+
+
+            // 🔥 1️⃣ Update returned quantity inside ORDER document
             var order = await _orders
                 .Find(o => o.Id == dto.OrderId)
                 .FirstOrDefaultAsync();
+
+            var product = order?.Products
+                .FirstOrDefault(p => p.ProductId == dto.ProductId);
+
+            if (product != null)
+            {
+                product.ReturnedQty += dto.ReturnQty;
+
+                await _orders.ReplaceOneAsync(
+                    o => o.Id == order.Id,
+                    order
+                );
+            }
+
 
             var customer = await _customers
                 .Find(c => c.CustomerId == customerId)
@@ -247,6 +276,9 @@ namespace DSM_Application.Server.Services
 
             await _returns.InsertOneAsync(returnRequest);
             return returnRequest;
+
+
+
         }
 
 
@@ -280,7 +312,8 @@ namespace DSM_Application.Server.Services
                     ReturnQty = r.ReturnQty,
                     PickupDate = r.PickupDate ?? DateTime.MinValue,
                     PickupSlot = r.PickupSlot,
-                    Status = r.Status
+                    Status = r.Status,
+                    ProductPrice = product?.Price ?? 0
                 });
             }
 
@@ -338,7 +371,6 @@ namespace DSM_Application.Server.Services
             if (ret == null)
                 throw new Exception("Return not found");
 
-            // 🚫 PREVENT SKIPPING STATES
             if (ret.Status != "Received")
                 throw new Exception("Item not yet picked up");
 
@@ -357,21 +389,34 @@ namespace DSM_Application.Server.Services
 
             await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
-            // 2️⃣ UPDATE RETURN STATUS
+            // 2️⃣ UPDATE ORDER (🔥 IMPORTANT — IN RIGHT ORDER)
+            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
+            if (order != null)
+            {
+                // Update returned quantity FIRST
+                var product = order.Products.FirstOrDefault(p => p.ProductId == ret.ProductId);
+                if (product != null)
+                {
+                    product.ReturnedQty += ret.ReturnQty;
+
+                    // never exceed original quantity
+                    if (product.ReturnedQty > product.Quantity)
+                        product.ReturnedQty = product.Quantity;
+                }
+
+                // NOW update order status
+                order.Status = "Return Completed";
+
+                // Save together
+                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
+            }
+
+            // 3️⃣ UPDATE RETURN STATUS
             ret.Status = "Completed";
             ret.CompletedAt = DateTime.UtcNow;
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
-
-            // ✅ 3️⃣ UPDATE ORDER STATUS (🔥 THIS IS WHAT WAS MISSING 🔥)
-            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
-            if (order != null)
-            {
-                order.Status = "Return Completed";
-                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
-            }
         }
-
 
 
 
@@ -521,11 +566,21 @@ namespace DSM_Application.Server.Services
 
         public async Task<List<ReturnHistoryDto>> GetReturnHistoryAsync(string? status = null)
         {
-            var filter = Builders<ReturnRequest>.Filter.Empty;
+            var customerId = _httpContextAccessor.HttpContext?
+                .User.FindFirst("CustomerId")?.Value;
+
+            if (string.IsNullOrEmpty(customerId))
+                throw new Exception("Customer not authenticated");
+
+            // Filter only this customer's return requests
+            var filter = Builders<ReturnRequest>.Filter.Eq(r => r.CustomerId, customerId);
 
             if (!string.IsNullOrEmpty(status))
             {
-                filter = Builders<ReturnRequest>.Filter.Eq(r => r.Status, status);
+                filter = Builders<ReturnRequest>.Filter.And(
+                    filter,
+                    Builders<ReturnRequest>.Filter.Eq(r => r.Status, status)
+                );
             }
 
             var returns = await _returns
@@ -533,22 +588,33 @@ namespace DSM_Application.Server.Services
                 .SortByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
-            return returns.Select(r => new ReturnHistoryDto
+            return returns.Select(r =>
             {
-                Id = r.Id,
-                OrderId = r.OrderId,
-                ProductId = r.ProductId,
-                ReturnQty = r.ReturnQty,
-                Status = r.Status,
-                Reason = r.Reason,
-                RejectedBy = r.RejectedBy,
+                Order? order = null;
 
-                CreatedAt = r.CreatedAt,
-                ApprovedAt = r.ApprovedAt,
-                ReceivedAt = r.ReceivedAt,
-                CompletedAt = r.CompletedAt
+                if (ObjectId.TryParse(r.OrderId, out _))
+                {
+                    order = _orders.Find(o => o.Id == r.OrderId).FirstOrDefault();
+                }
+
+                var product = order?.Products
+                    .FirstOrDefault(p => p.ProductId == r.ProductId);
+
+                return new ReturnHistoryDto
+                {
+                    Id = r.Id,
+                    OrderId = r.OrderId,
+                    ProductId = r.ProductId,
+                    ProductName = r.ProductName ?? product?.ProductName ?? "Unknown Product",
+                    Price = product?.Price,
+                    ReturnQty = r.ReturnQty,
+                    Status = r.Status,
+                    Reason = r.Reason,
+                    CreatedAt = r.CreatedAt
+                };
             }).ToList();
         }
+
 
 
         public async Task<List<ReturnRequest>> GetReturnHistoryByStatusAsync(string status)

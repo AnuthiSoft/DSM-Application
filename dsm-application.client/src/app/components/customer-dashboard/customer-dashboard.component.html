@@ -145,13 +145,21 @@
       <app-cust-dashboard></app-cust-dashboard>
     </div>
 
-    <!-- Products Tab -->
-    <div class="tab-content" *ngIf="isActive('products') && !loading">
-      <div class="welcome-header">
-        <h2>Available Products</h2>
-      </div>
 
-      <div class="products-wrapper">
+
+
+    <app-cust-dashboard *ngIf="activeTab === 'distributors'">
+    </app-cust-dashboard>
+
+
+    <!-- <div *ngIf="isActive('returns')">
+  <app-return-orders></app-return-orders>
+</div> -->
+
+    <div *ngIf="activeTab === 'products'">
+
+      <div *ngIf="activeTab === 'products'" class="products-wrapper">
+
         <ng-container *ngIf="products.length > 0; else noProductsYet">
           <app-products-by-dist [products]="products" [customerId]="customerId"
             (addToCartClicked)="cartService.addToCart($event)">
@@ -191,8 +199,32 @@
     <app-add-to-cart *ngIf="activeTab === 'cart'" [distributorId]="distributorId" [products]="products"
       (goToProductsClicked)="switchToProducts()" [selectedProduct]="selectedCartProduct">
     </app-add-to-cart>
- 
- 
-    </div>
+
+
+    <!-- <div class="tab-content" *ngIf="isActive('products')">
+      <div class="welcome-header">
+        <h2>All Products</h2>
+      </div> -->
+
+    <!-- 🔥 Products page is fully independent -->
+    <!-- <app-products-by-dist></app-products-by-dist>
+    </div> -->
+
+    <!-- Orders Tab -->
+
+    <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>
+
+
+    <!-- Profile Tab -->
+
+
+    <app-profile *ngIf="activeTab === 'profile'"></app-profile>
+    <!-- <app-review-submit *ngIf="activeTab === 'review'"></app-review-submit> -->
+
+    <!--search by pincode-->
+    <!-- <div class="nav-item" [class.active]="isActive('search')" (click)="setActiveTab('search')">
+      <i class="fas fa-search"></i> <span>Search</span>
+    </div> -->
+    <!-- <app-customer-search *ngIf="activeTab === 'search'"></app-customer-search> -->
+
   </div>
-</div>

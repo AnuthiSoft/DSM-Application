@@ -40,9 +40,12 @@ export class CustomerOrdersComponent {
   showProgressSteps: boolean = false;
   submitting: boolean = false;
 
-  // Alert message
-  returnMessage: string = '';
-  returnMessageType: 'alert-success' | 'alert-error' | '' = '';
+// Alert message
+returnMessage: string = '';
+returnMessageType: 'alert-success' | 'alert-error' | '' = '';
+selectedProductIds: string[] = [];
+returnQuantities: any = {}; 
+totalReturnQty: number = 0;
 
 
   orders: Order[] = [];
@@ -50,10 +53,9 @@ export class CustomerOrdersComponent {
   selectedOrder: any = null;
   selectedOrderss: any = null;
 
-  selectedFiles: File[] = [];
-  selectedProductId: string = '';
-  returnQty: number = 1;
-  selectedOrderForReturn: any = null;
+    selectedFiles: File[] = [];
+returnQty: number = 1;
+selectedOrderForReturn: any = null;
   activeTab: string = 'dashboard';
 
 
@@ -230,9 +232,10 @@ applyStatusFilter(): void {
     this.currentOrderId = order.id;
     this.selectedOrderForReturn = order;
 
-    this.selectedProductId = order.products[0]?.productId;
-    this.returnQty = 1;
-    this.selectedFiles = [];
+this.selectedProductIds = [];
+this.returnQuantities = {};
+  this.returnQty = 1;
+  this.selectedFiles = [];
 
     this.returnData = {
       returnType: 'Return',
@@ -242,14 +245,12 @@ applyStatusFilter(): void {
       files: null
     };
 
-    this.isReturnPopupOpen = true;
-  }
+  this.isReturnPopupOpen = true;
+}
 
 
 
-
- submitReturnRequest(): void {
-
+submitReturnRequest() {
   const baseReason =
     this.returnData.reason === 'Other'
       ? this.returnData.otherReason
@@ -258,56 +259,101 @@ applyStatusFilter(): void {
   const finalReason =
     `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
 
-  const selectedProduct = this.selectedOrderForReturn.products
-    .find((p: any) => p.productId === this.selectedProductId);
+  // Build return items for all selected products
+  const items = this.selectedProductIds.map(pid => {
+    const product = this.selectedOrderForReturn.products
+      .find((p: any) => p.productId === pid);
 
-  if (!selectedProduct) {
-    this.toastr.error('Invalid product selected');
-    return;
-  }
-
-  const payload = {
-    orderId: this.currentOrderId,
-    productId: this.selectedProductId,
-    productName: selectedProduct.productName,
-    returnQty: this.returnQty,
-    reason: finalReason,
-    resolution: this.returnData.resolution
-  };
-
-  this.submitting = true;
-
-  this.returnApiService.createReturn(payload).subscribe({
-    next: (res: any) => {
-      const returnId = res.id;
-
-      // upload images if any
-      if (this.selectedFiles.length > 0) {
-        this.returnApiService
-          .uploadReturnImages(returnId, this.selectedFiles)
-          .subscribe();
-      }
-
-      const order = this.orders.find(o => o.id === this.currentOrderId);
-      if (order) {
-        order.status = 'Return Pending';
-      }
-
-      this.toastr.success('Return request submitted');
-      this.isReturnPopupOpen = false;
-      this.submitting = false;
-
-      this.router.navigate(['/customer/dashboard'], {
-        queryParams: { tab: 'returns' }
-      });
-    },
-    error: () => {
-      this.submitting = false;
-      this.toastr.error('Failed to submit return request');
-    }
+    return {
+      orderId: this.currentOrderId,
+      productId: pid,
+      productName: product?.productName,
+      returnQty: this.returnQuantities[pid] || 1,
+      reason: finalReason,
+      resolution: this.returnData.resolution
+    };
   });
+
+  items.forEach(item => {
+    this.returnApiService.createReturn(item).subscribe({
+      next: (res) => {
+        const returnId = res.id;
+
+        if (this.selectedFiles.length > 0) {
+          this.returnApiService
+            .uploadReturnImages(returnId, this.selectedFiles)
+            .subscribe();
+        }
+      }
+    });
+  });
+
+ this.toastr.success("Return request submitted");
+
+// 👉 Update UI instantly
+this.selectedOrderForReturn.status = "Return Initiated";
+
+const index = this.orders.findIndex(o => o.id === this.currentOrderId);
+if (index !== -1) {
+    this.orders[index].status = "Return Initiated";
 }
 
+this.isReturnPopupOpen = false;
+
+}
+
+dropdownOpen: boolean = false;
+toggleDropdown() {
+  this.dropdownOpen = !this.dropdownOpen;
+}
+
+toggleProductSelection(pid: string) {
+  const index = this.selectedProductIds.indexOf(pid);
+
+  if (index === -1) {
+    this.selectedProductIds.push(pid);
+    this.returnQuantities[pid] = 1; // default qty
+  } else {
+    this.selectedProductIds.splice(index, 1);
+    delete this.returnQuantities[pid];
+  }
+
+  this.updateTotalReturnQty();
+}
+
+
+getProductName(pid: string) {
+  return this.selectedOrderForReturn?.products
+    .find((p: any) => p.productId === pid)?.productName || '';
+}
+
+getMaxReturnQtyForProduct(pid: string): number {
+  const p = this.selectedOrderForReturn?.products
+    .find((x: any) => x.productId === pid);
+  return p ? p.quantity - (p.returnedQty || 0) : 1;
+}
+
+onProductSelectionChange() {
+  // Initialize quantity = 1 for any newly added product
+  this.selectedProductIds.forEach(pid => {
+    if (!this.returnQuantities[pid]) {
+      this.returnQuantities[pid] = 1;
+    }
+  });
+
+  // Remove quantities for unselected products
+  Object.keys(this.returnQuantities).forEach(pid => {
+    if (!this.selectedProductIds.includes(pid)) {
+      delete this.returnQuantities[pid];
+    }
+  });
+
+  this.updateTotalReturnQty();
+}
+updateTotalReturnQty() {
+  this.totalReturnQty = Object.values(this.returnQuantities)
+    .reduce((sum: number, qty: any) => sum + Number(qty), 0);
+}
 
 
 
@@ -388,12 +434,29 @@ getPendingCount(): number {
           }
 
   // Calculate total spent
-getTotalSpent(): number {
-              return this.filteredOrders.reduce(
-                  (sum, o) => sum + (o.totalAmount || 0),
-                  0
-              );
-          }
+ getTotalSpent(): number {
+  return this.orders
+    .filter(o => o.status?.toLowerCase() !== 'cancelled' && o.status?.toLowerCase() !== 'canceled')
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+}
+
+canReturn(order: any): boolean {
+  if (!order || !order.status) return false;
+
+  if (order.status.toLowerCase() !== 'delivered') return false;
+
+  if (!order.products || order.products.length === 0) return false;
+
+  return order.products.every((p: any) => {
+    const returned = p.returnedQty ? p.returnedQty : 0;
+    return returned < p.quantity;
+  });
+}
+
+
+  // getTotalSpent(): number {
+  //   return this.orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  // }
 
   // ✅ FIXED View Details for order
   viewOrderDetails(id: string | null | undefined): void {
@@ -569,11 +632,11 @@ getStatusCount(status: string): number {
           }
 
 
-  getMaxReturnQuantity(): number {
-              if (!this.selectedOrderForReturn || !this.selectedProductId) return 1;
+getMaxReturnQuantity(): number {
+  if (!this.selectedOrderForReturn || !this.selectedProductIds) return 1;
 
-              const product = this.selectedOrderForReturn.products
-                  .find((p: any) => p.productId === this.selectedProductId);
+  const product = this.selectedOrderForReturn.products
+    .find((p: any) => p.productId === this.selectedProductIds);
 
               return product ? product.quantity : 1;
           }

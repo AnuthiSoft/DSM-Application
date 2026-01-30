@@ -597,6 +597,19 @@
   border-radius: 8px;
 }
  
+
+
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .orders-section .dashboard-card {

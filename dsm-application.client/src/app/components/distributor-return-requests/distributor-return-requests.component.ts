@@ -153,6 +153,8 @@ this.returnRequests = res.map(r => ({
                 <div style="font-weight: 600; color: #e74c3c;">${r.returnQty}</div>
               </div>
             </div>
+
+            
             
             <div style="background: rgba(52, 152, 219, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
               <div style="font-size: 0.85rem; color: #7f8c8d; margin-bottom: 4px;">Product</div>
@@ -685,6 +687,10 @@ this.returnRequests = res.map(r => ({
               <span style="color: #7f8c8d; font-weight: 500;">Quantity:</span>
               <span style="color: #e74c3c; font-weight: 600;">${r.returnQty}</span>
             </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+  <span style="color: #7f8c8d; font-weight: 500;">Price:</span>
+  <span style="color: #27ae60; font-weight: 600;">₹${r.price ?? '0'}</span>
+</div>
            
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
               <span style="color: #7f8c8d; font-weight: 500;">Status:</span>

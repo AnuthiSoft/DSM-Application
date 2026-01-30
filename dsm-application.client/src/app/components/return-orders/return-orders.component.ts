@@ -78,6 +78,8 @@ isApproved(r: any) {
           <p><b>Return ID:</b> ${r.id}</p>
           <p><b>Order ID:</b> ${r.orderId}</p>
           <p><b>Product ID:</b> ${r.productId}</p>
+           <p><b>Product Name:</b> ${r.productName || 'N/A'}</p>
+        <p><b>Price:</b> ₹${r.price?.toFixed(2) || 'N/A'}</p>
           <p><b>Quantity:</b> ${r.returnQty}</p>
           <p><b>Status:</b> ${r.status}</p>
           <p><b>Reason:</b> ${r.reason}</p>

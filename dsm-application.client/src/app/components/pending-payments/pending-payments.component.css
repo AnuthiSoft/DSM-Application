@@ -690,3 +690,148 @@
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+
+.payment-id-col {
+   background: #2563eb !important;
+  color: #fff !important;
+}
+.customer-col{
+  background: #2563eb !important;
+  color: #fff !important;
+}
+.amount-col{
+  background: #2563eb !important;
+  color: #fff !important;
+}
+.mode-col{
+  background:#2563eb !important;
+  color: #fff !important;
+}
+.date-col{
+    background:#2563eb !important;
+  color: #fff !important;
+}
+.payment-id-wrapper{
+  background-color: var(--hover-color);
+  color: var(--text-color);
+   
+}
+.payment-id{
+  background-color: var(--hover-color);
+  color: var(--text-color);
+
+}
+.customer-name{
+   background-color: var(--hover-color);
+  color: var(--text-color);
+}
+.payment-amount{
+     background-color: var(--hover-color);
+  color: var(--text-color);
+}
+.payment-mode{
+   background-color: var(--hover-color);
+  color: var(--text-color);
+}
+.payment-date{
+   background-color: var(--hover-color);
+  color: var(--text-color);
+}
+
+/* ===========================================================
+   CLEAN PREMIUM BORDER STYLE — OPPOSITE BORDER COLORS
+   =========================================================== */
+
+.table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  width: 100%;
+
+  /* Opposite border - darker for light mode */
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ---------------------- */
+/* HEADER WITH DIVIDERS   */
+/* ---------------------- */
+.table thead th {
+  background: var(--hover-color);
+
+  /* Darker border for light mode */
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.25);
+
+  padding: 14px 12px;
+}
+
+.table thead th:last-child {
+  border-right: none;
+}
+
+/* ---------------------- */
+/* BODY ROWS + SEPARATION */
+/* ---------------------- */
+.table tbody td {
+  /* Darker line for light mode */
+  border-right: 1px solid rgba(0, 0, 0, 0.22);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+
+  padding: 14px 12px;
+}
+
+.table tbody td:last-child {
+  border-right: none;
+}
+
+/* Remove border under last row */
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover */
+.table tbody tr:hover {
+  background: var(--hover-color);
+}
+
+/* Top rounded */
+.table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.table thead th:last-child {
+  border-top-right-radius: 8px;
+}
+
+/* ===========================================================
+   🌙 DARK MODE — OPPOSITE BORDER COLORS
+   =========================================================== */
+
+[data-theme="dark"] .table {
+  /* Light border for contrast */
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-theme="dark"] .table thead th {
+  background: #2b2b2b !important;
+
+  /* Lighter border */
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .table tbody td {
+  border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+  background: #2a2a2a !important;
+}
+
+[data-theme="dark"] .table thead th:last-child,
+[data-theme="dark"] .table tbody td:last-child {
+  border-right: none !important;
+}

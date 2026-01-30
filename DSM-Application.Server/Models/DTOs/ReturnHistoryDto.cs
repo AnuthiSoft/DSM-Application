@@ -6,6 +6,7 @@
         public string OrderId { get; set; }
         public string ProductId { get; set; }
         public int ReturnQty { get; set; }
+        public decimal? Price { get; set; }
         public string Status { get; set; }
         public string Reason { get; set; }
         public string CustomerPhone { get; set; }

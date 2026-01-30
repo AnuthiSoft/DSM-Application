@@ -138,7 +138,7 @@
               <!-- Normal orders -->
               <span class="detail-value" *ngIf="order.status?.toLowerCase() !== 'canceled' 
           && order.status?.toLowerCase() !== 'cancelled'; 
-          else cancelledDelivery">
+          else cancelledDelivery"> {{ order.expectedDeliveryDate | date:'mediumDate' }}
               </span>
               <!-- <span class="detail-value"
               *ngIf="order.status !== 'Cancelled'; else cancelledDelivery">
@@ -274,30 +274,25 @@
             <i class="fas fa-times"></i> Cancel Order
           </button> -->
 
-          <!-- Reorder -->
-          <button class="btn btn-outline-success btn-sm action-btn" *ngIf="order.status === 'Delivered'"
-            (click)="reorder(order.id)">
-            <i class="fas fa-redo"></i>
-            <span>Reorder</span>
-          </button>
+
 
           <!-- Reorder -->
-         <!-- <button class="btn btn-outline-success btn-sm"
-        *ngIf="order.status === 'Delivered'"
-        (click)="reorder(order.id)">
-  <i class="fas fa-redo"></i> Reorder
-</button> -->
+          <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'"
+            (click)="reorder(order.id)">
+            <i class="fas fa-redo"></i> Reorder
+          </button>
 
 
         </div>
 
-              <!-- Return (only for delivered orders) -->
- <button class="btn btn-warning btn-sm action-btn"
-                  *ngIf="order.status === 'Delivered'"
-                  (click)="openReturnPopup(order)">
-            <i class="fas fa-undo"></i>
-            <span>Return</span>
-          </button>
+        <!-- Return (only for delivered orders) -->
+        <!-- Return (only when order is delivered AND no previous returns exist) -->
+       <button class="btn btn-warning btn-sm"
+        *ngIf="canReturn(order)"
+        (click)="openReturnPopup(order)">
+  <i class="fas fa-undo"></i> Return
+</button>
+
 
 
 
@@ -405,35 +400,68 @@
       </div>
 
       <form (ngSubmit)="submitReturnRequest()">
-        <!-- Product Selection -->
-        <div class="form-group">
-          <label for="productSelect" class="required">
-            <i class="fas fa-box"></i> Select Product
-          </label>
-          <select id="productSelect" [(ngModel)]="selectedProductId" name="product" required class="form-select">
-            <option value="" disabled>Choose a product</option>
-            <option *ngFor="let p of selectedOrderForReturn?.products" [value]="p.productId"
-              [disabled]="p.returnedQty >= p.quantity">
-              {{ p.productName }}
-              <span *ngIf="p.returnedQty >= p.quantity">(Already returned)</span>
-            </option>
-          </select>
-          <span class="form-note">
-            <i class="fas fa-info-circle"></i> Select the product you want to return
-          </span>
-        </div>
+ <!-- Custom Multi-Select Dropdown -->
+<div class="form-group custom-multiselect">
+  <label class="required"><i class="fas fa-box"></i> Select Products</label>
 
-        <!-- Return Quantity -->
-        <div class="form-group">
-          <label for="returnQty" class="required">
-            <i class="fas fa-hashtag"></i> Return Quantity
-          </label>
-          <input type="number" id="returnQty" [(ngModel)]="returnQty" name="quantity" min="1"
-            [max]="getMaxReturnQuantity()" required class="form-control">
-          <span class="form-note">
-            <i class="fas fa-info-circle"></i> Max available: {{ getMaxReturnQuantity() }} units
-          </span>
-        </div>
+  <!-- Dropdown label -->
+  <div class="dropdown-display" (click)="toggleDropdown()">
+    <span *ngIf="selectedProductIds.length === 0">Select Products</span>
+    <span *ngIf="selectedProductIds.length > 0">
+      {{ selectedProductIds.length }} product(s) selected
+    </span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+
+  <!-- Dropdown list -->
+  <div class="dropdown-list" *ngIf="dropdownOpen">
+    <div *ngFor="let p of selectedOrderForReturn?.products"
+         class="dropdown-item"
+         [class.disabled]="p.returnedQty >= p.quantity"
+         (click)="p.returnedQty < p.quantity && toggleProductSelection(p.productId)">
+
+      <label class="checkbox-label">
+        <input type="checkbox"
+               [checked]="selectedProductIds.includes(p.productId)"
+               [disabled]="p.returnedQty >= p.quantity">
+
+        {{ p.productName }}
+      </label>
+
+      <span class="text-muted" style="font-size: 12px;">
+        Max: {{ p.quantity - (p.returnedQty || 0) }}
+      </span>
+    </div>
+  </div>
+</div>
+
+
+
+       
+
+        <!-- Return Qty Inputs for Each Selected Product -->
+<div class="form-group" *ngFor="let pid of selectedProductIds">
+  <label>
+    Return Qty for {{ getProductName(pid) }}
+  </label>
+  
+  <input type="number"
+         class="form-control"
+         min="1"
+         [max]="getMaxReturnQtyForProduct(pid)"
+         [(ngModel)]="returnQuantities[pid]"
+         (input)="updateTotalReturnQty()"
+         name="qty_{{pid}}">
+</div>
+
+<!-- Auto-filled Total Return Quantity -->
+<div class="form-group">
+  <label><i class="fas fa-calculator"></i> Total Return Quantity</label>
+  <input type="number"
+         class="form-control"
+         [value]="totalReturnQty"
+         readonly>
+</div>
 
         <!-- Return Reason -->
         <div class="form-group">

@@ -173,4 +173,19 @@ rejectReturn(returnId: string, reason: string): Observable<any> {
 }
 
 
+// New method: Pickup with photo and details
+  employeePickupWithDetails(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/pickup-with-details`, formData);
+  }
+
+  // New method: Cancel pickup
+  cancelPickup(returnId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${returnId}/cancel`, {});
+  }
+
+  // New method: Mark as reached
+  markAsReached(returnId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${returnId}/reached`, {});
+  }
+
 }

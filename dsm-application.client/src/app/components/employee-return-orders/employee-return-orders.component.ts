@@ -12,6 +12,11 @@ export class EmployeeReturnOrdersComponent {
 
     constructor(private http: HttpClient,private returnApiService: ReturnApiService) {}
 
+
+    showModal = false;
+selected: any = {};
+previewImage: string | null = null;
+
    ngOnInit(): void {
   const employeeId = localStorage.getItem('employeeId');
   if (!employeeId) return;
@@ -26,8 +31,37 @@ export class EmployeeReturnOrdersComponent {
   returns: any[] = [];
 
 markReached(r: any) {
-  r.showPickupForm = true;
+  this.selected = r;
+  this.previewImage = null;
+  this.showModal = true;
 }
+onModalFileSelected(event: any) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  this.selected.selectedFile = file;
+
+  const reader = new FileReader();
+  reader.onload = e => this.previewImage = e.target?.result as string;
+  reader.readAsDataURL(file);
+}
+closeModal() {
+  this.showModal = false;
+}
+confirmPickupFromModal() {
+  if (!this.selected.selectedFile) {
+    alert("Please upload product photo");
+    return;
+  }
+  if (!this.selected.tagPresent || !this.selected.packagingIntact) {
+    alert("Please check all conditions");
+    return;
+  }
+
+  this.confirmPickup(this.selected);
+  this.showModal = false;
+}
+
 
 onFileSelected(event: any, r: any) {
   r.selectedFile = event.target.files[0];

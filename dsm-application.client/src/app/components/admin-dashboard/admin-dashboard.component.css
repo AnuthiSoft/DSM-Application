@@ -53,14 +53,66 @@ html, body {
   background-color: var(--bg-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
- 
+
+/* Table container */
+/* ===============================
+   FORCE FIX FOR DASHBOARD TABLE
+   =============================== */
+
+/* Kill Bootstrap cell child background */
+body.dark-theme .dashboard-table .table-striped > tbody > tr > * {
+  background-color: transparent !important;
+}
+
+/* Apply background ONLY to the row */
+body.dark-theme .dashboard-table .table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-theme .dashboard-table tbody tr:hover {
+  background-color: var(--hover-color) !important;
+}
+
+/* Ensure td itself is transparent */
+body.dark-theme .dashboard-table td {
+  background-color: transparent !important;
+  color: var(--text-color) !important;
+}
+
+/* Inline elements must NEVER have background */
+body.dark-theme .dashboard-table td * {
+  background-color: transparent !important;
+}
+
+/* Premium indicator */
+body.dark-theme .premium-indicator {
+  color: var(--text-color) !important;
+}
+
+/* Muted text */
+body.dark-theme .text-muted {
+  color: #9ca3af !important;
+}
+
+/* Icons */
+body.dark-theme .dashboard-table i {
+  background: none !important;
+}
+
+
+
+
+
 .body {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-color);
   display: flex;
   position: relative;
+    color: var(--text-color);
 }
+
+/* Mobile Overlay */
 
 /* Mobile Overlay */
 .mobile-overlay {
@@ -80,6 +132,8 @@ html, body {
   display: block;
   opacity: 1;
 }
+
+
 
 /* Sidebar Navigation */
 .dashboard-sidebar {
@@ -303,6 +357,11 @@ html, body {
 .dashboard-sidebar.collapsed + .dashboard-main {
   margin-left: 70px;
   width: calc(100% - 70px);
+.dashboard-header {
+  background: var(--header-bg);
+  padding: 20px 30px;
+  border-bottom: 1px solid var(--border-color); /* CHANGED */
+  box-shadow: var(--shadow); /* CHANGED */
 }
 
 /* Welcome Header */
@@ -484,6 +543,128 @@ body[data-theme='dark'] .dashboard-card {
   vertical-align: middle;
   border-bottom: 1px solid var(--border-color);
 }
+background-color: var(--bg-color);
+}
+
+.fw-semibold{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.table-responsive.status-badge.bg-success{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+.text-center .action-buttons{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.col-md-6{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.modal-body{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.form-control{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+
+.modal-header{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.modal-footer{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+
+.categories-list{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+.dashboard-table{
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+.text-center{
+   color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+
+/* ===============================
+   FINAL TABLE DARK MODE FIX
+   =============================== */
+
+/* Let rows control background */
+body.dark-theme .dashboard-table tr {
+  background-color: transparent;
+}
+
+/* Zebra rows */
+body.dark-theme .dashboard-table tbody tr:nth-of-type(odd) {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* ALL cells transparent */
+body.dark-theme .dashboard-table td,
+body.dark-theme .dashboard-table th {
+  background-color: transparent !important;
+  color: var(--text-color);
+}
+
+/* Inline content must never paint background */
+body.dark-theme .dashboard-table td * {
+  background: transparent !important;
+}
+
+/* Premium + categories */
+body.dark-theme .premium-indicator,
+body.dark-theme .categories-list {
+  color: var(--text-color);
+}
+
+/* Status badges stay colored */
+body.dark-theme .status-badge.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+body.dark-theme .status-badge.bg-secondary {
+  background-color: #4b5563 !important;
+}
+
+
+.table.table-striped align-middle {
+  color:var(--text-color);
+background-color: var(--bg-color);
+}
+
+
+/* Action Buttons */
+.btn-action {
+  border: none;
+  background: transparent;
+  padding: 5px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+   color: var(--text-color);
+}
+
+.btn-edit:hover { background: #3498db; color: white; }
+.btn-deactivate:hover { background: #e74c3c; color: white; }
+.btn-activate:hover { background: #27ae60; color: white; }
+.btn-delete:hover { background: #c0392b; color: white; }
+.btn-premium:hover { background: #f39c12; color: white; }
 
 /* Status badges */
 .status-badge {
@@ -515,6 +696,12 @@ body[data-theme='dark'] .dashboard-card {
   font-weight: 500;
 }
 
+.premium-indicator{
+  color:var(--text-color);
+background-color: var(--bg-color);
+background:var(--bg-color) ;
+}
+
 /* Categories list */
 .categories-list {
   max-width: 200px;
@@ -524,6 +711,13 @@ body[data-theme='dark'] .dashboard-card {
   font-size: 0.85rem;
   color: var(--text-color);
   opacity: 0.9;
+}
+footer {
+  background: var(--secondary-color);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: auto;
 }
 
 /* Action buttons */
@@ -598,6 +792,7 @@ body[data-theme='dark'] .dashboard-card {
   padding: 12px 15px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
+  border-radius: 8px;
   background: var(--card-bg);
   font-size: 15px;
   color: var(--text-color);
@@ -610,18 +805,12 @@ body[data-theme='dark'] .dashboard-card {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-.form-control.is-invalid {
-  border-color: var(--accent-color);
-}
-
-.invalid-feedback {
-  color: var(--accent-color);
-  font-size: 0.85rem;
-  margin-top: 5px;
-}
-
-/* Phone input group */
-.phone-group {
+.phone-prefix {
+  padding: 10px 14px;
+  background: var(--bg-color);
+  border-right: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-weight: 500;
   display: flex;
   align-items: center;
 }
@@ -638,18 +827,13 @@ body[data-theme='dark'] .dashboard-card {
 
 .phone-input {
   flex: 1;
-  border-radius: 0 6px 6px 0;
+  border: none !important;
+  outline: none !important;
+  background: transparent;
+   border-radius: 0 6px 6px 0;
   border-left: none;
-}
-
-/* Form switch */
-.form-check-input {
-  cursor: pointer;
-}
-
-.form-check-input:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  padding: 0 12px;
+  font-size: 14px;
 }
 
 .form-check-label {
@@ -657,7 +841,71 @@ body[data-theme='dark'] .dashboard-card {
   cursor: pointer;
   font-weight: 500;
   margin-left: 10px;
+.phone-input:focus {
+  box-shadow: none;
 }
+
+/* Placeholder style */
+.phone-input::placeholder {
+  color: var(--secondary-color);
+  opacity: 0.7;
+}
+
+
+/* ===============================
+   FIX SPECIAL TABLE CELLS
+   =============================== */
+
+/* STATUS BADGES */
+.dark-theme .dashboard-table .status-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.dark-theme .dashboard-table .bg-success {
+  background-color: #166534 !important; /* dark green */
+  color: #dcfce7 !important;
+}
+
+.dark-theme .dashboard-table .bg-secondary {
+  background-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+.status-badge{
+     background-color: var(--sidebar-bg);
+
+}
+
+/* PREMIUM COLUMN */
+.dark-theme .dashboard-table .premium-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+    background-color: var(--secondary-color);
+
+  font-weight: 500;
+  color: #e5e7eb;
+}
+
+
+.dark-theme .dashboard-table .premium-indicator i {
+  color: #facc15 !important;
+}
+
+/* CATEGORIES */
+.dark-theme .dashboard-table .categories-list {
+  color: black;
+  background: transparent !important;
+  background-color: var(--secondary-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /* Modal adjustments */
 .modal-content {

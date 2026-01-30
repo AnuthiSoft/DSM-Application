@@ -3,11 +3,11 @@
   <!-- Header -->
   <div class="pickup-header dashboard-card">
     <h2><i class="fas fa-truck-loading"></i> Return Pickups</h2>
-    <div class="header-stats" *ngIf="returns.length > 0">
+    <!-- <div class="header-stats" *ngIf="returns.length > 0">
       <span class="stat-badge assigned">{{ getStatusCount('assigned') }} Assigned</span>
       <span class="stat-badge completed">{{ getStatusCount('completed') }} Completed</span>
       <span class="stat-badge total">{{ returns.length }} Total</span>
-    </div>
+    </div> -->
   </div>
 
   <!-- Empty State -->
@@ -100,7 +100,7 @@
         </button>
 
         <!-- Pickup Confirmation Form -->
-        <div *ngIf="r.showPickupForm" class="pickup-form">
+        <!-- <div *ngIf="r.showPickupForm" class="pickup-form">
           <h6><i class="fas fa-clipboard-check"></i> Complete Pickup</h6>
           
           <div class="form-group">
@@ -154,7 +154,7 @@
               <i class="fas fa-times"></i> Cancel
             </button>
           </div>
-        </div>
+        </div> -->
 
         <!-- Success Message -->
         <div *ngIf="r.pickupConfirmed" class="success-message">
@@ -168,6 +168,9 @@
         </div>
       </div>
 
+    
+
+
       <!-- Additional Actions -->
       <div class="secondary-actions" *ngIf="!r.pickupConfirmed">
         <button class="btn btn-outline btn-sm" (click)="viewDetails(r)">
@@ -180,6 +183,74 @@
           <i class="fas fa-phone-alt"></i> Call Customer
         </button>
       </div>
+
+      
     </div>
+  </div>
+</div>
+  <!-- ===========================
+     PICKUP CONFIRMATION MODAL
+=========================== -->
+<div class="pickup-modal-backdrop" *ngIf="showModal">
+  <div class="pickup-modal">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <i class="fas fa-map-marker-alt"></i>
+      <h3>Pickup Confirmation</h3>
+      <p>Please verify all details before confirming.</p>
+    </div>
+
+    <!-- PRODUCT SUMMARY -->
+    <div class="modal-section">
+      <div class="summary-row">
+        <span><i class="fas fa-receipt"></i> Order:</span>
+        <b>{{ selected.orderId }}</b>
+      </div>
+      <div class="summary-row">
+        <span><i class="fas fa-box"></i> Product:</span>
+        <b>{{ selected.productName }}</b>
+      </div>
+      <div class="summary-row">
+  <span><i class="fas fa-indian-rupee-sign"></i> Price:</span>
+  <b>₹{{ selected.productPrice }}</b>
+</div>
+
+      <div class="summary-row">
+        <span><i class="fas fa-hashtag"></i> Quantity:</span>
+        <b>{{ selected.returnQty }}</b>
+      </div>
+    </div>
+
+    <!-- FILE UPLOAD -->
+    <div class="modal-section">
+      <label class="upload-label"><i class="fas fa-camera"></i> Upload Product Photo</label>
+      <input type="file" (change)="onModalFileSelected($event)" />
+
+      <!-- Image Preview -->
+      <div class="image-preview" *ngIf="previewImage">
+        <img [src]="previewImage">
+      </div>
+    </div>
+
+    <!-- CHECKBOXES -->
+    <div class="modal-section">
+      <label class="checkbox">
+        <input type="checkbox" [(ngModel)]="selected.tagPresent" />
+        <span><i class="fas fa-file-invoice"></i> Billing is present and intact</span>
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" [(ngModel)]="selected.packagingIntact" />
+        <span><i class="fas fa-box-open"></i> Original packaging is intact</span>
+      </label>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="modal-actions">
+      <button class="confirm-btn" (click)="confirmPickupFromModal()">Confirm Pickup</button>
+      <button class="cancel-btn" (click)="closeModal()">Cancel</button>
+    </div>
+
   </div>
 </div>

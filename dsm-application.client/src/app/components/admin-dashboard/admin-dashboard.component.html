@@ -71,15 +71,11 @@
         <i class="fas fa-exclamation-triangle"></i>
         <span>Fraud Reports</span>
       </div>
-    </div>
-    
-    <div class="sidebar-footer">
-      <div class="nav-item logout-fixed"
-           (click)="logout()"
-           data-title="Logout">
+
+      <!-- <div class="nav-item" (click)="logout()">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
-      </div>
+      </div> -->
     </div>
   </div>
 
@@ -149,15 +145,15 @@
           <table class="table table-striped align-middle">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Company</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>GST</th>
-                <th>Status</th>
-                <th>Premium</th>
-                <th>Categories</th>
+                <th class="text-center">ID</th>
+                <th class="text-center">Company</th>
+                <th class="text-center">Name</th>
+                <th class="text-center">Email</th>
+                <th class="text-center">Phone</th>
+                <th class="text-center">GST</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Premium</th>
+                <th class="text-center">Categories</th>
                 <th class="text-center">Actions</th>
               </tr>
             </thead>
@@ -165,21 +161,21 @@
               <tr *ngFor="let d of searchText ? filteredDistributors : distributors">
                 <td class="fw-semibold">{{ d.distributorId }}</td>
                 <td class="fw-semibold">{{ d.companyName }}</td>
-                <td>{{ d.name }}</td>
-                <td>{{ d.email }}</td>
-                <td>{{ d.phoneNumber }}</td>
-                <td>{{ d.gst }}</td>
-                <td>
-                  <span class="status-badge bg-success" *ngIf="d.isActive">Active</span>
+                <td class="fw-semibold">{{ d.name }}</td>
+                <td class="fw-semibold">{{ d.email }}</td>
+                <td class="fw-semibold">{{ d.phoneNumber }}</td>
+                <td class="fw-semibold">{{ d.gst }}</td>
+                <td class="fw-semibold">
+                  <span class="status-badge bg-success" *ngIf="d.isActive" >Active</span>
                   <span class="status-badge bg-secondary" *ngIf="!d.isActive">Inactive</span>
                 </td>
-                <td>
-                  <span *ngIf="d.isPremium" class="premium-indicator">
+                <td class="fw-semibold">
+                  <span *ngIf="d.isPremium" class="premium-indicator" >
                     <i class="fas fa-crown fa-sm text-warning"></i> Premium
                   </span>
                   <span *ngIf="!d.isPremium" class="text-muted">Standard</span>
                 </td>
-                <td>
+                <td class="fw-semibold">
                   <div class="categories-list">
                     {{ d.categories?.join(", ") || "-" }}
                   </div>
@@ -422,6 +418,33 @@
                   </div>
                 </div>
               </div>
+
+                    <!-- <div class="row">
+                    <!-- <div class="row">
+                      <div class="col-md-6">
+                        <div class="mb-3">
+                          <label class="form-label">Categories</label>
+                          <select class="form-select" multiple formControlName="categories">
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Food & Beverages">Food & Beverages</option>
+                            <option value="Home & Garden">Home & Garden</option>
+                            <option value="Automotive">Automotive</option>
+                            <option value="Health & Beauty">Health & Beauty</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Others">Others</option>
+                          </select>
+                          <small class="form-text text-muted">Hold Ctrl to select multiple categories</small>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="mb-3" *ngIf="distributorForm.get('categories')?.value?.includes('Others')">
+                          <label class="form-label">Custom Category</label>
+                          <input type="text" class="form-control" formControlName="customCategory"
+                            placeholder="Enter custom category">
+                        </div>
+                      </div>
+                    </div> -->
 
               <div class="row">
                 <div class="mb-3">

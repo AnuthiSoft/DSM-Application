@@ -993,6 +993,60 @@ html[data-theme="dark"] .modal-close {
   animation: spin 1s linear infinite;
 }
 
+.custom-multiselect {
+  position: relative;
+  width: 100%;
+}
+
+.custom-multiselect .dropdown-display {
+  border: 1px solid #ccc;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.custom-multiselect .dropdown-display i {
+  float: right;
+  margin-top: 4px;
+}
+
+.custom-multiselect .dropdown-list {
+  position: absolute;
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 5px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-item.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.checkbox-label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

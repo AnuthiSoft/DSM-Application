@@ -40,4 +40,5 @@ public class InventoryBatch
     public bool IsExpired => ExpiryDate < DateTime.UtcNow;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public object CurrentStock { get; internal set; }
 }

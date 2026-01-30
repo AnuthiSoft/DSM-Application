@@ -244,10 +244,16 @@ confirmAddToCart() {
     return;
   }
 
+  // ✅ Add product with selected quantity
   this.employeeCartService.add(this.popupProduct, this.popupQty);
+
+  // 🎉 Success message
   this.toastr.success('Added to cart');
+
+  // ❌ CLOSE POPUP
   this.closeAddPopup();
 }
+
 
 
 
@@ -324,14 +330,14 @@ get cartCount() {
 
 
   onStockFilterChange() {
-    if (this.stockFilter === 'inStock') {
-      this.filterProducts = this.products.filter(p => p.currentStock > 0);
-    } else if (this.stockFilter === 'outOfStock') {
-      this.filterProducts = this.products.filter(p => p.currentStock === 0);
-    } else {
-      this.filterProducts = [...this.products];
-    }
+  if (this.stockFilter === 'inStock') {
+    this.filterProducts = this.products.filter(p => p.currentStock > 0);
+  } else if (this.stockFilter === 'outOfStock') {
+    this.filterProducts = this.products.filter(p => p.currentStock === 0);
+  } else {
+    this.filterProducts = [...this.products];
   }
+}
 }
 
 

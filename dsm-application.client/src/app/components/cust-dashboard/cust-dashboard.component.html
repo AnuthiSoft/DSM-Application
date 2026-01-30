@@ -49,8 +49,8 @@
             {{
             d.status === 'Pending'
             ? 'Pending'
-            : d.status === 'Accepted'
-            ? 'Accepted'
+            : d.status === 'Accepted' || d.status === 'Connected'
+            ? 'Connected'
             : 'Available'
             }}
 
@@ -106,12 +106,12 @@
 
           <!-- Connect Button -->
           <button class="btn btn-primary" *ngIf="dashboardType === 'global'"
-            [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
+            [disabled]="d.status === 'Pending' || d.status === 'Accepted' || d.status === 'Connected'"
             (click)="connectDistributor(d.distributorId)">
             {{
             d.status === 'Pending'
             ? 'Pending'
-            : d.status === 'Accepted'
+            : d.status === 'Accepted' || d.status === 'Connected'
             ? 'Connected'
             : 'Connect'
             }}

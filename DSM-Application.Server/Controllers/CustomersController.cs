@@ -157,7 +157,7 @@ namespace DSM_Application.Server.Controllers
                 Role = "Customer",
                 AddedByDistributorId = distributorId,
       
-                IsRegistered = true,
+                IsRegistered = false,
                 MustChangePassword = true
             };
 
@@ -528,7 +528,8 @@ namespace DSM_Application.Server.Controllers
                 }
 
                 bool canConnect =
-                    !isCreatorDistributor &&
+                      !isCreatorDistributor &&
+                    
                     (
                         conn == null ||
                         conn.Status == ConnectionStatus.Disconnected ||

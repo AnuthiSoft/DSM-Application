@@ -131,7 +131,7 @@ export class CustomerDashboardComponent {
   }
 
 
- @HostListener('window:resize', ['$event'])
+//  @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkScreenWidth();
   }
@@ -194,7 +194,11 @@ loadDashboard() {
 
       // ✅ CONNECTED DISTRIBUTORS
       this.connectedDistributors = data.distributors
-        .filter(d => d.distributor.status === 'Accepted')
+        .filter(d =>
+  d.distributor.status === 'Accepted' ||
+  d.distributor.status === 'Connected'
+)
+
         .map(d => ({
           distributorId: d.distributor.distributorId,
           name: d.distributor.companyName || d.distributor.name || 'Distributor'
@@ -202,7 +206,11 @@ loadDashboard() {
 
       // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
       this.products = data.distributors
-        .filter(d => d.distributor.status === 'Accepted')
+        .filter(d =>
+  d.distributor.status === 'Accepted' ||
+  d.distributor.status === 'Connected'
+)
+
         .flatMap(d => d.products || []);
 
       // ✅ DISTRIBUTOR + PRODUCT COUNTS

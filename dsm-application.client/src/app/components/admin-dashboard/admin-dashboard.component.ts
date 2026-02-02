@@ -45,19 +45,19 @@ export function firstLetterCapitalValidator(
 
 
 export class AdminDashboardComponent implements OnInit {
-   isSidebarCollapsed: boolean = false;
+  isSidebarCollapsed: boolean = false;
   isMobileMenuOpen = false;
-  
+
   // ⭐ Required for tab switching
   activeTab: string = 'dashboard';
-otpSent = false;
-otpVerified = false;
-otpFailed = false;
-otpCode = "";
-phoneVerifiedUI = false;
+  otpSent = false;
+  otpVerified = false;
+  otpFailed = false;
+  otpCode = "";
+  phoneVerifiedUI = false;
 
-categories: any[] = [];
-pendingCategories: any[] = [];
+  categories: any[] = [];
+  pendingCategories: any[] = [];
 
 
 
@@ -67,45 +67,45 @@ pendingCategories: any[] = [];
   }
 
   sendOtp() {
-  const phone = this.distributorForm.get("phoneNumber")!.value;
+    const phone = this.distributorForm.get("phoneNumber")!.value;
 
-  this.adminService.sendOtp(phone).subscribe({
-    next: (res) => {
-      this.otpSent = true;
-      this.otpFailed = false;
+    this.adminService.sendOtp(phone).subscribe({
+      next: (res) => {
+        this.otpSent = true;
+        this.otpFailed = false;
 
-      // ⭐ SHOW THE OTP FROM BACKEND
-      alert("OTP sent! Your OTP is: " + res.otp);
+        // ⭐ SHOW THE OTP FROM BACKEND
+        alert("OTP sent! Your OTP is: " + res.otp);
 
-      console.log("OTP from backend:", res.otp);
-    },
-    error: () => alert("Failed to send OTP")
-  });
-}
+        console.log("OTP from backend:", res.otp);
+      },
+      error: () => alert("Failed to send OTP")
+    });
+  }
 
 
   // ------------------- OTP VERIFY -------------------
- verifyOtp() {
-  const phone = this.distributorForm.get("phoneNumber")!.value;
+  verifyOtp() {
+    const phone = this.distributorForm.get("phoneNumber")!.value;
 
-  this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-    next: () => {
-      this.otpVerified = true;
-      this.otpFailed = false;
-      this.phoneVerifiedUI = true; // ⭐ Show tick mark
-      this.otpSent = false;        // ⭐ Hide OTP inputs
-      alert("Phone verified successfully!");
-    },
-    error: () => {
-      this.otpVerified = false;
-      this.otpFailed = true;
-      alert("Invalid or expired OTP");
-    }
-  });
-}
+    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
+      next: () => {
+        this.otpVerified = true;
+        this.otpFailed = false;
+        this.phoneVerifiedUI = true; // ⭐ Show tick mark
+        this.otpSent = false;        // ⭐ Hide OTP inputs
+        alert("Phone verified successfully!");
+      },
+      error: () => {
+        this.otpVerified = false;
+        this.otpFailed = true;
+        alert("Invalid or expired OTP");
+      }
+    });
+  }
 
-  
-  
+
+
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;
@@ -142,7 +142,7 @@ pendingCategories: any[] = [];
 
 
   ngOnInit(): void {
-     // Load sidebar state from localStorage
+    // Load sidebar state from localStorage
     const savedSidebarState = localStorage.getItem('adminSidebarCollapsed');
     if (savedSidebarState !== null) {
       this.isSidebarCollapsed = savedSidebarState === 'true';
@@ -271,7 +271,7 @@ pendingCategories: any[] = [];
         '',
         [
           Validators.required,
-           Validators.pattern(/^(\+91)?[6-9]\d{9}$/)
+          Validators.pattern(/^(\+91)?[6-9]\d{9}$/)
         ]
       ],
 

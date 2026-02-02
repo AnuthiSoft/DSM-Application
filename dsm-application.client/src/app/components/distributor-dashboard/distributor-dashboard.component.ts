@@ -3,12 +3,12 @@ import { AuthService } from '../../services/auth.service';
 import { ConnectionRequestDto, DistributorService } from '../../services/distributor.service';
 import { CustomerService } from '../../services/customer.service';
 import { HttpClient } from '@angular/common/http';
- 
+
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
- 
- 
+
+
 @Component({
   selector: 'app-distributor-dashboard',
   templateUrl: './distributor-dashboard.component.html',
@@ -22,10 +22,10 @@ export class DistributorDashboardComponent implements OnInit {
   expectedDays: number = 1; // default
   leadTime: number = 1;
   selectedQrFile: File | null = null;
-scannerQrUrl: string | null = null;
- 
+  scannerQrUrl: string | null = null;
+
   constructor(
- 
+
     private auth: AuthService,
     private distributorService: DistributorService,
     private router: Router,   // ✅ ADD THIS
@@ -49,10 +49,10 @@ scannerQrUrl: string | null = null;
   selectedEmployeeId: string = "";     // ⬅ added
   employees: any[] = [];               // ⬅ added
   //polylinePath: any[] =[];
- 
+
   @ViewChild('trackingComp') trackingComp: any;
- 
- 
+
+
   submenuState: { [key: string]: boolean } = {
     inventory: false,
     orders: false,
@@ -69,39 +69,39 @@ scannerQrUrl: string | null = null;
   // }
   ngOnInit() {
     this.distributorId = localStorage.getItem('distributorId') || '';
-     // ✅ RESTORE ACTIVE TAB
-  const savedTab = localStorage.getItem('distributorActiveTab');
-  this.activeTab = savedTab ? savedTab : 'dashboard';
+    // ✅ RESTORE ACTIVE TAB
+    const savedTab = localStorage.getItem('distributorActiveTab');
+    this.activeTab = savedTab ? savedTab : 'dashboard';
 
-  // ✅ RESTORE SUBMENU STATE (optional)
-  const savedSubmenus = localStorage.getItem('distributorOpenSubmenus');
-  if (savedSubmenus) {
-    this.openSubmenus = JSON.parse(savedSubmenus);
-  }
+    // ✅ RESTORE SUBMENU STATE (optional)
+    const savedSubmenus = localStorage.getItem('distributorOpenSubmenus');
+    if (savedSubmenus) {
+      this.openSubmenus = JSON.parse(savedSubmenus);
+    }
 
     // this.loadRequests();
     // this.loadAcceptedCustomers();
     // this.distributorId = localStorage.getItem('distributorId') || '';
-  // Load sidebar state from localStorage
+    // Load sidebar state from localStorage
     const savedSidebarState = localStorage.getItem('sidebarCollapsed');
     if (savedSidebarState !== null) {
       this.isSidebarCollapsed = savedSidebarState === 'true';
     }
-  // Load only ONCE when component is created
-  const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
-  this.expectedDays = stored ? Number(stored) : 1;
-       this.loadRetailerCount();
-        this.loadEmployees();              // ⬅ added
-        this.loadScannerQr();
-            // Check screen width on init
+    // Load only ONCE when component is created
+    const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
+    this.expectedDays = stored ? Number(stored) : 1;
+    this.loadRetailerCount();
+    this.loadEmployees();              // ⬅ added
+    this.loadScannerQr();
+    // Check screen width on init
     this.checkScreenWidth();
   }
-    @HostListener('window:resize', ['$event'])
- 
+  @HostListener('window:resize', ['$event'])
+
 
   checkScreenWidth() {
     if (window.innerWidth <= 768) {
-     this.isSidebarCollapsed = false; // disable collapse on mobile
+      this.isSidebarCollapsed = false; // disable collapse on mobile
     }
   }
 
@@ -112,37 +112,37 @@ scannerQrUrl: string | null = null;
     localStorage.setItem('sidebarCollapsed', this.isSidebarCollapsed.toString());
   }
 
- 
-loadRetailerCount() {
-  this.customerService.getAllCustomersForDistributor().subscribe({
-    next: (res) => {
-      this.retailerCount = res.length;
-    },
-    error: (err) => {
-      console.error("Failed to load retailers", err);
-      this.retailerCount = 0;
-    }
-  });
-}
-loadScannerQr() {
-  if (!this.distributorId) return;
- 
-  this.distributorService.getScannerQr(this.distributorId)
-    .subscribe({
-      next: res => {
-        this.scannerQrUrl = res?.scannerQrUrl || null; // blob name
+
+  loadRetailerCount() {
+    this.customerService.getAllCustomersForDistributor().subscribe({
+      next: (res) => {
+        this.retailerCount = res.length;
       },
-      error: () => {
-        this.scannerQrUrl = null;
+      error: (err) => {
+        console.error("Failed to load retailers", err);
+        this.retailerCount = 0;
       }
     });
-}
+  }
+  loadScannerQr() {
+    if (!this.distributorId) return;
+
+    this.distributorService.getScannerQr(this.distributorId)
+      .subscribe({
+        next: res => {
+          this.scannerQrUrl = res?.scannerQrUrl || null; // blob name
+        },
+        error: () => {
+          this.scannerQrUrl = null;
+        }
+      });
+  }
 
   // ==============================
   // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
   // ==============================
   loadEmployees() {
-    this.http.get(`http://192.168.1.21:5164/api/Employees/by-distributor/${this.distributorId}`)
+    this.http.get(`${environment.apiUrl}/api/Employees/by-distributor/${this.distributorId}`)
       .subscribe((res: any) => {
         this.employees = res;
         console.log("Loaded Employees:", res);
@@ -216,39 +216,39 @@ loadScannerQr() {
   // toggleMobileMenu() {
   //   this.isMobileMenuOpen = !this.isMobileMenuOpen;
   // }
- 
+
   // closeMobileMenu() {
   //   if (this.isMobileMenuOpen) {
   //     this.isMobileMenuOpen = false;
   //   }
   // }
   // Update these methods in your component
-  
-toggleSubmenu(menu: string) {
-  const isCurrentlyOpen = this.isSubmenuOpen(menu);
 
-  this.closeAllSubmenus();
+  toggleSubmenu(menu: string) {
+    const isCurrentlyOpen = this.isSubmenuOpen(menu);
 
-  if (!isCurrentlyOpen) {
-    this.openSubmenus.push(menu);
+    this.closeAllSubmenus();
+
+    if (!isCurrentlyOpen) {
+      this.openSubmenus.push(menu);
+    }
+
+    // ✅ SAVE SUBMENU STATE
+    localStorage.setItem(
+      'distributorOpenSubmenus',
+      JSON.stringify(this.openSubmenus)
+    );
   }
 
-  // ✅ SAVE SUBMENU STATE
-  localStorage.setItem(
-    'distributorOpenSubmenus',
-    JSON.stringify(this.openSubmenus)
-  );
-}
 
- 
- 
+
   // isSubmenuOpen(menu: string): boolean {
   //   return this.openSubmenus.includes(menu);
   // }
-closeAllSubmenus() {
-  this.openSubmenus = [];
-  localStorage.removeItem('distributorOpenSubmenus');
-}
+  closeAllSubmenus() {
+    this.openSubmenus = [];
+    localStorage.removeItem('distributorOpenSubmenus');
+  }
 
   // // Update the setActiveTab method to close submenus when switching tabs
   // setActiveTab(tab: string) {
@@ -256,31 +256,31 @@ closeAllSubmenus() {
   //   // Don't close submenus here to allow navigation within the same section
   // }
 
-setActiveTab(tab: string, invoiceId?: string) {
-  this.activeTab = tab;
+  setActiveTab(tab: string, invoiceId?: string) {
+    this.activeTab = tab;
 
-  // ✅ SAVE ACTIVE TAB
-  localStorage.setItem('distributorActiveTab', tab);
+    // ✅ SAVE ACTIVE TAB
+    localStorage.setItem('distributorActiveTab', tab);
 
-  // Close submenus (your existing logic)
-  this.closeAllSubmenus();
+    // Close submenus (your existing logic)
+    this.closeAllSubmenus();
 
-  if (invoiceId) {
-    this.selectedInvoiceId = invoiceId;
+    if (invoiceId) {
+      this.selectedInvoiceId = invoiceId;
+    }
   }
-}
 
- 
+
   // Update the toggleMobileMenu method
- 
-toggleMobileMenu() {
-  this.isMobileMenuOpen = !this.isMobileMenuOpen;
 
-  // 🔥 force expanded sidebar on mobile
-  if (this.isMobileMenuOpen && window.innerWidth <= 768) {
-    this.isSidebarCollapsed = false;
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+
+    // 🔥 force expanded sidebar on mobile
+    if (this.isMobileMenuOpen && window.innerWidth <= 768) {
+      this.isSidebarCollapsed = false;
+    }
   }
-}
 
   // Update the closeMobileMenu method
   closeMobileMenu() {
@@ -328,11 +328,11 @@ toggleMobileMenu() {
 
   //   loadRequests() {
   //     this.distributorService.getPendingRequests(this.distributorId).subscribe(res => {
- 
+
   //       this.pendingRequests = res;
   //     });
   //   }
- 
+
   // respond(request: any, accept: boolean) {
   //   if (!request.connectionId) {
   //     console.error('No connectionId found!', request);
@@ -365,73 +365,113 @@ toggleMobileMenu() {
   // setActiveTab(tab: string): void {
   //   this.activeTab = tab;
   // }
- 
+
   // Check if a tab is active
   isActive(tab: string): boolean {
     return this.activeTab === tab;
   }
-logout(): void {
-  Swal.fire({
-    title: 'Logout Confirmation',
-    text: 'Are you sure you want to logout?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Logout',
-    cancelButtonText: 'Cancel',
-    reverseButtons: true,
-    allowOutsideClick: false,
 
-    // 🌙 Dark / Light mode support
-    background: getComputedStyle(document.documentElement)
-      .getPropertyValue('--card-bg'),
-    color: getComputedStyle(document.documentElement)
-      .getPropertyValue('--text-color'),
+  logout(): void {
+    Swal.fire({
+      title: 'Logout Confirmation',
+      text: 'Are you sure you want to logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Logout',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      allowOutsideClick: false,
 
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d'
-  }).then((result) => {
-    if (result.isConfirmed) {
+      // 🌙 Dark / Light mode support
+      background: getComputedStyle(document.documentElement)
+        .getPropertyValue('--card-bg'),
+      color: getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-color'),
 
-      // ✅ CLEAR DISTRIBUTOR UI STATE
-      localStorage.removeItem('distributorActiveTab');
-      localStorage.removeItem('distributorOpenSubmenus');
-      localStorage.removeItem('sidebarCollapsed');
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
 
-      // ✅ AUTH CLEANUP
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      localStorage.removeItem('distributorId');
+        // ✅ CLEAR DISTRIBUTOR UI STATE
+        localStorage.removeItem('distributorActiveTab');
+        localStorage.removeItem('distributorOpenSubmenus');
+        localStorage.removeItem('sidebarCollapsed');
 
-      this.auth.logout();
+        // ✅ AUTH CLEANUP
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('distributorId');
 
-      // ✅ SUCCESS FEEDBACK
-      Swal.fire({
-        icon: 'success',
-        title: 'Logged out',
-        text: 'You have been logged out successfully',
-        timer: 1200,
-        showConfirmButton: false,
-        background: getComputedStyle(document.documentElement)
-          .getPropertyValue('--card-bg'),
-        color: getComputedStyle(document.documentElement)
-          .getPropertyValue('--text-color')
-      });
+        this.auth.logout();
 
-      setTimeout(() => {
-        this.router.navigate(['/distributor-login']);
-      }, 1200);
-    }
-  });
-}
- 
- 
+        // ✅ SUCCESS FEEDBACK
+        Swal.fire({
+          html: `
+    <div style="
+      width:72px;
+      height:72px;
+      border-radius:50%;
+      background: rgba(82,196,26,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 14px;
+    ">
+      <div style="
+        width:48px;
+        height:48px;
+        border-radius:50%;
+        background:#52c41a;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow: 0 6px 16px rgba(82,196,26,0.35);
+      ">
+        <i class="fas fa-check" style="color:white;font-size:22px;"></i>
+      </div>
+    </div>
+
+    <h2 style="margin:0 0 6px;font-size:20px;">Logged out</h2>
+    <p style="margin:0;font-size:14px;opacity:.8;">
+      You have been logged out successfully
+    </p>
+  `,
+
+          width: 360,
+          padding: '1.5rem 1.5rem 1.8rem',
+
+          showConfirmButton: false,
+          timer: 1300,
+          timerProgressBar: true,
+
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+
+          backdrop: 'rgba(0,0,0,0.55)',
+
+          background: getComputedStyle(document.documentElement)
+            .getPropertyValue('--card-bg'),
+          color: getComputedStyle(document.documentElement)
+            .getPropertyValue('--text-color')
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/distributor-login']);
+        }, 1300);
+
+      }
+    });
+  }
+
+
   onExpectedDate() {
     if (!this.orderedDate) return;
     const date = new Date(this.orderedDate);
     date.setDate(date.getDate() + 1);
     this.expectedDate = date.toISOString().split('T')[0];
   }
- 
+
   onOrderedDate() {
     console.log("Ordered Date button clicked");
   }
@@ -445,37 +485,36 @@ logout(): void {
   //     this.trackingComp.clearPolyline();
   //   }
 
-//   // Also clear local route
-//   this.polylinePath = [];
-// }
-onQrSelected(event: any) {
-  this.selectedQrFile = event.target.files[0];
-}
- 
-uploadScannerQr() {
-  if (!this.selectedQrFile || !this.distributorId) return;
- 
-  this.distributorService
-    .uploadScannerQr(this.distributorId, this.selectedQrFile)
-    .subscribe({
-      next: (res) => {
-        this.scannerQrUrl = res?.scannerQrUrl || null;
-        alert('Scanner QR uploaded successfully');
-        this.selectedQrFile = null;
-      },
-      error: () => {
-        alert('Failed to upload QR');
-      }
-    });
-}
- 
- @HostListener('window:resize')
-onResize() {
-  if (window.innerWidth <= 768) {
-    this.isSidebarCollapsed = false;
+  //   // Also clear local route
+  //   this.polylinePath = [];
+  // }
+  onQrSelected(event: any) {
+    this.selectedQrFile = event.target.files[0];
   }
-}
+
+  uploadScannerQr() {
+    if (!this.selectedQrFile || !this.distributorId) return;
+
+    this.distributorService
+      .uploadScannerQr(this.distributorId, this.selectedQrFile)
+      .subscribe({
+        next: (res) => {
+          this.scannerQrUrl = res?.scannerQrUrl || null;
+          alert('Scanner QR uploaded successfully');
+          this.selectedQrFile = null;
+        },
+        error: () => {
+          alert('Failed to upload QR');
+        }
+      });
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    if (window.innerWidth <= 768) {
+      this.isSidebarCollapsed = false;
+    }
+  }
 
 }
- 
- 
+

@@ -6,9 +6,10 @@ import { Component } from '@angular/core';
   styleUrl: './payments.component.css'
 })
 export class PaymentsComponent {
-   activeSection: 'reports' | 'handovers' | 'customers' = 'reports';
-     activeTab = 'payments';
+  activeSection: 'reports' | 'handovers' | 'customers' = 'reports';
+  activeTab = 'payments';
   // activeSection: 'reports' | 'handovers' | 'customers' = 'reports';
+  isMobileSheetOpen = false;
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;
@@ -23,8 +24,11 @@ export class PaymentsComponent {
 
   switch(section: 'reports' | 'handovers' | 'customers') {
     this.activeSection = section;
+    if (window.innerWidth <= 1024) {
+    this.isMobileSheetOpen = true;
   }
- getCompletedCount(): number { return 0; }
+  }
+  getCompletedCount(): number { return 0; }
   getPendingCount(): number { return 0; }
 
   getReportCount(): number { return 0; }
@@ -85,16 +89,21 @@ export class PaymentsComponent {
     alert('Send reminders coming soon');
   }
   refreshHandovers() {
-  if (this.activeSection !== 'handovers') {
-    this.activeSection = 'handovers';
+    if (this.activeSection !== 'handovers') {
+      this.activeSection = 'handovers';
+    }
+    this.refreshContent();
   }
-  this.refreshContent();
+
+  refreshCustomers() {
+    if (this.activeSection !== 'customers') {
+      this.activeSection = 'customers';
+    }
+    this.refreshContent();
+  }
+
+  closeSheet() {
+  this.isMobileSheetOpen = false;
 }
 
-refreshCustomers() {
-  if (this.activeSection !== 'customers') {
-    this.activeSection = 'customers';
-  }
-  this.refreshContent();
-}
 }

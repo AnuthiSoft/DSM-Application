@@ -147,42 +147,27 @@
               </div>
             </div>
 
-  <!-- SEND OTP BUTTON -->
-<button
-  type="button"
-  class="send-otp-btn"
-  *ngIf="!customer.phoneVerified"
-  (click)="sendOtp()"
-  [disabled]="!customer.phoneNumber || customer.phoneNumber.length !== 10"
->
-  Send OTP
-</button>
+            <!-- SEND OTP BUTTON -->
+            <button type="button" class="send-otp-btn" *ngIf="!customer.phoneVerified" (click)="sendOtp()"
+              [disabled]="!customer.phoneNumber || customer.phoneNumber.length !== 10">
+              Send OTP
+            </button>
 
-<!-- OTP INPUT -->
-<div *ngIf="showOtpInput && !customer.phoneVerified" class="otp-verify">
-  <input
-    type="text"
-    class="otp-box"
-    placeholder="Enter OTP"
-    [(ngModel)]="otp"
-    name="otp"
-  />
+            <!-- OTP INPUT -->
+            <div *ngIf="showOtpInput && !customer.phoneVerified" class="otp-verify">
+              <input type="text" class="otp-box" placeholder="Enter OTP" [(ngModel)]="otp" name="otp" />
 
-  <button
-    type="button"
-    class="verify-otp-btn"
-    (click)="verifyOtp()"
-  >
-    Verify OTP
-  </button>
-</div>
+              <button type="button" class="verify-otp-btn" (click)="verifyOtp()">
+                Verify OTP
+              </button>
+            </div>
 
-<!-- VERIFIED STATE -->
-<div *ngIf="customer.phoneVerified" class="verified-text">
-  <i class="fas fa-check-circle"></i> Phone verified
-</div>
+            <!-- VERIFIED STATE -->
+            <div *ngIf="customer.phoneVerified" class="verified-text">
+              <i class="fas fa-check-circle"></i> Phone verified
+            </div>
 
-</div>
+          </div>
           <div class="form-group full-width">
             <label class="form-label"><i class="fas fa-road"></i> Street</label>
             <input type="text" class="form-control" [(ngModel)]="customer.street" name="street" />

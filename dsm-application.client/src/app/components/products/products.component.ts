@@ -61,7 +61,7 @@ export class ProductsComponent {
   // FILTERS
   // ==============================================
   searchTerm = '';
-  categoryFilter = '';
+  //categoryFilter = '';
   color = '';
   stockFilter = '';
   minPriceFilter?: number;
@@ -72,6 +72,14 @@ export class ProductsComponent {
   inventoryStockMap: Record<string, number> = {};
   formSubmitted = false;
   existingImageUrls: string[] = [];
+  // ===== ADD STOCK MODAL =====
+  showStockModal = false;
+  stockQty = 0;
+  selectedStockProductId: string | null = null;
+  showCategorySheet = false;
+  categoryFilter: string = '';
+  showStockSheet = false;
+  showSortSheet = false;
 
 
   constructor(
@@ -551,23 +559,16 @@ export class ProductsComponent {
   }
 
   onCategoryChange(category: string) {
-    const distributorId = localStorage.getItem('DistributorId');
-    if (!distributorId) return;
-
-    this.categoryFilter = category;
-
-    // 🔥 If "All Categories" selected → show all products
-    if (!category || category.trim() === '') {
-      this.filteredProducts = [...this.products];
-      return;
-    }
-
-    // Otherwise, filter by category
-    this.productService.searchByCategory(distributorId, category).subscribe({
-      next: data => this.filteredProducts = data,
-      error: err => console.error('Error filtering by categories:', err)
-    });
+  if (!category) {
+    this.filteredProducts = [...this.products];
+    return;
   }
+
+  this.filteredProducts = this.products.filter(
+    p => p.category === category
+  );
+}
+
 
   onColorChange(color: string) {
 
@@ -725,66 +726,80 @@ export class ProductsComponent {
     // 🔥 ALWAYS go through backend image API
     return `${environment.apiUrl}/images/${img}`;
   }
-  increaseStock(productId: string) {
-    const qty = prompt('Enter quantity to add:');
-    if (!qty) return;
 
-    const quantity = Number(qty);
-    if (quantity <= 0) {
-      this.toastr.error('Invalid quantity');
+  // increaseStock(productId: string) {
+  //   this.selectedProductId = productId;
+  //   this.stockQty = 0;
+  //   this.showStockModal = true;
+  // }
+
+
+  confirmAddStock() {
+    if (!this.selectedStockProductId) {
+      this.toastr.error('Product not selected');
       return;
     }
 
-    //   this.productService.increaseStock(productId, quantity).subscribe({
-    //     next: () => {
-    //       this.toastr.success('Stock increased');
-
-    //       const distributorId = localStorage.getItem('DistributorId');
-    //       if (distributorId) {
-    //         // this.loadInventoryStock(distributorId); // ✅ ONLY inventory
-    //       }
-    //     },
-    //     error: () => this.toastr.error('Failed to increase stock')
-    //   });
-    // }
-
+    if (this.stockQty <= 0) {
+      this.toastr.error('Enter valid quantity');
+      return;
+    }
 
     this.inventoryService.stockIn({
-      productId,
+      productId: this.selectedStockProductId,   // ✅ REQUIRED
       distributorId: this.distributorId!,
-      quantity,
+      quantity: this.stockQty,
       reason: 'Manual add'
-    }).subscribe(() => {
-      this.toastr.success('Stock increased');
-      this.loadProducts(this.distributorId!); // 🔥 reload from inventory
+    }).subscribe({
+      next: () => {
+        this.toastr.success('Stock added successfully');
+        this.loadProducts(this.distributorId!);
+        this.closeStockModal();
+      },
+      error: () => this.toastr.error('Failed to add stock')
     });
-
-    // loadInventoryStock(distributorId: string) {
-    //   this.inventoryService.getStock(distributorId).subscribe({
-    //     next: (stock) => {
-    //       this.inventoryStockMap = {};
-    //       stock.forEach((s: any) => {
-    //         this.inventoryStockMap[s.productId] = s.currentStock;
-    //       });
-
-    //       this.mergeInventoryStock();
-    //     },
-    //     error: (err) => console.error('Error loading inventory stock', err)
-    //   });
-    // }
-
-    // mergeInventoryStock() {
-    //   this.products = this.products.map(p => ({
-    //     ...p,
-    //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
-    //   }));
-
-    //   this.filteredProducts = this.filteredProducts.map(p => ({
-    //     ...p,
-    //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
-    //   }));
-    // }
   }
+
+  openStockModal(productId: string) {
+    this.selectedStockProductId = productId; // ✅ KEY LINE
+    this.stockQty = 0;
+    this.showStockModal = true;
+    document.body.classList.add('modal-open');
+  }
+
+  closeStockModal() {
+    this.showStockModal = false;
+    this.selectedStockProductId = null;
+    document.body.classList.remove('modal-open');
+  }
+
+
+  // loadInventoryStock(distributorId: string) {
+  //   this.inventoryService.getStock(distributorId).subscribe({
+  //     next: (stock) => {
+  //       this.inventoryStockMap = {};
+  //       stock.forEach((s: any) => {
+  //         this.inventoryStockMap[s.productId] = s.currentStock;
+  //       });
+
+  //       this.mergeInventoryStock();
+  //     },
+  //     error: (err) => console.error('Error loading inventory stock', err)
+  //   });
+  // }
+
+  // mergeInventoryStock() {
+  //   this.products = this.products.map(p => ({
+  //     ...p,
+  //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
+  //   }));
+
+  //   this.filteredProducts = this.filteredProducts.map(p => ({
+  //     ...p,
+  //     stock: this.inventoryStockMap[p.productId!] ?? p.stock
+  //   }));
+  // }
+
   toggleTheme() {
     const body = document.body;
     const current = body.getAttribute('data-theme');
@@ -906,6 +921,66 @@ export class ProductsComponent {
   removeExistingImage(img: string) {
     this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
   }
+
+
+  openCategorySheet() {
+    this.showCategorySheet = true;
+    document.body.classList.add('modal-open');
+  }
+
+  closeCategorySheet() {
+    this.showCategorySheet = false;
+    document.body.classList.remove('modal-open');
+  }
+
+selectCategory(category: string) {
+  this.categoryFilter = category;
+  this.onCategoryChange(category);
+  this.closeCategorySheet();
+}
+
+openStockSheet() {
+  this.showStockSheet = true;
+  document.body.classList.add('modal-open');
+}
+
+closeStockSheet() {
+  this.showStockSheet = false;
+  document.body.classList.remove('modal-open');
+}
+
+selectStock(value: string) {
+  this.stockFilter = value;
+  this.filterProducts();
+  this.closeStockSheet();
+}
+
+openSortSheet() {
+  this.showSortSheet = true;
+  document.body.classList.add('modal-open');
+}
+
+closeSortSheet() {
+  this.showSortSheet = false;
+  document.body.classList.remove('modal-open');
+}
+
+selectSort(value: string) {
+  this.sortBy = value;
+  this.applySort();
+  this.closeSortSheet();
+}
+
+getSortLabel(value: string): string {
+  switch (value) {
+    case 'priceLow': return 'Price: Low to High';
+    case 'priceHigh': return 'Price: High to Low';
+    case 'stock': return 'Stock: High to Low';
+    case 'newest': return 'Newest First';
+    default: return 'Name (A–Z)';
+  }
+}
+
 
 }
 

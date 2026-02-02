@@ -110,7 +110,7 @@
 
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
-          <div class="stat-value">₹{{ revenueStats.total }}</div>
+          <div class="stat-value">₹{{ revenueStats.total | number:'1.2-2' }}</div>
           <div class="stat-label">Total Spent</div>
         </div>
       </div>
@@ -118,7 +118,7 @@
       <!-- Recent Orders -->
       <div class="dashboard-card">
         <h3>Recent Orders</h3>
-        <div *ngIf="recentOrders.length > 0; else noRecentOrders">
+        <!-- <div *ngIf="recentOrders.length > 0; else noRecentOrders">
           <div class="order-item" *ngFor="let order of recentOrders">
             <div class="order-info">
               <strong>Order #{{ order.orderId }}</strong>
@@ -128,7 +128,7 @@
               {{ order.status }}
             </div>
           </div>
-        </div> -->
+        </div>  -->
         <ng-template #noRecentOrders>
           <p class="empty-state">No recent orders found.</p>
         </ng-template>

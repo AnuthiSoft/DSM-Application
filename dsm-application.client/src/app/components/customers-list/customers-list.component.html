@@ -20,20 +20,34 @@
 
       <div class="filter-item search-box">
         <i class="fas fa-search search-icon"></i>
-        <input type="text" class="form-control" placeholder="Search customers by name, email, or phone..."
+        <input type="text" class="form-control" placeholder="Search customers by name or email....."
           [(ngModel)]="searchTerm" (input)="applyFilters()" />
       </div>
-
 
       <!-- STATUS -->
       <div class="filter-item">
         <label>Status</label>
-        <select class="form-control" [(ngModel)]="statusFilter" (change)="applyFilters()">
+
+        <!-- DESKTOP SELECT -->
+        <!-- DESKTOP ONLY (≥ 992px) -->
+        <select class="form-control d-none d-lg-block" [(ngModel)]="statusFilter" (change)="applyFilters()">
           <option value="">All Status</option>
           <option value="registered">Registered</option>
           <option value="unregistered">Not Registered</option>
         </select>
+
+        <!-- MOBILE + TABLET (< 992px) -->
+        <div class="mobile-select d-block d-lg-none" (click)="openStatusSheet()">
+          {{ statusFilter === 'registered'
+          ? 'Registered'
+          : statusFilter === 'unregistered'
+          ? 'Not Registered'
+          : 'All Status' }}
+          <i class="fas fa-chevron-down"></i>
+        </div>
+
       </div>
+
 
     </div>
   </div>
@@ -47,72 +61,73 @@
 
   <!-- 📄 CUSTOMER TABLE -->
   <div class="card p-3">
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Permanent Employee</th>
+            <th style="width: 160px;">Actions</th>
+          </tr>
+        </thead>
 
-    <table class="table table-hover table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Address</th>
-          <th>Status</th>
-          <th>Permanent Employee</th>
-          <th style="width: 160px;">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr *ngFor="let c of filteredCustomers">
-          <td class="md">{{ c.name }}</td>
-          <td class="md">{{ c.email }}</td>
-          <td class="md">{{ c.phoneNumber }}</td>
-          <td class="md">
-             {{  c.address || c.city ||c.street}}
-          </td>
+        <tbody>
+          <tr *ngFor="let c of filteredCustomers">
+            <td class="md">{{ c.name }}</td>
+            <td class="md">{{ c.email }}</td>
+            <td class="md">{{ c.phoneNumber }}</td>
+            <td class="md">
+              {{ c.address || c.city ||c.street}}
+            </td>
 
 
-          <td class="md">
-            <span class="badge" [ngClass]="{
+            <td class="md">
+              <span class="badge" [ngClass]="{
                 'bg-success': c.isRegistered,
                 'bg-warning text-dark': !c.isRegistered
               }">
-              {{ c.isRegistered ? 'Registered' : 'Pending' }}
-            </span>
-          </td>
-          <td class="md">
-            {{ c.permanentEmployeeName || 'Not Assigned' }}
+                {{ c.isRegistered ? 'Registered' : 'Pending' }}
+              </span>
+            </td>
+            <td class="md">
+              {{ c.permanentEmployeeName || 'Not Assigned' }}
 
-            <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
-              <i class="fas fa-user-check"></i> Assign
-            </button>
-          </td>
-
-          <td class="md">
-            <!-- ONLY distributor-created customers -->
-            <ng-container *ngIf="c.addedByDistributorId">
-              <button class="btn btn-outline-primary btn-sm me-1" (click)="editCustomer(c)">
-                <i class="fas fa-edit"></i> Edit
+              <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
+                <i class="fas fa-user-check"></i> Assign
               </button>
+            </td>
 
-              <button class="btn btn-outline-danger btn-sm me-1" (click)="deleteCustomer(c.customerId!)">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </ng-container>
+            <td class="md">
+              <!-- ONLY distributor-created customers -->
+              <ng-container *ngIf="c.addedByDistributorId">
+                <button class="btn btn-outline-primary btn-sm me-1" (click)="editCustomer(c)">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
 
-            <!-- Visible for ALL customers -->
-            <button class="btn btn-outline-danger btn-sm" [routerLink]="[
+                <button class="btn btn-outline-danger btn-sm me-1" (click)="deleteCustomer(c.customerId!)">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </ng-container>
+
+              <!-- Visible for ALL customers -->
+              <button class="btn btn-outline-danger btn-sm" [routerLink]="[
             '/report-fraud',
             'customer',
             c.customerId
           ]">
-              <i class="fas fa-flag"></i> Report
-            </button>
-          </td>
+                <i class="fas fa-flag"></i> Report
+              </button>
+            </td>
 
 
-        </tr>
-      </tbody>
-    </table>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
   </div>
 
@@ -235,6 +250,25 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeAssignModal()">Cancel</button>
       <button class="btn btn-primary" (click)="savePermanentEmployee()">Save</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOBILE STATUS BOTTOM SHEET -->
+<div class="bottom-sheet-backdrop" *ngIf="showStatusSheet" (click)="closeStatusSheet()">
+
+  <div class="bottom-sheet" (click)="$event.stopPropagation()">
+
+    <div class="sheet-header">
+      <span>Status</span>
+      <i class="fas fa-times" (click)="closeStatusSheet()"></i>
+    </div>
+
+    <div class="sheet-options">
+      <button (click)="selectStatus('')">All Status</button>
+      <button (click)="selectStatus('registered')">Registered</button>
+      <button (click)="selectStatus('unregistered')">Not Registered</button>
     </div>
 
   </div>

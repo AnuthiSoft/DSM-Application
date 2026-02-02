@@ -8,91 +8,72 @@
   <div class="mobile-overlay" [class.active]="isMobileMenuOpen" (click)="toggleMobileMenu()"></div>
 
   <!-- Sidebar Navigation -->
-  <div class="dashboard-sidebar" 
-       [class.mobile-open]="isMobileMenuOpen"
-       [class.collapsed]="isSidebarCollapsed">
-    
+  <div class="dashboard-sidebar" [class.mobile-open]="isMobileMenuOpen" [class.collapsed]="isSidebarCollapsed">
+
     <div class="sidebar-header">
-      
+
       <div>
- <button class="collapse-toggle" (click)="toggleSidebar()" title="Toggle Sidebar"> <i class="fas" [class.fa-chevron-left]="!isSidebarCollapsed" [class.fa-chevron-right]="isSidebarCollapsed"></i> </button>
+        <button class="collapse-toggle" (click)="toggleSidebar()" title="Toggle Sidebar"> <i class="fas"
+            [class.fa-chevron-left]="!isSidebarCollapsed" [class.fa-chevron-right]="isSidebarCollapsed"></i> </button>
         <!-- <button class="theme-toggle" (click)="toggleTheme()" *ngIf="!isSidebarCollapsed">
           <i class="fas" [class.fa-moon]="!isDarkTheme" [class.fa-sun]="isDarkTheme"></i>
         </button> -->
       </div>
     </div>
-    
+
     <div class="nav-items">
       <!-- Dashboard -->
-      <div class="nav-item" 
-           [class.active]="isActive('dashboard')"
-           (click)="setActiveTab('dashboard'); closeMobileMenu(); closeAllSubmenus()"
-           data-title="Dashboard">
-        <i class="fas fa-th-large"></i> 
+      <div class="nav-item" [class.active]="isActive('dashboard')"
+        (click)="setActiveTab('dashboard'); closeMobileMenu(); closeAllSubmenus()" data-title="Dashboard">
+        <i class="fas fa-th-large"></i>
         <span>Dashboard</span>
       </div>
 
       <!-- Live Tracking -->
-      <div class="nav-item"
-           [class.active]="isActive('live-tracking')"
-           (click)="setActiveTab('live-tracking'); closeMobileMenu(); closeAllSubmenus()"
-           data-title="Live Tracking">
+      <div class="nav-item" [class.active]="isActive('live-tracking')"
+        (click)="setActiveTab('live-tracking'); closeMobileMenu(); closeAllSubmenus()" data-title="Live Tracking">
         <i class="fas fa-map-marker-alt"></i>
         <span>📍 Live Tracking</span>
       </div>
 
       <!-- Inventory -->
-      <div class="nav-item has-submenu" 
-           [class.active]="isActive('inventory') || isSubmenuOpen('inventory')"
-           (click)="toggleSubmenu('inventory')"
-           data-title="Inventory">
-        <i class="fas fa-boxes"></i> 
+      <div class="nav-item has-submenu" [class.active]="isActive('inventory') || isSubmenuOpen('inventory')"
+        (click)="toggleSubmenu('inventory')" data-title="Inventory">
+        <i class="fas fa-boxes"></i>
         <span>Inventory</span>
         <i class="fas fa-chevron-down submenu-arrow" [class.rotated]="isSubmenuOpen('inventory')"></i>
       </div>
-      
+
       <div class="submenu" [class.open]="isSubmenuOpen('inventory')" *ngIf="isSubmenuOpen('inventory')">
-        <div class="submenu-item" 
-             [class.active]="isActive('products')"
-             (click)="setActiveTab('products'); closeMobileMenu()"
-             data-title="Products">
+        <div class="submenu-item" [class.active]="isActive('products')"
+          (click)="setActiveTab('products'); closeMobileMenu()" data-title="Products">
           <span>Products</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('warehouse')"
-             (click)="setActiveTab('warehouse'); closeMobileMenu()"
-             data-title="Warehouse">
+        <div class="submenu-item" [class.active]="isActive('warehouse')"
+          (click)="setActiveTab('warehouse'); closeMobileMenu()" data-title="Warehouse">
           <span>Warehouse</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('main-inventory')"
-             (click)="setActiveTab('main-inventory'); closeMobileMenu()"
-             data-title="Main Inventory">
+        <div class="submenu-item" [class.active]="isActive('main-inventory')"
+          (click)="setActiveTab('main-inventory'); closeMobileMenu()" data-title="Main Inventory">
           <span>Main Inventory</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('inventory-batches')"
-             (click)="setActiveTab('inventory-batches'); closeMobileMenu()"
-             data-title="Inventory Batches">
+        <div class="submenu-item" [class.active]="isActive('inventory-batches')"
+          (click)="setActiveTab('inventory-batches'); closeMobileMenu()" data-title="Inventory Batches">
           <span>Inventory Batches</span>
         </div>
       </div>
 
       <!-- Orders -->
-      <div class="nav-item has-submenu" 
-           [class.active]="isActive('orders') || isSubmenuOpen('orders')"
-           (click)="toggleSubmenu('orders')"
-           data-title="Orders">
-        <i class="fas fa-shopping-cart"></i> 
+      <div class="nav-item has-submenu" [class.active]="isActive('orders') || isSubmenuOpen('orders')"
+        (click)="toggleSubmenu('orders')" data-title="Orders">
+        <i class="fas fa-shopping-cart"></i>
         <span>Orders</span>
         <i class="fas fa-chevron-down submenu-arrow" [class.rotated]="isSubmenuOpen('orders')"></i>
       </div>
-      
+
       <div class="submenu" [class.open]="isSubmenuOpen('orders')" *ngIf="isSubmenuOpen('orders')">
-        <div class="submenu-item" 
-             [class.active]="isActive('order-list')"
-             (click)="setActiveTab('order-list'); closeMobileMenu()"
-             data-title="Order List">
+        <div class="submenu-item" [class.active]="isActive('order-list')"
+          (click)="setActiveTab('order-list'); closeMobileMenu()" data-title="Order List">
           <span>Order List</span>
         </div>
 
@@ -110,10 +91,8 @@
           (click)="setActiveTab('order-tracking'); closeMobileMenu()">
           <span>Order Tracking</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('create-invoice')"
-             (click)="setActiveTab('create-invoice'); closeMobileMenu()"
-             data-title="Create Invoice">
+        <div class="submenu-item" [class.active]="isActive('create-invoice')"
+          (click)="setActiveTab('create-invoice'); closeMobileMenu()" data-title="Create Invoice">
           <span>Create Invoice</span>
         </div>
       </div>
@@ -121,112 +100,84 @@
       
  
       <!-- Sales -->
-      <div class="nav-item has-submenu" 
-           [class.active]="isActive('sales') || isSubmenuOpen('sales')"
-           (click)="toggleSubmenu('sales')"
-           data-title="Sales">
-        <i class="fas fa-chart-line"></i> 
+      <div class="nav-item has-submenu" [class.active]="isActive('sales') || isSubmenuOpen('sales')"
+        (click)="toggleSubmenu('sales')" data-title="Sales">
+        <i class="fas fa-chart-line"></i>
         <span>Sales</span>
         <i class="fas fa-chevron-down submenu-arrow" [class.rotated]="isSubmenuOpen('sales')"></i>
       </div>
-      
+
       <div class="submenu" [class.open]="isSubmenuOpen('sales')" *ngIf="isSubmenuOpen('sales')">
-        <div class="submenu-item" 
-             [class.active]="isActive('monthly-income')"
-             (click)="setActiveTab('monthly-income'); closeMobileMenu()"
-             data-title="Monthly Income">
+        <div class="submenu-item" [class.active]="isActive('monthly-income')"
+          (click)="setActiveTab('monthly-income'); closeMobileMenu()" data-title="Monthly Income">
           <span>Monthly Income</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('paid-vs-unpaid')"
-             (click)="setActiveTab('paid-vs-unpaid'); closeMobileMenu()"
-             data-title="Paid vs Unpaid">
+        <div class="submenu-item" [class.active]="isActive('paid-vs-unpaid')"
+          (click)="setActiveTab('paid-vs-unpaid'); closeMobileMenu()" data-title="Paid vs Unpaid">
           <span>Paid vs Unpaid</span>
         </div>
       </div>
 
       <!-- Retailers -->
-      <div class="nav-item has-submenu" 
-           [class.active]="isActive('retailers') || isSubmenuOpen('retailers')"
-           (click)="toggleSubmenu('retailers')"
-           data-title="Retailers">
-        <i class="fas fa-store"></i> 
+      <div class="nav-item has-submenu" [class.active]="isActive('retailers') || isSubmenuOpen('retailers')"
+        (click)="toggleSubmenu('retailers')" data-title="Retailers">
+        <i class="fas fa-store"></i>
         <span>Retailers</span>
         <i class="fas fa-chevron-down submenu-arrow" [class.rotated]="isSubmenuOpen('retailers')"></i>
       </div>
-      
+
       <div class="submenu" [class.open]="isSubmenuOpen('retailers')" *ngIf="isSubmenuOpen('retailers')">
-        <div class="submenu-item" 
-             [class.active]="isActive('retailer-list')"
-             (click)="setActiveTab('retailer-list'); closeMobileMenu()"
-             data-title="Retailer List">
+        <div class="submenu-item" [class.active]="isActive('retailer-list')"
+          (click)="setActiveTab('retailer-list'); closeMobileMenu()" data-title="Retailer List">
           <span>Retailer List</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('retailer-details')"
-             (click)="setActiveTab('retailer-details'); closeMobileMenu()"
-             data-title="Retailer Details">
+        <div class="submenu-item" [class.active]="isActive('retailer-details')"
+          (click)="setActiveTab('retailer-details'); closeMobileMenu()" data-title="Retailer Details">
           <span>Retailer Details</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('no-of-retailers')"
-             (click)="setActiveTab('no-of-retailers'); closeMobileMenu()"
-             data-title="No Of Retailers">
+        <div class="submenu-item" [class.active]="isActive('no-of-retailers')"
+          (click)="setActiveTab('no-of-retailers'); closeMobileMenu()" data-title="No Of Retailers">
           <span>No Of Retailers</span>
         </div>
       </div>
 
       <!-- Payments -->
-      <div class="nav-item"
-           [class.active]="isActive('payments')"
-           (click)="setActiveTab('payments'); closeMobileMenu(); closeAllSubmenus()"
-           data-title="Payments">
+      <div class="nav-item" [class.active]="isActive('payments')"
+        (click)="setActiveTab('payments'); closeMobileMenu(); closeAllSubmenus()" data-title="Payments">
         <i class="fas fa-credit-card"></i>
         <span>Payments</span>
       </div>
 
       <!-- Settings -->
-      <div class="nav-item has-submenu" 
-           [class.active]="isActive('settings') || isSubmenuOpen('settings')"
-           (click)="toggleSubmenu('settings')"
-           data-title="Settings">
-        <i class="fas fa-cog"></i> 
+      <div class="nav-item has-submenu" [class.active]="isActive('settings') || isSubmenuOpen('settings')"
+        (click)="toggleSubmenu('settings')" data-title="Settings">
+        <i class="fas fa-cog"></i>
         <span>Settings</span>
         <i class="fas fa-chevron-down submenu-arrow" [class.rotated]="isSubmenuOpen('settings')"></i>
       </div>
-      
+
       <div class="submenu" [class.open]="isSubmenuOpen('settings')" *ngIf="isSubmenuOpen('settings')">
-        <div class="submenu-item" 
-             [class.active]="isActive('employees')"
-             (click)="setActiveTab('employees'); closeMobileMenu()"
-             data-title="Create Employees">
+        <div class="submenu-item" [class.active]="isActive('employees')"
+          (click)="setActiveTab('employees'); closeMobileMenu()" data-title="Create Employees">
           <span>Create Employees</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('connection-requests')"
-             (click)="setActiveTab('connection-requests'); closeMobileMenu()"
-             data-title="Connection Requests">
+        <div class="submenu-item" [class.active]="isActive('connection-requests')"
+          (click)="setActiveTab('connection-requests'); closeMobileMenu()" data-title="Connection Requests">
           <span>Connection Requests</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('settings')"
-             (click)="setActiveTab('settings'); closeMobileMenu()"
-             data-title="Distributor Settings">
+        <div class="submenu-item" [class.active]="isActive('settings')"
+          (click)="setActiveTab('settings'); closeMobileMenu()" data-title="Distributor Settings">
           <span>Distributor Settings</span>
         </div>
-        <div class="submenu-item" 
-             [class.active]="isActive('reports')"
-             (click)="setActiveTab('reports'); closeMobileMenu()"
-             data-title="Reports">
+        <div class="submenu-item" [class.active]="isActive('reports')"
+          (click)="setActiveTab('reports'); closeMobileMenu()" data-title="Reports">
           <span>Reports</span>
         </div>
       </div>
     </div>
-    
+
     <div class="sidebar-footer">
-      <div class="nav-item logout-fixed"
-           (click)="logout(); closeMobileMenu()"
-           data-title="Logout">
+      <div class="nav-item logout-fixed" (click)="logout(); closeMobileMenu()" data-title="Logout">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
       </div>
@@ -247,7 +198,7 @@
     </div>
 
     <!-- Dashboard Tab -->
-  <div class="tab-content" *ngIf="isActive('dashboard')">
+    <div class="tab-content" *ngIf="isActive('dashboard')">
       <div class="welcome-header">
         <h2>Dashboard Overview</h2>
         <div class="date-display">{{currentDate | date:'fullDate'}}</div>
@@ -315,34 +266,24 @@
             Save
           </button>
         </div>
-        
+
         <div class="settings-card">
           <h3 class="section-title">Scanner QR Configuration</h3>
           <!-- Upload -->
           <div class="form-group">
             <label>Upload Scanner QR</label>
-            <input
-              type="file"
-              accept="image/*"
-              (change)="onQrSelected($event)"
-            />
+            <input type="file" accept="image/*" (change)="onQrSelected($event)" />
           </div>
-         
-          <button
-            class="save-btn"
-            (click)="uploadScannerQr()"
-            [disabled]="!selectedQrFile">
+
+          <button class="save-btn" (click)="uploadScannerQr()" [disabled]="!selectedQrFile">
             Upload QR
           </button>
-         
+
           <!-- Preview -->
           <div *ngIf="scannerQrUrl" class="qr-preview">
             <p>Current Scanner QR</p>
-            <img
-              [src]="getScannerQrUrl(scannerQrUrl)"
-              alt="Scanner QR"
-              style="width:200px;border:1px solid #ccc;padding:10px"
-            />
+            <img [src]="getScannerQrUrl(scannerQrUrl)" alt="Scanner QR"
+              style="width:200px;border:1px solid #ccc;padding:10px" />
           </div>
         </div>
       </div>
@@ -359,10 +300,9 @@
     <!-- Orders -->
     <app-distributor-orders *ngIf="isActive('order-list')"></app-distributor-orders>
     <app-distributor-connection-requests *ngIf="isActive('connection-requests')"></app-distributor-connection-requests>
-<!-- return request -->
-    <app-distributor-return-requests
-  *ngIf="isActive('return-requests')">
-</app-distributor-return-requests>
+    <!-- return request -->
+    <app-distributor-return-requests *ngIf="isActive('return-requests')">
+    </app-distributor-return-requests>
     <!-- Sales -->
     <div *ngIf="isActive('monthly-income')" class="dashboard-under-dev">
       🚧 Monthly Income is under development

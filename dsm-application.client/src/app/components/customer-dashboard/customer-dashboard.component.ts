@@ -22,8 +22,8 @@ import { CartService } from '../../services/cart.service';
 })
 export class CustomerDashboardComponent {
   customerEmail: string | null = '';
-    customerName: string | null = '';
- dashboardData!: CustomerDashboardResponse;
+  customerName: string | null = '';
+  dashboardData!: CustomerDashboardResponse;
   loading = true;
   status: string = '';
   distributorId: string = '';
@@ -61,12 +61,12 @@ export class CustomerDashboardComponent {
     private fb: FormBuilder,
     private productService: ProductService,
     private orderService: OrderService,
-    private customerApiService:CustomerApiService,
+    private customerApiService: CustomerApiService,
     private router: Router,
     private http: HttpClient,
     private toastr: ToastrService,
     private productservice: ProductService,
-    private inventoryService: InventoryService,public cartService : CartService) {
+    private inventoryService: InventoryService, public cartService: CartService) {
     this.productForm = this.fb.group({
       productName: [''],
       productCode: [''],
@@ -87,7 +87,7 @@ export class CustomerDashboardComponent {
   }
 
   ngOnInit(): void {
-     // Load sidebar state
+    // Load sidebar state
     const savedSidebarState = localStorage.getItem('customerSidebarCollapsed');
     if (savedSidebarState !== null) {
       this.isSidebarCollapsed = savedSidebarState === 'true';
@@ -99,16 +99,16 @@ export class CustomerDashboardComponent {
 
     // Check screen width
     this.checkScreenWidth();
-     this.cartService.cartCount$.subscribe(count => {
-    this.cartCount = count; // 🔥 auto updates UI
-  });
-    
+    this.cartService.cartCount$.subscribe(count => {
+      this.cartCount = count; // 🔥 auto updates UI
+    });
+
     this.customerEmail = localStorage.getItem('customerEmail');
-   this.customerName  = localStorage.getItem('customerName'); // ✅ FIXED
-    
+    this.customerName = localStorage.getItem('customerName'); // ✅ FIXED
+
     this.customerId = localStorage.getItem('customerId') || '';
     this.distributorId = localStorage.getItem('distributorId') || '';
-      this.updateCartBadge();
+    this.updateCartBadge();
 
 
 
@@ -131,14 +131,14 @@ export class CustomerDashboardComponent {
   }
 
 
-//  @HostListener('window:resize', ['$event'])
+  //  @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkScreenWidth();
   }
 
   checkScreenWidth() {
     if (window.innerWidth <= 768) {
-      this.isSidebarCollapsed = true;
+      this.isSidebarCollapsed = false;
     }
   }
 
@@ -184,69 +184,69 @@ export class CustomerDashboardComponent {
   }
 
 
-loadDashboard() {
-  this.loading = true;
+  loadDashboard() {
+    this.loading = true;
 
-  // 🔹 1. LOAD DASHBOARD (distributors + products)
-  this.customerApiService.getDashboard(this.customerId).subscribe({
-    next: (data: CustomerDashboardResponse) => {
-      this.dashboardData = data;
+    // 🔹 1. LOAD DASHBOARD (distributors + products)
+    this.customerApiService.getDashboard(this.customerId).subscribe({
+      next: (data: CustomerDashboardResponse) => {
+        this.dashboardData = data;
 
-      // ✅ CONNECTED DISTRIBUTORS
-      this.connectedDistributors = data.distributors
-        .filter(d =>
-  d.distributor.status === 'Accepted' ||
-  d.distributor.status === 'Connected'
-)
-
-        .map(d => ({
-          distributorId: d.distributor.distributorId,
-          name: d.distributor.companyName || d.distributor.name || 'Distributor'
-        }));
-
-      // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
-      this.products = data.distributors
-        .filter(d =>
-  d.distributor.status === 'Accepted' ||
-  d.distributor.status === 'Connected'
-)
-
-        .flatMap(d => d.products || []);
-
-      // ✅ DISTRIBUTOR + PRODUCT COUNTS
-      this.distributorStats.total = this.connectedDistributors.length;
-      this.productStats.total = this.products.length;
-
-      // 🔹 2. LOAD ORDERS (THIS FIXES YOUR ISSUE)
-      this.orderService.getOrdersByCustomer(this.customerId).subscribe(orders => {
-
-        // ✅ TOTAL ORDERS
-        this.orderStats.total = orders.length;
-
-        // ✅ TOTAL SPENT
-        this.revenueStats.total = orders.reduce(
-          (sum: number, o: any) => sum + (o.totalAmount || 0),
-          0
-        );
-
-        // ✅ RECENT ORDERS (LATEST 5)
-        this.recentOrders = orders
-          .sort(
-            (a: any, b: any) =>
-              new Date(b.orderDate).getTime() -
-              new Date(a.orderDate).getTime()
+        // ✅ CONNECTED DISTRIBUTORS
+        this.connectedDistributors = data.distributors
+          .filter(d =>
+            d.distributor.status === 'Accepted' ||
+            d.distributor.status === 'Connected'
           )
-          .slice(0, 5);
-      });
 
-      this.loading = false;
-    },
-    error: () => {
-      this.loading = false;
-      this.toastr.error('Failed to load dashboard');
-    }
-  });
-}
+          .map(d => ({
+            distributorId: d.distributor.distributorId,
+            name: d.distributor.companyName || d.distributor.name || 'Distributor'
+          }));
+
+        // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
+        this.products = data.distributors
+          .filter(d =>
+            d.distributor.status === 'Accepted' ||
+            d.distributor.status === 'Connected'
+          )
+
+          .flatMap(d => d.products || []);
+
+        // ✅ DISTRIBUTOR + PRODUCT COUNTS
+        this.distributorStats.total = this.connectedDistributors.length;
+        this.productStats.total = this.products.length;
+
+        // 🔹 2. LOAD ORDERS (THIS FIXES YOUR ISSUE)
+        this.orderService.getOrdersByCustomer(this.customerId).subscribe(orders => {
+
+          // ✅ TOTAL ORDERS
+          this.orderStats.total = orders.length;
+
+          // ✅ TOTAL SPENT
+          this.revenueStats.total = orders.reduce(
+            (sum: number, o: any) => sum + (o.totalAmount || 0),
+            0
+          );
+
+          // ✅ RECENT ORDERS (LATEST 5)
+          this.recentOrders = orders
+            .sort(
+              (a: any, b: any) =>
+                new Date(b.orderDate).getTime() -
+                new Date(a.orderDate).getTime()
+            )
+            .slice(0, 5);
+        });
+
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.toastr.error('Failed to load dashboard');
+      }
+    });
+  }
 
 
 
@@ -260,38 +260,38 @@ loadDashboard() {
 
   //   return date.toDateString();  // or format as you like
   // }
-connectDistributor(distributor: Distributor) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: `Send connection request to ${distributor.companyName}?`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, send request',
-    cancelButtonText: 'Cancel'
-  }).then(result => {
-    if (!result.isConfirmed) return;
+  connectDistributor(distributor: Distributor) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Send connection request to ${distributor.companyName}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, send request',
+      cancelButtonText: 'Cancel'
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-    this.customerApiService
-      .connectDistributor(this.customerId, distributor.distributorId)
-      .subscribe({
-        next: (res: any) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Request Sent',
-            text: res?.message || 'Connection request sent'
-          });
-          this.loadDashboard();
-        },
-        error: (err) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Failed',
-            text: err?.error || 'Failed to send request'
-          });
-        }
-      });
-  });
-}
+      this.customerApiService
+        .connectDistributor(this.customerId, distributor.distributorId)
+        .subscribe({
+          next: (res: any) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Request Sent',
+              text: res?.message || 'Connection request sent'
+            });
+            this.loadDashboard();
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed',
+              text: err?.error || 'Failed to send request'
+            });
+          }
+        });
+    });
+  }
 
   viewProducts(distributor: any) {
 
@@ -343,84 +343,84 @@ connectDistributor(distributor: Distributor) {
   //   this.activeTab = tab;
   // }
 
-// onAddToCart(product: Product) {
-//   let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  // onAddToCart(product: Product) {
+  //   let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-//   const existing = cart.find(
-//     (c: any) => c.product.productId === product.productId
-//   );
+  //   const existing = cart.find(
+  //     (c: any) => c.product.productId === product.productId
+  //   );
 
-//   if (existing) {
-//     existing.quantity += 1;   // ✅ increment ONLY when user clicks +
-//   } else {
-//     cart.push({ product, quantity: 1 }); // ✅ FIRST TIME = 1
-//   }
+  //   if (existing) {
+  //     existing.quantity += 1;   // ✅ increment ONLY when user clicks +
+  //   } else {
+  //     cart.push({ product, quantity: 1 }); // ✅ FIRST TIME = 1
+  //   }
 
-//   localStorage.setItem('cart', JSON.stringify(cart));
-//   this.updateCartBadge();
-// }
-onAddToCart(product: Product) {
-  const raw = localStorage.getItem('cart');
+  //   localStorage.setItem('cart', JSON.stringify(cart));
+  //   this.updateCartBadge();
+  // }
+  onAddToCart(product: Product) {
+    const raw = localStorage.getItem('cart');
 
-  let cart: any[] = [];
+    let cart: any[] = [];
 
-  try {
-    const parsed = raw ? JSON.parse(raw) : [];
-    cart = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    cart = [];
+    try {
+      const parsed = raw ? JSON.parse(raw) : [];
+      cart = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      cart = [];
+    }
+
+    const existing = cart.find(
+      c => c.product.productId === product.productId
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ product, quantity: 1 });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    this.updateCartBadge();
   }
 
-  const existing = cart.find(
-    c => c.product.productId === product.productId
-  );
 
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push({ product, quantity: 1 });
+
+  // updateCartBadge() {
+  //   const raw = localStorage.getItem('cart');
+
+  //   let cart: any[] = [];
+
+  //   try {
+  //     const parsed = raw ? JSON.parse(raw) : [];
+  //     cart = Array.isArray(parsed) ? parsed : [];
+  //   } catch {
+  //     cart = [];
+  //   }
+
+  //   this.cartCount = cart.reduce(
+  //     (sum: number, c: any) => sum + (c?.quantity || 0),
+  //     0
+  //   );
+  // }
+  updateCartBadge() {
+    const raw = localStorage.getItem('cart');
+
+    let cart: any[] = [];
+
+    try {
+      const parsed = raw ? JSON.parse(raw) : [];
+      cart = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      cart = [];
+    }
+
+    this.cartCount = cart.reduce(
+      (sum: number, c: any) => sum + (c?.quantity || 0),
+      0
+    );
   }
-
-  localStorage.setItem('cart', JSON.stringify(cart));
-  this.updateCartBadge();
-}
-
-
-
-// updateCartBadge() {
-//   const raw = localStorage.getItem('cart');
-
-//   let cart: any[] = [];
-
-//   try {
-//     const parsed = raw ? JSON.parse(raw) : [];
-//     cart = Array.isArray(parsed) ? parsed : [];
-//   } catch {
-//     cart = [];
-//   }
-
-//   this.cartCount = cart.reduce(
-//     (sum: number, c: any) => sum + (c?.quantity || 0),
-//     0
-//   );
-// }
-updateCartBadge() {
-  const raw = localStorage.getItem('cart');
-
-  let cart: any[] = [];
-
-  try {
-    const parsed = raw ? JSON.parse(raw) : [];
-    cart = Array.isArray(parsed) ? parsed : [];
-  } catch {
-    cart = [];
-  }
-
-  this.cartCount = cart.reduce(
-    (sum: number, c: any) => sum + (c?.quantity || 0),
-    0
-  );
-}
 
 
   goToProducts(product: Product) {
@@ -434,59 +434,93 @@ updateCartBadge() {
     localStorage.setItem('cart', JSON.stringify(this.cart));
   }
 
-logout(): void {
-  Swal.fire({
-    title: 'Logout Confirmation',
-    text: 'Are you sure you want to logout?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Logout',
-    cancelButtonText: 'Cancel',
-    reverseButtons: true,
-    allowOutsideClick: false,
+  logout(): void {
+    Swal.fire({
+      title: 'Logout Confirmation',
+      text: 'Are you sure you want to logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Logout',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      allowOutsideClick: false,
 
-    // 🌙 Dark / Light theme support
-    background: getComputedStyle(document.documentElement)
-      .getPropertyValue('--card-bg'),
-    color: getComputedStyle(document.documentElement)
-      .getPropertyValue('--text-color'),
+      // 🌙 Dark / Light theme support
+      background: getComputedStyle(document.documentElement)
+        .getPropertyValue('--card-bg'),
+      color: getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-color'),
 
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d'
-  }).then((result) => {
-    if (result.isConfirmed) {
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
 
-      // ✅ CLEAR CUSTOMER UI STATE
-      localStorage.removeItem('customerActiveTab');
-      localStorage.removeItem('customerSidebarCollapsed');
+        // ✅ CLEAR CUSTOMER UI STATE
+        localStorage.removeItem('customerActiveTab');
+        localStorage.removeItem('customerSidebarCollapsed');
 
-      // (optional auth cleanup if used later)
-      localStorage.removeItem('token');
-      localStorage.removeItem('customerId');
+        // (optional auth cleanup if used later)
+        localStorage.removeItem('token');
+        localStorage.removeItem('customerId');
 
-      // ✅ SUCCESS MESSAGE
-      Swal.fire({
-        icon: 'success',
-        title: 'Logged out',
-        text: 'You have been logged out successfully',
-        timer: 1200,
+        // ✅ SUCCESS MESSAGE
+        Swal.fire({
+          html: `
+            <div style="
+              width:72px;
+              height:72px;
+              border-radius:50%;
+              background: rgba(82,196,26,0.12);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              margin:0 auto 14px;
+            ">
+              <div style="
+                width:48px;
+                height:48px;
+                border-radius:50%;
+                background:#52c41a;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                box-shadow: 0 6px 16px rgba(82,196,26,0.35);
+              ">
+                <i class="fas fa-check" style="color:white;font-size:22px;"></i>
+              </div>
+            </div>
         
-    width: '360px',              // ✅ smaller width
-    padding: '1.2rem',           // ✅ tighter spacing
+            <h2 style="margin:0 0 6px;font-size:20px;">Logged out</h2>
+            <p style="margin:0;font-size:14px;opacity:.8;">
+              You have been logged out successfully
+            </p>
+          `,
 
-        showConfirmButton: false,
-        background: getComputedStyle(document.documentElement)
-          .getPropertyValue('--card-bg'),
-        color: getComputedStyle(document.documentElement)
-          .getPropertyValue('--text-color')
-      });
+          width: 360,
+          padding: '1.5rem 1.5rem 1.8rem',
 
-      setTimeout(() => {
-        this.router.navigate(['/customer/login']);
-      }, 1200);
-    }
-  });
-}
+          showConfirmButton: false,
+          timer: 1300,
+          timerProgressBar: true,
+
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+
+          backdrop: 'rgba(0,0,0,0.55)',
+
+          background: getComputedStyle(document.documentElement)
+            .getPropertyValue('--card-bg'),
+          color: getComputedStyle(document.documentElement)
+            .getPropertyValue('--text-color')
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/customer/login']);
+        }, 1300);
+      }
+    });
+  }
   switchToProducts() {
     this.activeTab = 'products';
   }
@@ -501,13 +535,13 @@ logout(): void {
     // Call your cart service here
     this.toastr.success(`${product.productName} added successfully`, 'Added to Cart');
   }
-openCart() {
+  openCart() {
     this.updateCartBadge();   // 🔥 ADD THIS
-  this.activeTab = 'cart';   // ✅ OPEN CART TAB
-}
+    this.activeTab = 'cart';   // ✅ OPEN CART TAB
+  }
 
-goToTab(tab: string) {
-  this.setActiveTab(tab);
-}
+  goToTab(tab: string) {
+    this.setActiveTab(tab);
+  }
 
 }

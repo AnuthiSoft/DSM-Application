@@ -73,17 +73,17 @@ selectedOrderForReturn: any = null;
   currentOrderId: string = '';
   statusFilter: string = 'All';
 
-statusOptions: string[] = [
-  'All',
-  'Pending',
-  'Confirmed',
-  'Shipped',
-  'Delivered',
-  'Cancelled',
-  'Rejected'
-];
+  statusOptions: string[] = [
+    'All',
+    'Pending',
+    'Confirmed',
+    'Shipped',
+    'Delivered',
+    'Cancelled',
+    'Rejected'
+  ];
 
-filteredOrders: Order[] = [];
+  filteredOrders: Order[] = [];
 
 
   constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
@@ -98,37 +98,37 @@ filteredOrders: Order[] = [];
   }
 
 
-loadOrders(): void {
-  if (!this.customerId) return;
-  this.loading = true;
+  loadOrders(): void {
+    if (!this.customerId) return;
+    this.loading = true;
 
-  this.orderService.getOrdersByCustomer(this.customerId).subscribe({
-    next: (data: Order[]) => {
-      this.orders = data.map(order => ({
-        ...order,
-        expectedDeliveryDate: this.computeExpectedDelivery(
-          order.orderedDate,
-          order.distributorId
-        )
-      }));
+    this.orderService.getOrdersByCustomer(this.customerId).subscribe({
+      next: (data: Order[]) => {
+        this.orders = data.map(order => ({
+          ...order,
+          expectedDeliveryDate: this.computeExpectedDelivery(
+            order.orderedDate,
+            order.distributorId
+          )
+        }));
 
-      this.applyStatusFilter(); // ✅ IMPORTANT
-      this.loading = false;
-    },
-    error: () => {
-      this.loading = false;
-    }
-  });
-}
-applyStatusFilter(): void {
-  if (this.statusFilter === 'All') {
-    this.filteredOrders = [...this.orders];
-  } else {
-    this.filteredOrders = this.orders.filter(
-      o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
-    );
+        this.applyStatusFilter(); // ✅ IMPORTANT
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
-}
+  applyStatusFilter(): void {
+    if (this.statusFilter === 'All') {
+      this.filteredOrders = [...this.orders];
+    } else {
+      this.filteredOrders = this.orders.filter(
+        o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
+      );
+    }
+  }
 
 
 
@@ -420,18 +420,18 @@ updateTotalReturnQty() {
 
 
   // Count completed orders
-getCompletedCount(): number {
-              return this.filteredOrders.filter(
-                  o => o.status?.toLowerCase() === 'delivered'
-              ).length;
-          }
+  getCompletedCount(): number {
+    return this.filteredOrders.filter(
+      o => o.status?.toLowerCase() === 'delivered'
+    ).length;
+  }
 
   // Count pending orders
-getPendingCount(): number {
-              return this.filteredOrders.filter(
-                  o => o.status?.toLowerCase() === 'pending'
-              ).length;
-          }
+  getPendingCount(): number {
+    return this.filteredOrders.filter(
+      o => o.status?.toLowerCase() === 'pending'
+    ).length;
+  }
 
   // Calculate total spent
  getTotalSpent(): number {
@@ -461,20 +461,20 @@ canReturn(order: any): boolean {
   // ✅ FIXED View Details for order
   viewOrderDetails(id: string | null | undefined): void {
 
-              if (!id) {
-                  this.toastr.error('Invalid Order ID');
-                  return;
-              }
+    if (!id) {
+      this.toastr.error('Invalid Order ID');
+      return;
+    }
 
-              this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
-                  next: order => {
+    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+      next: order => {
 
-                      const taxableAmount =
-                          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
+        const taxableAmount =
+          (order.subtotal ?? 0) - (order.totalDiscount ?? 0);
 
-                      Swal.fire({
-                          title: 'Order Summary',
-                          html: `
+        Swal.fire({
+          title: 'Order Summary',
+          html: `
           <div style="text-align:left; font-size:15px; line-height:1.6">
  
             <p><strong>Subtotal:</strong> ₹${order.subtotal?.toFixed(2)}</p>
@@ -538,34 +538,34 @@ canReturn(order: any): boolean {
  
           </div>
         `,
-                          icon: 'info',
-                          width: 420,
-                          confirmButtonText: 'Close'
-                      });
+          icon: 'info',
+          width: 420,
+          confirmButtonText: 'Close'
+        });
 
-                  },
-                  error: () => {
-                      this.toastr.error('Unable to load order details');
-                  }
-              });
-          }
- 
- 
- 
+      },
+      error: () => {
+        this.toastr.error('Unable to load order details');
+      }
+    });
+  }
+
+
+
   viewOrderDetailss(id: string | null | undefined): void {
 
-              console.log('View Items clicked. Order ID =', id);
+    console.log('View Items clicked. Order ID =', id);
 
-              // 🛑 STOP if ID is invalid
-              if (!id) {
-                  this.toastr.error('Invalid Order ID');
-                  return;
-              }
+    // 🛑 STOP if ID is invalid
+    if (!id) {
+      this.toastr.error('Invalid Order ID');
+      return;
+    }
 
-              this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
-                  next: order => {
+    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+      next: order => {
 
-                      const itemsHtml = (order.products || []).map((item: any) => `
+        const itemsHtml = (order.products || []).map((item: any) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <div>
             <strong>${item.productName}</strong><br>
@@ -577,14 +577,14 @@ canReturn(order: any): boolean {
         </div>
       `).join('');
 
-                      const totalPrice = (order.products || []).reduce(
-                          (sum: number, item: any) => sum + (item.price * item.quantity),
-                          0
-                      );
+        const totalPrice = (order.products || []).reduce(
+          (sum: number, item: any) => sum + (item.price * item.quantity),
+          0
+        );
 
-                      Swal.fire({
-                          title: 'Order Items',
-                          html: `
+        Swal.fire({
+          title: 'Order Items',
+          html: `
           <div style="text-align:left; font-size:15px;">
  
             ${itemsHtml}
@@ -603,33 +603,33 @@ canReturn(order: any): boolean {
  
           </div>
         `,
-                          icon: 'info',
-                          width: 450,
-                          confirmButtonText: 'Close'
-                      });
+          icon: 'info',
+          width: 450,
+          confirmButtonText: 'Close'
+        });
 
-                  },
-                  error: err => {
-                      console.error('Error loading order:', err);
-                      Swal.fire('Error', 'Unable to load order details', 'error');
-                  }
-              });
-          }
- 
- setStatusFilter(status: string) {
-              this.statusFilter = status;
-              this.applyStatusFilter();
-          }
-getStatusCount(status: string): number {
-              if (status === 'All') return this.orders.length;
+      },
+      error: err => {
+        console.error('Error loading order:', err);
+        Swal.fire('Error', 'Unable to load order details', 'error');
+      }
+    });
+  }
 
-              return this.orders.filter(
-                  o => o.status?.toLowerCase() === status.toLowerCase()
-              ).length;
-          }
- goBackToDashboard() {
-              this.router.navigate(['/customer-dashboard']);
-          }
+  setStatusFilter(status: string) {
+    this.statusFilter = status;
+    this.applyStatusFilter();
+  }
+  getStatusCount(status: string): number {
+    if (status === 'All') return this.orders.length;
+
+    return this.orders.filter(
+      o => o.status?.toLowerCase() === status.toLowerCase()
+    ).length;
+  }
+  goBackToDashboard() {
+    this.router.navigate(['/customer-dashboard']);
+  }
 
 
 getMaxReturnQuantity(): number {

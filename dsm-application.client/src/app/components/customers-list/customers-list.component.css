@@ -1,3 +1,20 @@
+:root {
+  --card-bg: #ffffff;
+  --text-color: #1f2937;
+  --border-color: #e5e7eb;
+  --hover-color: #f9fafb;
+  --text-muted: #6b7280;
+}
+
+/* 🌙 DARK MODE */
+[data-theme="dark"] {
+  --card-bg: #1f2937;
+  --text-color: #f9fafb;
+  --border-color: #374151;
+  --hover-color: #111827;
+  --text-muted: #9ca3af;
+}
+
 /* ================================
    👥 CUSTOMERS MANAGEMENT OFFICIAL THEME
 =================================== */
@@ -9,7 +26,7 @@
   border: 1px solid var(--border-color);
   margin: 20px;
 }
- 
+
 h2 {
   color: var(--text-color);
   font-weight: 600;
@@ -20,13 +37,13 @@ h2 {
   display: flex;
   align-items: center;
 }
- 
+
 h2::before {
   content: "👥";
   margin-right: 12px;
   font-size: 1.5rem;
 }
- 
+
 /* ================================
    🔍 SEARCH BAR STYLING
 =================================== */
@@ -37,7 +54,7 @@ h2::before {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   padding: 20px !important;
 }
- 
+
 .card.p-3.mb-3 .form-control {
   border-radius: 8px;
   border: 1px solid var(--border-color);
@@ -47,18 +64,18 @@ h2::before {
   font-size: 0.95rem;
   transition: all 0.2s ease;
 }
- 
+
 .card.p-3.mb-3 .form-control:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   outline: none;
 }
- 
+
 .card.p-3.mb-3 .form-control::placeholder {
   color: var(--text-muted);
   opacity: 0.7;
 }
- 
+
 /* ================================
    📌 COUNT BADGE
 =================================== */
@@ -72,7 +89,7 @@ h2::before {
   font-size: 0.9rem !important;
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
 }
- 
+
 /* ================================
    📄 CUSTOMER TABLE STYLING
 =================================== */
@@ -84,25 +101,25 @@ h2::before {
   padding: 0 !important;
   overflow: hidden;
 }
- 
+
 .table {
   margin-bottom: 0;
   background: var(--card-bg);
   color: var(--text-color);
 }
- 
+
 .table-bordered {
   border: 1px solid var(--border-color) !important;
 }
- 
+
 .table-bordered th,
 .table-bordered td {
   border: 1px solid var(--border-color) !important;
 }
- 
- 
- 
- 
+
+
+
+
 /* Page Header - Unified Style */
 .page-header {
   display: flex;
@@ -111,7 +128,7 @@ h2::before {
   margin-bottom: 25px;
   padding: 0 10px;
 }
- 
+
 .page-header h2 {
   font-size: 30px;
   font-weight: 500;
@@ -120,12 +137,12 @@ h2::before {
   display: flex;
   align-items: center;
 }
- 
+
 .page-header h2 i {
   margin-right: 12px;
   color: var(--primary-color);
 }
- 
+
 .add-btn {
   padding: 10px 20px;
   border-radius: 6px;
@@ -139,21 +156,21 @@ h2::before {
   gap: 8px;
   transition: all 0.3s;
 }
- 
+
 .add-btn:hover {
   background-color: #2980b9;
   transform: translateY(-1px);
 }
- 
- 
- 
+
+
+
 /* Filter Header - Unified */
 .filter-header {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
- 
+
 .filter-header h3 {
   margin: 0;
   color: var(--text-color);
@@ -161,24 +178,24 @@ h2::before {
   align-items: center;
   font-size: 1.2rem;
 }
- 
+
 .filter-header i {
   margin-right: 10px;
   color: var(--primary-color);
 }
- 
+
 /* FIX: Filter header text not visible in dark mode */
 .filter-header h4 {
   color: var(--text-color);
   font-weight: 600;
 }
- 
+
 /* Ensure icon is visible too */
 .filter-header h4 i {
   color: var(--primary-color);
 }
- 
- 
+
+
 /* Search and Filter Grids - Unified */
 .search-filter-grid {
   display: grid;
@@ -186,29 +203,29 @@ h2::before {
   gap: 15px;
   align-items: end;
 }
- 
+
 .filters-row {
   display: grid;
   grid-template-columns: 1fr 180px;
   gap: 20px;
   align-items: end;
 }
- 
+
 .filters-grid {
   display: grid;
   grid-template-columns: 1fr 150px;
   gap: 20px;
   margin-top: 12px;
 }
- 
+
 .search-input-wrapper {
   position: relative;
 }
- 
+
 .search-box {
   position: relative;
 }
- 
+
 .search-icon {
   position: absolute;
   left: 12px;
@@ -218,17 +235,18 @@ h2::before {
   font-size: 14px;
   z-index: 1;
 }
- 
+
 .search-input {
   padding-left: 40px;
 }
- 
+
 .search-box .form-control {
   padding-left: 35px;
 }
- 
+
 /* Form Controls - Unified */
-.form-control, .form-select {
+.form-control,
+.form-select {
   padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -239,33 +257,34 @@ h2::before {
   width: 100%;
   height: 42px;
 }
- 
-.form-control:focus, .form-select:focus {
+
+.form-control:focus,
+.form-select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
- 
+
 .form-control::placeholder {
   color: var(--text-muted);
   opacity: 0.7;
 }
- 
+
 textarea.form-control {
   height: 85px;
   resize: none;
   padding: 12px;
 }
- 
- 
+
+
 .password-wrapper {
   position: relative;
 }
- 
+
 .password-wrapper input {
   padding-right: 40px;
 }
- 
+
 .toggle-icon {
   position: absolute;
   right: 12px;
@@ -274,25 +293,25 @@ textarea.form-control {
   cursor: pointer;
   color: #6c757d;
 }
- 
+
 .toggle-icon:hover {
   color: #000;
 }
- 
+
 /* Filter Group */
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
- 
+
 .filter-label {
   color: var(--text-color);
   font-weight: 600;
   font-size: 0.9rem;
 }
- 
- 
+
+
 .filter-card {
   background: var(--card-bg);
   padding: 25px;
@@ -301,13 +320,13 @@ textarea.form-control {
   margin-bottom: 30px;
   border: 1px solid var(--border-color);
 }
- 
+
 /* Table Header */
 .table-dark {
   background: linear-gradient(135deg, var(--secondary-color), #2c3e50) !important;
   border-bottom: 2px solid var(--primary-color) !important;
 }
- 
+
 .table-dark th {
   background: transparent !important;
   color: white !important;
@@ -319,7 +338,7 @@ textarea.form-control {
   border: none !important;
   position: relative;
 }
- 
+
 .table-dark th::after {
   content: '';
   position: absolute;
@@ -329,26 +348,26 @@ textarea.form-control {
   height: 2px;
   background: var(--primary-color);
 }
- 
+
 /* Table Body */
 .table-hover tbody tr:hover {
   background-color: rgba(52, 152, 219, 0.05) !important;
   transform: translateY(-1px);
   transition: all 0.2s ease;
 }
- 
+
 .table tbody tr {
   border-bottom: 1px solid var(--border-color);
   transition: all 0.2s ease;
 }
- 
+
 .table td {
   padding: 14px 12px;
   color: var(--text-color);
   font-size: 0.9rem;
   vertical-align: middle;
 }
- 
+
 /* ================================
    ✅ STATUS BADGES
 =================================== */
@@ -361,23 +380,23 @@ textarea.form-control {
   letter-spacing: 0.5px;
   border: 1px solid transparent;
 }
- 
+
 .badge.bg-success {
   background-color: rgba(22, 163, 74, 0.1) !important;
   color: #16a34a !important;
   border-color: rgba(22, 163, 74, 0.2);
 }
- 
+
 .badge.bg-warning {
   background-color: rgba(217, 119, 6, 0.1) !important;
   color: #d97706 !important;
   border-color: rgba(217, 119, 6, 0.2);
 }
- 
+
 .text-dark {
   color: #78350f !important;
 }
- 
+
 /* ================================
    ⚡ ACTION BUTTONS
 =================================== */
@@ -392,17 +411,20 @@ textarea.form-control {
   justify-content: center;
   gap: 6px;
   border: 1px solid;
-  min-width: 80px; /* Ensures same minimum width */
-  height: 36px; /* Fixed height for consistency */
+  min-width: 80px;
+  /* Ensures same minimum width */
+  height: 36px;
+  /* Fixed height for consistency */
   box-sizing: border-box;
 }
+
 .btn-sm {
   padding: 6px 12px !important;
   font-size: 0.8rem !important;
   min-width: 70px !important;
   height: 32px !important;
 }
- 
+
 .btn-outline-primary {
   background: transparent;
   color: var(--primary-color) !important;
@@ -410,15 +432,15 @@ textarea.form-control {
   width: auto !important;
   flex: 0 0 auto !important;
 }
- 
+
 .btn-outline-primary:hover {
   background: var(--primary-color);
   color: white !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
 }
- 
- 
+
+
 .btn-outline-danger {
   background: transparent;
   color: #dc3545 !important;
@@ -426,23 +448,25 @@ textarea.form-control {
   width: auto !important;
   flex: 0 0 auto !important;
 }
+
 .btn-outline-danger:hover {
   background: #dc3545;
   color: white !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
 }
+
 /* Table Action Cell */
 .table td:last-child {
   white-space: nowrap;
 }
- 
+
 /* Ensure buttons in table cells have consistent spacing */
 .table td .btn {
   margin: 0 2px;
   vertical-align: middle;
 }
- 
+
 /* Specific fix for action buttons in customer table */
 .table tbody tr td:last-child .btn {
   min-width: 70px;
@@ -453,7 +477,7 @@ textarea.form-control {
   padding: 6px 12px !important;
   font-size: 0.8rem !important;
 }
- 
+
 /* Make sure both buttons have exactly the same dimensions */
 .table tbody tr td:last-child .btn-outline-primary,
 .table tbody tr td:last-child .btn-outline-danger {
@@ -462,9 +486,10 @@ textarea.form-control {
   padding: 6px 12px !important;
   font-size: 0.8rem !important;
 }
- 
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
+
   .table tbody tr td:last-child .btn-outline-primary,
   .table tbody tr td:last-child .btn-outline-danger {
     min-width: 65px;
@@ -472,19 +497,19 @@ textarea.form-control {
     padding: 5px 10px !important;
     font-size: 0.75rem !important;
   }
- 
+
   .table td .btn-sm i {
     font-size: 0.7rem;
   }
 }
- 
+
 @media (max-width: 576px) {
   .table tbody tr td:last-child {
     display: flex;
     flex-direction: column;
     gap: 5px;
   }
- 
+
   .table tbody tr td:last-child .btn-outline-primary,
   .table tbody tr td:last-child .btn-outline-danger {
     width: 100% !important;
@@ -492,7 +517,7 @@ textarea.form-control {
     height: 30px;
   }
 }
- 
+
 /* ================================
    🪟 MODAL STYLING
 =================================== */
@@ -508,7 +533,7 @@ textarea.form-control {
   justify-content: center;
   z-index: 1050;
 }
- 
+
 .customer-modal {
   background: var(--card-bg);
   border-radius: 12px;
@@ -520,18 +545,19 @@ textarea.form-control {
   overflow-y: auto;
   animation: modalAppear 0.3s ease-out;
 }
- 
+
 @keyframes modalAppear {
   from {
     opacity: 0;
     transform: scale(0.9) translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 }
- 
+
 /* Modal Header */
 .modal-header {
   background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
@@ -543,7 +569,7 @@ textarea.form-control {
   justify-content: space-between;
   align-items: center;
 }
- 
+
 .modal-header h3 {
   color: white !important;
   font-weight: 600;
@@ -553,11 +579,11 @@ textarea.form-control {
   align-items: center;
   gap: 10px;
 }
- 
+
 .modal-header h3 i {
   color: white;
 }
- 
+
 .close-icon {
   color: white;
   font-size: 1.2rem;
@@ -567,32 +593,32 @@ textarea.form-control {
   padding: 5px;
   border-radius: 4px;
 }
- 
+
 .close-icon:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.1);
 }
- 
+
 /* Modal Body */
 .modal-body {
   padding: 25px;
 }
- 
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
- 
+
 .form-group {
   display: flex;
   flex-direction: column;
 }
- 
+
 .form-group.full-row {
   grid-column: 1 / -1;
 }
- 
+
 .form-group label {
   font-weight: 600;
   color: var(--text-color);
@@ -602,13 +628,13 @@ textarea.form-control {
   align-items: center;
   gap: 8px;
 }
- 
+
 .form-group label i {
   color: var(--primary-color);
   width: 16px;
   text-align: center;
 }
- 
+
 .form-control {
   background: var(--card-bg);
   color: var(--text-color) !important;
@@ -618,7 +644,7 @@ textarea.form-control {
   transition: all 0.2s ease;
   font-size: 0.9rem;
 }
- 
+
 .form-control:focus {
   background: var(--card-bg);
   color: var(--text-color) !important;
@@ -626,17 +652,17 @@ textarea.form-control {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   outline: none;
 }
- 
+
 .form-control::placeholder {
   color: var(--text-muted);
   opacity: 0.6;
 }
- 
+
 textarea.form-control {
   resize: vertical;
   min-height: 80px;
 }
- 
+
 /* Modal Footer */
 .modal-footer {
   border-top: 1px solid var(--border-color);
@@ -647,37 +673,37 @@ textarea.form-control {
   justify-content: flex-end;
   gap: 12px;
 }
- 
+
 .modal-footer .btn {
   padding: 10px 20px;
   font-weight: 500;
 }
- 
+
 .btn-secondary {
   background: #6c757d;
   border-color: #6c757d;
   color: white;
 }
- 
+
 .btn-secondary:hover {
   background: #5a6268;
   border-color: #545b62;
   transform: translateY(-1px);
 }
- 
+
 .btn-primary {
   background: var(--primary-color);
   border-color: var(--primary-color);
   color: white;
 }
- 
+
 .btn-primary:hover {
   background: #2980b9;
   border-color: #2980b9;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
- 
+
 /* ================================
    📱 RESPONSIVE DESIGN
 =================================== */
@@ -686,69 +712,69 @@ textarea.form-control {
     margin: 10px;
     padding: 20px;
   }
- 
+
   h2 {
     font-size: 1.5rem;
   }
- 
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
- 
+
   .table-responsive {
     border-radius: 8px;
     border: 1px solid var(--border-color);
   }
- 
+
   .customer-modal {
     width: 95%;
     margin: 20px;
   }
- 
+
   .modal-body {
     padding: 20px;
   }
- 
+
   .modal-header,
   .modal-footer {
     padding: 15px 20px;
   }
- 
+
   td .btn {
     margin-bottom: 5px;
   }
 }
- 
+
 @media (max-width: 576px) {
   .container-fluid {
     padding: 15px;
     margin: 5px;
   }
- 
+
   h2 {
     font-size: 1.3rem;
   }
- 
+
   .table {
     font-size: 0.8rem;
   }
- 
+
   .table-dark th {
     padding: 12px 8px;
     font-size: 0.8rem;
   }
- 
+
   .table td {
     padding: 10px 8px;
   }
- 
+
   .btn {
     font-size: 0.75rem;
     padding: 5px 10px;
   }
 }
- 
+
 /* ================================
    🎭 DARK THEME ENHANCEMENTS
 =================================== */
@@ -756,19 +782,19 @@ textarea.form-control {
   background: var(--card-bg) !important;
   border-color: var(--border-color);
 }
- 
+
 [data-theme="dark"] .table-hover tbody tr:hover {
   background-color: rgba(52, 152, 219, 0.1) !important;
 }
- 
+
 [data-theme="dark"] .table-dark {
   background: linear-gradient(135deg, #2c3e50, #34495e) !important;
 }
- 
+
 [data-theme="dark"] .modal-footer {
   background: var(--hover-color);
 }
- 
+
 /* ================================
    ✨ ADDITIONAL ENHANCEMENTS
 =================================== */
@@ -777,30 +803,30 @@ textarea.form-control {
   content: "No customers found";
   display: table-row;
 }
- 
+
 .table tbody:empty::after td {
   text-align: center;
   color: var(--text-muted);
   font-style: italic;
   padding: 40px;
 }
- 
+
 /* Column specific styling */
 .table td:first-child {
   font-weight: 500;
   color: var(--text-color);
 }
- 
+
 .table td:nth-child(2) {
   color: var(--text-color);
 }
- 
+
 .table td:nth-child(3) {
   color: var(--text-color);
   font-family: 'Courier New', monospace;
 }
 
-.md{
+.md {
   color: var(--text-color);
   background-color: var(--hover-color);
 }
@@ -812,38 +838,38 @@ textarea.form-control {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
- 
+
 /* Loading state */
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none !important;
 }
- 
+
 .form-group {
   margin-bottom: 16px;
 }
- 
+
 .form-group label {
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   display: flex;
   align-items: center;
   gap: 6px;
 }
- 
+
 .form-control {
   height: 42px;
   border-radius: 6px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border-color);
   font-size: 0.95rem;
 }
- 
+
 .form-control:focus {
   border-color: #409eff;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.15);
 }
- 
+
 .btn-warning {
   background-color: #ffc107;
   border: none;
@@ -852,16 +878,16 @@ textarea.form-control {
   height: 42px;
   border-radius: 6px;
 }
- 
+
 .btn-warning:hover:not(:disabled) {
   background-color: #e0a800;
 }
- 
+
 .btn-warning:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
- 
+
 .btn-success {
   background-color: #198754;
   border: none;
@@ -869,28 +895,28 @@ textarea.form-control {
   height: 42px;
   border-radius: 6px;
 }
- 
+
 .btn-success:hover {
   background-color: #157347;
 }
- 
+
 .mt-3 label {
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
 }
- 
+
 .text-success {
   color: #198754 !important;
   font-weight: 600;
   font-size: 0.9rem;
 }
- 
+
 .text-success i {
   font-size: 1rem;
 }
- 
+
 /* PHONE GROUP FIX */
 .phone-group {
   display: flex;
@@ -899,16 +925,17 @@ textarea.form-control {
   border: 1px solid #ced4da;
   border-radius: 6px;
   background: #fff;
-  overflow: hidden; /* 🔥 IMPORTANT */
+  overflow: hidden;
+  /* 🔥 IMPORTANT */
   transition: all 0.2s ease;
 }
- 
+
 /* Focus effect – whole box */
 .phone-group:focus-within {
   border-color: #0d6efd;
   box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
 }
- 
+
 /* +91 prefix */
 .phone-prefix {
   padding: 0 12px;
@@ -921,7 +948,7 @@ textarea.form-control {
   color: #495057;
   white-space: nowrap;
 }
- 
+
 /* Input */
 .phone-input {
   flex: 1;
@@ -932,21 +959,21 @@ textarea.form-control {
   font-size: 0.95rem;
   background: transparent;
 }
- 
+
 /* Placeholder */
 .phone-input::placeholder {
   color: #6c757d;
 }
- 
+
 /* Verified state */
 .phone-group.verified {
   background: #f8f9fa;
 }
- 
+
 .phone-group.verified .phone-input {
   cursor: not-allowed;
 }
- 
+
 /* Verified label */
 .verified-text {
   margin-top: 6px;
@@ -981,4 +1008,211 @@ textarea.form-control {
   background: #1e1e1e !important;
   color: #ffffff !important;
   border-color: #444 !important;
+}
+
+/* ================================
+   CUSTOMER TABLE RESPONSIVE FIX
+================================ */
+
+/* Enable horizontal scroll on mobile */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Keep desktop layout intact */
+.customer-table {
+  min-width: 1000px;
+}
+
+/* Prevent text breaking */
+.customer-table th,
+.customer-table td {
+  white-space: nowrap;
+}
+
+/* Address column ellipsis */
+.customer-table td:nth-child(4) {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile action buttons fix */
+@media (max-width: 576px) {
+  .customer-table td:last-child {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .customer-table td:last-child .btn {
+    flex: 1;
+    min-width: 90px;
+  }
+}
+
+/* 📱 FILTER FIX – Mobile & Tablet */
+@media (max-width: 992px) {
+  .filters-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .filter-item {
+    width: 100%;
+  }
+
+  .search-box .form-control,
+  .filter-item select {
+    height: 46px;
+    font-size: 1rem;
+  }
+}
+
+/* 📱 MOBILE BOTTOM-SHEET STYLE SELECT */
+@media (max-width: 768px) {
+  select.form-control {
+    appearance: none;
+    -webkit-appearance: none;
+    font-size: 1rem;
+    padding-right: 40px;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--text-color) 50%),
+      linear-gradient(135deg, var(--text-color) 50%, transparent 50%);
+    background-position:
+      calc(100% - 20px) center,
+      calc(100% - 15px) center;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+}
+
+/* 📱 PAGE HEADER FIX */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .add-btn {
+    width: 100%;
+    justify-content: center;
+    height: 46px;
+    font-size: 1rem;
+  }
+}
+
+/* 🚫 STOP BACKGROUND SCROLL WHEN MODAL OPEN */
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* 🔻 Bottom Sheet Backdrop */
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+/* 📦 Bottom Sheet */
+.bottom-sheet {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  animation: slideUp 0.25s ease-out;
+}
+
+/* Header */
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Options */
+.sheet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 🟦 Bottom Sheet Buttons – FIX TEXT VISIBILITY */
+.sheet-options button {
+  background: var(--hover-color);
+  color: var(--text-color);
+  /* 🔥 REQUIRED */
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  text-align: left;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+
+.sheet-options button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sheet-options button:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 📱 Fake Select Box (Mobile + Tablet) */
+.mobile-select {
+  height: 46px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  line-height: 46px;  
+  justify-content: space-between;
+  background: var(--card-bg);
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  color: var(--text-color);
+}
+
+/* 🌙 DARK MODE – PHONE INPUT FIX */
+[data-theme="dark"] .phone-group {
+  background: #111827 !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .phone-prefix {
+  background: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .phone-input {
+  color: #f9fafb !important;
 }

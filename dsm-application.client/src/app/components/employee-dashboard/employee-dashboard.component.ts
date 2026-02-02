@@ -34,8 +34,8 @@ export class EmployeeDashboardComponent implements OnInit {
   designation = '';
   canSeeInvoices = false;
   isCashCollector = false;
-  isDeliveryBoy= false;
-// Add these properties for sidebar functionality
+  isDeliveryBoy = false;
+  // Add these properties for sidebar functionality
   isSidebarCollapsed: boolean = false;
   isMobileMenuOpen = false;
   isDarkTheme = false;
@@ -65,8 +65,8 @@ export class EmployeeDashboardComponent implements OnInit {
   //   this.loadAvailability();
   // 
 
-ngOnInit(): void {
-  // Load sidebar state
+  ngOnInit(): void {
+    // Load sidebar state
     const savedSidebarState = localStorage.getItem('employeeSidebarCollapsed');
     if (savedSidebarState !== null) {
       this.isSidebarCollapsed = savedSidebarState === 'true';
@@ -78,29 +78,29 @@ ngOnInit(): void {
 
     // Check screen width
     this.checkScreenWidth();
-  this.employeeName = localStorage.getItem('employeeName') || 'Employee';
-  this.employeeId = localStorage.getItem('employeeId') || '';
+    this.employeeName = localStorage.getItem('employeeName') || 'Employee';
+    this.employeeId = localStorage.getItem('employeeId') || '';
 
-  this.designation = (localStorage.getItem('designation') || '')
-    .trim()
-    .toLowerCase();
+    this.designation = (localStorage.getItem('designation') || '')
+      .trim()
+      .toLowerCase();
 
-  // ✅ ROLE FLAGS
-  this.isCashCollector = this.designation.includes('cash');
-  this.canSeeInvoices = this.designation.includes('delivery');
+    // ✅ ROLE FLAGS
+    this.isCashCollector = this.designation.includes('cash');
+    this.canSeeInvoices = this.designation.includes('delivery');
     this.isDeliveryBoy = this.designation.includes('delivery');
 
-  this.loadDashboardData();
-  this.loadAvailability();
-}
- @HostListener('window:resize', ['$event'])
+    this.loadDashboardData();
+    this.loadAvailability();
+  }
+  @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkScreenWidth();
   }
 
   checkScreenWidth() {
     if (window.innerWidth <= 768) {
-      this.isSidebarCollapsed = true;
+      this.isSidebarCollapsed = false;
     }
   }
 
@@ -195,30 +195,30 @@ closeAddToCart() {
   }
 
   loadDashboardData(): void {
-  if (!this.employeeId) return;
+    if (!this.employeeId) return;
 
-  this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
-    next: (orders) => {
-      this.recentOrders = orders.slice(0, 5);
+    this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
+      next: (orders) => {
+        this.recentOrders = orders.slice(0, 5);
 
-      // ✅ ASSIGNED = SHIPPED (not delivered yet)
-      this.orderStats.assigned = orders.filter(
-        o => o.status === 'Shipped'
-      ).length;
+        // ✅ ASSIGNED = SHIPPED (not delivered yet)
+        this.orderStats.assigned = orders.filter(
+          o => o.status === 'Shipped'
+        ).length;
 
-      // ✅ COMPLETED = DELIVERED
-      this.orderStats.completed = orders.filter(
-        o => o.status === 'Delivered'
-      ).length;
+        // ✅ COMPLETED = DELIVERED
+        this.orderStats.completed = orders.filter(
+          o => o.status === 'Delivered'
+        ).length;
 
-      // ✅ PENDING = everything not delivered
-      this.orderStats.pending = orders.filter(
-        o => o.status !== 'Delivered'
-      ).length;
-    },
-    error: err => console.error('Error loading orders:', err)
-  });
-}
+        // ✅ PENDING = everything not delivered
+        this.orderStats.pending = orders.filter(
+          o => o.status !== 'Delivered'
+        ).length;
+      },
+      error: err => console.error('Error loading orders:', err)
+    });
+  }
 
   refreshTasks(): void {
     this.toastr.success('Tasks refreshed successfully!');
@@ -232,63 +232,101 @@ closeAddToCart() {
     this.toastr.success('Schedule viewed successfully!');
   }
   openLogoutConfirm(): void {
-  this.showLogoutConfirm = true;
-}
+    this.showLogoutConfirm = true;
+  }
 
-cancelLogout(): void {
-  this.showLogoutConfirm = false;
-}
+  cancelLogout(): void {
+    this.showLogoutConfirm = false;
+  }
   // ✅ Proper logout functionality
-logout(): void {
-  Swal.fire({
-    title: 'Logout Confirmation',
-    text: 'Are you sure you want to logout?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, Logout',
-    cancelButtonText: 'Cancel',
-    reverseButtons: true,
+  logout(): void {
+    Swal.fire({
+      title: 'Logout Confirmation',
+      text: 'Are you sure you want to logout?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Logout',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
 
-    // Dark mode support
-    background: getComputedStyle(document.documentElement)
-      .getPropertyValue('--card-bg'),
-    color: getComputedStyle(document.documentElement)
-      .getPropertyValue('--text-color'),
+      // Dark mode support
+      background: getComputedStyle(document.documentElement)
+        .getPropertyValue('--card-bg'),
+      color: getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-color'),
 
-    confirmButtonColor: '#dc3545',
-    cancelButtonColor: '#6c757d'
-  }).then((result) => {
-    if (result.isConfirmed) {
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
 
-      // Clear UI state
-      localStorage.removeItem('employeeActiveTab');
-      localStorage.removeItem('employeeSidebarCollapsed');
+        // Clear UI state
+        localStorage.removeItem('employeeActiveTab');
+        localStorage.removeItem('employeeSidebarCollapsed');
 
-      // Clear auth data
-      localStorage.removeItem('token');
-      localStorage.removeItem('employeeName');
-      localStorage.removeItem('employeeId');
-      localStorage.removeItem('distributorId');
-      localStorage.removeItem('designation');
+        // Clear auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('employeeName');
+        localStorage.removeItem('employeeId');
+        localStorage.removeItem('distributorId');
+        localStorage.removeItem('designation');
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Logged out',
-        text: 'You have been logged out successfully',
-        timer: 1200,
-        showConfirmButton: false,
-        background: getComputedStyle(document.documentElement)
-          .getPropertyValue('--card-bg'),
-        color: getComputedStyle(document.documentElement)
-          .getPropertyValue('--text-color')
-      });
+        Swal.fire({
+          html: `
+    <div style="
+      width:72px;
+      height:72px;
+      border-radius:50%;
+      background: rgba(82,196,26,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 14px;
+    ">
+      <div style="
+        width:48px;
+        height:48px;
+        border-radius:50%;
+        background:#52c41a;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow: 0 6px 16px rgba(82,196,26,0.35);
+      ">
+        <i class="fas fa-check" style="color:white;font-size:22px;"></i>
+      </div>
+    </div>
 
-      setTimeout(() => {
-        this.router.navigate(['/employee-login']);
-      }, 1200);
-    }
-  });
-}
+    <h2 style="margin:0 0 6px;font-size:20px;">Logged out</h2>
+    <p style="margin:0;font-size:14px;opacity:.8;">
+      You have been logged out successfully
+    </p>
+  `,
+
+          width: 360,
+          padding: '1.5rem 1.5rem 1.8rem',
+
+          showConfirmButton: false,
+          timer: 1300,
+          timerProgressBar: true,
+
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+
+          backdrop: 'rgba(0,0,0,0.55)',
+
+          background: getComputedStyle(document.documentElement)
+            .getPropertyValue('--card-bg'),
+          color: getComputedStyle(document.documentElement)
+            .getPropertyValue('--text-color')
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/employee-login']);
+        }, 1300);
+      }
+    });
+  }
 
 
   submitReason() {
@@ -318,7 +356,7 @@ logout(): void {
   }
 
   goToTab(tab: string) {
-  this.setActiveTab(tab);
-}
+    this.setActiveTab(tab);
+  }
 
 }

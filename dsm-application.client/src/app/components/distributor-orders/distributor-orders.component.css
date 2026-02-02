@@ -651,7 +651,7 @@
   }
 }
  
-@media (max-width: 480px) {
+/* @media (max-width: 480px) {
   .orders-section .welcome-header h2 {
     font-size: 1.5rem;
   }
@@ -660,17 +660,8 @@
   .card-header h3 {
     font-size: 1.1rem;
   }
- 
-  .orders-table {
-    display: block;
-  }
- 
-  .orders-table thead {
-    display: none;
-  }
- 
+  
   .orders-table tbody tr {
-    display: block;
     margin-bottom: 15px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -696,9 +687,7 @@
     margin-right: 10px;
     flex: 1;
   }
- 
-  /* Add data-label attributes to your HTML or use JavaScript */
-}
+  */
  
 /* Animations */
 @keyframes fadeIn {
@@ -772,4 +761,220 @@ body.dark-theme .select-arrow {
 table {
   width: 100%;
   table-layout: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container {
+  overflow-x: visible;
+}
+
+@media (max-width: 768px) {
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .orders-table {
+    min-width: 1000px; /* 🔥 forces scroll */
+  }
+
+  .orders-table th,
+  .orders-table td {
+    white-space: nowrap;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .table-container {
+    overflow-x: hidden;
+  }
+
+  .orders-table {
+    table-layout: fixed;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    white-space: normal;
+    word-break: break-word;
+    font-size: 0.85rem;
+    padding: 12px 10px;
+  }
+
+  .actions-column {
+    min-width: 150px;
+  }
+}
+
+.bottom-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: flex-end;
+  z-index: 9999;
+}
+
+.bottom-sheet {
+  background: var(--card-bg);
+  width: 100%;
+  border-radius: 18px 18px 0 0;
+  padding: 16px;
+  animation: slideUp 0.25s ease;
+}
+
+.sheet-header h4 {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.sheet-option {
+  padding: 16px;
+  border: none;
+  width: 100%;
+  text-align: left;
+  background: none;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sheet-option:hover {
+  background: var(--hover-color);
+}
+
+.sheet-cancel {
+  margin-top: 12px;
+  padding: 14px;
+  width: 100%;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 🚫 Disable bottom sheet on desktop */
+@media (min-width: 1025px) {
+  .bottom-sheet-overlay { display: none; }
+}
+
+/* ============================= */
+/* RESPONSIVE TABLE - CORRECT */
+/* ============================= */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px; /* forces scroll on small screens */
+}
+
+/* Tablet + Mobile */
+@media (max-width: 1024px) {
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .orders-table {
+    min-width: 1200px;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    white-space: nowrap;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .btn,
+  .view-details-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Mobile fine tuning */
+@media (max-width: 768px) {
+
+  .orders-table th,
+  .orders-table td {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+
+  .orders-count {
+    font-size: 0.8rem;
+  }
+}
+
+/* =============================== */
+/* PRODUCT DETAILS MODAL - MOBILE */
+/* =============================== */
+
+@media (max-width: 480px) {
+
+  /* Product box layout */
+  .product-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-img {
+    width: 100px !important;
+    height: 100px !important;
+    margin-bottom: 10px;
+  }
+
+  /* Order summary alignment */
+  .order-summary p {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.9rem;
+  }
+
+  .order-summary strong {
+    white-space: nowrap;
+  }
+
+  /* Sticky footer (Close button always visible) */
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--card-bg);
+    padding: 12px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    font-size: 1rem;
+  }
 }

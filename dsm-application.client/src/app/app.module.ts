@@ -38,11 +38,11 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
 import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
- 
+
 import { TruncatePipe } from './pipe/truncate.pipe';
 import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
 import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
- 
+
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
@@ -53,19 +53,19 @@ import { CustomerPaymentStatusComponent } from './components/customer-payment-st
 import { PaymentReportComponent } from './components/payment-report/payment-report.component';
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
- 
 
- 
- 
- 
+
+
+
+
 import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
- import { GoogleMapsModule } from '@angular/google-maps';
-// import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-//import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-//import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
+import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
 // import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
@@ -73,7 +73,7 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
 import { PaymentsComponent } from './components/payments/payments.component';
 import { DistributorSettingsComponent } from './components/distributor-settings/distributor-settings.component';
 import { PaymentCollectionForCashcollectorComponent } from './components/payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
-import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
+
 import { EmployeeReturnOrdersComponent } from './components/employee-return-orders/employee-return-orders.component';
 import { DistributorReturnRequestsComponent } from './components/distributor-return-requests/distributor-return-requests.component';
 import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
@@ -81,53 +81,50 @@ import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/em
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
 import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
 @NgModule({
   declarations: [
-AppComponent,
-ProductsComponent,
-CustomerRegisterComponent,
-CustomerLoginComponent,
-CreateCustomerDistributorComponent,
-AdminDashboardComponent,
-DistributorDashboardComponent,
-EmployeeDashboardComponent,
-MainPageComponent,
-DistributorLoginComponent,
-DistributorSignupComponent,
-ForgotPasswordComponent,
-EmployeesComponent,
-SetPasswordComponent,
-ProfileComponent,
-ThemeToggleComponent,
-ProductsByDistComponent,
- 
-//AddPaymentNoteComponent,
-//DistributorViewComponent,
- 
+    AppComponent,
+    ProductsComponent,
+    CustomerRegisterComponent,
+    CustomerLoginComponent,
+    CreateCustomerDistributorComponent,
+    AdminDashboardComponent,
+    DistributorDashboardComponent,
+    EmployeeDashboardComponent,
+    MainPageComponent,
+    DistributorLoginComponent,
+    DistributorSignupComponent,
+    ForgotPasswordComponent,
+    EmployeesComponent,
+    SetPasswordComponent,
+    ProfileComponent,
+    ThemeToggleComponent,
+    ProductsByDistComponent,
 
-FraudHistoryComponent,
-AdminReviewListComponent,
-AdminReviewHistoryComponent,
- 
- 
+    AddPaymentNoteComponent,
+    DistributorViewComponent,
 
- 
-// InventoryBatchesComponent,
- 
-InvoiceCreateComponent,
-InvoiceDetailComponent,
-EmployeeInvoicesComponent,
- 
- 
-    // AdminDistributorsComponent
- 
+
+    FraudHistoryComponent,
+    AdminReviewListComponent,
+    AdminReviewHistoryComponent,
+
+
+
+
+    InventoryBatchesComponent,
+
+    InvoiceCreateComponent,
+    InvoiceDetailComponent,
+    EmployeeInvoicesComponent,
+
     OrderHistoryComponent,
     DistributorOrdersComponent,
     CustomerOrdersComponent,
@@ -139,15 +136,15 @@ EmployeeInvoicesComponent,
     EmployeeSignupComponent,
     AddToCartComponent,
     EmployeeProfileComponent,
-CustomerDashboardComponent,
+    CustomerDashboardComponent,
     FraudReportComponent,
- 
+
     AdminFraudListComponent,
- 
+
     TruncatePipe,
     ReviewSubmitComponent,
- 
- 
+
+
     FraudHistoryComponent,
     AdminReviewHistoryComponent,
     CashCollectionComponent,
@@ -160,7 +157,7 @@ CustomerDashboardComponent,
     PendingHandoversComponent,
     PaymentsComponent,
     DistributorSettingsComponent,
-PaymentCollectionForCashcollectorComponent,
+    PaymentCollectionForCashcollectorComponent,
     MainInventoryComponent,
     CustomersListComponent,
     EmployeeTrackingComponent,
@@ -177,19 +174,19 @@ PaymentCollectionForCashcollectorComponent,
 
 
     // AdminDistributorsComponent
- 
+
     DistributorReturnRequestsComponent,
- 
- 
- 
+
+
+
   ],
   imports: [
-    BrowserModule, HttpClientModule,  GoogleMapsModule ,  CommonModule,           // ✅ ADD THIS      // ✅ you already imported but forgot here
+    BrowserModule, HttpClientModule, GoogleMapsModule, CommonModule,           // ✅ ADD THIS      // ✅ you already imported but forgot here
     AppRoutingModule, FormsModule, ReactiveFormsModule, BrowserAnimationsModule, ToastrModule.forRoot({
       timeOut: 1000,
       positionClass: 'toast-top-right',
       preventDuplicates: true,
- 
+
     }),
   ],
   providers: [{
@@ -200,6 +197,3 @@ PaymentCollectionForCashcollectorComponent,
   bootstrap: [AppComponent]
 })
 export class AppModule { }
- 
- 
- 

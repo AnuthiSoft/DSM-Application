@@ -1,3 +1,18 @@
+:root {
+  --table-header-bg: #34495e;
+  --table-header-text: #ffffff;
+  --table-row-text: #333;
+  --table-muted-text: #666;
+}
+
+/* Dark mode override */
+[data-theme="dark"] {
+  --table-header-bg: #3a4a5c;
+  --table-header-text: #ffffff;
+  --table-row-text: #e0e0e0;
+  --table-muted-text: #b0b0b0;
+}
+
 .customer-connections-section {
   padding: 20px 0;
   display: flex;
@@ -138,17 +153,20 @@
 }
 
 .customers-table thead {
-  background-color: var(--secondary-color);
+  background-color: var(--table-header-bg);
 }
 
-.customers-table th {
-  color: white;
+.customers-table thead th {
+  color: #ffffff; 
   padding: 15px 12px;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  opacity: 1 !important;
+  filter: none !important;
+  text-shadow: none !important;
 }
 
 .customers-table tbody tr {
@@ -175,16 +193,18 @@
 }
 
 .customer-email, .customer-phone {
-  color: var(--text-color);
-  opacity: 0.8;
+  color: var(--table-row-text);
+  opacity: 1;
 }
 
 .connection-date {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--text-color);
-  opacity: 0.8;
+  gap: 6px;
+  color: var(--table-row-text);
+  opacity: 1;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .actions-column {
@@ -337,4 +357,21 @@
   .connection-date {
     justify-content: center;
   }
+}
+
+/* Tablet specific (iPad) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-card {
+    padding: 20px;
+  }
+
+  .requests-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.connection-date i {
+  color: var(--primary-color);
+  opacity: 1;
+  font-size: 0.8rem;
 }

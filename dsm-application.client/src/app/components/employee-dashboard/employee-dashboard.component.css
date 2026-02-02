@@ -867,3 +867,10 @@ input[type="date"]::-moz-calendar-picker-indicator {
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
+
+@media (max-width: 768px) {
+  .dashboard-sidebar.mobile-open,
+  .dashboard-sidebar.mobile-open.collapsed {
+    transform: translateX(0) !important;
+  }
+}

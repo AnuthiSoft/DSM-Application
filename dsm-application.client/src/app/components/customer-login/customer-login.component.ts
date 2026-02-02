@@ -16,11 +16,11 @@ export class CustomerLoginComponent {
   request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
   email = '';
   message = '';
-   showPassword = false; 
-showChangePasswordModal = false;
-newPassword = '';
-confirmPassword = '';
-passwordError = '';
+  showPassword = false;
+  showChangePasswordModal = false;
+  newPassword = '';
+  confirmPassword = '';
+  passwordError = '';
 
 
   constructor(
@@ -49,48 +49,48 @@ passwordError = '';
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
-submitNewPassword() {
-  this.passwordError = '';
+  submitNewPassword() {
+    this.passwordError = '';
 
-  if (!this.newPassword || this.newPassword.length < 4) {
-    this.passwordError = 'Password must be at least 4 characters';
-    return;
-  }
-
-  if (this.newPassword !== this.confirmPassword) {
-    this.passwordError = 'Passwords do not match';
-    return;
-  }
-
-  this.customerService.changePassword({
-    newPassword: this.newPassword
-  }).subscribe({
-    next: () => {
-      this.showChangePasswordModal = false;
-      this.newPassword = '';
-      this.confirmPassword = '';
-
-      this.ngZone.run(() => {
-        this.router.navigateByUrl('/customer-dashboard');
-      });
-    },
-    error: () => {
-      this.passwordError = 'Failed to update password';
+    if (!this.newPassword || this.newPassword.length < 4) {
+      this.passwordError = 'Password must be at least 4 characters';
+      return;
     }
-  });
-}
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.passwordError = 'Passwords do not match';
+      return;
+    }
+
+    this.customerService.changePassword({
+      newPassword: this.newPassword
+    }).subscribe({
+      next: () => {
+        this.showChangePasswordModal = false;
+        this.newPassword = '';
+        this.confirmPassword = '';
+
+        this.ngZone.run(() => {
+          this.router.navigateByUrl('/customer-dashboard');
+        });
+      },
+      error: () => {
+        this.passwordError = 'Failed to update password';
+      }
+    });
+  }
 
 
 
 
   login() {
-  const identifier = this.request.email?.trim();
-  if (!identifier) {
-    this.message = "Please enter email or phone number";
-    return;
-  }
+    const identifier = this.request.email?.trim();
+    if (!identifier) {
+      this.message = "Please enter email or phone number";
+      return;
+    }
 
- 
+
 
     if (/^\d+$/.test(identifier)) {
       this.request.phoneNumber = identifier;
@@ -115,16 +115,16 @@ submitNewPassword() {
         // Save new data
         localStorage.setItem("token", res.token);
         localStorage.setItem("role", res.role);
- localStorage.setItem('customerId', res.customer.customerId!);
-localStorage.setItem('customerName', res.customer.name!);
-localStorage.setItem('customerEmail', res.customer.email!);
-localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
+        localStorage.setItem('customerId', res.customer.customerId!);
+        localStorage.setItem('customerName', res.customer.name!);
+        localStorage.setItem('customerEmail', res.customer.email!);
+        localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
 
 
- if (res.mustChangePassword) {
-  this.showChangePasswordModal = true;
-  return; // ⛔ stop dashboard navigation
-}
+        if (res.mustChangePassword) {
+          this.showChangePasswordModal = true;
+          return; // ⛔ stop dashboard navigation
+        }
 
 
         // ⭐ SAVE DISTRIBUTOR ID HERE

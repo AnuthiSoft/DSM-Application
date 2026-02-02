@@ -135,15 +135,14 @@
             <td class="customer-phone">{{ c.phoneNumber || '-' }}</td>
             <td class="connection-date">
               <i class="fas fa-calendar-check"></i>
-              {{ c.connectedOn | date:'medium' }}
+              {{ c.connectedOn | date:'dd MMM yyyy' }}
             </td>
             <td class="customer-actions">
-             <button class="btn btn-danger btn-sm"
-        (click)="disconnect(c.customerId, distributorId)">
-  Disconnect
-</button>
+              <button class="btn btn-danger btn-sm" (click)="disconnect(c.customerId, distributorId)">
+                Disconnect
+              </button>
 
-                <!-- <button class="btn btn-danger btn-sm mt-1"
+              <!-- <button class="btn btn-danger btn-sm mt-1"
           [routerLink]="[
              '/report-fraud',
              'customer',

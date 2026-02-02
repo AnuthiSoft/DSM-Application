@@ -18,26 +18,27 @@
 
     <div class="nav-items">
       <!-- Dashboard -->
-      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')" data-title="Dashboard">
+      <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')"
+        data-title="Dashboard">
         <i class="fas fa-th-large"></i>
         <span>Dashboard</span>
       </div>
 
       <!-- Orders (Delivery Boy only) -->
-      <div *ngIf="isDeliveryBoy" class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')" data-title="My Orders">
+      <div *ngIf="isDeliveryBoy" class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')"
+        data-title="My Orders">
         <i class="fas fa-shopping-cart"></i>
         <span>My Orders</span>
       </div>
-          <div *ngIf="isDeliveryBoy"
-     class="nav-item"
-     [class.active]="isActive('return-orders')"
-     (click)="setActiveTab('return-orders')">
-  <i class="fas fa-undo"></i>
-  <span>Return Pickups</span>
-</div>
- 
+      <!-- <div *ngIf="isDeliveryBoy" class="nav-item" [class.active]="isActive('return-orders')"
+        (click)="setActiveTab('return-orders')">
+        <i class="fas fa-undo"></i>
+        <span>Return Pickups</span>
+      </div> -->
+
       <!-- Payment Collection (Cash Collector only) -->
-      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('payment-collection')" (click)="setActiveTab('payment-collection')" data-title="Payment Collection">
+      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('payment-collection')"
+        (click)="setActiveTab('payment-collection')" data-title="Payment Collection">
         <i class="fas fa-rupee-sign"></i>
         <span>Payment Collection</span>
       </div>
@@ -50,33 +51,31 @@
 </button> -->
 
 
-<!-- products -->
-<div *ngIf="isCashCollector"
-     class="nav-item"
-     [class.active]="isActive('products')"
-     (click)="setActiveTab('products')">
-  <i class="fas fa-box"></i>
-  <span>Products</span>
-</div>
+      <!-- products -->
+      <div *ngIf="isCashCollector" class="nav-item" [class.active]="isActive('products')"
+        (click)="setActiveTab('products')">
+        <i class="fas fa-box"></i>
+        <span>Products</span>
+      </div>
 
 
       <!-- Invoices (Delivery Boy only) -->
-      <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('invoices')" (click)="setActiveTab('invoices')" data-title="Invoices">
+      <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('invoices')"
+        (click)="setActiveTab('invoices')" data-title="Invoices">
         <i class="fas fa-file-pdf"></i>
         <span>Invoices</span>
       </div>
 
-      <div *ngIf="canSeeInvoices"
-     class="nav-item"
-     [class.active]="isActive('return-orders')"
-     (click)="setActiveTab('return-orders')">
-  <i class="fas fa-undo"></i>
-  <span>Return Pickups</span>
-</div>
+      <div *ngIf="canSeeInvoices" class="nav-item" [class.active]="isActive('return-orders')"
+        (click)="setActiveTab('return-orders')">
+        <i class="fas fa-undo"></i>
+        <span>Return Pickups</span>
+      </div>
 
 
       <!-- Profile (Common) -->
-      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')" data-title="My Profile">
+      <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')"
+        data-title="My Profile">
         <i class="fas fa-user"></i>
         <span>My Profile</span>
       </div>
@@ -89,7 +88,7 @@
         <span>Logout</span>
       </div>
     </div>
-    
+
   </div>
 
   <!-- Main Content -->
@@ -123,7 +122,7 @@
           <div class="stat-value">{{performanceRating || '4.5'}}</div>
           <div class="stat-label">Performance</div>
         </div>
-        
+
         <!-- Employee Availability Section -->
         <div class="dashboard-card" style="margin-top: 20px; grid-column: span 2;">
           <div class="card-header">
@@ -268,16 +267,15 @@
     </div>
 
     <!-- Payment Collection Tab (Cash Collector) -->
-    <app-payment-collection-for-cashcollector 
-      *ngIf="activeTab === 'payment-collection' && isCashCollector">
+    <app-payment-collection-for-cashcollector *ngIf="activeTab === 'payment-collection' && isCashCollector">
     </app-payment-collection-for-cashcollector>
 
     <!-- Invoices Tab (Delivery Boy) -->
     <div *ngIf="activeTab === 'invoices' && canSeeInvoices">
       <app-employee-invoices></app-employee-invoices>
     </div>
-<app-employee-return-orders *ngIf="activeTab === 'return-orders'"></app-employee-return-orders>
- 
+    <app-employee-return-orders *ngIf="activeTab === 'return-orders'"></app-employee-return-orders>
+
     <!-- Profile Tab -->
     <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
 
@@ -296,23 +294,12 @@
 
 
 
-    <!-- Profile Tab -->
 
-    <app-employee-profile *ngIf="activeTab === 'profile'"></app-employee-profile>
+    <app-employee-products *ngIf="activeTab === 'products'" (addToCart)="openEmployeeAddToCart()">
+    </app-employee-products>
 
-
-    <app-employee-return-orders *ngIf="activeTab === 'return-orders'"></app-employee-return-orders>
-
-
-    <app-employee-products
-  *ngIf="activeTab === 'products'"
-(addToCart)="openEmployeeAddToCart()">
-</app-employee-products>
-
-<app-employee-add-to-cart
-  *ngIf="activeTab === 'employee-add-to-cart'"
-  (close)="backToProducts()">
-</app-employee-add-to-cart>
+    <app-employee-add-to-cart *ngIf="activeTab === 'employee-add-to-cart'" (close)="backToProducts()">
+    </app-employee-add-to-cart>
 
 
     <!-- <app-employee-add-to-cart

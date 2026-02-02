@@ -86,7 +86,8 @@
   font-size: 0.9rem;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   padding: 10px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -97,7 +98,8 @@
   width: 100%;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
@@ -142,10 +144,13 @@
 
 /* Table Styles */
 .table-container {
+  width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 8px;
   border: 1px solid var(--border-color);
 }
+
 
 .employee-table {
   width: 100%;
@@ -208,7 +213,8 @@
   flex-direction: column;
 }
 
-.employee-email, .employee-phone {
+.employee-email,
+.employee-phone {
   color: var(--text-color);
   opacity: 0.8;
 }
@@ -281,8 +287,10 @@
   font-size: 0.8rem;
   font-weight: 500;
 
-  white-space: nowrap;     /* 🔥 Prevent text breaking */
-  min-width: 95px;         /* 🔥 Ensures button is fully visible */
+  white-space: nowrap;
+  /* 🔥 Prevent text breaking */
+  min-width: 95px;
+  /* 🔥 Ensures button is fully visible */
 }
 
 /* Hover effect */
@@ -442,12 +450,13 @@
 
 .modal-overlay {
   position: fixed;
-  inset: 0;                 /* covers full screen */
+  inset: 0;        /* covers full screen */
   display: flex;
-  align-items: center;      /* 🔥 vertical center */
+  align-items: center;    /* 🔥 vertical center */
   justify-content: center;  /* 🔥 horizontal center */
   background: rgba(0, 0, 0, 0.5);
-  z-index: 1050;
+  overflow: hidden;
+  z-index: 9999;
 }
 
 .modal-backdrop {
@@ -456,8 +465,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   z-index: 1000;
 }
 
@@ -467,9 +476,15 @@
   box-shadow: var(--shadow);
   width: 90%;
   max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  overflow: hidden; 
+  flex-direction: column;
   z-index: 1001;
   border: 1px solid var(--border-color);
   animation: modalSlideIn 0.3s ease-out;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @keyframes modalSlideIn {
@@ -477,6 +492,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -522,9 +538,13 @@
 
 .modal-body {
   padding: 25px;
+  overflow-y: auto; /* 🔥 enables scrolling */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
 }
 
- .upload-btn-center {
+.upload-btn-center {
   display: flex;
   justify-content: center;
   width: 100%;
@@ -604,11 +624,11 @@
   border-radius: 50%;
 }
 
-.toggle-input:checked + .toggle-slider {
+.toggle-input:checked+.toggle-slider {
   background-color: var(--primary-color);
 }
 
-.toggle-input:checked + .toggle-slider:before {
+.toggle-input:checked+.toggle-slider:before {
   transform: translateX(26px);
 }
 
@@ -624,7 +644,12 @@
   gap: 12px;
   padding: 20px 25px;
   border-top: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 0;
+  background: var(--card-bg);
+  z-index: 2;
 }
+
 /* ===============================
    EMPLOYEE PHONE FIELD – MATCH FORM-CONTROL
 ================================ */
@@ -635,7 +660,8 @@
   width: 100%;
 
   padding: 0;
-  height: 42px; /* same visual height as .form-control */
+  height: 42px;
+  /* same visual height as .form-control */
 
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -661,7 +687,8 @@
   font-weight: 500;
   color: var(--text-color);
 
-  background: transparent; /* 🔥 important */
+  background: transparent;
+  /* 🔥 important */
   border-right: 1px solid var(--border-color);
 }
 
@@ -690,142 +717,70 @@
   border-color: #e74c3c;
 }
 
-/* ===== DELETE CONFIRM MODAL ===== */
-
-.confirm-box {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 30px 25px;
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-
-  /* 🔥 IMPORTANT FIX */
-  position: relative;
-  z-index: 1100;
-  isolation: isolate;        /* ⭐ THIS LINE fixes blur bleed */
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-
-.confirm-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  border: 4px solid #f4b183;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.confirm-icon span {
-  font-size: 34px;
-  font-weight: bold;
-  color: #f4b183;
-}
-
-.confirm-text {
-  font-size: 18px;
-  color: #333;
-  margin-bottom: 25px;
-  line-height: 1.4;
-}
-
-.confirm-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-.btn-ok {
-  background: #2e7d32;
-  color: #fff;
-  border: none;
-  padding: 8px 28px;
-  border-radius: 6px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.btn-ok:hover {
-  background: #256428;
-}
-
-.btn-cancel {
-  background: #b0b0b0;
-  color: #fff;
-  border: none;
-  padding: 8px 22px;
-  border-radius: 6px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.btn-cancel:hover {
-  background: #9e9e9e;
-}
-
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .employee-section {
     padding: 15px 0;
   }
-  
+
   .dashboard-card {
     padding: 20px 15px;
     margin: 0 10px 20px;
   }
-  
+
   .search-filter-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .welcome-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .table-container {
     margin: 0 -15px;
     border-radius: 0;
     border-left: none;
     border-right: none;
   }
-  
+
   .employee-table {
-    min-width: 800px;
-  }
-  
-  .action-buttons {
+    width: 100%;
+    table-layout: auto;
+}
+
+
+  /* .action-buttons {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .action-btn {
     width: 100%;
     justify-content: center;
-  }
-  
+  } */
+
   .modal-content {
-    width: 95%;
-    margin: 20px;
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+
+    border-radius: 14px 14px 0 0;
+    margin: 0;
   }
-  
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .table-footer {
     flex-direction: column;
     gap: 15px;
     align-items: flex-start;
   }
-  
+
   .footer-actions {
     width: 100%;
     justify-content: space-between;
@@ -836,29 +791,30 @@
   .welcome-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .employee-count {
     align-self: flex-start;
   }
-  
+
   .modal-body {
     padding: 20px 15px;
   }
-  
-  .modal-header, .modal-footer {
+
+  .modal-header,
+  .modal-footer {
     padding: 15px 20px;
   }
-  
+
   .modal-footer {
     flex-direction: column;
   }
-  
+
   .modal-footer .btn {
     width: 100%;
     justify-content: center;
@@ -966,3 +922,350 @@
   color: #ffffff !important;
   opacity: 1 !important;
 }
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+}
+
+.mobile-select {
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 4000;
+}
+
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50vh;
+  background: var(--card-bg);
+  border-radius: 18px 18px 0 0;
+  z-index: 4001;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #aaa;
+  margin: 10px auto;
+  border-radius: 4px;
+}
+
+.sheet-header {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sheet-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.sheet-option {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.sheet-option:hover {
+  background: var(--hover-color);
+}
+
+.modal-content .action-btn {
+  width: 42px;
+  height: 42px;
+}
+
+.modal-content .action-btn i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1024px) {
+  .welcome-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .add-employee-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.95rem;
+    padding: 12px;
+  }
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .modal-content {
+    width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 14px 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+}
+
+/* ==================================================
+   ✅ MOBILE CARD LAYOUT – SINGLE FINAL VERSION
+   ================================================== */
+@media (max-width: 767px) {
+
+  /* disable table */
+  .employee-table,
+  .employee-table thead,
+  .employee-table tbody,
+  .employee-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .employee-table th {
+    display: none !important;
+  }
+
+  /* CARD */
+  .employee-table tr {
+    background: var(--card-bg);
+    margin: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+  }
+
+  /* HEADER */
+  .employee-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* DATA ROWS */
+  .employee-table td:not(.employee-info):not(.employee-actions) {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    padding: 6px 0;
+  }
+
+  .employee-table td::before {
+    content: attr(data-label);
+    font-size: 0.85rem;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  /* VALUE COLUMN — FIX ALIGNMENT */
+  .employee-table td > * {
+    text-align: left;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  /* BADGES */
+  .designation-badge,
+  .status-badge {
+    justify-self: flex-start;
+    max-width: fit-content;
+  }
+
+  /* ACTIONS */
+  .employee-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 14px;
+    padding: 10px 16px;
+    background: var(--hover-color);
+    border-radius: 18px;
+  }
+
+  /* ICON ONLY BUTTONS */
+  .action-btn {
+    width: 42px;
+    height: 42px;
+    padding: 0 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    font-size: 0;       /* 🔥 removes text spacing */
+    line-height: 0;
+  }
+
+  .action-btn i {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  /* 🔥 fully hide text */
+  .action-btn span {
+    display: none !important;
+  }
+
+  .table-container {
+    overflow: visible;
+    border: none;
+  }
+}
+
+.employee-email {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1023px) {
+  .employee-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .employee-actions::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .action-buttons {
+    padding: 8px 12px;        /* 🔥 smaller */
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .action-btn {
+    width: 38px;              /* 🔥 smaller */
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .action-btn i {
+    font-size: 1rem !important;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .employee-table thead {
+    display: none !important;
+  }
+}
+
+/* ==================================================
+   ✅ TABLET FIX (ALL REAL TABLETS)
+   iPad Mini, Air, Surface, Fold, etc.
+================================================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+  /* Let table breathe */
+  .employee-table {
+    table-layout: auto !important;
+    width: 100%;
+  }
+
+  /* Email MUST wrap */
+  .employee-email,
+  .employee-table td[data-label="Email"] {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* Prevent nowrap inheritance */
+  .employee-table td {
+    white-space: normal;
+  }
+
+  /* Action buttons stay compact */
+  .employee-actions {
+    white-space: normal !important;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .action-btn {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+  .action-btn i {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .action-btn .fa-cloud-upload-alt {
+  font-size: 1.1rem !important;
+ }
+  .action-btn span {
+    display: none !important;
+  }
+
+  .action-btn .fa-eye {
+  font-size: 1.1rem !important;
+}
+
+}
+
+

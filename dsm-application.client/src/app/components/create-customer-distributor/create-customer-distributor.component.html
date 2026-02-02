@@ -146,31 +146,23 @@
           </div>
 
           <!-- PASSWORD (Only for Create) -->
-<div class="form-group" *ngIf="!isEdit">
-  <label>
-    <i class="fas fa-lock"></i> Password
-  </label>
+          <div class="form-group" *ngIf="!isEdit">
+            <label>
+              <i class="fas fa-lock"></i> Password
+            </label>
 
-  <input
-    class="form-control"
-    type="password"
-    [(ngModel)]="customer.password"
-    name="password"
-    required
-    minlength="6"
-    #password="ngModel"
-    placeholder="Enter password"
-  />
+            <input class="form-control" type="password" [(ngModel)]="customer.password" name="password" required
+              minlength="6" #password="ngModel" placeholder="Enter password" />
 
-  <div class="text-danger" *ngIf="password.touched && password.errors">
-    <div *ngIf="password.errors['required']">
-      Password is required
-    </div>
-    <div *ngIf="password.errors['minlength']">
-      Password must be at least 6 characters
-    </div>
-  </div>
-</div>
+            <div class="text-danger" *ngIf="password.touched && password.errors">
+              <div *ngIf="password.errors['required']">
+                Password is required
+              </div>
+              <div *ngIf="password.errors['minlength']">
+                Password must be at least 6 characters
+              </div>
+            </div>
+          </div>
 
 
           <div class="form-group">
@@ -180,16 +172,22 @@
             </label>
 
             <input type="text" class="form-control" [(ngModel)]="customer.phoneNumber" name="phoneNumber"
-              placeholder="Enter phone number" [readonly]="phoneVerifiedUI" (input)="restrictPhoneInput($event)"
-              required pattern="^[6-9][0-9]{9}$" #phone="ngModel" />
+              placeholder="Enter phone number" [readonly]="isEdit && !allowPhoneEdit"
+              (input)="allowPhoneEdit && restrictPhoneInput($event)" required pattern="^[6-9][0-9]{9}$"
+              #phone="ngModel" />
 
             <!-- Verified Badge -->
-            <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+            <div *ngIf="phoneVerifiedUI && !allowPhoneEdit" class="text-success mt-1">
               <i class="fas fa-check-circle"></i> Verified
             </div>
 
+            <button *ngIf="isEdit && !allowPhoneEdit" type="button" class="btn btn-outline-warning btn-sm mt-2"
+              (click)="enablePhoneEdit()">
+              Change phone number
+            </button>
+
             <!-- SEND OTP BUTTON -->
-            <button *ngIf="!otpSent && !phoneVerifiedUI" type="button" class="btn btn-warning w-100 mt-2"
+            <button *ngIf="allowPhoneEdit && !phoneVerifiedUI && !otpSent" type="button" class="btn btn-warning w-100 mt-2"
               (click)="sendOtp()">
               Send OTP
             </button>

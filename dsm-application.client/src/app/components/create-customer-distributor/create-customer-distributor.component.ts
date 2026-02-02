@@ -74,6 +74,8 @@ import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
 import { AdminService } from '../../services/admin.service';
 import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-create-customer-distributor',
   templateUrl: './create-customer-distributor.component.html',
@@ -86,21 +88,24 @@ export class CreateCustomerDistributorComponent implements OnInit {
   otpFailed = false;
   otpCode = '';
   phoneVerifiedUI = false;
+  allowPhoneEdit = false;
+  originalPhoneNumber = '';
+
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
-customer: Customer = {
-  name: '',
-  email: '',
-  
-  phoneNumber: '',
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-  
-  isActive: true          // ✅ ADD THIS
-};
-employees: any[] = [];
+  customer: Customer = {
+    name: '',
+    email: '',
+
+    phoneNumber: '',
+    address: '',
+    role: 'Customer',
+    isRegistered: false,
+
+    isActive: true          // ✅ ADD THIS
+  };
+  employees: any[] = [];
 
   showAssignModal = false;
   selectedCustomerId = '';
@@ -253,37 +258,54 @@ employees: any[] = [];
     this.isEdit = false;
     this.customer = {
 
-      
-  name: '',
-  email: '',
-  phoneNumber: '',
-  address: '',
-  role: 'Customer',
-  isRegistered: false,
-    password: '', // ✅ ADD
 
-  isActive: true        // ✅ ADD THIS
-};
-this.otpSent = false;
-this.otpVerified = false;
-this.otpFailed = false;
-this.otpCode = '';
-this.phoneVerifiedUI = false;
+      name: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      role: 'Customer',
+      isRegistered: false,
+      password: '', // ✅ ADD
+
+      isActive: true        // ✅ ADD THIS
+    };
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpFailed = false;
+    this.otpCode = '';
+    this.phoneVerifiedUI = false;
 
 
     this.showModal = true;
   }
 
   editCustomer(c: Customer) {
+    this.isEdit = true;
+    this.showModal = true;
+
     this.customer = {
       ...c,
       phoneNumber: c.phoneNumber?.startsWith('+91')
-        ? c.phoneNumber.slice(3)   // remove +91
+        ? c.phoneNumber.slice(3)
         : c.phoneNumber
     };
 
-    this.isEdit = true;
-    this.showModal = true;
+    this.originalPhoneNumber = this.customer.phoneNumber || '';
+
+    this.allowPhoneEdit = false;     // 🔒 readonly
+    this.phoneVerifiedUI = true;     // ✅ already verified
+
+    this.otpSent = false;
+    this.otpVerified = true;
+    this.otpFailed = false;
+  }
+
+  enablePhoneEdit() {
+    this.allowPhoneEdit = true;
+    this.phoneVerifiedUI = false;
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpCode = '';
   }
 
 
@@ -292,14 +314,30 @@ this.phoneVerifiedUI = false;
   }
 
   saveCustomer() {
+
+    if (
+      this.isEdit &&
+      this.allowPhoneEdit &&
+      this.customer.phoneNumber !== this.originalPhoneNumber &&
+      !this.phoneVerifiedUI
+    ) {
+      this.toastr.warning('Please verify the new phone number');
+      return;
+    }
+
+    if (this.isEdit && !this.customer.password?.trim()) {
+      delete (this.customer as any).password;
+    }
+
     const payload: Customer = {
       ...this.customer,
       phoneNumber: '+91' + this.customer.phoneNumber
     };
 
-    this.isEdit ? this.updateCustomer(payload) : this.createCustomer(payload);
+    this.isEdit
+      ? this.updateCustomer(payload)
+      : this.createCustomer(payload);
   }
-
 
   /* ----------------------------- CREATE ------------------------------ */
 
@@ -353,35 +391,30 @@ this.phoneVerifiedUI = false;
     });
   }
 
-  deleteCustomer(customerId: string) {
-
-    // FIRST CLICK → SHOW CONFIRMATION TOAST
-    if (this.confirmDelete !== customerId) {
-      this.toastr.clear(); // remove existing toasts
-
-      this.toastr.warning(
-        'Click DELETE again to confirm',
-        'Confirm Delete',
-        { timeOut: 3000 }
-      );
-
-      this.confirmDelete = customerId;
-      return; // stop here
+  deleteCustomer(customerId: string): void {
+  Swal.fire({
+    title: 'Are you sure you want to delete this customer?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d32f2f',
+    cancelButtonColor: '#aaa',
+    backdrop: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.customerService.deleteCustomer(customerId).subscribe({
+        next: () => {
+          this.toastr.success('Customer deleted successfully');
+          this.loadCustomers();
+        },
+        error: () => {
+          this.toastr.error('Failed to delete customer');
+        }
+      });
     }
-
-    // SECOND CLICK → DELETE THE CUSTOMER
-    this.customerService.deleteCustomer(customerId).subscribe({
-      next: () => {
-        this.toastr.clear(); // remove confirm toast
-        this.toastr.success('Customer deleted successfully', 'Deleted');
-        this.confirmDelete = null; // reset
-        this.loadCustomers();
-      },
-      error: () => {
-        this.toastr.clear();
-        this.toastr.error('Failed to delete customer', 'Error');
-      }
-    });
-  }
+  });
+}
 
 }

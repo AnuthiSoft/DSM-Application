@@ -11,16 +11,13 @@ export interface Payment {
   handoverStatus?: 'Pending' | 'Accepted' | 'Rejected';
   rejectReason?: string;
 }
-export 
-
-
-interface CustomerLedgerDay {
+export interface CustomerLedgerDay {
   date: string;
   totalPaid: number;
   payments: {
     orderId: string;
     amountPaidToday: number;
-    paymentMode: string;
+    paymentMode: 'cash' | 'upi' | 'online' | 'scanner';
     paymentDate: string;
   }[];
 }

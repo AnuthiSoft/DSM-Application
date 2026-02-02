@@ -230,10 +230,9 @@
       <h2><i class="fas fa-users"></i> Employee Management</h2>
 
       <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
-
-      <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
         <i class="fas fa-plus"></i> Add Employee
       </button>
+    </div>
 
 
     <!-- Search and Filter Card -->
@@ -251,7 +250,7 @@
           </div>
         </div>
 
-        <div class="filter-group">
+        <div class="filter-group desktop-only">
           <label class="filter-label">Designation</label>
           <select class="form-select" [(ngModel)]="roleFilter" (change)="applyFilters()">
             <option value="">All Designations</option>
@@ -262,13 +261,29 @@
           </select>
         </div>
 
-        <div class="filter-group">
+        <!-- MOBILE / TABLET -->
+        <div class="filter-group mobile-only">
+          <label class="filter-label">Designation</label>
+          <div class="mobile-select" (click)="openSheet('designation')">
+            {{ roleFilter || 'All Designations' }}
+          </div>
+        </div>
+
+        <div class="filter-group desktop-only">
           <label class="filter-label">Status</label>
           <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
             <option value="">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+        </div>
+
+        <!-- MOBILE / TABLET -->
+        <div class="filter-group mobile-only">
+          <label class="filter-label">Status</label>
+          <div class="mobile-select" (click)="openSheet('status')">
+            {{ statusFilter || 'All Status' }}
+          </div>
         </div>
       </div>
     </div>
@@ -303,38 +318,40 @@
                   <strong>{{ emp.name }}</strong>
                 </div>
               </td>
-              <td class="employee-email">{{ emp.email }}</td>
-              <td class="employee-phone">{{ emp.phoneNumber || '-' }}</td>
-              <td class="employee-role">{{ emp.role }}</td>
-              <td class="employee-designation">
+              <td class="employee-email" data-label="Email">{{ emp.email }}</td>
+              <td class="employee-phone" data-label="Phone">{{ emp.phoneNumber || '-' }}</td>
+              <td class="employee-role" data-label="Role">{{ emp.role }}</td>
+              <td class="employee-designation" data-label="Designation">
                 <span class="designation-badge">{{ emp.designation }}</span>
               </td>
-              <td class="employee-status">
+              <td class="employee-status" data-label="Status">
                 <span class="status-badge" [class]="emp.isActive ? 'active' : 'inactive'">
                   {{ emp.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </td>
-              <td class="employee-actions">
+              <td class="employee-actions" data-label="Actions">
                 <div class="action-buttons">
                   <button class="btn btn-outline-primary btn-sm action-btn" (click)="editEmployee(emp)">
                     <i class="fas fa-edit"></i>
                     Edit
                   </button>
-                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="openDeleteConfirm(emp)">
-                    <i class="fas fa-trash"></i> Delete
+                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="deleteEmployee(emp)">
+                    <i class="fas fa-trash"></i>
+                    Delete
                   </button>
 
-
-                  <button *ngIf="(emp.designation || '').toLowerCase().trim() === 'delivery boy'"
+                  <button *ngIf="isDistributor() && (emp.designation || '').toLowerCase().trim() === 'delivery boy'"
                     class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
-                    <i class="fas fa-file-upload"></i> Tax Invoice
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Upload Invoice
                   </button>
 
-                  <button *ngIf="emp.invoicePdfUrl" class="btn btn-outline-secondary btn-sm action-btn"
-                    (click)="viewPdf(emp.invoicePdfUrl)">
-                    <i class="fas fa-eye"></i> View PDF
-                  </button>
 
+                  <button *ngIf="emp.invoicePdfUrl && (emp.designation || '').toLowerCase().trim() === 'delivery boy'" 
+                  class="btn btn-outline-secondary btn-sm action-btn" (click)="viewPdf(emp.invoicePdfUrl)">
+                    <i class="fas fa-eye"></i>
+                    <span>View PDF</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -373,9 +390,9 @@
         </div>
       </div>
 
-    <!-- ================= Upload Invoice Modal ================= -->
-    <div *ngIf="showUploadModal" class="modal-overlay">
-      <!-- <div class="modal-backdrop" (click)="closeUploadModal()"></div> -->
+      <!-- ================= Upload Invoice Modal ================= -->
+      <div *ngIf="showUploadModal" class="modal-overlay">
+        <!-- <div class="modal-backdrop" (click)="closeUploadModal()"></div> -->
 
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
@@ -385,7 +402,7 @@
             </button>
           </div>
 
-        <!-- <div class="modal-body">
+          <!-- <div class="modal-body">
           <p><strong>Employee:</strong> {{ selectedEmployee?.name }}</p>
 
           <input type="file" (change)="onFileSelected($event)" accept="application/pdf" />
@@ -409,19 +426,11 @@
                 Choose PDF
                 <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
               </label>
-            <div class="file-upload-wrapper">
-              <label class="file-upload-btn">
-                <i class="fas fa-upload"></i>
-                Choose PDF
-                <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
-              </label>
 
-                <span class="file-name">
+              <span class="file-name">
                 {{ selectedFileName || 'No file chosen' }}
               </span>
             </div>
-
-          <!-- <input type="file" (change)="onFileSelected($event)" accept="application/pdf" /> -->
 
             <div class="upload-btn-center">
               <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
@@ -436,9 +445,9 @@
 
 
 
-    <!-- Employee Modal -->
-    <div *ngIf="showModal" class="modal-overlay">
-      <!-- <div class="modal-backdrop" (click)="closeEmployeeModal()"></div> -->
+      <!-- Employee Modal -->
+      <div *ngIf="showModal" class="modal-overlay">
+        <!-- <div class="modal-backdrop" (click)="closeEmployeeModal()"></div> -->
 
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
@@ -608,4 +617,37 @@
       </div>
     </div>
   </div>
+</div>
 
+<!-- BACKDROP -->
+<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
+
+<!-- BOTTOM SHEET -->
+<div class="bottom-sheet" *ngIf="sheetOpen">
+  <div class="sheet-handle"></div>
+
+  <div class="sheet-header">
+    <h4>{{ sheetTitle }}</h4>
+    <button (click)="closeSheet()">✕</button>
+  </div>
+
+  <div class="sheet-body">
+
+    <!-- DESIGNATION -->
+    <div *ngIf="sheetType === 'designation'">
+      <div class="sheet-option" (click)="setDesignation('')">All Designations</div>
+      <div class="sheet-option" (click)="setDesignation('Delivery Boy')">Delivery Boy</div>
+      <div class="sheet-option" (click)="setDesignation('Cash Collector')">Cash Collector</div>
+      <div class="sheet-option" (click)="setDesignation('Manager')">Manager</div>
+      <div class="sheet-option" (click)="setDesignation('Sales Representative')">Sales Representative</div>
+    </div>
+
+    <!-- STATUS -->
+    <div *ngIf="sheetType === 'status'">
+      <div class="sheet-option" (click)="setStatus('')">All Status</div>
+      <div class="sheet-option" (click)="setStatus('active')">Active</div>
+      <div class="sheet-option" (click)="setStatus('inactive')">Inactive</div>
+    </div>
+
+  </div>
+</div>

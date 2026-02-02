@@ -22,7 +22,8 @@
 
 /* Date and Time Separator Styling */
 .report-table td:nth-child(6)::before {
-  content: none; /* Remove any default separators */
+  content: none;
+  /* Remove any default separators */
 }
 
 /* Date Time Display Container */
@@ -692,33 +693,61 @@
 }
 
 /* Badges */
+/* =========================
+   STATUS BADGES – FINAL
+   ========================= */
+
 .badge {
-  padding: 4px 8px;
-  border-radius: 4px;
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
 }
 
+/* LIGHT MODE */
 .badge-success {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
+  background: #e6f7ee;
+  color: #0f7b4f;
 }
 
 .badge-warning {
-  background: rgba(241, 196, 15, 0.1);
-  color: #f1c40f;
+  background: #fff4cc;
+  color: #8a6d00;
 }
 
 .badge-danger {
-  background: rgba(231, 76, 60, 0.1);
-  color: var(--accent-color);
+  background: #fdecea;
+  color: #b42318;
 }
 
 .badge-secondary {
-  background: rgba(149, 165, 166, 0.1);
-  color: #95a5a6;
+  background: #f1f3f5;
+  color: #495057;
+}
+
+/* DARK MODE */
+body.dark-mode .badge-success {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ecc71;
+}
+
+body.dark-mode .badge-warning {
+  background: rgba(241, 196, 15, 0.22);
+  color: #f1c40f;
+}
+
+body.dark-mode .badge-danger {
+  background: rgba(231, 76, 60, 0.22);
+  color: #e74c3c;
+}
+
+body.dark-mode .badge-secondary {
+  background: #2a2a2a;
+  color: #f1f3f5;
 }
 
 .modal-footer {
@@ -727,6 +756,7 @@
   padding-top: 20px;
   border-top: 1px solid var(--border-color);
 }
+
 /* --------------------------------------------- */
 /* CLEAN VISUAL SEPARATION FOR FULL REPORT TABLE */
 /* --------------------------------------------- */
@@ -792,7 +822,8 @@
 
 /* Dark Mode Header Styling - Blue */
 .report-table thead {
-  background: #1e3a5f !important;     /* deep navy blue */
+  background: #1e3a5f !important;
+  /* deep navy blue */
 }
 
 .report-table thead th {
@@ -813,35 +844,35 @@
   .dashboard-card {
     padding: 16px;
   }
-  
+
   .filters-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .report-summary-stats {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .report-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .pagination-controls {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .page-numbers {
     flex-wrap: wrap;
     justify-content: center;
   }
-  
+
   .modal-content {
     width: 95%;
     padding: 16px;
   }
-  
+
   .details-table {
     display: block;
     overflow-x: auto;
@@ -852,16 +883,142 @@
   .report-summary-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .summary-stat-card {
     flex-direction: column;
     text-align: center;
     gap: 12px;
   }
-  
+
   .stat-icon {
     width: 40px;
     height: 40px;
     font-size: 1.2rem;
   }
 }
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-select {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-select {
+    display: block;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg);
+    cursor: pointer;
+  }
+
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .bottom-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50vh;
+    background: var(--card-bg);
+    border-radius: 18px 18px 0 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #aaa;
+    margin: 10px auto;
+    border-radius: 4px;
+  }
+
+  .sheet-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sheet-body {
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .sheet-option {
+    padding: 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sheet-date {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+.bottom-sheet {
+  z-index: 5000 !important;
+}
+
+.sheet-backdrop {
+  z-index: 4999 !important;
+}
+
+/* Mobile calendar inline fix */
+.mobile-calendar-inline {
+  width: 100%;
+}
+
+.mobile-calendar-inline .drp-calendar {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.mobile-calendar-inline .drp-buttons {
+  display: none;
+  /* we use our own Apply button */
+}
+
+/* =========================
+   DATE ICON – FINAL FIX
+   ========================= */
+
+/* Always visible */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+}
+
+/* LIGHT MODE → dark icon */
+body:not(.dark-mode) input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
+/* DARK MODE → white icon */
+body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Ensure status column text always visible */
+.details-table td:last-child,
+.report-table td:last-child {
+  color: var(--text-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+

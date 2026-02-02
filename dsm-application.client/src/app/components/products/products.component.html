@@ -10,7 +10,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- 🔍 SEARCH & FILTER SECTION -->
   <div class="filter-section">
     <div class="filter-row">
@@ -25,46 +25,65 @@
           </button>
         </div>
       </div>
- 
+
       <!-- Filters -->
       <div class="filters">
         <div class="filter-group">
           <label class="filter-label">
             <i class="fas fa-tag"></i> Category
           </label>
-          <select class="form-select" [(ngModel)]="categoryFilter" (change)="onCategoryChange(categoryFilter)">
+          <select class="form-select desktop-only" [(ngModel)]="categoryFilter"
+            (change)="onCategoryChange(categoryFilter)">
             <option value="">All Categories</option>
-            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+            <option *ngFor="let c of categories" [value]="c.category">{{ c.name }}</option>
           </select>
+
+          <div class="mobile-select mobile-only" (click)="openCategorySheet()">
+            <span>{{ categoryFilter || 'All Categories' }}</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+
         </div>
- 
+
         <div class="filter-group">
           <label class="filter-label">
             <i class="fas fa-box"></i> Stock Status
           </label>
-          <select class="form-select" [(ngModel)]="stockFilter" (change)="filterProducts()">
+          <select class="form-select desktop-only" [(ngModel)]="stockFilter" (change)="filterProducts()">
             <option value="">All Stock</option>
             <option value="inStock">In Stock</option>
             <option value="lowStock">Low Stock</option>
             <option value="outOfStock">Out of Stock</option>
           </select>
+
+          <!-- MOBILE -->
+          <div class="mobile-select mobile-only" (click)="openStockSheet()">
+            <span>{{ getStockFilterLabel(stockFilter) || 'All Stock' }}</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </div>
- 
+
         <div class="filter-group">
           <label class="filter-label">
             <i class="fas fa-sort"></i> Sort By
           </label>
-          <select class="form-select" [(ngModel)]="sortBy" (change)="applySort()">
+          <select class="form-select desktop-only" [(ngModel)]="sortBy" (change)="applySort()">
             <option value="name">Name (A-Z)</option>
             <option value="priceLow">Price: Low to High</option>
             <option value="priceHigh">Price: High to Low</option>
             <option value="stock">Stock: High to Low</option>
             <option value="newest">Newest First</option>
           </select>
+
+          <!-- MOBILE -->
+          <div class="mobile-select mobile-only" (click)="openSortSheet()">
+            <span>{{ getSortLabel(sortBy) }}</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
         </div>
       </div>
     </div>
- 
+
     <!-- Active Filters Display -->
     <div class="active-filters" *ngIf="hasActiveFilters()">
       <div class="active-filters-title">
@@ -89,7 +108,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- 📊 PRODUCT STATS -->
   <div class="stats-grid" *ngIf="filteredProducts.length > 0">
     <div class="stat-card">
@@ -113,7 +132,7 @@
       <div class="stat-label">Total Value</div>
     </div>
   </div>
- 
+
   <!-- 🧾 PRODUCT GRID -->
   <div class="products-grid-container">
     <!-- Empty State -->
@@ -132,7 +151,7 @@
         <i class="fas fa-plus"></i> Add New Product
       </button>
     </div>
- 
+
     <!-- Product Cards -->
     <div *ngIf="filteredProducts.length > 0" class="products-grid">
       <div class="product-card" *ngFor="let product of filteredProducts">
@@ -151,38 +170,38 @@
               <i class="fas fa-images"></i> {{ product.imageUrls.length }} images
             </div>
           </div>
- 
+
           <!-- Single Image -->
           <div *ngIf="product.imageUrls && product.imageUrls.length === 1" class="single-image">
             <img [src]="getFullImageUrl(product.imageUrls[0])" [alt]="product.productName" class="product-img">
           </div>
- 
+
           <!-- No Image Placeholder -->
           <div *ngIf="!product.imageUrls || product.imageUrls.length === 0" class="no-image">
             <i class="fas fa-box"></i>
             <span>No Image</span>
           </div>
- 
+
           <!-- Stock Badge -->
           <div class="stock-badge" [class]="getStockStatus(product.currentStock).class">
             {{ getStockStatus(product.currentStock).text }}
           </div>
         </div>
- 
+
         <!-- Product Info -->
         <div class="product-info">
           <div class="product-header">
             <h5 class="product-title">{{ product.productName }}</h5>
             <div class="product-code">{{ product.productCode }}</div>
           </div>
- 
+
           <!-- Price -->
           <div class="product-price">
             <span class="price-currency">₹</span>
             <span class="price-amount">{{ product.price }}</span>
             <span class="price-unit">/{{ product.measure }}</span>
           </div>
- 
+
           <!-- Product Details -->
           <div class="product-details">
             <!-- <div class="detail-item">
@@ -202,7 +221,7 @@
               <span>{{ product.brand }}</span>
             </div>
           </div>
- 
+
           <!-- Stock Progress -->
           <div class="stock-progress-section" *ngIf="product.currentStock > 0">
             <div class="stock-info">
@@ -215,7 +234,7 @@
             </div>
           </div>
         </div>
- 
+
         <!-- Actions -->
         <div class="product-actions">
           <button class="btn btn-outline-primary btn-sm" (click)="editProduct(product)">
@@ -224,13 +243,14 @@
           <button class="btn btn-outline-danger btn-sm" (click)="deleteProduct(product.productId!)">
             <i class="fas fa-trash"></i> Delete
           </button>
-          <button class="btn btn-outline-success btn-sm" (click)="increaseStock(product.productId!)">
+          <button class="btn btn-outline-success btn-sm" (click)="openStockModal(product.productId!)">
             <i class="fas fa-plus"></i> Add Stock
           </button>
+
         </div>
       </div>
     </div>
- 
+
     <!-- Pagination -->
     <div class="pagination" *ngIf="filteredProducts.length > 12">
       <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
@@ -247,7 +267,7 @@
       </button>
     </div>
   </div>
- 
+
   <!-- 🪟 PRODUCT MODAL -->
   <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
@@ -260,7 +280,7 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
- 
+
       <div class="modal-body">
         <form [formGroup]="productForm">
           <div class="form-grid">
@@ -273,7 +293,7 @@
                 Product name is required
               </div>
             </div>
- 
+
             <div class="form-group">
               <label class="form-label">Product Code *</label>
               <input type="text" class="form-control" formControlName="productCode"
@@ -282,7 +302,7 @@
                 Product Code is required
               </div>
             </div>
- 
+
             <!-- Row 2: Color & Price -->
             <div class="form-group">
               <label class="form-label">Color *</label>
@@ -292,7 +312,7 @@
                 Color is required
               </div>
             </div>
- 
+
             <div class="form-group">
               <label class="form-label">Price (₹) *</label>
               <input type="number" step="0.01" class="form-control" formControlName="price"
@@ -301,7 +321,7 @@
                 Price is required and must be valid
               </div>
             </div>
- 
+
             <!-- Row 3: Cost Price & Stock -->
             <div class="form-group">
               <label class="form-label">Cost Price (₹) *</label>
@@ -311,23 +331,21 @@
                 Cost Price is required
               </div>
             </div>
- 
+
             <div class="form-group">
               <label class="form-label">Initial Stock</label>
               <input type="number" class="form-control" formControlName="stock" min="0" step="1" [disabled]="isEdit"
-          [class.is-invalid]="formSubmitted && productForm.get('stock')?.invalid"
-        />
+                [class.is-invalid]="formSubmitted && productForm.get('stock')?.invalid" />
 
-        <div class="invalid-feedback"
-        *ngIf="formSubmitted && productForm.get('stock')?.hasError('min')">
-        Initial stock cannot be negative
-      </div>
+              <div class="invalid-feedback" *ngIf="formSubmitted && productForm.get('stock')?.hasError('min')">
+                Initial stock cannot be negative
+              </div>
 
               <small class="form-text">
                 {{ isEdit ? 'Use "Add Stock" to update quantity' : 'Initial stock quantity' }}
               </small>
             </div>
- 
+
             <!-- Row 4: Main Category & Subcategory -->
             <div class="form-group">
               <label class="form-label">Main Category *</label>
@@ -342,7 +360,7 @@
                 Main category is required
               </div>
             </div>
- 
+
             <div class="form-group">
               <label class="form-label">Subcategory *</label>
               <select class="form-select" formControlName="category" (change)="onSubCategoryChange($event)"
@@ -361,7 +379,7 @@
               <label class="form-label">GST (%)</label>
               <input type="number" step="0.01" class="form-control" formControlName="gst" readonly>
             </div>
- 
+
             <!-- Row 5: Brand & Measure -->
             <div class="form-group">
               <label class="form-label">Brand *</label>
@@ -371,7 +389,7 @@
                 Brand is required
               </div>
             </div>
- 
+
             <div class="form-group">
               <label class="form-label">Measure *</label>
               <select class="form-select" formControlName="measure"
@@ -383,7 +401,7 @@
                 Measure is required
               </div>
             </div>
- 
+
             <!-- Row 6: Discount & GST -->
             <div class="form-group">
               <label class="form-label">Discount (%)</label>
@@ -408,7 +426,7 @@
                   </div>
                 </div>
               </div>
- 
+
               <!-- Existing Images -->
               <!-- <div *ngIf="selectedProduct?.imageUrls?.length && isEdit" class="existing-images">
                 <div class="existing-title">Existing Images:</div>
@@ -422,7 +440,7 @@
                 </div>
               </div> -->
             </div>
- 
+
             <!-- Description -->
             <div class="form-group full-width">
               <label class="form-label">Description</label>
@@ -435,7 +453,7 @@
           </div>
         </form>
       </div>
- 
+
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeModal()">
           Cancel
@@ -447,4 +465,65 @@
       </div>
     </div>
   </div>
+
+  <!-- ADD STOCK MODAL / SHEET -->
+  <!-- ADD STOCK MODAL (CENTER ALWAYS) -->
+  <div class="stock-overlay" *ngIf="showStockModal" (click)="closeStockModal()">
+
+    <div class="stock-modal" (click)="$event.stopPropagation()">
+      <h4>Add Stock</h4>
+
+      <input type="number" class="form-control" placeholder="Enter quantity" [(ngModel)]="stockQty" min="1" />
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeStockModal()">
+          Cancel
+        </button>
+        <button class="btn btn-primary" (click)="confirmAddStock()">
+          Add
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sheet-overlay" *ngIf="showCategorySheet" (click)="closeCategorySheet()">
+
+    <div class="sheet" (click)="$event.stopPropagation()">
+      <h4>Select Category</h4>
+
+      <div class="sheet-option" (click)="selectCategory('')">
+        All Categories
+      </div>
+
+      <div class="sheet-option" *ngFor="let c of categories" (click)="selectCategory(c.category)">
+        {{ c. name }}
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" *ngIf="showStockSheet" (click)="closeStockSheet()">
+    <div class="sheet" (click)="$event.stopPropagation()">
+      <h4>Select Stock Status</h4>
+
+      <div class="sheet-option" (click)="selectStock('')">All Stock</div>
+      <div class="sheet-option" (click)="selectStock('inStock')">In Stock</div>
+      <div class="sheet-option" (click)="selectStock('lowStock')">Low Stock</div>
+      <div class="sheet-option" (click)="selectStock('outOfStock')">Out of Stock</div>
+    </div>
+  </div>
+
+  <div class="sheet-overlay" *ngIf="showSortSheet" (click)="closeSortSheet()">
+    <div class="sheet" (click)="$event.stopPropagation()">
+      <h4>Sort By</h4>
+
+      <div class="sheet-option" (click)="selectSort('name')">Name (A–Z)</div>
+      <div class="sheet-option" (click)="selectSort('priceLow')">Price: Low to High</div>
+      <div class="sheet-option" (click)="selectSort('priceHigh')">Price: High to Low</div>
+      <div class="sheet-option" (click)="selectSort('stock')">Stock: High to Low</div>
+      <div class="sheet-option" (click)="selectSort('newest')">Newest First</div>
+    </div>
+  </div>
+
+
 </div>

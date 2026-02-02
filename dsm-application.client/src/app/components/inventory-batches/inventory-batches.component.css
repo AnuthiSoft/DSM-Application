@@ -203,3 +203,55 @@ html[data-theme="dark"] .date-input:focus {
     padding: 4px 6px;
   }
 }
+
+/* ===============================
+   TABLET RESPONSIVE (769px–1024px)
+   =============================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .table {
+    table-layout: fixed;     /* 🔥 KEY FIX */
+    width: 100%;
+  }
+
+  .table th,
+  .table td {
+    white-space: normal;     /* allow wrapping */
+    word-break: break-word;
+  }
+
+  /* Reduce column pressure */
+  .date-input {
+    max-width: 120px;
+  }
+
+  .status-badge {
+    min-width: 80px;
+    font-size: 0.7rem;
+  }
+
+  .quantity-badge {
+    min-width: 36px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ===============================
+   MOBILE RESPONSIVE (≤768px)
+   =============================== */
+@media (max-width: 768px) {
+
+  .table {
+    min-width: 900px;     /* 🔥 forces scroll */
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table th,
+  .table td {
+    white-space: nowrap;
+  }
+}

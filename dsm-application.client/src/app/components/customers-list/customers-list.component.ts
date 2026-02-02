@@ -43,7 +43,8 @@ export class CustomersListComponent implements OnInit {
   otpCode = '';
   generatedOtp = '';
   formSubmitted = false;
-
+  showStatusSheet = false;
+  isSidebarOpen = false;
 
   constructor(
     private customerService: CustomerService,
@@ -59,34 +60,34 @@ export class CustomersListComponent implements OnInit {
   loadEmployees() {
     const distId = localStorage.getItem('distributorId')!;
 
-  this.customerService.getEmployees(distId).subscribe((res: any[]) => {
-    this.employees = res
-      .filter(e => e.isActive)                           // only active
-      .filter(e => e.designation === "Delivery Boy");    // only delivery boys
-  });
-}
-
-reportFraudAgainstDistributor() {
-  const distributorId = localStorage.getItem('distributorId');
-
-  if (!distributorId) {
-    alert('Distributor not found');
-    return;
+    this.customerService.getEmployees(distId).subscribe((res: any[]) => {
+      this.employees = res
+        .filter(e => e.isActive)                           // only active
+        .filter(e => e.designation === "Delivery Boy");    // only delivery boys
+    });
   }
 
-  // 🔴 Customer → Distributor
-  this.router.navigate([
-    '/report-fraud',
-    'DISTRIBUTOR',
-    distributorId
-  ]);
-}
+  reportFraudAgainstDistributor() {
+    const distributorId = localStorage.getItem('distributorId');
 
-openAssignModal(customerId: string) {
-  this.selectedCustomerId = customerId;
-  this.selectedEmployeeId = '';
-  this.showAssignModal = true;
-}
+    if (!distributorId) {
+      alert('Distributor not found');
+      return;
+    }
+
+    // 🔴 Customer → Distributor
+    this.router.navigate([
+      '/report-fraud',
+      'DISTRIBUTOR',
+      distributorId
+    ]);
+  }
+
+  openAssignModal(customerId: string) {
+    this.selectedCustomerId = customerId;
+    this.selectedEmployeeId = '';
+    this.showAssignModal = true;
+  }
 
   closeAssignModal() {
     this.showAssignModal = false;
@@ -103,6 +104,7 @@ openAssignModal(customerId: string) {
     this.phoneError = '';
 
     this.showModal = false;
+    document.body.classList.remove('modal-open');
   }
 
 
@@ -171,6 +173,7 @@ openAssignModal(customerId: string) {
     };
 
     this.showModal = true;
+    document.body.classList.add('modal-open');
   }
 
   editCustomer(c: Customer) {
@@ -245,29 +248,29 @@ openAssignModal(customerId: string) {
   /* ----------------------------- DELETE ------------------------------ */
 
   deleteCustomer(customerId: string) {
-  const toast = this.toastr.warning(
-    'Click YES to delete this customer',
-    'Confirm Delete',
-    {
-      timeOut: 0,
-      extendedTimeOut: 0,
-      closeButton: true,
-      tapToDismiss: false
-    }
-  );
-
-  toast.onTap.subscribe(() => {
-    this.customerService.deleteCustomer(customerId).subscribe({
-      next: (res: any) => {
-        this.toastr.success('Customer deleted successfully');
-        this.loadAllCustomers();
-      },
-      error: () => {
-        this.toastr.error('Failed to delete customer');
+    const toast = this.toastr.warning(
+      'Click YES to delete this customer',
+      'Confirm Delete',
+      {
+        timeOut: 0,
+        extendedTimeOut: 0,
+        closeButton: true,
+        tapToDismiss: false
       }
+    );
+
+    toast.onTap.subscribe(() => {
+      this.customerService.deleteCustomer(customerId).subscribe({
+        next: (res: any) => {
+          this.toastr.success('Customer deleted successfully');
+          this.loadAllCustomers();
+        },
+        error: () => {
+          this.toastr.error('Failed to delete customer');
+        }
+      });
     });
-  });
-}
+  }
 
   loadAllCustomers() {
     this.customerService.getAllCustomersForDistributor()
@@ -316,7 +319,7 @@ openAssignModal(customerId: string) {
     this.otpVerified = false;
     this.otpCode = '';
 
-     alert(`OTP sent! Your OTP is: ${this.generatedOtp}`);
+    alert(`OTP sent! Your OTP is: ${this.generatedOtp}`);
 
     // 🔥 Replace later with SMS API
   }
@@ -330,6 +333,34 @@ openAssignModal(customerId: string) {
       this.toastr.error('Invalid OTP');
 
     }
+  }
+
+  openStatusSheet() {
+    if (window.innerWidth < 992) {
+      this.showStatusSheet = true;
+      document.body.classList.add('modal-open');
+    }
+  }
+
+  closeStatusSheet() {
+    this.showStatusSheet = false;
+    document.body.classList.remove('modal-open');
+  }
+
+  selectStatus(value: string) {
+    this.statusFilter = value;
+    this.applyFilters();
+    this.closeStatusSheet();
+  }
+
+  openSidebar() {
+    this.isSidebarOpen = true;
+    document.body.classList.add('sidebar-open');
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
+    document.body.classList.remove('sidebar-open');
   }
 
 }

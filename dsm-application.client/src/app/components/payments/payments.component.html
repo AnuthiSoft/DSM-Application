@@ -16,19 +16,17 @@
 
   <!-- Main Payments Container -->
   <div class="payments-dashboard">
-    
+
     <!-- Left Side Navigation (Same style as dashboard sidebar) -->
     <div class="payments-sidebar">
       <div class="sidebar-card">
         <div class="sidebar-header">
           <h3><i class="fas fa-bars"></i> Payments Navigation</h3>
         </div>
-        
+
         <div class="sidebar-nav">
           <!-- Reports Navigation -->
-          <div class="nav-item" 
-               [class.active]="activeSection === 'reports'"
-               (click)="switch('reports')">
+          <div class="nav-item" [class.active]="activeSection === 'reports'" (click)="switch('reports')">
             <div class="nav-icon">
               <i class="fas fa-chart-bar"></i>
             </div>
@@ -42,9 +40,7 @@
           </div>
 
           <!-- Handovers Navigation -->
-          <div class="nav-item" 
-               [class.active]="activeSection === 'handovers'"
-               (click)="switch('handovers')">
+          <div class="nav-item" [class.active]="activeSection === 'handovers'" (click)="switch('handovers')">
             <div class="nav-icon">
               <i class="fas fa-exchange-alt"></i>
             </div>
@@ -58,9 +54,7 @@
           </div>
 
           <!-- Customers Navigation -->
-          <div class="nav-item" 
-               [class.active]="activeSection === 'customers'"
-               (click)="switch('customers')">
+          <div class="nav-item" [class.active]="activeSection === 'customers'" (click)="switch('customers')">
             <div class="nav-icon">
               <i class="fas fa-user-friends"></i>
             </div>
@@ -118,14 +112,14 @@
 
     <!-- Main Content Area -->
     <div class="payments-main">
-      
+
       <!-- Content Header -->
       <div class="content-header">
         <div class="content-title">
           <h3><i [class]="getActiveIcon()"></i> {{getActiveTitle()}}</h3>
           <div class="content-subtitle">{{getActiveSubtitle()}}</div>
         </div>
-        
+
         <div class="content-tools">
           <button class="tool-btn" (click)="refreshContent()" [disabled]="loading" title="Refresh">
             <i class="fas fa-sync-alt" [class.spin]="loading"></i>
@@ -140,7 +134,7 @@
 
       <!-- Content Body -->
       <div class="content-body">
-        
+
         <!-- Loading State -->
         <div *ngIf="loading" class="loading-state">
           <div class="spinner"></div>
@@ -184,5 +178,29 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ===== Mobile / Tablet Bottom Sheet ===== -->
+<div class="mobile-sheet-backdrop" *ngIf="isMobileSheetOpen" (click)="closeSheet()">
+</div>
+
+<div class="mobile-bottom-sheet" [class.open]="isMobileSheetOpen">
+
+  <div class="sheet-handle"></div>
+
+  <div class="sheet-header">
+    <h4>
+      <i [class]="getActiveIcon()"></i>
+      {{ getActiveTitle() }}
+    </h4>
+
+    <button class="sheet-close" (click)="closeSheet()">✕</button>
+  </div>
+
+  <div class="sheet-body">
+    <app-payment-report *ngIf="activeSection === 'reports'"></app-payment-report>
+    <app-pending-handovers *ngIf="activeSection === 'handovers'"></app-pending-handovers>
+    <app-customer-payment-status *ngIf="activeSection === 'customers'"></app-customer-payment-status>
   </div>
 </div>

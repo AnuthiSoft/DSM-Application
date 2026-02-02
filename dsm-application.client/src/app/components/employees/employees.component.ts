@@ -26,6 +26,10 @@ export class EmployeesComponent {
   selectedFile: File | null = null;
   selectedFileName: string = '';   // ✅ ADD THIS
   showUploadModal = false;
+  sheetOpen = false;
+  sheetType: 'designation' | 'status' | '' = '';
+  sheetTitle = '';
+  currentUserRole: string = '';
 
   // selectedEmployee: any = null;
   // selectedFile: File | null = null;
@@ -48,8 +52,6 @@ export class EmployeesComponent {
   otpCode = '';
   phoneVerifiedUI = false;
   apiUrl = environment.apiUrl;
-  showDeleteConfirm = false;
-  employeeToDelete: Employee | null = null;
 
   // isEdit = false;
   constructor(
@@ -65,6 +67,7 @@ export class EmployeesComponent {
   ngOnInit(): void {
     this.distributorId = this.auth.getDistributorId();
     this.employeeId = this.auth.getEmployeeId();
+    this.currentUserRole = localStorage.getItem('role') || '';
 
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
@@ -81,8 +84,6 @@ export class EmployeesComponent {
       isActive: [true] // ensures value exists
     });
 
-    this.showModal = false;
-    this.showUploadModal = false;
     this.loadEmployees();
   }
 
@@ -312,59 +313,27 @@ export class EmployeesComponent {
   // }
 
 
-  // deleteEmployee(emp: Employee) {
-  //   if (!confirm(`Delete ${emp.name}?`)) return;
+  deleteEmployee(emp: Employee) {
+    if (!confirm(`Delete ${emp.name}?`)) return;
 
-  //   this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
-  //     next: () => {
-  //       this.toastr.success("Employee deleted successfully", "Success");
-  //       this.loadEmployees();
-  //     },
-  //     error: (err) => {
-  //       // ✔ If backend returned text instead of JSON, treat 200 as success
-  //       if (err.status === 200) {
-  //         this.toastr.success("Employee deleted successfully", "Success");
-  //         this.loadEmployees();
-  //       } else {
-  //         this.toastr.error("Failed to delete employee", "Error");
-  //       }
-  //     }
-  //   });
-  // }
-
-
-  openDeleteConfirm(emp: Employee) {
-  this.employeeToDelete = emp;
-  this.showDeleteConfirm = true;
-}
-
-cancelDelete() {
-  this.showDeleteConfirm = false;
-  this.employeeToDelete = null;
-}
-
-confirmDelete() {
-  if (!this.employeeToDelete) return;
-
-  this.employeeService
-    .deleteEmployee(this.distributorId, this.employeeToDelete.employeeId!)
-    .subscribe({
+    this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
       next: () => {
         this.toastr.success("Employee deleted successfully", "Success");
         this.loadEmployees();
-        this.cancelDelete();
       },
       error: (err) => {
+        // ✔ If backend returned text instead of JSON, treat 200 as success
         if (err.status === 200) {
           this.toastr.success("Employee deleted successfully", "Success");
           this.loadEmployees();
-          this.cancelDelete();
         } else {
           this.toastr.error("Failed to delete employee", "Error");
         }
       }
     });
-}
+  }
+
+
 
 
   // ✅ Toggle active/inactive
@@ -424,10 +393,12 @@ confirmDelete() {
     });
 
     this.showModal = true;
+    document.body.classList.add('modal-open');
   }
 
   closeEmployeeModal(): void {
     this.showModal = false;
+    document.body.classList.remove('modal-open');
   }
 
   openUploadModal(emp: any) {
@@ -542,5 +513,33 @@ confirmDelete() {
     window.open(url, '_blank');
   }
 
-}
+  openSheet(type: 'designation' | 'status') {
+    this.sheetType = type;
+    this.sheetTitle = type === 'designation' ? 'Select Designation' : 'Select Status';
+    this.sheetOpen = true;
+  }
 
+  closeSheet() {
+    this.sheetOpen = false;
+  }
+
+  setDesignation(value: string) {
+    this.roleFilter = value;
+    this.applyFilters();
+    this.closeSheet();
+  }
+
+  setStatus(value: string) {
+    this.statusFilter = value;
+    this.applyFilters();
+    this.closeSheet();
+  }
+
+  isDistributor(): boolean {
+    return this.currentUserRole === 'Distributor';
+  }
+
+  isDeliveryBoyUser(): boolean {
+    return this.currentUserRole === 'Delivery Boy';
+  }
+}

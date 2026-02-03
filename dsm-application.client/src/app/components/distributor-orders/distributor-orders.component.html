@@ -307,6 +307,32 @@
 
         </select>
       </div>
+  
+
+
+<!-- ✅ AVAILABLE EMPLOYEES DROPDOWN -->
+<div class="availability-box mt-3">
+  <h5 class="fw-bold">Available Employees</h5>
+
+  <select
+    class="form-select"
+    *ngIf="availableEmployees.length > 0"
+    [(ngModel)]="selectedEmployeeId">
+
+    <option value="">-- Select Available Employee --</option>
+
+    <option
+      *ngFor="let e of availableEmployees"
+      [value]="e.employeeId">
+      {{ e.name }}
+    </option>
+
+  </select>
+
+  <p *ngIf="availableEmployees.length === 0" class="text-muted">
+    No available employees today
+  </p>
+</div>
 
       <div class="modal-footer">
         <button class="btn btn-outline-secondary" (click)="closeAssignModal()">

@@ -31,8 +31,12 @@ export class DistributorOrdersComponent implements OnInit {
   tempEmployeeId = '';
   showTempDropdown = false; showProductPopup = false;
   selectedOrder: any = null;
+  availableEmployees: any[] = [];
+  
+selectedEmployeeId: string = '';
 
-  confirmingOrder = false;
+ 
+ confirmingOrder = false;
   // For assignment modal
   // selectedOrder: DistributorOrder | null = null;
   employeeId = '';
@@ -250,6 +254,12 @@ export class DistributorOrdersComponent implements OnInit {
   // ✅ Fixed: accepts full order object
   openAssignModal(order: DistributorOrder) {
     this.selectedOrder = order;
+      this.showAssignModal = true;
+
+      // reset state ✅ (from THEIRS)
+      this.availableEmployees = [];
+      this.selectedEmployeeId = '';
+      this.showTempDropdown = false;
 
     // LOAD employees for dropdown
     this.filteredEmployees = this.employees;
@@ -263,26 +273,60 @@ export class DistributorOrdersComponent implements OnInit {
       // Save availability in object for UI
       this.employeeAvailability[order.customerId] = status;
 
-      // Decide active employee
-      this.activeEmployeeId =
-        status.temporaryEmployeeId ||
-        status.permanentEmployeeId ||
-        '';
+      // 2️⃣ Show active employee (ONLY if assigned)
+    if (status.temporaryEmployeeId) {
+  const tempEmp = this.employees.find(
+    e => e.employeeId === status.temporaryEmployeeId
+  );
+  this.activeEmployeeName = tempEmp?.name || 'Temporary employee assigned';
 
-      const emp = this.employees.find(e => e.employeeId === this.activeEmployeeId);
-      this.activeEmployeeName = emp ? emp.name : "No employee assigned";
+  // ✅ ADD THIS
+  this.selectedEmployeeId = status.temporaryEmployeeId;
+}
+else if (status.permanentEmployeeId) {
+  const permEmp = this.employees.find(
+    e => e.employeeId === status.permanentEmployeeId
+  );
+  this.activeEmployeeName = permEmp?.name || 'Permanent employee assigned';
 
-      // Show temp dropdown ONLY if permanent employee exists AND NOT AVAILABLE
+  // ✅ ADD THIS
+  this.selectedEmployeeId = status.permanentEmployeeId;
+}
+
+
+      // 3️⃣ Load AVAILABLE employees for today
+     this.employeeService
+  .getAvailableEmployeesToday(this.distributorId)
+  .subscribe(list => {
+
+    this.availableEmployees = list;
+
+    // ✅ ADD THIS BLOCK
+    if (
+      this.selectedEmployeeId &&
+      !this.availableEmployees.some(e => e.employeeId === this.selectedEmployeeId)
+    ) {
+      const assignedEmp = this.employees.find(
+        e => e.employeeId === this.selectedEmployeeId
+      );
+      if (assignedEmp) {
+        this.availableEmployees.unshift(assignedEmp);
+      }
+    }
+
+    this.cd.detectChanges();
+  });
+
+      // 4️⃣ Show temp dropdown ONLY when permanent exists but NOT available
       this.showTempDropdown =
         !!status.permanentEmployeeId &&
         status.permanentEmployeeAvailable === false;
 
+      this.cd.detectChanges();
     });
-    this.showAssignModal = true;   // 🔥 show assign modal
-    this.filteredEmployees = this.employees.filter(e => e.isActive);
-    this.cd.detectChanges();
-  }
+}
 
+ 
   closeAssignModal() {
     this.showAssignModal = false;
     this.selectedOrder = null;
@@ -314,6 +358,8 @@ export class DistributorOrdersComponent implements OnInit {
   //   }
 
   assignAndShip() {
+    
+
     if (!this.selectedOrder) return;
 
     const customerId = this.selectedOrder.customerId;
@@ -361,11 +407,16 @@ export class DistributorOrdersComponent implements OnInit {
 
       return;
     }
-    if (!this.selectedOrder || !this.employeeId) {
-      this.toastr.warning('Please select an employee before assigning.');
-      return;
-    }
+    
 
+    // ⭐ CASE 3: Manual assignment from Available Employees dropdown
+if (this.selectedEmployeeId) {
+  this.finalOrderAssign(this.selectedEmployeeId);
+  return;
+}
+
+    
+ 
     alert("Temporary employee not selected");
   }
 
@@ -467,8 +518,7 @@ export class DistributorOrdersComponent implements OnInit {
         }
       });
   }
-  selectedEmployeeId = '';
-
+ 
   savePermanentEmployee() {
     if (!this.selectedOrder || !this.selectedEmployeeId) {
       alert("Select an employee");

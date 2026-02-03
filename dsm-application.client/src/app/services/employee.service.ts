@@ -115,7 +115,12 @@ deleteEmployee(distributorId: string, employeeId: string): Observable<any> {
 
 
 // }
-  
+  getAvailableEmployeesToday(distributorId: string) {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/employees/available-today/${distributorId}`
+  );
+}
+
 getMyProfile(): Observable<any> {
   const token = localStorage.getItem("token");
 

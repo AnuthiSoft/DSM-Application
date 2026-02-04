@@ -206,31 +206,36 @@
 
       <!-- Stats Grid -->
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-          <div class="stat-value">4</div>
-          <div class="stat-label">Reading Orders</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-truck"></i></div>
-          <div class="stat-value">3</div>
-          <div class="stat-label">Orders To Deliver</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-undo-alt"></i></div>
-          <div class="stat-value">6</div>
-          <div class="stat-label">Product Returns</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-store"></i></div>
-          <div class="stat-value">{{ retailerCount }}</div>
-          <div class="stat-label">No Of Retailers</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
-          <div class="stat-value">$1,374,500</div>
-          <div class="stat-label">Monthly Income</div>
-        </div>
+        <div class="stat-card" (click)="openOrdersWithStatus('Pending')">
+  <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+  <div class="stat-value">4</div>
+  <div class="stat-label">Pending Orders</div>
+</div>
+
+<div class="stat-card" (click)="openOrdersWithStatus('Shipped')">
+  <div class="stat-icon"><i class="fas fa-truck"></i></div>
+  <div class="stat-value">3</div>
+  <div class="stat-label">Orders To Deliver</div>
+</div>
+
+<div class="stat-card" (click)="setActiveTab('return-requests')">
+  <div class="stat-icon"><i class="fas fa-undo-alt"></i></div>
+  <div class="stat-value">6</div>
+  <div class="stat-label">Returned Products</div>
+</div>
+
+<div class="stat-card" (click)="setActiveTab('retailer-list')">
+  <div class="stat-icon"><i class="fas fa-store"></i></div>
+  <div class="stat-value">{{ retailerCount }}</div>
+  <div class="stat-label">No Of Retailers</div>
+</div>
+
+<div class="stat-card" (click)="setActiveTab('monthly-income')">
+  <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+  <div class="stat-value">$1,374,500</div>
+  <div class="stat-label">Monthly Revenue</div>
+</div>
+
       </div>
 
       <!-- Charts Section -->
@@ -298,7 +303,11 @@
     <app-invoice-detail *ngIf="isActive('invoice-detail')"></app-invoice-detail>
 
     <!-- Orders -->
-    <app-distributor-orders *ngIf="isActive('order-list')"></app-distributor-orders>
+    <app-distributor-orders
+  *ngIf="isActive('order-list')"
+  [presetStatus]="orderStatusFromDashboard">
+</app-distributor-orders>
+
     <app-distributor-connection-requests *ngIf="isActive('connection-requests')"></app-distributor-connection-requests>
     <!-- return request -->
     <app-distributor-return-requests *ngIf="isActive('return-requests')">

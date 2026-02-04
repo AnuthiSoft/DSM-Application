@@ -7,11 +7,15 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import Swal from 'sweetalert2';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
+import { AppModule } from '../../app.module';
 
 @Component({
   selector: 'app-distributor-dashboard',
-  templateUrl: './distributor-dashboard.component.html',
+templateUrl: './distributor-dashboard.component.html',
   styleUrl: './distributor-dashboard.component.css'
 })
 export class DistributorDashboardComponent implements OnInit {
@@ -23,6 +27,7 @@ export class DistributorDashboardComponent implements OnInit {
   leadTime: number = 1;
   selectedQrFile: File | null = null;
   scannerQrUrl: string | null = null;
+orderStatusFromDashboard: string | null = null;
 
   constructor(
 
@@ -62,8 +67,6 @@ export class DistributorDashboardComponent implements OnInit {
     settings: false
   };
 
-
-
   // toggleSubmenu(menu: string) {
   //   this.submenuState[menu] = !this.submenuState[menu];
   // }
@@ -96,8 +99,11 @@ export class DistributorDashboardComponent implements OnInit {
     // Check screen width on init
     this.checkScreenWidth();
   }
-  @HostListener('window:resize', ['$event'])
-
+  
+openOrdersWithStatus(status: string) {
+  this.orderStatusFromDashboard = status;
+  this.setActiveTab('order-list');
+}
 
   checkScreenWidth() {
     if (window.innerWidth <= 768) {

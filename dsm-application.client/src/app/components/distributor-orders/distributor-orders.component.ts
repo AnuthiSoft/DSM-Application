@@ -6,13 +6,17 @@ import { DistributorService } from '../../services/distributor.service';
 import { ToastrService } from 'ngx-toastr';
 import { ProductService } from '../../services/product.service';
 import { environment } from '../../../environments/environment';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-distributor-orders',
-  templateUrl: './distributor-orders.component.html',
+ templateUrl: './distributor-orders.component.html',
   styleUrl: './distributor-orders.component.css'
 })
-export class DistributorOrdersComponent implements OnInit {
+export class DistributorOrdersComponent implements OnInit, OnChanges {
+
   distributorId = localStorage.getItem('distributorId') || '';
   empId = localStorage.getItem('employeeId') || '';
   apiBaseUrl = environment.apiUrl.replace('/api', '');
@@ -34,6 +38,7 @@ export class DistributorOrdersComponent implements OnInit {
   availableEmployees: any[] = [];
   
 selectedEmployeeId: string = '';
+@Input() presetStatus: string | null = null;
 
  
  confirmingOrder = false;
@@ -68,6 +73,14 @@ selectedEmployeeId: string = '';
     this.loadOrders();
     this.loadEmployees();
   }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+  if (changes['presetStatus'] && this.presetStatus) {
+    this.statusFilter = this.presetStatus;
+    this.loadOrders();
+  }
+}
 
   loadOrders(): void {
     if (!this.distributorId) return;

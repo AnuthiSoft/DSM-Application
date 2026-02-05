@@ -174,7 +174,7 @@ showCustomerPopup = false;
 
 
 
-    this.distributorId = localStorage.getItem('distributorId') ?? '';
+   
     if (this.distributorId) {
       this.computeExpectedDateForDistributor(this.distributorId);
     }
@@ -586,21 +586,30 @@ connectDistributorFromCart(distributorId: string) {
   //  LOAD PRODUCTS
   // ---------------------------------------------------
   loadProducts(): void {
-    if (!this.distributorId) return;
-    this.loading = true;
-
-    this.productService.getProductsByDistributor(this.distributorId).subscribe({
-      next: (data: Product[]) => {
-        this.products = data;
-        this.filterProducts = data;
-        this.extractCategories();
-        this.loading = false;
-
-        // ⭐ RESTORE HERE (not in ngOnInit)
-        this.restoreProductTable();
-      }
-    });
+  if (!this.distributorId) {
+    this.loading = false;
+    return;
   }
+
+  this.loading = true;
+
+  this.productService.getProductsByDistributor(this.distributorId).subscribe({
+    next: (data: Product[]) => {
+      this.products = data || [];
+      this.filterProducts = this.products;
+      this.extractCategories();
+      this.loading = false;
+
+      // ✅ restore cart AFTER products load
+      this.restoreProductTable();
+    },
+    error: () => {
+      this.loading = false;
+      this.toastr.error('Failed to load products');
+    }
+  });
+}
+
 
   extractCategories() {
     this.categories = Array.from(

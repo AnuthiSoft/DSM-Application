@@ -12,6 +12,7 @@ namespace DSM_Application.Server.Models
         public string HandoverId { get; set; } = Guid.NewGuid().ToString();
 
         public string CashierId { get; set; }
+
         public string DistributorId { get; set; }
 
         public List<string> ReceiptIds { get; set; }   // ⭐ CUSTOMER RECEIPTS
@@ -27,5 +28,9 @@ namespace DSM_Application.Server.Models
         public string Status { get; set; } = "Pending";   // Pending / Accepted / Rejected
         public string? Notes { get; set; }
         public DateTime? ReviewedOn { get; set; }
+        public bool IsRehandover { get; set; }
+        public string? RehandoverNote { get; set; }
+        public string? PreviousRejectReason { get; set; }
+
     }
 }

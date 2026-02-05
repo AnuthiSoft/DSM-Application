@@ -249,22 +249,16 @@ body {
   width: calc(100% - 70px);
 }
 
-.floating-cart {
-  position: fixed;
-  top: 20px;          /* 🔥 move to top */
-  right: 30px;        /* keep right */
-  width: 60px;
-  height: 60px;
-  background: var(--primary-color);
-  color: white;
+/* Cart inside top bar */
+.top-cart {
+  position: relative;
+  top: unset;
+  right: unset;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 2000;      /* 🔥 above sidebar + content */
+  font-size: 1.2rem;
+  box-shadow: none;
 }
 
 
@@ -409,6 +403,47 @@ body {
   color: var(--text-color);
   opacity: 0.7;
 }
+/* ============================= */
+/* 🔝 FIXED TOP DASHBOARD BAR */
+/* ============================= */
+
+.top-dashboard-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 60px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 25px;
+  z-index: 1400;
+  box-shadow: var(--shadow);
+}
+
+/* when sidebar expanded */
+.dashboard-main .top-dashboard-bar {
+  left: 250px;
+}
+
+/* when sidebar collapsed */
+.dashboard-sidebar.collapsed + .dashboard-main .top-dashboard-bar {
+  left: 70px;
+}
+
+/* mobile */
+@media (max-width: 768px) {
+  .top-dashboard-bar {
+    left: 0 !important;
+  }
+}
+
+/* push content down */
+.dashboard-main {
+  padding-top: 90px;
+}
+
 
 /* Responsive Design */
 @media (max-width: 992px) {

@@ -80,8 +80,8 @@ selectedOrderForReturn: any = null;
     'Confirmed',
     'Shipped',
     'Delivered',
-    'Cancelled',
-    'Rejected'
+    'Canceled',
+    'Return Rejected'
   ];
 
   filteredOrders: Order[] = [];

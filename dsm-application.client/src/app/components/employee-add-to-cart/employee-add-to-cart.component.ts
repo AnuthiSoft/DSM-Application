@@ -61,8 +61,12 @@ export class EmployeeAddToCartComponent implements OnInit {
  
    filterProducts: Product[] = [];
    categories: string[] = [];
+   @Input() employeeCart: { product: Product; quantity: number }[] = [];
  
-   cart: { product: Product; quantity: number }[] = [];
+cart = this.employeeCart;
+ 
+ 
+   
    orderProducts: any[] = [];
  
    showPopup = false;
@@ -854,49 +858,45 @@ persistCart() {
 }
 
    
-  placeOrder() {
+ placeOrder() {
   if (!this.selectedCustomerId) {
     this.toastr.warning('Select customer');
     return;
   }
-
+ 
   if (!this.cart.length) {
     this.toastr.warning('Cart is empty');
     return;
   }
-
+ 
   const distributorId = this.getDistributorIdFromCart();
-
-  if (!distributorId) {
-    this.toastr.error('Distributor not found');
-    return;
-  }
-
-  this.isProcessing = true;
-
+ 
   const payload = {
     customerId: this.selectedCustomerId,
-    distributorId: distributorId, // ✅ GUARANTEED
+    distributorId: distributorId,
+    specialDiscountPercent: 0,
+    expectedDelivery: this.expectedDate,
+    orderedDate: this.orderedDate,
+ 
     products: this.cart.map(c => ({
       productId: c.product.productId!,
       quantity: c.quantity
     }))
   };
-
+ 
   this.orderService.createOrderByCollector(payload).subscribe({
     next: () => {
       this.toastr.success('Order placed successfully');
       this.employeeCartService.clear();
       this.cart = [];
-      this.isProcessing = false;
       this.close.emit();
     },
-    error: () => {
-      this.toastr.error('Order failed');
-      this.isProcessing = false;
+    error: (err) => {
+      this.toastr.error(err.error?.message || 'Order failed');
     }
   });
 }
+ 
 
 
  

@@ -9,6 +9,7 @@ namespace DSM_Application.Server.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
 
         public string OrderId { get; set; }
         public string ProductId { get; set; }
@@ -52,6 +53,7 @@ namespace DSM_Application.Server.Models
         public DateTime CreatedAt { get; set; }
 
         public List<ReturnImageInfo> Images { get; set; } = new();
+        public DateTime UpdatedAt { get; set; }
 
     }
 

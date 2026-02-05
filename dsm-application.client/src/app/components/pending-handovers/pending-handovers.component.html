@@ -6,68 +6,164 @@
   </div>
 
   <!-- LOADING STATE -->
-  <div *ngIf="loading" class="loading-state">
-    <div class="spinner"></div>
-    <p>Loading handovers...</p>
+ <div class="cashier-filter-row">
+
+  <div class="filter-box">
+    <label>Cashier</label>
+    <select
+      [(ngModel)]="selectedCashier"
+      (change)="applyCashierFilter()">
+
+      <option value="ALL">All Cashiers</option>
+
+      <option *ngFor="let c of cashiers" [value]="c">
+        {{ c }}
+      </option>
+
+    </select>
   </div>
+
+</div>
+<div class="cashier-summary" *ngIf="filteredRows.length">
+
+  <h4>
+    💼 Cashier Summary —
+    <span *ngIf="selectedCashier !== 'ALL'">
+      {{ selectedCashier }}
+    </span>
+    <span *ngIf="selectedCashier === 'ALL'">
+      All Cashiers
+    </span>
+  </h4>
+
+  <div class="summary-grid">
+
+    <!-- TOTAL -->
+    <div class="summary-box total">
+      <label>Total</label>
+      <strong>₹{{ cashierTotals.total | number:'1.2-2' }}</strong>
+    </div>
+
+    <!-- MODES -->
+    <div
+      class="summary-box"
+      *ngFor="let m of cashierTotals.modes | keyvalue">
+
+      <label>{{ m.key }}</label>
+      <strong>₹{{ m.value | number:'1.2-2' }}</strong>
+
+    </div>
+
+  </div>
+
+</div>
+
 
   <!-- DATA TABLE -->
   <div *ngIf="!loading && handovers.length > 0" class="table-container">
     <table class="handover-table">
       <thead>
-        <tr>
-          <th>Date</th>
-          <th>Total Amount</th>
-          <th>Cashier</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+  <tr>
+    <th>Date</th>
+    <th>Customer</th>
+    <th>Receipt</th>
+    <!-- <th>Handover</th> -->
+    <th>Mode</th>
+    <th>Amount</th>
+    <th>Cashier</th>
+    <th>Actions</th>
+  </tr>
+</thead>
+
 
       <tbody>
-        <tr *ngFor="let h of handovers">
-          <td class="date-cell">
-            <div class="date-icon">
-              <i class="fas fa-calendar-alt"></i>
-              {{ h.handoverDate | date:'dd/MM/yyyy' }}
-            </div>
-            <div class="time-text">
-              {{ h.handoverDate | date:'hh:mm a' }}
-            </div>
-          </td>
-          
-          <td class="amount-cell">
-            <span class="amount-badge">
-              <i class="fas fa-rupee-sign"></i>
-              {{ h.totalAmountSubmitted | number:'1.2-2' }}
-            </span>
-          </td>
-          
-          <td class="cashier-cell">
-            <div class="cashier-info">
-              <i class="fas fa-user-tie"></i>
-              <span>{{ h.cashierName }}</span>
-            </div>
-          </td>
+  <tr *ngFor="let h of filteredRows"
+    [class.rehandover-row]="h.receiptIsRehandover">
 
-          <td class="actions-cell">
-            <div class="action-buttons">
-              <button class="btn-action btn-approve" (click)="approve(h)" title="Approve">
-                <i class="fas fa-check"></i>
-                <span class="btn-text">Approve</span>
-              </button>
-              
-              <button class="btn-action btn-reject" (click)="reject(h)" title="Reject">
-                <i class="fas fa-times"></i>
-                <span class="btn-text">Reject</span>
-              </button>
-              
-              <button class="btn-action btn-details" (click)="viewDetails(h)" title="View Details">
-                <i class="fas fa-eye"></i>
-                <span class="btn-text">Details</span>
-              </button>
-            </div>
-          </td>
-        </tr>
+
+  <!-- DATE -->
+  <td>
+    <div>{{ h.paidOn | date:'dd/MM/yyyy' }}</div>
+    <small class="muted">{{ h.paidOn | date:'hh:mm a' }}</small>
+  </td>
+
+  <!-- CUSTOMER -->
+  <td>
+    <i class="fas fa-user text-primary"></i>
+    {{ h.customerName }}
+  </td>
+
+  <!-- RECEIPT -->
+<td>
+  <span class="pill">#{{ h.receiptId }}</span>
+
+ <span *ngIf="h.receiptIsRehandover" class="pill warning">
+  🔁 RE-HANDOVER
+</span>
+
+<div *ngIf="h.distributorRejectReason" class="reject-reason">
+  ❌ Rejected by distributor: {{ h.distributorRejectReason }}
+</div>
+
+<div *ngIf="h.cashierRehandoverNote" class="rehandover-reason">
+  🔁 Cashier note: {{ h.cashierRehandoverNote }}
+</div>
+</td>
+
+
+  <!-- HANDOVER -->
+<!-- <td>
+  <span class="pill outline">
+    {{ h.handoverId | slice:0:8 }}…
+  </span>
+
+  <span *ngIf="h.status === 'Partial'" class="pill partial">
+    PARTIAL
+  </span>
+</td> -->
+
+
+  <!-- MODE -->
+  <td>
+    <span class="mode-chip" [ngClass]="h.paymentMode">
+      {{ h.paymentMode | uppercase }}
+    </span>
+  </td>
+
+  <!-- AMOUNT -->
+  <td>
+    <strong class="text-success">
+      ₹{{ h.amountPaid | number:'1.2-2' }}
+    </strong>
+  </td>
+
+  <!-- CASHIER -->
+  <td>
+    {{ h.cashierName }}
+  </td>
+
+  <!-- ACTIONS -->
+  <td>
+    <div class="action-compact">
+  <button class="btn-sm success" (click)="approveReceipt(h)">
+  ✓
+</button>
+
+<button class="btn-sm danger" (click)="rejectReceipt(h)">
+  ✕
+</button>
+<div class="pill outline" *ngIf="h.status !== 'Pending'">
+  {{ h.status }}
+</div>
+<!-- 
+      <button class="btn-sm info" (click)="viewDetails(h)">
+        👁
+      </button> -->
+    </div>
+  </td>
+
+</tr>
+
       </tbody>
     </table>
   </div>
@@ -165,6 +261,11 @@
           <span class="badge">{{ selectedDetails?.payments?.length || 0 }} payments</span>
         </div>
         
+
+       
+
+
+
         <div class="table-responsive">
           <table class="payment-table">
             <thead>
@@ -223,15 +324,15 @@
         <i class="fas fa-times"></i> Close
       </button>
       
-      <div class="action-buttons" *ngIf="selectedDetails">
-        <button class="btn btn-success" (click)="approve(selectedDetails)">
+      <!-- <div class="action-buttons" *ngIf="selectedDetails">
+        <button class="btn btn-success" (click)="approveReceipt(selectedDetails)">
           <i class="fas fa-check"></i> Approve Handover
         </button>
         
-        <button class="btn btn-danger" (click)="reject(selectedDetails)">
+        <button class="btn btn-danger" (click)="rejectReceipt(selectedDetails)">
           <i class="fas fa-times"></i> Reject Handover
         </button>
-      </div>
+      </div> -->
     </div>
     
   </div>

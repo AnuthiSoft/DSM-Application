@@ -905,6 +905,28 @@ body.dark-theme .modal-actions .btn-primary {
   background: #3498db;
   color: #ffffff;
 }
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+ 
+/* Make info area stretch evenly */
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+ 
+/* Keep stock section aligned at bottom */
+.stock-progress-section {
+  margin-top: auto;
+}
+ 
+.product-info .stock-progress-section {
+  margin-top: auto;
+}
+ 
+ 
 
 /* Responsive Design */
 @media (max-width: 992px) {

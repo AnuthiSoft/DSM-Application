@@ -68,33 +68,39 @@ namespace DSM_Application.Server.Controllers
             await _db.Customers.InsertOneAsync(customer);
             return Ok(new { message = "Customer registered successfully", customer });
         }
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] CustomerLoginRequest request)
         {
-            if (string.IsNullOrEmpty(request.Email) && string.IsNullOrEmpty(request.PhoneNumber))
+            if (string.IsNullOrWhiteSpace(request.Email) &&
+                string.IsNullOrWhiteSpace(request.PhoneNumber))
                 return BadRequest("Email or Phone Number is required");
 
-            if (string.IsNullOrEmpty(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Password))
                 return BadRequest("Password is required");
 
-            // Find customer by email OR phone
-            var customer = await _db.Customers
-      .Find(c => (request.Email != null && c.Email == request.Email) ||
-                 (request.PhoneNumber != null && c.PhoneNumber == request.PhoneNumber))
-      .FirstOrDefaultAsync();
+            var email = request.Email?.Trim().ToLower();
+            var phone = request.PhoneNumber?.Trim();
+
+            // normalize phone
+            if (!string.IsNullOrEmpty(phone) && !phone.StartsWith("+91"))
+                phone = "+91" + phone;
+
+            var customer = await _db.Customers.Find(c =>
+                (!string.IsNullOrEmpty(email) && c.Email.ToLower() == email) ||
+                (!string.IsNullOrEmpty(phone) && c.PhoneNumber == phone)
+            ).FirstOrDefaultAsync();
 
             if (customer == null)
                 return Unauthorized("Customer not found");
 
             if (!customer.IsRegistered)
-                return Unauthorized("You must create password first (distributor added you)");
+                return Unauthorized("You must create password first");
 
             if (customer.PasswordHash != ComputeHash(request.Password))
                 return Unauthorized("Invalid password");
 
-            // Generate JWT for customer
             var token = _jwt.GenerateCustomerToken(customer);
+
             return Ok(new
             {
                 token,
@@ -102,10 +108,10 @@ namespace DSM_Application.Server.Controllers
                 role = customer.Role,
                 customerId = customer.CustomerId,
                 mustChangePassword = customer.MustChangePassword,
-
-                addedByDistributorId = customer.AddedByDistributorId // 🔥 ADD THIS
+                addedByDistributorId = customer.AddedByDistributorId
             });
         }
+
 
         [Authorize(Roles = "Customer")]
         [HttpPost("change-password")]
@@ -143,6 +149,8 @@ namespace DSM_Application.Server.Controllers
 
             if (existing != null)
                 return BadRequest("Email or phone number already exists.");
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Initial password is required");
 
             var distributorId = User.FindFirst("DistributorId")?.Value;
             if (distributorId == null)
@@ -156,10 +164,13 @@ namespace DSM_Application.Server.Controllers
                 Address = dto.Address,
                 Role = "Customer",
                 AddedByDistributorId = distributorId,
-      
-                IsRegistered = false,
+                PasswordHash = ComputeHash(dto.Password),
+
+                IsRegistered = true,
+
                 MustChangePassword = true
             };
+
 
             await _db.Customers.InsertOneAsync(customer);
 

@@ -28,37 +28,9 @@
         </div>
       </div>
 
-      <!-- Payment Mode Filter -->
-      <div class="form-group">
-        <label><i class="fas fa-money-check-alt"></i> Payment Mode</label>
-        <select class="form-select desktop-only" [(ngModel)]="paymentMode">
-          <option value="">All Modes</option>
-          <option value="cash">Cash</option>
-          <option value="online">Online</option>
-          <option value="upi">UPI</option>
-          <option value="scanner">Scanner</option>
-        </select>
-      </div>
+ 
+      
 
-      <!-- Mobile -->
-      <div class="mobile-select" (click)="openSheet('payment')">
-        {{ paymentMode || 'All Modes' }}
-      </div>
-
-      <!-- Handover Status Filter -->
-      <div class="form-group">
-        <label><i class="fas fa-hand-holding-usd"></i> Handover Status</label>
-        <select class="form-select desktop-only" [(ngModel)]="handoverStatus">
-          <option value="">All Status</option>
-          <option value="handed">Handed Over</option>
-          <option value="pending">Pending</option>
-        </select>
-      </div>
-
-      <!-- Mobile -->
-      <div class="mobile-select" (click)="openSheet('handover')">
-        {{ handoverStatus || 'All Status' }}
-      </div>
 
       <!-- Action Buttons -->
       <div class="action-buttons">
@@ -142,12 +114,12 @@
     <div class="section-header">
       <h4><i class="fas fa-list-alt"></i> Payment Details</h4>
       <div class="report-actions">
-        <button class="btn btn-sm btn-outline-primary" (click)="exportToExcel()">
+        <!-- <button class="btn btn-sm btn-outline-primary" (click)="exportToExcel()">
           <i class="fas fa-file-excel"></i> Export
         </button>
         <button class="btn btn-sm btn-outline-secondary" (click)="printReport()">
           <i class="fas fa-print"></i> Print
-        </button>
+        </button> -->
       </div>
     </div>
 
@@ -235,7 +207,9 @@
             <th>Order Total</th>
             <th>Paid</th>
             <th>Pending</th>
+            <th>Payment Mode</th>
             <th>Payment Date</th>
+            
             <th>Cashier Name</th>
             <th>Handed Over</th>
             <th>Status</th>
@@ -255,17 +229,23 @@
                 ₹{{ o.pendingAmount }}
               </span>
             </td>
+         <td>
+<span class="payment-mode-pill">
+  {{ o.paymentMode | uppercase }}
+</span>
+</td>
             <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td> {{ o.cashierName }}</td>
             <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
             <td>
-              <span class="badge" [ngClass]="{
-                'badge-success': o.handoverStatus === 'Accepted',
-                'badge-danger': o.handoverStatus === 'Rejected',
-                'badge-secondary': !o.handoverStatus
-              }">
-                {{ o.handoverStatus || 'Pending' }}
-              </span>
+           <span class="badge" [ngClass]="{
+  'badge-success': o.handoverStatus === 'Accepted',
+  'badge-danger': o.handoverStatus === 'Rejected',
+  'badge-warning': o.handoverStatus === 'Pending'
+}">
+  {{ o.handoverStatus || 'Pending' }}
+</span>
+
 
               <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
                 Reason: {{ o.rejectReason }}
@@ -300,7 +280,7 @@
 
   <div class="sheet-body">
 
-    <!-- Payment Mode -->
+ 
     <div *ngIf="sheetType === 'payment'">
       <div class="sheet-option" (click)="setPayment('')">All Modes</div>
       <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
@@ -309,7 +289,7 @@
       <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
     </div>
 
-    <!-- Handover -->
+  
     <div *ngIf="sheetType === 'handover'">
       <div class="sheet-option" (click)="setHandover('')">All Status</div>
       <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>

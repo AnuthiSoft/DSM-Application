@@ -1,0 +1,84 @@
+<div class="dashboard-card">
+
+   <div class="d-flex justify-content-between align-items-center mb-3">
+
+    <h3>
+      <i class="fas fa-receipt"></i>
+      Customer Receipts
+    </h3>
+
+    <!-- 🔙 BACK BUTTON -->
+    <button class="btn btn-outline-primary"
+            routerLink="/employee-dashboard">
+
+      <i class="fas fa-arrow-left"></i>
+      Back to Payment Collection
+
+    </button>
+
+  </div>
+  <!-- LOADING -->
+  <div *ngIf="loading" class="loading-box">
+    Loading receipts...
+  </div>
+
+  <!-- NO DATA -->
+  <div *ngIf="!loading && receipts.length === 0" class="no-data-message">
+    <i class="fas fa-inbox"></i>
+    <p>No receipts found</p>
+  </div>
+
+  <!-- RECEIPTS TABLE -->
+  <div *ngIf="!loading && receipts.length > 0"
+       class="orders-table-container">
+
+    <table class="orders-table">
+
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Receipt</th>
+          <th>Amount</th>
+          <th>Mode</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let r of receipts">
+
+          <td>{{ r.paidOn | date:'dd-MMM-yyyy hh:mm a' }}</td>
+
+          <td class="receipt-id">
+            {{ r.receiptId }}
+          </td>
+
+          <td class="text-success">
+            ₹{{ r.amountPaid | number:'1.2-2' }}
+          </td>
+
+          <td>
+            <span class="payment-mode-badge"
+                  [class]="r.paymentMode">
+              {{ r.paymentMode }}
+            </span>
+          </td>
+
+          <td>
+            <span class="status-badge"
+                  [ngClass]="{
+                    'badge-success': r.handoverStatus === 'Accepted',
+                    'badge-warning': r.handoverStatus === 'Pending',
+                    'badge-danger': r.handoverStatus === 'Rejected'
+                  }">
+              {{ r.handoverStatus || 'Not Submitted' }}
+            </span>
+          </td>
+
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+
+</div>

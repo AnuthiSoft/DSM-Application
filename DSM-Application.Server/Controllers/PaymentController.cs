@@ -90,21 +90,21 @@ namespace DSM_Application.Server.Controllers
         }
 
 
-        [HttpPost("handover-reject/{handoverId}")]
-        public async Task<IActionResult> RejectHandover(
-       string handoverId,
-       [FromBody] string reason)
-        {
-            try
-            {
-                var result = await _paymentService.RejectHandover(handoverId, reason);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-        }
+       // [HttpPost("handover-reject/{handoverId}")]
+       // public async Task<IActionResult> RejectHandover(
+       //string handoverId,
+       //[FromBody] string reason)
+       // {
+       //     try
+       //     {
+       //         var result = await _paymentService.RejectHandover(handoverId, reason);
+       //         return Ok(result);
+       //     }
+       //     catch (Exception ex)
+       //     {
+       //         return BadRequest(new { error = ex.Message });
+       //     }
+       // }
 
         [HttpGet("pending-handovers/{distributorId}")]
         public async Task<IActionResult> GetPendingHandovers(string distributorId)
@@ -249,8 +249,33 @@ namespace DSM_Application.Server.Controllers
                 scannerQrUrl = distributor.ScannerQrUrl
             });
         }
-
-
+        [HttpGet("order-full-details/{orderId}")]
+        public async Task<IActionResult> GetOrderFullDetails(string orderId)
+        {
+            try
+            {
+                var result = await _paymentService.GetOrderFullDetails(orderId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+        [HttpPost("receipt-approve/{receiptId}")]
+        public async Task<IActionResult> ApproveReceipt(string receiptId)
+        {
+            var result = await _paymentService.ApproveReceipt(receiptId);
+            return Ok(result);
+        }
+        [HttpPost("receipt-reject/{receiptId}")]
+        public async Task<IActionResult> RejectReceipt(
+            string receiptId,
+            [FromBody] string reason)
+        {
+            var result = await _paymentService.RejectReceipt(receiptId, reason);
+            return Ok(result);
+        }
 
     }
 }

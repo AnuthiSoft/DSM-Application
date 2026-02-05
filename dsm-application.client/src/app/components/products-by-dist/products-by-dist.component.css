@@ -849,6 +849,49 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+/* Make card vertical flexbox */
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+/* Push whole bottom block to bottom */
+.bottom-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* keep existing spacing */
+}
+ 
+/* Make card stretch vertically */
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+ 
+/* Make info grow */
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+ 
+ 
+/* Let main content stretch */
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+ 
+/* Make these elements ALWAYS go down */
+.product-stock,
+.product-price,
+.product-actions {
+  margin-top: auto;
+}
+ 
+ 
+ 
 
 /* Helper Classes */
 .mb-2 { margin-bottom: 8px; }

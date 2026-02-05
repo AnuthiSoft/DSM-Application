@@ -20,13 +20,16 @@ export class CashCollectionComponent implements OnInit {
 
   amountError: string | null = null;
   filteredCustomers: any[] = [];
-
+selectedOrderId: string | null = null;
+showOrderPopup = false;
   // Customer filter properties
   showCustomerDropdown: boolean = false;
   selectedCustomerFilter: string = '';
   selectedCustomerName: string = '';
   selectedCustomerPhone: string = '';
   selectedCustomerPending: number = 0;
+  orderFullDetails: any = null;
+showOrderModal = false;
 
   form = {
     customerId: '',
@@ -112,6 +115,7 @@ export class CashCollectionComponent implements OnInit {
   }
 
   canSubmit() {
+    
     return this.form.amountPaid > 0 && !this.amountError;
   }
 
@@ -127,6 +131,7 @@ export class CashCollectionComponent implements OnInit {
   }
 
   viewDetails(customer: any) {
+      this.selectedCustomer = customer;
     const distributorId = localStorage.getItem('distributorId')!;
 
     // 1️⃣ Load order-wise pending (existing)
@@ -200,4 +205,32 @@ export class CashCollectionComponent implements OnInit {
       this.showCustomerDropdown = false;
     }
   }
+  openOrderFullDetails(orderId: string) {
+  this.paymentService.getOrderFullDetails(orderId)
+    .subscribe(res => {
+      this.orderFullDetails = res;
+      this.showOrderModal = true;
+    });
+}
+
+closeOrderModal() {
+  this.showOrderModal = false;
+  this.orderFullDetails = null;
+}
+openOrderDetails(orderId: string) {
+  this.selectedOrderId = orderId;
+  this.showOrderPopup = true;
+}
+viewReceipt(blobName: string) {
+  if (!blobName) {
+    alert('Receipt not available');
+    return;
+  }
+
+  const receiptUrl =
+    `${environment.apiUrl}/orders/receipt/${blobName}`;
+
+  window.open(receiptUrl, '_blank');
+}
+
 }

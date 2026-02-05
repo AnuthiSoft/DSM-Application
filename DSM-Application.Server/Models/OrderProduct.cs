@@ -36,5 +36,6 @@ namespace DSM_Application.Server.Models
         public decimal FinalPrice { get; set; }
         public decimal GstPercentage { get; set; }   // copied from Product
         public decimal GstAmount { get; set; }
+        public string OrderId { get; set; }
     }
 }

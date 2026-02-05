@@ -20,6 +20,7 @@ pendingPayments: any[] = [];
 unhandedReceipts: any[] = [];
 selectedReceipts: any[] = [];
  showModal: boolean = false;
+ rehandoverReason: string = '';
   
   // Extra required fields for HTML template
   todayDate: string = new Date().toISOString().split("T")[0];
@@ -75,6 +76,9 @@ loadPendingPayments() {
 
 isSelected(receipt: any) {
   return this.selectedReceipts.includes(receipt);
+}
+hasRejectedSelected(): boolean {
+  return this.selectedReceipts.some(r => r.handoverStatus === 'Rejected');
 }
 
 toggleReceiptSelection(receipt: any, checked: boolean) {
@@ -168,17 +172,27 @@ getOnlinePaymentCount() {
   }
 
   // ---- SUBMIT HANDOVER ---- //
-  submit() {
+ submit() {
+
   if (this.selectedReceipts.length === 0) {
     alert('Please select at least one receipt.');
     return;
   }
 
-  this.form.notes = this.notes;
+  // 🔥 REQUIRE reason for rejected receipts
+  if (this.hasRejectedSelected() && !this.rehandoverReason.trim()) {
+    alert('Re-handover reason is required.');
+    return;
+  }
+
+  // attach to payload
+  (this.form as any).rehandoverNote = this.rehandoverReason;
 
   this.paymentService.createHandover(this.form).subscribe({
     next: () => {
       alert('Handover submitted! Waiting for distributor approval.');
+
+      this.rehandoverReason = '';
       this.clearSelection();
       this.loadPendingPayments();
     },
@@ -187,6 +201,7 @@ getOnlinePaymentCount() {
     }
   });
 }
+
  // Open the modal popup
   openHandoverModal(): void {
     this.showModal = true;

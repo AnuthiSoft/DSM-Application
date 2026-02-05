@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import Swal from 'sweetalert2';
 import { ReturnApiService } from '../../services/return-api.service'
 
@@ -10,6 +10,8 @@ import { ReturnApiService } from '../../services/return-api.service'
 })
 export class ReturnOrdersComponent implements OnInit {
 
+  @Output() returnUpdated = new EventEmitter<void>();
+ 
  returnOrders: any[] = [];
   loading = true;
 
@@ -108,23 +110,16 @@ cancelReturn(r: any) {
       this.returnApiService
         .rejectReturn(r.id, 'Cancelled by customer')
         .subscribe(() => {
-
-          // ✅ UPDATE UI STATE
+ 
           r.status = 'Rejected';
-
-          Swal.fire(
-            'Cancelled',
-            'Return request cancelled',
-            'success'
-          );
-
-          // optional: re-sync from server
-          // this.loadReturnOrders();
+          this.returnUpdated.emit();   // 🔥 Notify parent to refresh orders
+ 
+          Swal.fire('Cancelled', 'Return request cancelled', 'success');
         });
     }
   });
 }
-
+ 
 
 // ✅ Does this return need user action?
 needsAction(r: any): boolean {

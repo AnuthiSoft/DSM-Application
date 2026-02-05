@@ -3,20 +3,20 @@
   <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
     <i class="fas fa-bars"></i>
   </button>
-
+ 
   <!-- Sidebar Navigation -->
   <div class="dashboard-sidebar" [class.mobile-open]="isMobileMenuOpen" [class.collapsed]="isSidebarCollapsed">
-
+ 
     <div class="sidebar-header">
       <!-- <h3>
-        <i class="fas fa-building"></i> 
+        <i class="fas fa-building"></i>
         <span>Customer Portal</span>
       </h3> -->
-
+ 
       <button class="collapse-toggle" (click)="toggleSidebar()" title="Toggle Sidebar"> <i class="fas"
           [class.fa-chevron-left]="!isSidebarCollapsed" [class.fa-chevron-right]="isSidebarCollapsed"></i> </button>
     </div>
-
+ 
     <div class="nav-items">
       <!-- Dashboard -->
       <div class="nav-item" [class.active]="isActive('dashboard')" (click)="setActiveTab('dashboard')"
@@ -24,34 +24,34 @@
         <i class="fas fa-th-large"></i>
         <span>Dashboard</span>
       </div>
-
+ 
       <!-- Distributors -->
       <div class="nav-item" [class.active]="isActive('distributors')" (click)="setActiveTab('distributors')"
         data-title="Distributors">
         <i class="fas fa-truck"></i>
         <span>Distributors</span>
       </div>
-
+ 
       <!-- Products -->
       <div class="nav-item" [class.active]="isActive('products')" (click)="setActiveTab('products')"
         data-title="Products">
         <i class="fas fa-box"></i>
         <span>Products</span>
       </div>
-
+ 
       <!-- Orders -->
       <div class="nav-item" [class.active]="isActive('orders')" (click)="setActiveTab('orders')" data-title="My Orders">
         <i class="fas fa-shopping-cart"></i>
         <span>My Orders</span>
       </div>
-
+ 
       <!-- Return Orders -->
       <div class="nav-item" [class.active]="isActive('returns')" (click)="setActiveTab('returns')"
         data-title="Return Orders">
         <i class="fas fa-undo-alt"></i>
         <span>Return Orders</span>
       </div>
-
+ 
       <!-- Profile -->
       <div class="nav-item" [class.active]="isActive('profile')" (click)="setActiveTab('profile')"
         data-title="My Profile">
@@ -59,7 +59,7 @@
         <span>My Profile</span>
       </div>
     </div>
-
+ 
     <div class="sidebar-footer">
       <div class="nav-item logout-fixed" (click)="logout()" data-title="Logout">
         <i class="fas fa-sign-out-alt"></i>
@@ -67,29 +67,37 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Main Content -->
   <div class="dashboard-main">
     <!-- Floating Cart Button -->
-    <div class="floating-cart" (click)="openCart()" *ngIf="activeTab !== 'cart'">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="cart-badge" *ngIf="cartCount > 0">
-        {{ cartCount }}
-      </span>
-    </div>
+   <!-- 🔝 FIXED TOP BAR -->
+<div class="top-dashboard-bar">
 
+  <!-- CART ICON -->
+  <div class="floating-cart top-cart" (click)="openCart()">
+    <i class="fas fa-shopping-cart"></i>
+
+    <span class="cart-badge" *ngIf="cartCount > 0">
+      {{ cartCount }}
+    </span>
+  </div>
+
+</div>
+
+ 
     <!-- Loading State -->
     <div *ngIf="loading" class="loading-state">
       <i class="fas fa-spinner fa-spin"></i> Loading...
     </div>
-
+ 
     <!-- Dashboard Tab -->
     <div class="tab-content" *ngIf="isActive('dashboard') && !loading">
       <div class="welcome-header">
         <h2>Welcome, {{ customerName}}</h2>
         <div class="date-display">{{ currentDate | date:'fullDate' }}</div>
       </div>
-
+ 
       <!-- Stats Grid -->
       <div class="stats-grid">
         <div class="stat-card clickable" (click)="goToTab('orders')">
@@ -107,14 +115,14 @@
           <div class="stat-value">{{ distributorStats.total }}</div>
           <div class="stat-label">Distributors</div>
         </div>
-
+ 
         <div class="stat-card">
           <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
           <div class="stat-value">₹{{ revenueStats.total | number:'1.2-2' }}</div>
           <div class="stat-label">Total Spent</div>
         </div>
       </div>
-
+ 
       <!-- Recent Orders -->
       <div class="dashboard-card">
         <h3>Recent Orders</h3>
@@ -134,38 +142,38 @@
         </ng-template>
       </div>
     </div>
-
+ 
     <!-- Distributors Tab -->
     <div class="tab-content" *ngIf="isActive('distributors') && !loading">
       <div class="welcome-header">
         <h2>My Distributors</h2>
       </div>
-
+ 
       <!-- Your existing distributors component -->
-      <app-cust-dashboard></app-cust-dashboard>
+      <!-- <app-cust-dashboard></app-cust-dashboard> -->
     </div>
-
-
-
-
+ 
+ 
+ 
+ 
     <app-cust-dashboard *ngIf="activeTab === 'distributors'">
     </app-cust-dashboard>
-
-
+ 
+ 
     <!-- <div *ngIf="isActive('returns')">
   <app-return-orders></app-return-orders>
 </div> -->
-
+ 
     <div *ngIf="activeTab === 'products'">
-
+ 
       <div *ngIf="activeTab === 'products'" class="products-wrapper">
-
+ 
         <ng-container *ngIf="products.length > 0; else noProductsYet">
           <app-products-by-dist [products]="products" [customerId]="customerId"
             (addToCartClicked)="cartService.addToCart($event)">
           </app-products-by-dist>
         </ng-container>
-
+ 
         <ng-template #noProductsYet>
           <div class="empty-products">
             <h3>No products to display</h3>
@@ -174,57 +182,59 @@
         </ng-template>
       </div>
     </div>
-
+ 
     <!-- Orders Tab -->
     <div class="tab-content" *ngIf="isActive('orders')">
       <app-customer-orders></app-customer-orders>
     </div>
-
-    <div *ngIf="isActive('returns')">
-  <app-return-orders></app-return-orders>
+ 
+  <div *ngIf="isActive('returns')">
+  <app-return-orders (returnUpdated)="refreshOrders()"></app-return-orders>
 </div>
+ 
     <!-- Return Orders Tab -->
     <!-- <div class="tab-content" *ngIf="isActive('returns')">
       <app-return-orders></app-return-orders>
     </div> -->
-
+ 
     <!-- Profile Tab -->
     <div class="tab-content" *ngIf="isActive('profile')">
       <app-profile></app-profile>
     </div>
-
+ 
     <!-- Cart Tab -->
     <div class="tab-content" *ngIf="isActive('cart')">
      <!-- Add-to-Cart Tab -->
     <app-add-to-cart *ngIf="activeTab === 'cart'" [distributorId]="distributorId" [products]="products"
       (goToProductsClicked)="switchToProducts()" [selectedProduct]="selectedCartProduct">
     </app-add-to-cart>
-
-
+ 
+ 
     <!-- <div class="tab-content" *ngIf="isActive('products')">
       <div class="welcome-header">
         <h2>All Products</h2>
       </div> -->
-
+ 
     <!-- 🔥 Products page is fully independent -->
     <!-- <app-products-by-dist></app-products-by-dist>
     </div> -->
-
+ 
     <!-- Orders Tab -->
-
+ 
     <app-customer-orders *ngIf="activeTab === 'orders'"></app-customer-orders>
-
-
+ 
+ 
     <!-- Profile Tab -->
-
-
+ 
+ 
     <app-profile *ngIf="activeTab === 'profile'"></app-profile>
     <!-- <app-review-submit *ngIf="activeTab === 'review'"></app-review-submit> -->
-
+ 
     <!--search by pincode-->
     <!-- <div class="nav-item" [class.active]="isActive('search')" (click)="setActiveTab('search')">
       <i class="fas fa-search"></i> <span>Search</span>
     </div> -->
     <!-- <app-customer-search *ngIf="activeTab === 'search'"></app-customer-search> -->
-
+ 
   </div>
+ 

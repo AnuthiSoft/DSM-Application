@@ -12,6 +12,8 @@ namespace DSM_Application.Server.Models.DTOs
         public List<OrderProductInputDto> Products { get; set; }
         public decimal SpecialDiscountPercent { get; set; }
         public DateTime? ExpectedDelivery { get; set; }
+        public DateTime? OrderedDate { get; set; }
+
 
 
 

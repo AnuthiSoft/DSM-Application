@@ -161,6 +161,17 @@
           <textarea [(ngModel)]="form.notes" 
                     placeholder="Add any notes or remarks for this handover..."></textarea>
         </div>
+        <div *ngIf="hasRejectedSelected()" class="modal-form-group danger">
+  <label>
+    <i class="fas fa-exclamation-triangle"></i>
+    Re-handover Reason <span class="required">*</span>
+  </label>
+
+  <textarea
+    [(ngModel)]="rehandoverReason"
+    placeholder="Explain why this rejected receipt is being re-submitted..."
+  ></textarea>
+</div>
         
       </div>
       

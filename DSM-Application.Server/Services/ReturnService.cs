@@ -497,51 +497,49 @@ namespace DSM_Application.Server.Services
 
         // 5️⃣ REJECT RETURN
         public async Task RejectReturnAsync(
-       string returnId,
-       string reason,
-       string rejectedBy
-   )
+     string returnId,
+     string reason,
+     string rejectedBy
+ )
         {
+            // 1️⃣ Fetch return record
             var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
             if (ret == null)
                 throw new Exception("Return not found");
 
-            // 🔐 CUSTOMER RULE
+            // 2️⃣ CUSTOMER rule
             if (rejectedBy == "Customer")
             {
                 if (ret.Status != "Pending")
-                    throw new Exception("Return cannot be cancelled now");
+                    throw new Exception("Return cannot be cancelled at this stage.");
             }
 
-            // 🔐 DISTRIBUTOR RULE
+            // 3️⃣ DISTRIBUTOR rule
             if (rejectedBy == "Distributor")
             {
                 var distributorId = GetDistributorId();
                 if (ret.DistributorId != distributorId)
-                    throw new Exception("Unauthorized distributor");
+                    throw new Exception("Unauthorized distributor.");
 
                 if (ret.Status == "Received" || ret.Status == "Completed")
-                    throw new Exception("Cannot reject after receiving item");
+                    throw new Exception("Cannot reject return after receiving item.");
             }
 
-            // ✅ UPDATE RETURN
+            // 4️⃣ Update return record
             ret.Status = "Rejected";
             ret.RejectedBy = rejectedBy;
             ret.RejectionReason = reason;
-
+            ret.UpdatedAt = DateTime.UtcNow;
 
             await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
 
-            // ✅ OPTIONAL: update order status
-            var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
-            if (order != null)
-            {
-                order.Status = rejectedBy == "Customer"
-                    ? "Delivered"
-                    : "Return Rejected";
-
-                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
-            }
+            // 5️⃣ Update related order (IMPORTANT FIX)
+            await _orders.UpdateOneAsync(
+                o => o.Id == ret.OrderId,  // OrderId matches Order.Id
+                Builders<Order>.Update
+                    .Set(o => o.Status, rejectedBy == "Customer" ? "Delivered" : "Return Rejected")
+                    .Set(o => o.UpdatedAt, DateTime.UtcNow)
+            );
         }
 
 

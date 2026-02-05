@@ -400,6 +400,10 @@
   content: "✓";
   font-size: 1.2rem;
 }
+.employee-cart-icon{
+  color:rgba(var(--accent-color-rgb), 0.1)
+}
+ 
 
 /* Empty Products State */
 .products-grid:empty + .empty-products {

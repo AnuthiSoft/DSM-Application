@@ -275,7 +275,6 @@ namespace DSM_Application.Server.Controllers
 
 
 
-
         [Authorize(Roles = "Customer")]
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetCustomerOrders(string customerId)
@@ -303,8 +302,14 @@ namespace DSM_Application.Server.Controllers
                     .FirstOrDefaultAsync();
 
                 // 🔥 Fix status based on returned quantity
-                if (o.Products.Any(p => p.ReturnedQty > 0) && o.Status != "Return Completed")
+                // 🔥 Do NOT override if return was rejected
+                if (o.Status != "Return Rejected" &&
+                    o.Products.Any(p => p.ReturnedQty > 0) &&
+                    o.Status != "Return Completed")
+                {
                     o.Status = "Return Initiated";
+                }
+
 
                 return new DistributorOrderDto
                 {
@@ -342,6 +347,8 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(result);
         }
+
+
 
 
 
@@ -1030,7 +1037,9 @@ namespace DSM_Application.Server.Controllers
                     customerName = customer?.Name,
                     customerPhone = customer?.PhoneNumber,
                     totalAmount = order.TotalAmount,
-                    pendingAmount = order.RemainingAmount
+                    pendingAmount = order.RemainingAmount,
+                    // ⭐ ADD THIS
+                    deliveryReceiptUrl = order.DeliveryReceiptUrl
                 });
             }
 
@@ -1091,39 +1100,13 @@ namespace DSM_Application.Server.Controllers
 
         [HttpPost("create-by-collector")]
 
-        public async Task<IActionResult> CreateOrderByCollector([FromBody] OrderCreateDto dto)
-
+        public async Task<IActionResult> CreateByCollector([FromBody] OrderCreateDto dto)
         {
+            // Force distributor from token (same as your earlier code)
+            dto.DistributorId = User.FindFirst("DistributorId")?.Value;
 
-            var userId = User.FindFirst("UserId")?.Value;
-
-            var role = User.FindFirst("role")?.Value;
-
-            var distributorId = User.FindFirst("DistributorId")?.Value;
-
-            if (string.IsNullOrEmpty(distributorId))
-
-                return Unauthorized("DistributorId missing from token");
-
-            // 🔐 FORCE distributor from JWT (ignore frontend value)
-
-            dto.DistributorId = distributorId;
-
-            var order = await _orderService.CreateByCollector(
-
-                dto,
-
-                userId,
-
-                role,
-
-                distributorId
-
-            );
-
-
-            return Ok(order);
-
+            // Reuse the existing CreateOrder method
+            return await CreateOrder(dto);
         }
 
 
@@ -1314,6 +1297,7 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("customer/{customerId}/last-quantities")]
         public async Task<IActionResult> GetLastBoughtQuantities(string customerId)
         {
+
             var customerIdFromToken = User.FindFirst("CustomerId")?.Value;
             if (customerIdFromToken != customerId)
                 return Unauthorized();

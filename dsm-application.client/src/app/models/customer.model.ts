@@ -15,6 +15,8 @@ export interface Customer {
   registrationDate?: Date;       // ✅ Add this
   permanentEmployeeId?: string;      // 🔵 ADD THIS
   permanentEmployeeName?: string;    // 🔵 ADD THIS
+  mustChangePassword?: Boolean;
+ 
 
 
   password?: string;

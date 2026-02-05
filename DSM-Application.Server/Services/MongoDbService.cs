@@ -74,7 +74,8 @@ namespace DistributorManagementSystem.Server.Services
         public IMongoCollection<InventoryBatch> InventoryBatches =>_db.GetCollection<InventoryBatch>("InventoryBatches");
         public IMongoCollection<InvoiceUpload> InvoiceUploads =>
             _db.GetCollection<InvoiceUpload>("InvoiceUploads");
-
+        public IMongoCollection<OrderProduct> OrderProducts =>
+          _db.GetCollection<OrderProduct>("OrderProduct");
 
         public IMongoCollection<Cart> Carts =>
     _db.GetCollection<Cart>("Carts");

@@ -51,6 +51,7 @@ getReceiptsForHandover(
   totalAmountSubmitted: number;
   date: string;
   notes?: string;
+    rehandoverNote?: string;   // 🔥 ADD
 }): Observable<any> {
   return this.api.post(`${this.endpoint}/create-handover`, dto);
 }
@@ -169,4 +170,28 @@ getAllReceiptsForHandover(
     { params: { cashierId } } // ❌ no date param
   );
 }
+// 🔥 NEW — Get full order details with products + images
+getOrderFullDetails(orderId: string): Observable<any> {
+  return this.api.get(
+    `${this.endpoint}/order-full-details/${orderId}`
+  );
+}
+// ✅ Approve single receipt
+approveReceipt(receiptId: string) {
+  return this.api.post(
+    `${this.endpoint}/receipt-approve/${receiptId}`,
+    {}
+  );
+}
+
+// ✅ Reject single receipt
+rejectReceipt(receiptId: string, reason: string) {
+  return this.api.post(
+    `${this.endpoint}/receipt-reject/${receiptId}`,
+    JSON.stringify(reason),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
+
 }

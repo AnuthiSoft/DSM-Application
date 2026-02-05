@@ -7,8 +7,8 @@
 }
 
 .page-header {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -17,6 +17,7 @@
   margin-bottom: 8px;
   display: flex;
   align-items: center;
+   font-size: 1.6rem;
   gap: 10px;
 }
 
@@ -26,8 +27,9 @@
 
 .page-header p {
   color: var(--text-color);
-  opacity: 0.7;
+  opacity: 0.6;
   margin: 0;
+    font-size: 13px;
 }
 
 /* Section Navigation - Horizontal Tabs */
@@ -44,22 +46,27 @@
 .section-nav button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 6px;
+
+  padding: 6px 14px;          /* 👈 smaller */
+  font-size: 13px;           /* 👈 cleaner */
+  font-weight: 500;
+
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: 6px;        /* 👈 sharper */
+
   color: var(--text-color);
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s;
+
+  transition: background 0.2s ease, color 0.2s ease, border 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .section-nav button:hover {
-  background: var(--hover-color);
-  transform: translateY(-2px);
+ background: var(--hover-color);
+  transform: none;          /* 👈 remove jump */
 }
 
 .section-nav button.active {
@@ -74,7 +81,8 @@
 
 .section-nav button i {
   color: var(--primary-color);
-  transition: color 0.3s;
+    font-size: 12px;
+  /* transition: color 0.3s; */
 }
 
 /* Section Content */

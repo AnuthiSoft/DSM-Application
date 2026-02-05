@@ -17,7 +17,7 @@ namespace DSM_Application.Server.Models.DTOs
 
         [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
+        public string Password { get; set; }   // ⭐ ADD THIS
 
-    
     }
 }

@@ -9,12 +9,30 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './pending-handovers.component.css'
 })
 export class PendingHandoversComponent implements OnInit {
+  flatRows: any[] = [];
 
   distributorId = localStorage.getItem('distributorId') || '';
   handovers: any[] = [];
   loading = true;
   selectedDetails: any = null;
   showModal = false;
+  rehandoverNote: string = '';
+showRehandoverReason = false;
+
+
+selectedCashier: string = 'ALL';
+cashiers: string[] = [];
+
+filteredRows: any[] = [];
+
+cashierTotals: {
+  total: number;
+  modes: Record<string, number>;
+} = {
+  total: 0,
+  modes: {}
+};
+
 
   constructor(private paymentService: PaymentService, private toastr: ToastrService) { }
 
@@ -22,42 +40,152 @@ export class PendingHandoversComponent implements OnInit {
     this.loadPendingHandovers();
   }
 
-  loadPendingHandovers() {
-    this.loading = true;
+loadPendingHandovers() {
+  this.loading = true;
 
-    this.paymentService.getPendingHandovers(this.distributorId)
-      .subscribe({
-        next: (data) => {
-          this.handovers = data;
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        }
-      });
+  this.paymentService.getPendingHandovers(this.distributorId)
+    .subscribe({
+      next: (data: any[]) => {
+
+        this.handovers = data;
+
+        // 🔥 FLATTEN HANDOVERS INTO RECEIPT ROWS
+      this.flatRows = [];
+
+data.forEach((h: any) => {
+  h.receipts.forEach((r: any) => {
+
+    // 🔥 SHOW ONLY NON-FINAL RECEIPTS
+    if (r.handoverStatus === 'Accepted') return;
+this.flatRows.push({
+  handoverId: h.handoverId,
+  handoverDate: h.handoverDate,
+  cashierName: h.cashierName,
+  handoverStatus: h.status,
+
+  receiptId: r.receiptId,
+  customerName: r.customerName,
+  amountPaid: r.amountPaid,
+  paymentMode: r.paymentMode,
+  paidOn: r.paidOn,
+  receiptStatus: r.handoverStatus,
+
+  // 🔥 re-handover flags
+  receiptIsRehandover: r.isRehandover,
+  distributorRejectReason: r.previousRejectReason,
+  cashierRehandoverNote: r.rehandoverNote
+});
+  });
+});
+
+        console.log('FLAT ROWS =>', this.flatRows);
+        // ✅ REMOVE DUPLICATE RECEIPTS — keep latest handover only
+const map = new Map<string, any>();
+
+this.flatRows.forEach(row => {
+  const existing = map.get(row.receiptId);
+
+  if (!existing) {
+    map.set(row.receiptId, row);
+  } else {
+    // keep the newer handover by date
+    const oldDate = new Date(existing.handoverDate).getTime();
+    const newDate = new Date(row.handoverDate).getTime();
+
+    if (newDate > oldDate) {
+      map.set(row.receiptId, row);
+    }
   }
+});
 
-  approve(h: any) {
-    this.paymentService.approveHandover(h.handoverId).subscribe({
-      next: () => {
-      this.toastr.success('Approved successfully');
-      this.loadPendingHandovers();
+this.flatRows = Array.from(map.values());
+// 🔥 extract unique cashiers
+this.cashiers = [
+  ...new Set(this.flatRows.map(r => r.cashierName))
+];
+
+// default
+this.applyCashierFilter();
+
+
+        this.loading = false;
       },
       error: () => {
-        this.toastr.error('Failed to approve handover')
+        this.loading = false;
       }
     });
+}
+applyCashierFilter() {
+
+  if (this.selectedCashier === 'ALL') {
+    this.filteredRows = [...this.flatRows];
+  } else {
+
+    const selected = this.selectedCashier.trim().toLowerCase();
+
+    this.filteredRows = this.flatRows.filter(r =>
+      r.cashierName?.trim().toLowerCase() === selected
+    );
   }
 
-reject(h: any) {
-  const reason = prompt("Enter reject reason:");
-  if (!reason) return;
+  this.calculateCashierTotals();
+}
 
-  this.paymentService.rejectHandover(h.handoverId, reason).subscribe(() => {
-    alert("Rejected successfully!");
-    this.loadPendingHandovers();
+
+// -------------------------
+
+calculateCashierTotals() {
+
+  this.cashierTotals = {
+    total: 0,
+    modes: {}
+  };
+
+  this.filteredRows.forEach(r => {
+
+    this.cashierTotals.total += r.amountPaid;
+
+    const mode = r.paymentMode?.toUpperCase() || 'OTHER';
+
+    if (!this.cashierTotals.modes[mode]) {
+      this.cashierTotals.modes[mode] = 0;
+    }
+
+    this.cashierTotals.modes[mode] += r.amountPaid;
   });
 }
+
+
+approveReceipt(row: any) {
+  this.paymentService.approveReceipt(row.receiptId)
+    .subscribe({
+      next: () => {
+        this.toastr.success('Receipt approved');
+        this.loadPendingHandovers();
+      },
+      error: err => {
+        this.toastr.error(err?.error?.error || 'Already processed');
+      }
+    });
+}
+
+rejectReceipt(row: any) {
+  const reason = prompt('Enter reject reason:');
+  if (!reason) return;
+
+  this.paymentService.rejectReceipt(row.receiptId, reason)
+    .subscribe({
+      next: () => {
+        this.toastr.success('Receipt rejected');
+        this.loadPendingHandovers();
+      },
+      error: err => {
+        this.toastr.error(err?.error?.error || 'Already processed');
+      }
+    });
+}
+
+
 viewDetails(h: any) {
   this.paymentService.getHandoverDetails(h.handoverId)
     .subscribe(res => {

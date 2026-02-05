@@ -16,6 +16,9 @@ export class CustomerLoginComponent {
   request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
   email = '';
   message = '';
+
+
+   customerEmail = '';
   showPassword = false;
   showChangePasswordModal = false;
   newPassword = '';
@@ -122,9 +125,11 @@ export class CustomerLoginComponent {
 
 
         if (res.mustChangePassword) {
-          this.showChangePasswordModal = true;
-          return; // ⛔ stop dashboard navigation
-        }
+   this.customerEmail = res.customer.email;
+  this.showChangePasswordModal = true;
+  return; // ⛔ stop dashboard navigation
+}
+ 
 
 
         // ⭐ SAVE DISTRIBUTOR ID HERE

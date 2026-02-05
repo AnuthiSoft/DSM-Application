@@ -30,6 +30,8 @@ namespace DSM_Application.Server.Models
         public bool IsSubmittedForHandover { get; set; }
         public string HandoverStatus { get; set; } = "Pending"; // Pending | Rejected | Accepted
         public string RejectReason { get; set; }
+        public string? HandoverId { get; set; }
+        public string ReceiptId { get; set; }
 
 
 

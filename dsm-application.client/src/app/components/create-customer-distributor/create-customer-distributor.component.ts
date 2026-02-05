@@ -330,13 +330,13 @@ export class CreateCustomerDistributorComponent implements OnInit {
     }
 
     const payload: Customer = {
-      ...this.customer,
-      phoneNumber: '+91' + this.customer.phoneNumber
-    };
-
-    this.isEdit
-      ? this.updateCustomer(payload)
-      : this.createCustomer(payload);
+     ...this.customer,
+  phoneNumber: '+91' + this.customer.phoneNumber,
+  mustChangePassword: true   // ⭐ Force password update
+};
+ 
+ 
+    this.isEdit ? this.updateCustomer(payload) : this.createCustomer(payload);
   }
 
   /* ----------------------------- CREATE ------------------------------ */

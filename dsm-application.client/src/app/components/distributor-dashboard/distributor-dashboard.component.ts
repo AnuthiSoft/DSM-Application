@@ -148,7 +148,7 @@ openOrdersWithStatus(status: string) {
   // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
   // ==============================
   loadEmployees() {
-    this.http.get(`${environment.apiUrl}/api/Employees/by-distributor/${this.distributorId}`)
+    this.http.get(`${environment.apiUrl}/Employees/by-distributor/${this.distributorId}`)
       .subscribe((res: any) => {
         this.employees = res;
         console.log("Loaded Employees:", res);

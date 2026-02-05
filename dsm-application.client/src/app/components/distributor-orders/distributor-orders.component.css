@@ -302,6 +302,17 @@
 .view-details-btn:hover {
   background-color: rgba(52, 152, 219, 0.2);
 }
+ .modal-content.assign-modal {
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+ 
+.assign-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+}
  
 /* Payment Status */
 .text-success {

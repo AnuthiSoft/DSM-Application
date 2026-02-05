@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { Employee, EmployeeService } from '../../services/employee.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -407,10 +408,10 @@ export class EmployeesComponent {
   }
 
   closeUploadModal() {
-    this.showUploadModal = false;
-    this.selectedFile = null;
-    this.selectedFileName = '';   // ✅ RESET
-  }
+  this.showUploadModal = false;
+  this.selectedFile = null;
+  this.selectedFileName = '';   // ✅ RESET
+}
 
   // closeUploadModal() {
   //   this.showUploadModal = false;
@@ -418,13 +419,13 @@ export class EmployeesComponent {
   // }
 
   onFileSelected(event: any) {
-    const file = event.target.files[0];
+  const file = event.target.files[0];
 
-    if (file) {
-      this.selectedFile = file;
-      this.selectedFileName = file.name;   // ✅ ADD THIS
-    }
+  if (file) {
+    this.selectedFile = file;
+    this.selectedFileName = file.name;   // ✅ ADD THIS
   }
+}
 
   // onFileSelected(event: any) {
   //   this.selectedFile = event.target.files[0];

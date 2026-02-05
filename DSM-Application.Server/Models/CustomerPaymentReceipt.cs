@@ -22,6 +22,11 @@
         public string? HandoverStatus { get; set; }   // Pending / Accepted / Rejected
         public string? RejectReason { get; set; }
         public List<OrderPaymentSplit> Orders { get; set; } = new();
+        public string HandoverId { get; set; }
+        public string? PreviousRejectReason { get; set; }
+        public string? RehandoverNote { get; set; }
+        public bool IsRehandover { get; set; }
+
     }
 
     public class OrderPaymentSplit

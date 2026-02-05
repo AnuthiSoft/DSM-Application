@@ -1,0 +1,152 @@
+<!-- 📌 ORDER DETAILS MODAL -->
+<div *ngIf="visible" class="modal-overlay" (click)="close()">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-box"></i>
+        Order Details
+      </h3>
+
+      <button class="modal-close" (click)="close()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <!-- ORDER SUMMARY -->
+      <div class="order-summary-card">
+
+        <div class="order-summary-grid">
+          <div>
+            <strong>Order:</strong> {{ order?.id }}
+          </div>
+
+          <div>
+            <strong>Status:</strong> {{ order?.status }}
+          </div>
+
+          <div>
+            <strong>Total:</strong>
+            ₹{{ order?.totalAmount | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS LIST -->
+      <div class="products-grid">
+
+        <div class="product-card"
+             *ngFor="let item of order?.products">
+
+          <img
+            [src]="item.imageUrl || 'assets/no-image.png'"
+            class="product-img" />
+
+          <h5>{{ item.productName }}</h5>
+
+          <p><strong>Brand:</strong> {{ item.brand }}</p>
+
+          <p><strong>Price:</strong> ₹{{ item.price }}</p>
+
+          <p><strong>Qty:</strong> {{ item.quantity }}</p>
+
+        </div>
+
+      </div>
+
+      <!-- 🧾 ORDER CALCULATION SUMMARY -->
+      <div class="order-summary mt-3">
+
+        <p>
+          <strong>Subtotal:</strong>
+          ₹{{ order?.subtotal | number:'1.2-2' }}
+        </p>
+
+        <hr />
+
+        <p class="fw-bold">Discounts</p>
+
+        <p>
+          Price Discount ({{ order?.priceDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (order?.subtotal * (order?.priceDiscountPercent ?? 0) / 100)
+            | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          Quantity Discount ({{ order?.quantityDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (order?.subtotal * (order?.quantityDiscountPercent ?? 0) / 100)
+            | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          Special Discount ({{ order?.specialDiscountPercent ?? 0 }}%):
+          <span class="text-success">
+            - ₹{{ (order?.subtotal * (order?.specialDiscountPercent ?? 0) / 100)
+            | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <p>
+          General Discount:
+          <span class="text-success">
+          ₹{{ order?.products?.[0]?.generalDiscount | number:'1.2-2' }}
+
+          </span>
+        </p>
+
+        <p class="fw-bold">
+          Total Discount:
+          <span class="text-success">
+            - ₹{{ order?.totalDiscount | number:'1.2-2' }}
+          </span>
+        </p>
+
+        <hr />
+
+        <p>
+          <strong>Taxable Amount:</strong>
+          ₹{{ (order?.subtotal - order?.totalDiscount)
+          | number:'1.2-2' }}
+        </p>
+
+        <p>
+          <strong>
+            GST ({{ order?.gstPercentage ?? 0 }}%):
+          </strong>
+          ₹{{
+          (
+          (order?.subtotal - order?.totalDiscount) *
+          (order?.gstPercentage ?? 0) / 100
+          ) | number:'1.2-2'
+          }}
+        </p>
+
+        <hr />
+
+        <h5 class="text-success">
+          <strong>Total Amount:</strong>
+          ₹{{ order?.totalAmount | number:'1.2-2' }}
+        </h5>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="close()">
+        Close
+      </button>
+    </div>
+
+  </div>
+</div>

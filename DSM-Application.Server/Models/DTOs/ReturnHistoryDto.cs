@@ -1,8 +1,13 @@
-﻿namespace DSM_Application.Server.Models.DTOs
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace DSM_Application.Server.Models.DTOs
 {
     public class ReturnHistoryDto
     {
         public string Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+
         public string OrderId { get; set; }
         public string ProductId { get; set; }
         public int ReturnQty { get; set; }

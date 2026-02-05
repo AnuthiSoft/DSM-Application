@@ -31,28 +31,32 @@
     </table>
   </div> -->
 <div class="orders-section">
-  <!-- <div class="welcome-header">
+  <div class="welcome-header">
     <h2>My Orders</h2>
-    <button class="btn btn-outline-primary" (click)="goBackToDashboard()">
-      <i class="fas fa-arrow-left"></i>
-      Back to Dashboard
-    </button>
-  </div> -->
-  <!-- 🔽 STATUS FILTER -->
-  <div class="orders-filter-tabs">
-
-    <button *ngFor="let s of statusOptions" class="status-tab" [class.active]="statusFilter === s"
-      (click)="setStatusFilter(s)">
-
-      {{ s }}
-
-      <span class="tab-count">
-        {{ getStatusCount(s) }}
-      </span>
-
-    </button>
-
+ <button class="btn btn-outline-primary"
+          (click)="goBackToDashboard()">
+    <i class="fas fa-arrow-left"></i>
+    Back to Dashboard
+  </button>
   </div>
+        <!-- 🔽 STATUS FILTER -->
+<div class="orders-filter-tabs">
+
+  <button
+    *ngFor="let s of statusOptions"
+    class="status-tab"
+    [class.active]="statusFilter === s"
+    (click)="setStatusFilter(s)">
+
+    {{ s }}
+
+    <span class="tab-count">
+      {{ getStatusCount(s) }}
+    </span>
+
+  </button>
+
+</div>
 
 
   <div *ngIf="loading" class="loading-state">
@@ -89,12 +93,12 @@
         <div class="stat-value">₹{{ getTotalSpent() | number:'1.0-2' }}</div>
         <div class="stat-label">Total Spent</div>
       </div>
-
+      
     </div>
 
 
     <div class="orders-grid">
-      <div class="order-card" *ngFor="let order of filteredOrders">
+     <div class="order-card" *ngFor="let order of filteredOrders">
         <div class="order-header">
           <div class="order-title">
             <h4>Order #{{ order.id }}</h4>
@@ -283,9 +287,11 @@
 
         <!-- Return (only for delivered orders) -->
         <!-- Return (only when order is delivered AND no previous returns exist) -->
-        <button class="btn btn-warning btn-sm" *ngIf="canReturn(order)" (click)="openReturnPopup(order)">
-          <i class="fas fa-undo"></i> Return
-        </button>
+       <button class="btn btn-warning btn-sm"
+        *ngIf="canReturn(order)"
+        (click)="openReturnPopup(order)">
+  <i class="fas fa-undo"></i> Return
+</button>
 
 
 
@@ -394,58 +400,68 @@
       </div>
 
       <form (ngSubmit)="submitReturnRequest()">
-        <!-- Custom Multi-Select Dropdown -->
-        <div class="form-group custom-multiselect">
-          <label class="required"><i class="fas fa-box"></i> Select Products</label>
+ <!-- Custom Multi-Select Dropdown -->
+<div class="form-group custom-multiselect">
+  <label class="required"><i class="fas fa-box"></i> Select Products</label>
 
-          <!-- Dropdown label -->
-          <div class="dropdown-display" (click)="toggleDropdown()">
-            <span *ngIf="selectedProductIds.length === 0">Select Products</span>
-            <span *ngIf="selectedProductIds.length > 0">
-              {{ selectedProductIds.length }} product(s) selected
-            </span>
-            <i class="fas fa-chevron-down"></i>
-          </div>
+  <!-- Dropdown label -->
+  <div class="dropdown-display" (click)="toggleDropdown()">
+    <span *ngIf="selectedProductIds.length === 0">Select Products</span>
+    <span *ngIf="selectedProductIds.length > 0">
+      {{ selectedProductIds.length }} product(s) selected
+    </span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
 
-          <!-- Dropdown list -->
-          <div class="dropdown-list" *ngIf="dropdownOpen">
-            <div *ngFor="let p of selectedOrderForReturn?.products" class="dropdown-item"
-              [class.disabled]="p.returnedQty >= p.quantity"
-              (click)="p.returnedQty < p.quantity && toggleProductSelection(p.productId)">
+  <!-- Dropdown list -->
+  <div class="dropdown-list" *ngIf="dropdownOpen">
+    <div *ngFor="let p of selectedOrderForReturn?.products"
+         class="dropdown-item"
+         [class.disabled]="p.returnedQty >= p.quantity"
+         (click)="p.returnedQty < p.quantity && toggleProductSelection(p.productId)">
 
-              <label class="checkbox-label">
-                <input type="checkbox" [checked]="selectedProductIds.includes(p.productId)"
-                  [disabled]="p.returnedQty >= p.quantity">
+      <label class="checkbox-label">
+        <input type="checkbox"
+               [checked]="selectedProductIds.includes(p.productId)"
+               [disabled]="p.returnedQty >= p.quantity">
 
-                {{ p.productName }}
-              </label>
+        {{ p.productName }}
+      </label>
 
-              <span class="text-muted" style="font-size: 12px;">
-                Max: {{ p.quantity - (p.returnedQty || 0) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-
+      <span class="text-muted" style="font-size: 12px;">
+        Max: {{ p.quantity - (p.returnedQty || 0) }}
+      </span>
+    </div>
+  </div>
+</div>
 
 
+
+       
 
         <!-- Return Qty Inputs for Each Selected Product -->
-        <div class="form-group" *ngFor="let pid of selectedProductIds">
-          <label>
-            Return Qty for {{ getProductName(pid) }}
-          </label>
+<div class="form-group" *ngFor="let pid of selectedProductIds">
+  <label>
+    Return Qty for {{ getProductName(pid) }}
+  </label>
+  
+  <input type="number"
+         class="form-control"
+         min="1"
+         [max]="getMaxReturnQtyForProduct(pid)"
+         [(ngModel)]="returnQuantities[pid]"
+         (input)="updateTotalReturnQty()"
+         name="qty_{{pid}}">
+</div>
 
-          <input type="number" class="form-control" min="1" [max]="getMaxReturnQtyForProduct(pid)"
-            [(ngModel)]="returnQuantities[pid]" (input)="updateTotalReturnQty()" name="qty_{{pid}}">
-        </div>
-
-        <!-- Auto-filled Total Return Quantity -->
-        <div class="form-group">
-          <label><i class="fas fa-calculator"></i> Total Return Quantity</label>
-          <input type="number" class="form-control" [value]="totalReturnQty" readonly>
-        </div>
+<!-- Auto-filled Total Return Quantity -->
+<div class="form-group">
+  <label><i class="fas fa-calculator"></i> Total Return Quantity</label>
+  <input type="number"
+         class="form-control"
+         [value]="totalReturnQty"
+         readonly>
+</div>
 
         <!-- Return Reason -->
         <div class="form-group">

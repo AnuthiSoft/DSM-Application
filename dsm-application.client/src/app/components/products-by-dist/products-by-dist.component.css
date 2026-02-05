@@ -858,8 +858,6 @@
 .mt-3 { margin-top: 12px; }
 .mt-4 { margin-top: 16px; }
 
-
-
 /* ✅ Fix product code visibility in dark mode popup */
 .popup-details .text-muted {
   color: #cfd3da !important;  /* light gray */
@@ -1183,11 +1181,3 @@ select option {
     -webkit-appearance: auto;
   }
 }
-
-/* 🔥 GLOBAL CONTENT WIDTH (Amazon style) */
-.content-container {
-  max-width: 1200px;          /* 👈 control width here */
-  margin: 0 auto;
-  width: 100%;
-}
-

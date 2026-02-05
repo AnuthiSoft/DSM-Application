@@ -86,34 +86,6 @@ export class CustomerDashboardComponent {
     });
   }
 
-  get showHeader(): boolean {
-    return !['dashboard', 'profile', 'cart'].includes(this.activeTab);
-  }
-
-  get showSearch(): boolean {
-    return this.activeTab === 'products';
-  }
-
-  get headerTitle(): string {
-    switch (this.activeTab) {
-      case 'distributors':
-        return 'My Distributors';
-
-      case 'products':
-        return 'Distributor Products';
-
-      case 'orders':
-        return 'My Orders';
-
-      case 'returns':
-        return 'My Return Orders';
-
-      default:
-        return '';
-    }
-  }
-
-
   ngOnInit(): void {
     // Load sidebar state
     const savedSidebarState = localStorage.getItem('customerSidebarCollapsed');

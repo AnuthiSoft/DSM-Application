@@ -237,18 +237,15 @@
 
     <!-- Search and Filter Card -->
     <div class="dashboard-card">
-
       <div class="filter-header">
         <h3><i class="fas fa-filter"></i> Filter Employees</h3>
       </div>
-
-      <!-- GRID: search + desktop filters only -->
       <div class="search-filter-grid">
         <div class="search-box">
           <div class="search-input-wrapper">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="form-control search-input"
-              placeholder="Search employees by name or phone..." [(ngModel)]="searchTerm"
+              placeholder="    Search employees by name, email, or phone..." [(ngModel)]="searchTerm"
               (input)="applyFilters()" />
           </div>
         </div>
@@ -264,6 +261,14 @@
           </select>
         </div>
 
+        <!-- MOBILE / TABLET -->
+        <div class="filter-group mobile-only">
+          <label class="filter-label">Designation</label>
+          <div class="mobile-select" (click)="openSheet('designation')">
+            {{ roleFilter || 'All Designations' }}
+          </div>
+        </div>
+
         <div class="filter-group desktop-only">
           <label class="filter-label">Status</label>
           <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
@@ -272,23 +277,16 @@
             <option value="inactive">Inactive</option>
           </select>
         </div>
-      </div>
 
-      <!-- 🛒 SHOPPING STYLE FILTERS (MOBILE / TABLET) -->
-      <div class="shop-filters mobile-only">
-        <div class="filter-chip" (click)="openSheet('designation')">
-          <span>Designation</span>
-          <i class="fas fa-chevron-down"></i>
-        </div>
-
-        <div class="filter-chip" (click)="openSheet('status')">
-          <span>Status</span>
-          <i class="fas fa-chevron-down"></i>
+        <!-- MOBILE / TABLET -->
+        <div class="filter-group mobile-only">
+          <label class="filter-label">Status</label>
+          <div class="mobile-select" (click)="openSheet('status')">
+            {{ statusFilter || 'All Status' }}
+          </div>
         </div>
       </div>
-
     </div>
-
 
     <!-- Employee Table Card -->
     <div class="dashboard-card">
@@ -349,8 +347,8 @@
                   </button>
 
 
-                  <button *ngIf="emp.invoicePdfUrl && (emp.designation || '').toLowerCase().trim() === 'delivery boy'"
-                    class="btn btn-outline-secondary btn-sm action-btn" (click)="viewPdf(emp.invoicePdfUrl)">
+                  <button *ngIf="emp.invoicePdfUrl && (emp.designation || '').toLowerCase().trim() === 'delivery boy'" 
+                  class="btn btn-outline-secondary btn-sm action-btn" (click)="viewPdf(emp.invoicePdfUrl)">
                     <i class="fas fa-eye"></i>
                     <span>View PDF</span>
                   </button>
@@ -622,10 +620,10 @@
 </div>
 
 <!-- BACKDROP -->
-<div class="sheet-backdrop" [class.open]="sheetOpen" (click)="closeSheet()">
-</div>
+<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
+
 <!-- BOTTOM SHEET -->
-<div class="bottom-sheet" [class.open]="sheetOpen">
+<div class="bottom-sheet" *ngIf="sheetOpen">
   <div class="sheet-handle"></div>
 
   <div class="sheet-header">

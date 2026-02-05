@@ -217,9 +217,8 @@
 
 
 <!-- ✅ Assign Modal -->
-<div *ngIf="showAssignModal" class="modal-overlay">
-  <div class="modal-backdrop" (click)="closeAssignModal()"></div>
-
+<div *ngIf="showAssignModal" class="modal-overlay"(click)="closeAssignModal()">>
+ 
 
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -314,10 +313,13 @@
 <div class="availability-box mt-3">
   <h5 class="fw-bold">Available Employees</h5>
 
-  <select
-    class="form-select"
-    *ngIf="availableEmployees.length > 0"
-    [(ngModel)]="selectedEmployeeId">
+ <select
+  class="form-select"
+  *ngIf="availableEmployees.length > 0"
+  [(ngModel)]="selectedEmployeeId"
+  (click)="$event.stopPropagation()"
+  (mousedown)="$event.stopPropagation()">
+
 
     <option value="">-- Select Available Employee --</option>
 

@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import { ReturnApiService } from '../../services/return-api.service';
 import { environment } from '../../../environments/environment';
+import { CartService } from '../../services/cart.service';
 
 interface ReturnData {
   returnType: string;
@@ -86,7 +87,7 @@ selectedOrderForReturn: any = null;
   filteredOrders: Order[] = [];
 
 
-  constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService) { }
+  constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService, private cartService: CartService ) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -395,26 +396,51 @@ updateTotalReturnQty() {
           }
 
   // Reorder a previous order
-  reorder(orderId: string): void {
+ reorder(orderId: string): void {
 
-              const distributorId = localStorage.getItem('distributorId')!;
-              const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
+  this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`).subscribe({
+    next: (order) => {
 
-              const today = new Date();
-              today.setDate(today.getDate() + leadTime);
+      if (!order || !order.products || order.products.length === 0) {
+        this.toastr.error('No products found in this order');
+        return;
+      }
 
-              const expectedDelivery = today.toISOString().split('T')[0];
+      // ✅ Required for AddToCart screen
+      const distributorId = order.distributorId;
+      localStorage.setItem('distributorId', distributorId);
 
-              this.orderService.reorder(orderId, expectedDelivery).subscribe({
-                  next: () => {
-                      this.toastr.success('Order placed successfully');
-                      this.loadOrders();
-                  },
-                  error: (err) => {
-                      this.toastr.error(err?.error?.message || 'Reorder failed');
-                  }
-              });
-          }
+      // 🔑 USE THE CORRECT CART KEY
+      const CART_KEY = `customer_order_products_${distributorId}`;
+
+      const orderProducts = order.products.map((item: any) => ({
+        product: {
+          productId: item.productId,
+          productName: item.productName,
+          price: item.price,
+          distributorId: distributorId
+        },
+        quantity: item.quantity,
+        deliveryEta: null
+      }));
+
+      // ✅ Save where AddToCartComponent actually reads
+      localStorage.setItem(CART_KEY, JSON.stringify(orderProducts));
+
+      // Optional: keep global cart in sync
+      localStorage.setItem('cart', JSON.stringify(orderProducts));
+
+      this.toastr.success('Order items loaded into cart');
+
+      // ✅ Navigate to cart page
+      this.router.navigate(['/add-to-cart']);
+    },
+    error: () => {
+      this.toastr.error('Failed to load previous order');
+    }
+  });
+}
+
 
 
 

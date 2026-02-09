@@ -106,7 +106,6 @@ showCustomerPopup = false;
   expectedDays: number = 1;
 
 
-  CART_KEY = "customer_order_products";
 
   activeTab: string = 'dashboard';
   customers: any[] = [];
@@ -174,6 +173,8 @@ showCustomerPopup = false;
 
 
 
+
+
    
     if (this.distributorId) {
       this.computeExpectedDateForDistributor(this.distributorId);
@@ -183,7 +184,8 @@ showCustomerPopup = false;
 
     this.getCustomerInfo();
 
-
+ this.customerId = localStorage.getItem('customerId') ?? '';
+  this.loadCartForCustomer();
 
     //console.log("Stored Orders:", localStorage.getItem("cart"));
 
@@ -196,20 +198,18 @@ showCustomerPopup = false;
     // }
 
     this.customerId = localStorage.getItem('customerId') ?? '';
+    this.restoreProductTable();
     if (this.customerId) {
       this.loadCustomerName(this.customerId);
       this.loadCustomerEmail(this.customerId);
-      this.loadCartFromBackend();
+      // this.loadCartFromBackend();
 
     }
 
 
     const id = localStorage.getItem("customerId");
 
-    this.customerService.getCustomerById(id!).subscribe(c => {
-      console.log(c.email);
-      console.log(c.phoneNumber);
-    });
+    
 
 
 
@@ -220,16 +220,24 @@ showCustomerPopup = false;
     // console.log(this.customerEmail);
     // console.log(this.customerPhoneNumber);
 
-    this.expectedDays = Number(localStorage.getItem("expectedDays")) || 1;
-    this.orderedDate = new Date().toISOString().split('T')[0];
-    this.updateExpectedDate();
+   this.expectedDays = Number(localStorage.getItem("expectedDays")) || 1;
+this.orderedDate = new Date().toISOString().split('T')[0];
 
-    const saved = localStorage.getItem('cart');
-    if (saved) {
-      this.cart = JSON.parse(saved);
-      this.orderProducts = [...this.cart];
-    }
-    this.distributorId = localStorage.getItem('distributorId') ?? '';
+// 🔥 Load distributor first
+this.distributorId = localStorage.getItem('DistributorId') ?? '';
+
+
+// 🔥 Then calculate expected date
+if (this.distributorId) {
+  this.computeExpectedDateForDistributor(this.distributorId);
+}
+
+    // const saved = localStorage.getItem('cart');
+    // if (saved) {
+    //   this.cart = JSON.parse(saved);
+    //   this.orderProducts = [...this.cart];
+    // }
+    // this.distributorId = localStorage.getItem('distributorId') ?? '';
     //  this.distributorId = this.route.snapshot.paramMap.get('distributorId') ?? '';
 
     // if (this.distributorId) {
@@ -238,10 +246,7 @@ showCustomerPopup = false;
     //   console.warn("Distributor ID missing from route");
     // }
     // ✅ Load existing cart from localStorage
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      this.cart = JSON.parse(savedCart);
-    }
+    
 
 
 
@@ -269,9 +274,7 @@ showCustomerPopup = false;
 
 
 
-    this.customerService.getCustomerById(this.customerId).subscribe(res => {
-      console.log("Full Customer Data:", res);
-    });
+   
 
 
   }
@@ -305,6 +308,10 @@ connectDistributorFromCart(distributorId: string) {
       });
   }
 
+getCartKey(): string {
+  const customerId = localStorage.getItem('customerId');
+  return `cart_customer_${customerId}`;
+}
 
 
   connectAllDistributorsFromCart() {
@@ -393,34 +400,19 @@ connectDistributorFromCart(distributorId: string) {
 
 
   restoreProductTable() {
-    if (!this.distributorId) return;
+  const key = this.getCartKey();
+  const saved = localStorage.getItem(key);
 
-    const key = `${this.CART_KEY}_${this.distributorId}`;
-    const saved = localStorage.getItem(key);
+  this.orderProducts = saved ? JSON.parse(saved) : [];
+  this.cart = [...this.orderProducts];
+}
 
-    if (saved) {
-      this.orderProducts = JSON.parse(saved);
-      this.cart = [...this.orderProducts];
-    } else {
-      this.orderProducts = [];
-      this.cart = [];
-    }
-  }
 
   syncProductTable() {
-    if (!this.distributorId) return;
-
-    const key = `${this.CART_KEY}_${this.distributorId}`;
-    this.cart = [...this.orderProducts];
-
-    localStorage.setItem(key, JSON.stringify(this.orderProducts));
-
-    // Optional global fallback
-    localStorage.setItem("cart", JSON.stringify(this.cart));
-
-    this.cartUpdated.emit(this.cart);
-  }
-
+  const key = this.getCartKey();
+  this.cart = [...this.orderProducts];
+  localStorage.setItem(key, JSON.stringify(this.orderProducts));
+}
 
 
   // syncCart() {
@@ -725,39 +717,46 @@ connectDistributorFromCart(distributorId: string) {
   }
 
 
-  confirmAddToCart() {
-    if (!this.selectedProduct) return;
+confirmAddToCart() {
+  if (!this.selectedProduct) return;
 
-    // ⭐ ensure correct distributor
-    this.distributorId = this.selectedProduct.distributorId;
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
 
-    // ⭐ Refresh product table according to distributor
-    this.restoreProductTable();
+  // 🔥 Customer-specific key
+  const key = `cart_customer_${customerId}`;
 
-    const eta = this.computeDeliveryDate(this.selectedProduct, this.orderedDate);
+  // Get existing cart for this customer
+  const saved = localStorage.getItem(key);
+  let cart = saved ? JSON.parse(saved) : [];
 
-    const existing = this.orderProducts.find(
-      x => x.product.productId === this.selectedProduct?.productId
-    );
+  const existing = cart.find(
+    (x: any) => x.product.productId === this.selectedProduct!.productId
+  );
 
-    if (existing) {
-      existing.quantity += this.selectedQuantity;
-      existing.deliveryEta = eta;
-    } else {
-      this.orderProducts.push({
-        product: this.selectedProduct,
-        quantity: this.selectedQuantity,
-        deliveryEta: eta
-      });
-    }
-
-    // ⭐ Store table under correct distributor
-    this.syncProductTable();
-
-    this.showPopup = false;
-    this.selectedProduct = null;
-    this.toastr.success("Added to cart");
+  if (existing) {
+    existing.quantity += this.selectedQuantity;
+  } else {
+    cart.push({
+      product: this.selectedProduct,
+      quantity: this.selectedQuantity
+    });
   }
+
+  // 🔥 Save ONLY to customer cart
+  localStorage.setItem(key, JSON.stringify(cart));
+
+  // 🔥 Also update global cart for UI
+
+
+  this.orderProducts = cart;
+  this.cart = [...cart];
+
+  this.showPopup = false;
+  this.selectedProduct = null;
+}
+
+
 
 
 
@@ -818,12 +817,17 @@ connectDistributorFromCart(distributorId: string) {
   // ---------------------------------------------------
   //  RESET ORDER
   // ---------------------------------------------------
-  resetOrder() {
-    this.cart = [];
-    this.orderProducts = [];
-    localStorage.removeItem('cart');
-    this.cartUpdated.emit([]);
+ resetOrder() {
+  const customerId = localStorage.getItem('customerId');
+  if (customerId) {
+    localStorage.removeItem(`cart_customer_${customerId}`);
   }
+
+  this.cart = [];
+  this.orderProducts = [];
+
+  this.cartUpdated.emit([]);
+}
 
   // ---------------------------------------------------
   //  PLACE ORDER
@@ -888,15 +892,6 @@ connectDistributorFromCart(distributorId: string) {
 
 
 
-  updateCart(newCart: any[]) {
-    this.cart = [...newCart];
-    this.orderProducts = [...newCart];
-    localStorage.setItem('cart', JSON.stringify(this.cart));
-  }
-
-
-
-
 
 
 
@@ -905,6 +900,7 @@ connectDistributorFromCart(distributorId: string) {
       next: (customer) => {
         this.customerName = customer.customerName || customer.name;
         localStorage.setItem('customerName', this.customerName);
+        
       }
     })
   }
@@ -920,9 +916,11 @@ connectDistributorFromCart(distributorId: string) {
   }
 
 
-  viewProducts(distributor: any) {
+viewProducts(distributor: any) {
+ localStorage.setItem("distributorId", distributor.distributorId);
 
-    localStorage.setItem("distributorId", distributor.distributorId);
+
+
 
     // Reset internal table immediately
     this.orderProducts = [];
@@ -956,35 +954,18 @@ connectDistributorFromCart(distributorId: string) {
 
 
 
-loadCartFromBackend(): void {
-  this.orderService.getCart().subscribe({
-    next: (cart: any) => {
-      console.log('✅ DB CART LOADED:', cart);
 
-      if (!cart || !cart.items || cart.items.length === 0) return;
 
-      this.orderProducts = cart.items.map((i: any) => ({
-        product: {
-          productId: i.productId,
-          productName: i.productName,
-          price: i.price,
-          distributorId: cart.distributorId
-        },
-        quantity: i.quantity
-      }));
+loadCartForCustomer() {
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) {
+    this.orderProducts = [];
+    return;
+  }
 
-      this.cart = [...this.orderProducts];
-
-      const key = `${this.CART_KEY}_${cart.distributorId}`;
-      localStorage.setItem(key, JSON.stringify(this.orderProducts));
-      localStorage.setItem('cart', JSON.stringify(this.cart));
-    },
-    error: err => {
-      console.error('FAILED TO LOAD CART FROM DB', err);
-    }
-  });
+  const raw = localStorage.getItem(`cart_customer_${customerId}`);
+  this.orderProducts = raw ? JSON.parse(raw) : [];
 }
-
 
 
 }

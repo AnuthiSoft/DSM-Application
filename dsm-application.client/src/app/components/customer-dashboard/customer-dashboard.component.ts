@@ -382,31 +382,28 @@ ordersNeedRefresh: boolean = false;
   //   localStorage.setItem('cart', JSON.stringify(cart));
   //   this.updateCartBadge();
   // }
-  onAddToCart(product: Product) {
-    const raw = localStorage.getItem('cart');
- 
-    let cart: any[] = [];
- 
-    try {
-      const parsed = raw ? JSON.parse(raw) : [];
-      cart = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      cart = [];
-    }
- 
-    const existing = cart.find(
-      c => c.product.productId === product.productId
-    );
- 
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ product, quantity: 1 });
-    }
- 
-    localStorage.setItem('cart', JSON.stringify(cart));
-    this.updateCartBadge();
+onAddToCart(product: Product) {
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
+
+  const key = `cart_customer_${customerId}`;
+  const raw = localStorage.getItem(key);
+  const cart = raw ? JSON.parse(raw) : [];
+
+  const existing = cart.find(
+    (c: any) => c.product.productId === product.productId
+  );
+
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ product, quantity: 1 });
   }
+
+  localStorage.setItem(key, JSON.stringify(cart));
+  this.updateCartBadge();
+}
+
  
  
  
@@ -428,22 +425,22 @@ ordersNeedRefresh: boolean = false;
   //   );
   // }
   updateCartBadge() {
-    const raw = localStorage.getItem('cart');
- 
-    let cart: any[] = [];
- 
-    try {
-      const parsed = raw ? JSON.parse(raw) : [];
-      cart = Array.isArray(parsed) ? parsed : [];
-    } catch {
-      cart = [];
-    }
- 
-    this.cartCount = cart.reduce(
-      (sum: number, c: any) => sum + (c?.quantity || 0),
-      0
-    );
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) {
+    this.cartCount = 0;
+    return;
   }
+
+  const key = `cart_customer_${customerId}`;
+  const raw = localStorage.getItem(key);
+  const cart = raw ? JSON.parse(raw) : [];
+
+  this.cartCount = cart.reduce(
+    (sum: number, c: any) => sum + (c?.quantity || 0),
+    0
+  );
+}
+
  
  
   goToProducts(product: Product) {
@@ -452,41 +449,35 @@ ordersNeedRefresh: boolean = false;
   }
  
  
-  updateCart(newCart: any[]) {
-    this.cart = [...newCart];
-    localStorage.setItem('cart', JSON.stringify(this.cart));
-  }
- 
-  logout(): void {
-    Swal.fire({
-      title: 'Logout Confirmation',
-      text: 'Are you sure you want to logout?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Logout',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-      allowOutsideClick: false,
- 
-      // 🌙 Dark / Light theme support
-      background: getComputedStyle(document.documentElement)
-        .getPropertyValue('--card-bg'),
-      color: getComputedStyle(document.documentElement)
-        .getPropertyValue('--text-color'),
- 
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d'
-    }).then((result) => {
-      if (result.isConfirmed) {
- 
-        // ✅ CLEAR CUSTOMER UI STATE
-        localStorage.removeItem('customerActiveTab');
-        localStorage.removeItem('customerSidebarCollapsed');
- 
-        // (optional auth cleanup if used later)
-        localStorage.removeItem('token');
-        localStorage.removeItem('customerId');
- 
+
+
+ logout(): void {
+  Swal.fire({
+    title: 'Logout Confirmation',
+    text: 'Are you sure you want to logout?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, Logout',
+    cancelButtonText: 'Cancel',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+    
+
+      // 🔐 CLEAR SESSION
+      localStorage.removeItem('token');
+      localStorage.removeItem('customerId');
+      localStorage.removeItem('customerEmail');
+      localStorage.removeItem('customerName');
+      localStorage.removeItem('distributorId');
+
+      this.router.navigate(['/customer/login']);
+    
+  
+
+
+
         // ✅ SUCCESS MESSAGE
         Swal.fire({
           html: `

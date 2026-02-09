@@ -127,7 +127,7 @@
           <p><strong>Price:</strong> ₹{{ item.product.price }}</p>
           <p><strong>Stock:</strong> {{ item.product.currentStock }}</p>
           <p><strong>Brand:</strong> {{ item.product.brand }}</p>
-          <!-- <p><strong>Category:</strong> {{ item.product.category }}</p> -->
+          <p><strong>Category:</strong> {{ item.product.category }}</p>
           <p><strong>Distributor:</strong> {{ item.product.distributorName }}</p>
           <p><strong>Expected Delivery:</strong>
             {{ computeDeliveryDate(item.product, orderedDate) }}
@@ -158,6 +158,7 @@
 
 
 
+<div class="popup-overlay" *ngIf="showPopup && selectedProduct">
 
   <!--
  🛒 Add to Cart Popup Modal

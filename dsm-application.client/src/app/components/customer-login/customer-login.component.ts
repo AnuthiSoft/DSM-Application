@@ -119,6 +119,15 @@ export class CustomerLoginComponent {
         localStorage.setItem("token", res.token);
         localStorage.setItem("role", res.role);
         localStorage.setItem('customerId', res.customer.customerId!);
+
+// 🔐 LOAD CUSTOMER-SPECIFIC CART INTO GLOBAL CART
+// 🔐 LOAD CUSTOMER-SPECIFIC CART INTO GLOBAL CART
+const customerId = res.customer.customerId;   // ✅ correct id
+
+const customerCart = localStorage.getItem(`cart_customer_${customerId}`);
+localStorage.setItem('cart', customerCart ? customerCart : '[]');
+
+
         localStorage.setItem('customerName', res.customer.name!);
         localStorage.setItem('customerEmail', res.customer.email!);
         localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);

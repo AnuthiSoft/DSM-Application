@@ -13,19 +13,26 @@ export class CartService {
     this.emitCount(); // ✅ initialize on app load
   }
 
-  private getCart(): any[] {
-    const raw = localStorage.getItem('cart');
+ private getCart(): any[] {
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return [];
 
-    try {
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+  const raw = localStorage.getItem(`cart_customer_${customerId}`);
+
+  try {
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
+}
 
   private saveCart(cart: any[]) {
-    localStorage.setItem('cart', JSON.stringify(cart));
+   const customerId = localStorage.getItem('customerId');
+if (!customerId) return;
+
+localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
+
     this.emitCount(); // 🔥 notify immediately
   }
 
@@ -54,45 +61,36 @@ export class CartService {
     return this.getCart().reduce((s, c) => s + c.quantity, 0);
   }
    addToCart(product: Product) {
-    const raw = localStorage.getItem('cart');
-    let cart: any[] = [];
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
 
-    try {
-      cart = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(cart)) cart = [];
-    } catch {
-      cart = [];
-    }
+  const raw = localStorage.getItem(`cart_customer_${customerId}`);
+  let cart: any[] = [];
 
-    const existing = cart.find(
-      c => c.product.productId === product.productId
-    );
-
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ product, quantity: 1 });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    this.updateCartCount();
+  try {
+    cart = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(cart)) cart = [];
+  } catch {
+    cart = [];
   }
 
-  updateCartCount() {
-    const raw = localStorage.getItem('cart');
-    let cart: any[] = [];
+  const existing = cart.find(
+    c => c.product.productId === product.productId
+  );
 
-    try {
-      cart = raw ? JSON.parse(raw) : [];
-    } catch {
-      cart = [];
-    }
-
-    const count = cart.reduce(
-      (sum, c) => sum + (c?.quantity || 0),
-      0
-    );
-
-    this.cartCountSubject.next(count);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({ product, quantity: 1 });
   }
+
+  localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
+
+  this.emitCount(); // 🔥 important
+}
+
+updateCartCount() {
+  this.emitCount();
+}
+
 }

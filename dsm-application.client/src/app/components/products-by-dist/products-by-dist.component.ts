@@ -506,9 +506,20 @@ previousQtyMap: { [productId: string]: number } = {};
 
 
 openAddPopup(prod: Product) {
+  //  Do not open popup if stock is zero
+  if (!prod.currentStock || prod.currentStock <= 0) {
+    return;
+  }
+
   this.selectedProduct = prod;
   this.selectedQuantity =
     this.previousQtyMap[prod.productId as string] ?? 1;
+
+  // Limit to available stock
+  if (this.selectedQuantity > prod.currentStock) {
+    this.selectedQuantity = prod.currentStock;
+  }
+
   this.showPopup = true;
 }
 
@@ -545,11 +556,7 @@ onPopupQtyChange(value: number): void {
     if (!this.selectedProduct) return;
 
   // Reduce UI stock instantly
-  this.selectedProduct.currentStock -= this.selectedQuantity;
-
-  if (this.selectedProduct.currentStock < 0) {
-    this.selectedProduct.currentStock = 0;
-  }
+ 
 
   // Inform cart service
   this.cartService.addWithQuantity(

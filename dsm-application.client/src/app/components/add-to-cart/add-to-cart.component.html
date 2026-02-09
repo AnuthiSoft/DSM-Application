@@ -114,8 +114,15 @@
 
       <!-- QUANTITY COLUMN (STAYS FIXED ALWAYS) -->
       <td class="quantity-cell">
-        <input type="number" [(ngModel)]="item.quantity" min="1" />
-      </td>
+  <input
+    type="number"
+    [(ngModel)]="item.quantity"
+    (change)="onQuantityChange(item)"
+    [max]="item.product.currentStock"
+    min="1"
+  />
+</td>
+
 
     </tr>
 

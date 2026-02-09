@@ -37,20 +37,34 @@ localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
   }
 
   addWithQuantity(product: any, qty: number) {
-    const cart = this.getCart();
+  const cart = this.getCart();
 
-    const existing = cart.find(
-      c => c.product.productId === product.productId
-    );
+  const existing = cart.find(
+    c => c.product.productId === product.productId
+  );
 
+  const currentQty = existing ? existing.quantity : 0;
+  const newTotal = currentQty + qty;
+
+  //  Do not allow more than stock
+  if (newTotal > product.currentStock) {
+    // Limit to max stock
     if (existing) {
-      existing.quantity += qty;
+      existing.quantity = product.currentStock;
+    } else {
+      cart.push({ product, quantity: product.currentStock });
+    }
+  } else {
+    if (existing) {
+      existing.quantity = newTotal;
     } else {
       cart.push({ product, quantity: qty });
     }
-
-    this.saveCart(cart); // 🔥 triggers badge update
   }
+
+  this.saveCart(cart);
+}
+
 
   private emitCount() {
     const count = this.getCart().reduce((s, c) => s + (c.quantity || 0), 0);

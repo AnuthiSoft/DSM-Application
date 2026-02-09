@@ -197,17 +197,7 @@ showCustomerPopup = false;
     //   this.extractCategories();
     // }
 
-    this.customerId = localStorage.getItem('customerId') ?? '';
-    this.restoreProductTable();
-    if (this.customerId) {
-      this.loadCustomerName(this.customerId);
-      this.loadCustomerEmail(this.customerId);
-      // this.loadCartFromBackend();
-
-    }
-
-
-    const id = localStorage.getItem("customerId");
+   
 
     
 
@@ -773,14 +763,29 @@ confirmAddToCart() {
   // ---------------------------------------------------
   //  MODIFY QUANTITY IN TABLE
   // ---------------------------------------------------
-  increaseQuantity(item: any) {
-    if (item.quantity >= item.product.stock) {
-      this.toastr.error('Not enough stock available');
-      return;
-    }
-    item.quantity++;
-    this.syncProductTable();
+increaseQuantity(item: any) {
+  if (item.quantity >= item.product.currentStock) {
+    this.toastr.error('Not enough stock available');
+    return;
   }
+  item.quantity++;
+  this.syncProductTable();
+}
+
+
+
+onQuantityChange(item: any) {
+  if (!item.quantity || item.quantity < 1) {
+    item.quantity = 1;
+  }
+
+  if (item.quantity > item.product.currentStock) {
+    item.quantity = item.product.currentStock;
+    this.toastr.error(`Only ${item.product.currentStock} items available`);
+  }
+
+  this.syncProductTable();
+}
 
 
   decreaseQuantity(item: any) {
@@ -847,6 +852,17 @@ confirmAddToCart() {
       }
 
       if (this.orderProducts.length === 0) {
+for (const item of this.orderProducts) {
+  if (item.quantity > item.product.currentStock) {
+    this.toastr.error(
+      `${item.product.productName} has only ${item.product.currentStock} in stock`
+    );
+    this.isPlacingOrder = false;
+    return;
+  }
+}
+
+
         this.toastr.warning('Your cart is empty');
         return;
       }

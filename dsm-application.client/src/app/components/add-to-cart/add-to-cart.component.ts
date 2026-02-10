@@ -954,8 +954,16 @@ viewProducts(distributor: any) {
   //  NAVIGATE TO PRODUCTS
   // ---------------------------------------------------
   goToProducts() {
-    this.goToProductsClicked.emit();
+  const distributorId =
+    this.distributorId || localStorage.getItem('distributorId');
+
+  if (!distributorId) {
+    this.toastr.error('Distributor not found');
+    return;
   }
+
+  this.router.navigate(['/products', distributorId]);
+}
 
 
 

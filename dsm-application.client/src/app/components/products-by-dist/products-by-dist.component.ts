@@ -95,12 +95,58 @@ previousQtyMap: { [productId: string]: number } = {};
   }
   ngOnInit(): void {
 
-    this.extractConnectedDistributors();
-    this.loadPreviousQuantities();
-  }
-  ngAfterViewInit(): void {
-    this.initCarousels();
-  }
+  this.route.paramMap.subscribe(params => {
+    const distId = params.get('distributorId');
+
+    console.log('Route distributorId =', distId);  // Debug
+
+    if (!distId) {
+      this.loading = false;
+      return;
+    }
+
+    this.distributorId = distId;
+
+    // Save for other screens
+    localStorage.setItem('distributorId', distId);
+    localStorage.setItem('DistributorId', distId);
+
+    // Load products for this distributor
+    this.loadProducts(distId);
+  });
+
+  this.extractConnectedDistributors();
+  this.loadPreviousQuantities();
+}
+
+ngAfterViewInit(): void {
+  this.initCarousels();
+}
+
+loadProducts(distributorId: string): void {
+  this.loading = true;
+
+  this.productService.getProductsByDistributor(distributorId).subscribe({
+    next: (data: Product[]) => {
+      this.products = data.map(p => ({
+        ...p,
+        imageUrls: Array.isArray(p.imageUrls)
+          ? p.imageUrls
+          : p.imageUrls ? [p.imageUrls] : []
+      }));
+
+      this.filterProducts = [...this.products];
+      this.extractCategories();
+      this.loading = false;
+
+      setTimeout(() => this.initCarousels(), 0);
+    },
+    error: () => {
+      this.loading = false;
+    }
+  });
+}
+
 
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -251,51 +297,33 @@ previousQtyMap: { [productId: string]: number } = {};
 
 
 
-  openAddToCart(product: Product) {
-    this.addToCartClicked.emit(product);
+ openAddToCart(product: Product) {
 
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
 
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  const key = `cart_customer_${customerId}`;
 
-    // Check if product exists
-    const existing = cart.find((c: any) => c.product.productId === product.productId);
+  let cart = JSON.parse(localStorage.getItem(key) || '[]');
 
-    if (existing) {
-      existing.quantity++;
-    } else {
-      cart.push({ product, quantity: 1 });
-    }
+  const existing = cart.find(
+    (c: any) => c.product.productId === product.productId
+  );
 
-    // Save updated cart
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    localStorage.setItem("selectedProduct", JSON.stringify(product));
-
-    // Navigate to Add-to-Cart page
-    this.router.navigate(['/customer/add-to-cart']);
+  if (existing) {
+    existing.quantity += 1;
+  } else {
+    cart.push({
+      product: product,
+      quantity: 1
+    });
   }
 
+  localStorage.setItem(key, JSON.stringify(cart));
 
-  AddtoCart(product: Product) {
-
-    // Load existing cart
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-    // Check if product exists
-    const existing = cart.find((c: any) => c.product.productId === product.productId);
-
-    if (existing) {
-      existing.quantity++;
-    } else {
-      cart.push({ product, quantity: 1 });
-    }
-
-    // Save updated cart
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Navigate to Add-to-Cart page
-    this.router.navigate(['/customer/add-to-cart']);
-  }
+  // 🔥 Redirect to cart
+  this.router.navigate(['/add-to-cart']);
+}
 
 
 
@@ -552,22 +580,40 @@ onPopupQtyChange(value: number): void {
 
 
 
-  confirmAddToCart() {
-    if (!this.selectedProduct) return;
+ confirmAddToCart() {
 
-  // Reduce UI stock instantly
- 
+  if (!this.selectedProduct) return;
 
-  // Inform cart service
-  this.cartService.addWithQuantity(
-    this.selectedProduct,
-    this.selectedQuantity
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
+
+  const key = `cart_customer_${customerId}`;
+
+  let cart = JSON.parse(localStorage.getItem(key) || '[]');
+
+  const existing = cart.find(
+    (c: any) => c.product.productId === this.selectedProduct?.productId
   );
+
+  if (existing) {
+    existing.quantity += this.selectedQuantity;
+  } else {
+    cart.push({
+      product: this.selectedProduct,
+      quantity: this.selectedQuantity
+    });
+  }
+
+  localStorage.setItem(key, JSON.stringify(cart));
 
   // Close popup
   this.showPopup = false;
   this.selectedProduct = null;
+
+  // 🔥 Redirect to cart
+  this.router.navigate(['/add-to-cart']);
 }
+
 
 
   /* Helper function for TypeScript/JavaScript */

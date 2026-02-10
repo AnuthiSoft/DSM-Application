@@ -396,7 +396,7 @@ updateTotalReturnQty() {
           }
 
   // Reorder a previous order
- reorder(orderId: string): void {
+reorder(orderId: string): void {
 
   this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`).subscribe({
     next: (order) => {
@@ -406,33 +406,41 @@ updateTotalReturnQty() {
         return;
       }
 
-      // ✅ Required for AddToCart screen
       const distributorId = order.distributorId;
+      const customerId = localStorage.getItem('customerId');
+
+      if (!customerId) {
+        this.toastr.error('Customer not found');
+        return;
+      }
+
+      // ✅ Set distributor for AddToCart screen
       localStorage.setItem('distributorId', distributorId);
 
-      // 🔑 USE THE CORRECT CART KEY
-      const CART_KEY = `customer_order_products_${distributorId}`;
+      // 🔑 SAME KEY used by AddToCartComponent
+      const CART_KEY = `cart_customer_${customerId}`;
 
-      const orderProducts = order.products.map((item: any) => ({
-        product: {
-          productId: item.productId,
-          productName: item.productName,
-          price: item.price,
-          distributorId: distributorId
-        },
-        quantity: item.quantity,
-        deliveryEta: null
-      }));
+     const orderProducts = order.products.map((item: any) => ({
+  product: {
+    productId: item.productId,
+    productName: item.productName,
+    price: item.price,
+    distributorId: distributorId,
 
-      // ✅ Save where AddToCartComponent actually reads
+    // 🔥 Required by AddToCartComponent
+    currentStock: item.currentStock || 9999,
+    brand: item.brand || '',
+    category: item.category || '',
+    distributorName: order.distributorName || ''
+  },
+  quantity: item.quantity
+}));
+
+      // ✅ Save where AddToCart actually reads
       localStorage.setItem(CART_KEY, JSON.stringify(orderProducts));
-
-      // Optional: keep global cart in sync
-      localStorage.setItem('cart', JSON.stringify(orderProducts));
 
       this.toastr.success('Order items loaded into cart');
 
-      // ✅ Navigate to cart page
       this.router.navigate(['/add-to-cart']);
     },
     error: () => {

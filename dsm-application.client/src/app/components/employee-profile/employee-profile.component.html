@@ -47,8 +47,15 @@
           <div class="row">
             <div class="col">
               <label>Phone Number</label>
-              <input type="text" class="form-control" [(ngModel)]="profile.phoneNumber" name="phoneNumber"
-                (ngModelChange)="onPhoneChange()" />
+
+              <!-- PHONE INPUT UI -->
+              <div class="phone-wrapper">
+                <span class="phone-prefix">+91</span>
+                <span class="phone-separator"></span>
+                <input type="text" class="form-control phone-input" [(ngModel)]="profile.phoneNumber" name="phoneNumber"
+                  maxlength="10" (ngModelChange)="onPhoneChange()" placeholder="Enter phone number" />
+              </div>
+
               <!-- SEND OTP -->
               <button type="button" class="btn btn-warning mt-2" *ngIf="!profile.phoneVerified" (click)="sendOtp()">
                 Send OTP

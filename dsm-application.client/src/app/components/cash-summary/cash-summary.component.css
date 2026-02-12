@@ -734,3 +734,60 @@ html[data-theme="dark"] .summary-item {
     display: none !important;
   }
 }
+
+@media (max-width: 768px) {
+  .details-table td.date {
+    white-space: normal;        /* allow wrapping */
+    line-height: 1.3;
+    font-size: 0.8rem;
+  }
+
+  .details-table td.date {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* Mobile-friendly date display */
+@media (max-width: 768px) {
+  .details-table td.date {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  .date-day {
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .date-time {
+    font-size: 0.75rem;
+    opacity: 0.75;
+  }
+}
+
+.modal-overlay {
+  z-index: 99999 !important;
+}
+
+.modal-content {
+  z-index: 100000 !important;
+}
+
+/* Mobile: compact modal footer buttons */
+@media (max-width: 768px) {
+  .modal-footer {
+    align-items: center; /* center buttons */
+  }
+
+  .modal-footer .btn {
+    width: auto;                 /* 🔥 not full width */
+    min-width: 90px;            /* controlled width */
+    padding: 8px 14px;           /* smaller height */
+    font-size: 0.85rem;
+  }
+}

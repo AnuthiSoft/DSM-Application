@@ -621,10 +621,10 @@
 </div>
 
 <!-- BACKDROP -->
-<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
+<div class="sheet-backdrop" [class.active]="sheetOpen" (click)="closeSheet()"></div>
 
 <!-- BOTTOM SHEET -->
-<div class="bottom-sheet" *ngIf="sheetOpen">
+<div class="bottom-sheet" [class.active]="sheetOpen">
   <div class="sheet-handle"></div>
 
   <div class="sheet-header">

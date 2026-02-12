@@ -1,8 +1,8 @@
 .orders-section {
-  padding: 20px 0;
+  padding: 0;
 }
 
-.welcome-header {
+/* .welcome-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -12,7 +12,7 @@
 .welcome-header h2 {
 color: var(--text-color);
   margin: 0;
-}
+} */
 
 .return-info {
   margin-top: 10px;
@@ -1279,3 +1279,4 @@ html[data-theme="dark"] .modal-close {
     border-radius: 16px 16px 0 0;
   }
 }
+

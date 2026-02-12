@@ -13,11 +13,8 @@
       <div class="form-row">
         <div class="form-group">
           <label><i class="fas fa-receipt"></i> Order ID</label>
-          <input type="text" 
-                 class="form-input"
-                 [(ngModel)]="orderId"
-                 placeholder="Enter Order ID"
-                 (keyup.enter)="check()">
+          <input type="text" class="form-input" [(ngModel)]="orderId" placeholder="Enter Order ID"
+            (keyup.enter)="check()">
         </div>
 
         <!-- <div class="form-group">
@@ -90,8 +87,7 @@
         </div>
         <div class="summary-content">
 
-                    <div class="summary-value pending-amount"
-              *ngIf="!isOrderCancelled(); else cancelledPending">
+          <div class="summary-value pending-amount" *ngIf="!isOrderCancelled(); else cancelledPending">
             ₹{{ status.pendingAmount | number:'1.2-2' }}
           </div>
 
@@ -110,35 +106,35 @@
     <!-- Progress Bar -->
     <!-- <div class="payment-progress"> -->
 
-      <!-- Payment Progress -->
-          <ng-container *ngIf="!isOrderCancelled(); else cancelledProgress">
+    <!-- Payment Progress -->
+    <ng-container *ngIf="!isOrderCancelled(); else cancelledProgress">
 
-            <div class="payment-progress">
-              <div class="progress-label">
-                <span>Payment Progress</span>
-                <span class="progress-percentage">{{ getPaymentPercentage() }}%</span>
-              </div>
+      <div class="payment-progress">
+        <div class="progress-label">
+          <span>Payment Progress</span>
+          <span class="progress-percentage">{{ getPaymentPercentage() }}%</span>
+        </div>
 
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="getPaymentPercentage()"></div>
-              </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" [style.width.%]="getPaymentPercentage()"></div>
+        </div>
 
-              <div class="progress-stats">
-                <span>Paid: ₹{{ status.totalPaid | number:'1.2-2' }}</span>
-                <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span>
-              </div>
-            </div>
+        <div class="progress-stats">
+          <span>Paid: ₹{{ status.totalPaid | number:'1.2-2' }}</span>
+          <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
 
-          </ng-container>
+    </ng-container>
 
-          <!-- CANCELLED TEMPLATE -->
-          <ng-template #cancelledProgress>
-            <div class="payment-progress cancelled-text">
-              This order has been cancelled. No payment required.
-            </div>
-          </ng-template>
- </div>
-      <!-- <div class="payment-progress" *ngIf="!isOrderCancelled(); else cancelledProgress">
+    <!-- CANCELLED TEMPLATE -->
+    <ng-template #cancelledProgress>
+      <div class="payment-progress cancelled-text">
+        This order has been cancelled. No payment required.
+      </div>
+    </ng-template>
+  </div>
+  <!-- <div class="payment-progress" *ngIf="!isOrderCancelled(); else cancelledProgress">
 
       <div class="progress-label">
         <span>Payment Progress</span>
@@ -165,54 +161,55 @@
         </ng-template>
 
         <span>Remaining: ₹{{ status.pendingAmount | number:'1.2-2' }}</span> -->
-      <!-- </div>
+  <!-- </div>
     </div> -->
- 
+
 
   <!-- Payment History -->
- <div *ngIf="status?.payments?.length" class="payment-history-section">
-  <div class="section-header">
-    <h4><i class="fas fa-history"></i> Complete Payment History</h4>
+  <div *ngIf="status?.payments?.length" class="payment-history-section">
+    <div class="section-header">
+      <h4><i class="fas fa-history"></i> Complete Payment History</h4>
+    </div>
+    <div class="table-wrapper">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Payment ID</th>
+          <th>Amount</th>
+          <th>Pending</th>
+          <th>Mode</th>
+          <th>Cashier</th>
+          <th>Date</th>
+          <th>Handed Over</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let row of status.payments">
+          <td>#{{ row.paymentId }}</td>
+          <td>₹{{ row.amountPaidToday }}</td>
+          <td>₹{{ row.pendingAmount}}</td>
+
+          <td>
+            <i [class]="getPaymentModeIcon(row.paymentMode)"></i>
+            {{ row.paymentMode }}
+          </td>
+
+          <td>{{ row.cashierId }}</td>
+
+          <td>{{ row.paymentDate | date:'dd/MM/yyyy hh:mm a' }}</td>
+
+          <td>
+            <span [class]="row.isHandedOver ? 'handed-over' : 'pending-handover'">
+              {{ row.isHandedOver ? 'Handed Over' : 'Pending' }}
+            </span>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+    </div>
   </div>
-
-  <table class="history-table">
-    <thead>
-      <tr>
-        <th>Payment ID</th>
-        <th>Amount</th>
-        <th>Pending</th>
-        <th>Mode</th>
-        <th>Cashier</th>
-        <th>Date</th>
-        <th>Handed Over</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let row of status.payments">
-  <td>#{{ row.paymentId }}</td>
-  <td>₹{{ row.amountPaidToday }}</td>
-  <td>₹{{ row.pendingAmount}}</td>
-
-  <td>
-    <i [class]="getPaymentModeIcon(row.paymentMode)"></i>
-    {{ row.paymentMode }}
-  </td>
-
-  <td>{{ row.cashierId }}</td>
-
-  <td>{{ row.paymentDate | date:'dd/MM/yyyy hh:mm a' }}</td>
-
-  <td>
-    <span [class]="row.isHandedOver ? 'handed-over' : 'pending-handover'">
-      {{ row.isHandedOver ? 'Handed Over' : 'Pending' }}
-    </span>
-  </td>
-</tr>
-
-    </tbody>
-  </table>
-</div>
 
 
   <!-- No Results Message -->

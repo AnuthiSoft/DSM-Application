@@ -25,7 +25,6 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
 
-
   @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];
@@ -36,7 +35,9 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   isEdit = false;
   selectedProductId: string | null = null;
 
-
+  showSheet = false;
+  sheetType = '';
+  sheetOptions: any[] = [];
   sortBy: string = 'name';
 
 
@@ -51,6 +52,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   maxPriceFilter?: number;
   categoryFilter: string = '';
   stockFilter: string = '';
+  activeTab: string = 'products';
   categories: string[] = [];
 
   filterProducts: Product[] = [];
@@ -58,7 +60,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   distributorFilter: string = '';
   distributors: string[] = [];
 
-previousQtyMap: { [productId: string]: number } = {};
+  previousQtyMap: { [productId: string]: number } = {};
 
 
   @Output() addToCartClicked = new EventEmitter<Product>();
@@ -95,57 +97,57 @@ previousQtyMap: { [productId: string]: number } = {};
   }
   ngOnInit(): void {
 
-  this.route.paramMap.subscribe(params => {
-    const distId = params.get('distributorId');
+    this.route.paramMap.subscribe(params => {
+      const distId = params.get('distributorId');
 
-    console.log('Route distributorId =', distId);  // Debug
+      console.log('Route distributorId =', distId);  // Debug
 
-    if (!distId) {
-      this.loading = false;
-      return;
-    }
+      if (!distId) {
+        this.loading = false;
+        return;
+      }
 
-    this.distributorId = distId;
+      this.distributorId = distId;
 
-    // Save for other screens
-    localStorage.setItem('distributorId', distId);
-    localStorage.setItem('DistributorId', distId);
+      // Save for other screens
+      localStorage.setItem('distributorId', distId);
+      localStorage.setItem('DistributorId', distId);
 
-    // Load products for this distributor
-    this.loadProducts(distId);
-  });
+      // Load products for this distributor
+      this.loadProducts(distId);
+    });
 
-  this.extractConnectedDistributors();
-  this.loadPreviousQuantities();
-}
+    this.extractConnectedDistributors();
+    this.loadPreviousQuantities();
+  }
 
-ngAfterViewInit(): void {
-  this.initCarousels();
-}
+  ngAfterViewInit(): void {
+    this.initCarousels();
+  }
 
-loadProducts(distributorId: string): void {
-  this.loading = true;
+  loadProducts(distributorId: string): void {
+    this.loading = true;
 
-  this.productService.getProductsByDistributor(distributorId).subscribe({
-    next: (data: Product[]) => {
-      this.products = data.map(p => ({
-        ...p,
-        imageUrls: Array.isArray(p.imageUrls)
-          ? p.imageUrls
-          : p.imageUrls ? [p.imageUrls] : []
-      }));
+    this.productService.getProductsByDistributor(distributorId).subscribe({
+      next: (data: Product[]) => {
+        this.products = data.map(p => ({
+          ...p,
+          imageUrls: Array.isArray(p.imageUrls)
+            ? p.imageUrls
+            : p.imageUrls ? [p.imageUrls] : []
+        }));
 
-      this.filterProducts = [...this.products];
-      this.extractCategories();
-      this.loading = false;
+        this.filterProducts = [...this.products];
+        this.extractCategories();
+        this.loading = false;
 
-      setTimeout(() => this.initCarousels(), 0);
-    },
-    error: () => {
-      this.loading = false;
-    }
-  });
-}
+        setTimeout(() => this.initCarousels(), 0);
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
 
 
 
@@ -297,33 +299,33 @@ loadProducts(distributorId: string): void {
 
 
 
- openAddToCart(product: Product) {
+  openAddToCart(product: Product) {
 
-  const customerId = localStorage.getItem('customerId');
-  if (!customerId) return;
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
 
-  const key = `cart_customer_${customerId}`;
+    const key = `cart_customer_${customerId}`;
 
-  let cart = JSON.parse(localStorage.getItem(key) || '[]');
+    let cart = JSON.parse(localStorage.getItem(key) || '[]');
 
-  const existing = cart.find(
-    (c: any) => c.product.productId === product.productId
-  );
+    const existing = cart.find(
+      (c: any) => c.product.productId === product.productId
+    );
 
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push({
-      product: product,
-      quantity: 1
-    });
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({
+        product: product,
+        quantity: 1
+      });
+    }
+
+    localStorage.setItem(key, JSON.stringify(cart));
+
+    // 🔥 Redirect to cart
+    this.router.navigate(['/add-to-cart']);
   }
-
-  localStorage.setItem(key, JSON.stringify(cart));
-
-  // 🔥 Redirect to cart
-  this.router.navigate(['/add-to-cart']);
-}
 
 
 
@@ -533,23 +535,23 @@ loadProducts(distributorId: string): void {
 
 
 
-openAddPopup(prod: Product) {
-  //  Do not open popup if stock is zero
-  if (!prod.currentStock || prod.currentStock <= 0) {
-    return;
+  openAddPopup(prod: Product) {
+    //  Do not open popup if stock is zero
+    if (!prod.currentStock || prod.currentStock <= 0) {
+      return;
+    }
+
+    this.selectedProduct = prod;
+    this.selectedQuantity =
+      this.previousQtyMap[prod.productId as string] ?? 1;
+
+    // Limit to available stock
+    if (this.selectedQuantity > prod.currentStock) {
+      this.selectedQuantity = prod.currentStock;
+    }
+
+    this.showPopup = true;
   }
-
-  this.selectedProduct = prod;
-  this.selectedQuantity =
-    this.previousQtyMap[prod.productId as string] ?? 1;
-
-  // Limit to available stock
-  if (this.selectedQuantity > prod.currentStock) {
-    this.selectedQuantity = prod.currentStock;
-  }
-
-  this.showPopup = true;
-}
 
 
 
@@ -567,52 +569,52 @@ openAddPopup(prod: Product) {
     }
   }
 
-onPopupQtyChange(value: number): void {
-  if (!value || value < 1) {
-    this.selectedQuantity = 1;
-    return;
+  onPopupQtyChange(value: number): void {
+    if (!value || value < 1) {
+      this.selectedQuantity = 1;
+      return;
+    }
+
+    if (this.selectedProduct && value > this.selectedProduct.currentStock) {
+      this.selectedQuantity = this.selectedProduct.currentStock;
+    }
   }
 
-  if (this.selectedProduct && value > this.selectedProduct.currentStock) {
-    this.selectedQuantity = this.selectedProduct.currentStock;
+
+
+  confirmAddToCart() {
+
+    if (!this.selectedProduct) return;
+
+    const customerId = localStorage.getItem('customerId');
+    if (!customerId) return;
+
+    const key = `cart_customer_${customerId}`;
+
+    let cart = JSON.parse(localStorage.getItem(key) || '[]');
+
+    const existing = cart.find(
+      (c: any) => c.product.productId === this.selectedProduct?.productId
+    );
+
+    if (existing) {
+      existing.quantity += this.selectedQuantity;
+    } else {
+      cart.push({
+        product: this.selectedProduct,
+        quantity: this.selectedQuantity
+      });
+    }
+
+    localStorage.setItem(key, JSON.stringify(cart));
+
+    // Close popup
+    this.showPopup = false;
+    this.selectedProduct = null;
+
+    // 🔥 Redirect to cart
+    this.router.navigate(['/add-to-cart']);
   }
-}
-
-
-
- confirmAddToCart() {
-
-  if (!this.selectedProduct) return;
-
-  const customerId = localStorage.getItem('customerId');
-  if (!customerId) return;
-
-  const key = `cart_customer_${customerId}`;
-
-  let cart = JSON.parse(localStorage.getItem(key) || '[]');
-
-  const existing = cart.find(
-    (c: any) => c.product.productId === this.selectedProduct?.productId
-  );
-
-  if (existing) {
-    existing.quantity += this.selectedQuantity;
-  } else {
-    cart.push({
-      product: this.selectedProduct,
-      quantity: this.selectedQuantity
-    });
-  }
-
-  localStorage.setItem(key, JSON.stringify(cart));
-
-  // Close popup
-  this.showPopup = false;
-  this.selectedProduct = null;
-
-  // 🔥 Redirect to cart
-  this.router.navigate(['/add-to-cart']);
-}
 
 
 
@@ -720,17 +722,84 @@ onPopupQtyChange(value: number): void {
     const item = this.cart.find(c => c.product.productId === prod.productId);
     if (item && item.quantity > 1) item.quantity--;
   }
-   loadPreviousQuantities() {
-  if (!this.customerId) return;
+  loadPreviousQuantities() {
+    if (!this.customerId) return;
 
-  this.orderService
-    .getLastBoughtQuantities(this.customerId)
-    .subscribe((res: { [productId: string]: number }) => {
-      this.previousQtyMap = res;
-    });
-}
+    this.orderService
+      .getLastBoughtQuantities(this.customerId)
+      .subscribe((res: { [productId: string]: number }) => {
+        this.previousQtyMap = res;
+      });
+  }
 
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
 
+  openFilterSheet(type: string) {
+    this.sheetType = type;
+    this.showSheet = true;
 
+    if (type === 'distributor') {
+      this.sheetOptions = [
+        { label: 'All Distributors', value: '' },
+        ...this.connectedDistributors.map(d => ({
+          label: d.name,
+          value: d.distributorId
+        }))
+      ];
+    }
+
+    if (type === 'stock') {
+      this.sheetOptions = [
+        { label: 'All Stock', value: '' },
+        { label: 'In Stock', value: 'inStock' },
+        { label: 'Low Stock', value: 'lowStock' },
+        { label: 'Out of Stock', value: 'outOfStock' }
+      ];
+    }
+
+    if (type === 'sort') {
+      this.sheetOptions = [
+        { label: 'Name (A-Z)', value: 'name' },
+        { label: 'Price: Low to High', value: 'priceLow' },
+        { label: 'Price: High to Low', value: 'priceHigh' },
+        { label: 'Stock: High to Low', value: 'stock' }
+      ];
+    }
+  }
+
+  selectSheetOption(value: string) {
+
+    if (this.sheetType === 'distributor') {
+      this.distributorFilter = value;
+      this.onDistributorChange(value);
+    }
+
+    if (this.sheetType === 'stock') {
+      this.stockFilter = value;
+      this.filteredProducts();
+    }
+
+    if (this.sheetType === 'sort') {
+      this.sortBy = value;
+      this.applySort();
+    }
+
+    this.closeSheet();
+  }
+
+  sortByLabel() {
+    switch (this.sortBy) {
+      case 'priceLow': return 'Price: Low to High';
+      case 'priceHigh': return 'Price: High to Low';
+      case 'stock': return 'Stock: High to Low';
+      default: return 'Name (A-Z)';
+    }
+  }
+
+  closeSheet() {
+    this.showSheet = false;
+  }
 
 }

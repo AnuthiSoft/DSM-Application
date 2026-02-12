@@ -15,8 +15,8 @@ export class EmployeeProfileComponent implements OnInit {
   profile: any = {};
   showOtpInput = false;
   otp = '';
- isVerifyingOtp = false;
- receivedOtp: string | null = null;
+  isVerifyingOtp = false;
+  receivedOtp: string | null = null;
   selectedImage: File | null = null;
   profileImageUrl: string = '';
 
@@ -61,88 +61,89 @@ export class EmployeeProfileComponent implements OnInit {
   //     });
   //   }
 
-loadProfile() {
-  this.employeeService.getMyProfile().subscribe({
-    next: (res) => {
-      Object.assign(this.profile, {
-        name: res.name,
-        email: res.email,
-        phoneNumber: res.phoneNumber,
-        phoneVerified: res.phoneVerified,
-        street: res.street,
-        city: res.city,
-        
-        state: res.state,
-        pincode: res.pincode,
-        country: res.country,
-        createdDate: res.createdDate,
-        updatedDate: res.updatedDate,
-        isActive: res.isActive
-      });
+  loadProfile() {
+    this.employeeService.getMyProfile().subscribe({
+      next: (res) => {
+        Object.assign(this.profile, {
+          name: res.name,
+          email: res.email,
+          phoneNumber: res.phoneNumber?.replace('+91', ''),
+          phoneVerified: res.phoneVerified,
+          street: res.street,
+          city: res.city,
+
+          state: res.state,
+          pincode: res.pincode,
+          country: res.country,
+          createdDate: res.createdDate,
+          updatedDate: res.updatedDate,
+          isActive: res.isActive
+        });
+        this.originalPhoneNumber = this.profile.phoneNumber;
+      }
+    });
+  }
+  originalPhoneNumber: string | null = null;
+  sendOtp() {
+    if (!this.profile.phoneNumber) {
+      this.toastr.error('Enter phone number first');
+      return;
     }
-  });
-}
-originalPhoneNumber: string | null = null;
-sendOtp() {
-  if (!this.profile.phoneNumber) {
-    this.toastr.error('Enter phone number first');
-    return;
+
+    const phone = '+91' + this.profile.phoneNumber;
+
+    this.employeeService.sendOtp(phone).subscribe({
+      next: (res: any) => {
+        this.showOtpInput = true;
+
+        // ✅ SAME AS CUSTOMER (DEV ONLY POPUP)
+        alert(`OTP sent! Your OTP is: ${res.otp}`);
+
+        this.toastr.success('OTP sent');
+      },
+      error: () => {
+        this.toastr.error('Failed to send OTP');
+      }
+    });
   }
 
-  const phone = '+91' + this.profile.phoneNumber;
 
-  this.employeeService.sendOtp(phone).subscribe({
-    next: (res: any) => {
-      this.showOtpInput = true;
-
-      // ✅ SAME AS CUSTOMER (DEV ONLY POPUP)
-      alert(`OTP sent! Your OTP is: ${res.otp}`);
-
-      this.toastr.success('OTP sent');
-    },
-    error: () => {
-      this.toastr.error('Failed to send OTP');
+  verifyOtp() {
+    if (!this.otp) {
+      this.toastr.error('Enter OTP');
+      return;
     }
-  });
-}
 
+    const phone = '+91' + this.profile.phoneNumber;
 
-verifyOtp() {
-  if (!this.otp) {
-    this.toastr.error('Enter OTP');
-    return;
+    this.isVerifyingOtp = true;
+
+    this.employeeService.verifyOtp(phone, this.otp).subscribe({
+      next: () => {
+        // ✅ IMPORTANT: update UI immediately
+        this.profile.phoneVerified = true;
+
+        this.showOtpInput = false;
+        this.otp = '';
+
+        this.toastr.success('Phone number verified');
+
+        this.isVerifyingOtp = false;
+      },
+      error: () => {
+        this.toastr.error('Invalid OTP');
+        this.isVerifyingOtp = false;
+      }
+    });
   }
 
-  const phone = '+91' + this.profile.phoneNumber;
-
-  this.isVerifyingOtp = true;
-
-  this.employeeService.verifyOtp(phone, this.otp).subscribe({
-    next: () => {
-      // ✅ IMPORTANT: update UI immediately
-      this.profile.phoneVerified = true;
-
+  onPhoneChange() {
+    if (this.profile.phoneNumber !== this.originalPhoneNumber) {
+      this.profile.phoneVerified = false;
       this.showOtpInput = false;
       this.otp = '';
-
-      this.toastr.success('Phone number verified');
-
-      this.isVerifyingOtp = false;
-    },
-    error: () => {
-      this.toastr.error('Invalid OTP');
-      this.isVerifyingOtp = false;
     }
-  });
-}
-
-onPhoneChange() {
-  if (this.profile.phoneNumber !== this.originalPhoneNumber) {
-    this.profile.phoneVerified = false;
-    this.showOtpInput = false;
-    this.otp = '';
   }
-}
 
 
 
@@ -175,7 +176,7 @@ onPhoneChange() {
     if (!file) return;
 
     this.selectedImage = file;  // <--- Save file
-   const reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
       this.profileImageUrl = reader.result as string;
     };
@@ -185,34 +186,34 @@ onPhoneChange() {
   // ======================
   // UPDATE PROFILE
   // ======================
-updateProfile() {
-  const formData = new FormData();
+  updateProfile() {
+    const formData = new FormData();
 
-  formData.append('Name', this.profile.name || '');
-  formData.append('PhoneNumber', this.profile.phoneNumber || '');
-  formData.append('Street', this.profile.street || '');
-  formData.append('City', this.profile.city || '');
-  formData.append('State', this.profile.state || '');
-  formData.append('Pincode', this.profile.pincode || '');
-  formData.append('Country', this.profile.country || '');
+    formData.append('Name', this.profile.name || '');
+    formData.append('PhoneNumber', this.profile.phoneNumber || '');
+    formData.append('Street', this.profile.street || '');
+    formData.append('City', this.profile.city || '');
+    formData.append('State', this.profile.state || '');
+    formData.append('Pincode', this.profile.pincode || '');
+    formData.append('Country', this.profile.country || '');
 
-  if (this.selectedImage) {
-    formData.append('profileImage', this.selectedImage);
+    if (this.selectedImage) {
+      formData.append('profileImage', this.selectedImage);
+    }
+
+    this.employeeService.updateMyProfile(formData).subscribe({
+      next: () => {
+        this.toastr.success('Profile updated successfully', 'Success');
+
+        setTimeout(() => {
+          this.loadProfile();
+        }, 200);
+      },
+      error: () => {
+        this.toastr.error('Profile update failed', 'Error');
+      }
+    });
   }
-
- this.employeeService.updateMyProfile(formData).subscribe({
-  next: () => {
-    this.toastr.success('Profile updated successfully', 'Success');
-
-    setTimeout(() => {
-      this.loadProfile();
-    }, 200);
-  },
-  error: () => {
-    this.toastr.error('Profile update failed', 'Error');
-  }
-});
-}
 
 
   loadImage() {
@@ -250,9 +251,9 @@ updateProfile() {
         this.toastr.error('Image upload failed', 'Error');
       }
     });
-    
+
   }
 
-  
+
 }
 

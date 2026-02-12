@@ -6,10 +6,7 @@
   <!-- DATE SELECTION -->
   <div class="summary-controls">
     <label>Select Date</label>
-    <input type="date"
-           class="form-input"
-           [(ngModel)]="date"
-           (change)="onDateChange()">
+    <input type="date" class="form-input" [(ngModel)]="date" (change)="onDateChange()">
     <button class="btn btn-primary" (click)="load()">Load Summary</button>
   </div>
 
@@ -49,8 +46,7 @@
             <span class="status-badge success">Collected</span>
           </td>
           <td data-label="Details">
-            <button class="btn btn-sm btn-outline-primary"
-                    (click)="openDetailsModal(c)">
+            <button class="btn btn-sm btn-outline-primary" (click)="openDetailsModal(c)">
               View Details
             </button>
           </td>
@@ -64,7 +60,7 @@
   </div>
 </div>
 
-<!-- MODAL POPUP -->
+
 <!-- MODAL POPUP -->
 <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
@@ -78,7 +74,7 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
+
     <div class="modal-body">
       <!-- Section 1: Order-wise Pending Details -->
       <div class="modal-section">
@@ -92,7 +88,7 @@
             <span class="amount">₹{{ getTotalPending() | number:'1.2-2' }}</span>
           </div>
         </div>
-        
+
         <table class="details-table">
           <thead>
             <tr>
@@ -127,7 +123,7 @@
             Customer Payment History
           </h4>
         </div>
-        
+
         <table class="details-table">
           <thead>
             <tr>
@@ -138,32 +134,37 @@
             </tr>
           </thead>
           <tbody>
-  <tr *ngFor="let receipt of customerReceipts">
-    <td class="date">
-      {{ receipt.paidOn | date:'dd-MMM-yyyy hh:mm a' }}
-    </td>
-    <td class="receipt">
-      {{ receipt.receiptId }}
-    </td>
-    <td class="paid-amount">
-      ₹{{ receipt.amountPaid | number:'1.2-2' }}
-    </td>
-    <td>
-      <span class="payment-mode" [ngClass]="receipt.paymentMode">
-        <i [class]="getPaymentModeIcon(receipt.paymentMode)"></i>
-        {{ receipt.paymentMode | uppercase }}
-      </span>
-    </td>
-  </tr>
+            <tr *ngFor="let receipt of customerReceipts">
+              <td class="date">
+                <span class="date-day">
+                  {{ receipt.paidOn | date:'dd-MMM-yyyy' }}
+                </span>
+                <span class="date-time">
+                  {{ receipt.paidOn | date:'hh:mm a' }}
+                </span>
+              </td>
+              <td class="receipt">
+                {{ receipt.receiptId }}
+              </td>
+              <td class="paid-amount">
+                ₹{{ receipt.amountPaid | number:'1.2-2' }}
+              </td>
+              <td>
+                <span class="payment-mode" [ngClass]="receipt.paymentMode">
+                  <i [class]="getPaymentModeIcon(receipt.paymentMode)"></i>
+                  {{ receipt.paymentMode | uppercase }}
+                </span>
+              </td>
+            </tr>
 
-  <tr *ngIf="customerReceipts.length === 0">
-    <td colspan="4" class="no-data">No payment history available</td>
-  </tr>
-</tbody>
+            <tr *ngIf="customerReceipts.length === 0">
+              <td colspan="4" class="no-data">No payment history available</td>
+            </tr>
+          </tbody>
 
         </table>
       </div>
-      
+
       <!-- Summary Card -->
       <div class="summary-card">
         <div class="summary-row">
@@ -188,7 +189,7 @@
         </div> -->
       </div>
     </div>
-    
+
     <!-- Modal Footer -->
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="printDetails()">

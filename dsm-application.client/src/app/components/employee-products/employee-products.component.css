@@ -47,7 +47,7 @@
 
 .search-section .form-control,
 .search-section .form-select {
-  background: var(--bg-color);
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
   color: var(--text-color);
   border-radius: 8px;
@@ -55,6 +55,12 @@
   font-size: 0.95rem;
   transition: all 0.3s;
   height: 46px;
+}
+
+html[data-theme="dark"] .search-section .form-control {
+  background: #111827;
+  border-color: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
 .search-section .form-control:focus,
@@ -683,11 +689,16 @@ html[data-theme="dark"] .employee-cart .table td {
   position: relative;
   cursor: pointer;
   font-size: 22px;
-  color: #333;
+  color: var(--text-color);
+  transition: color 0.2s ease;
+}
+
+html[data-theme="dark"] .employee-cart-icon {
+  color: #ffffff;
 }
 
 .employee-cart-icon:hover {
-  color: #0d6efd;
+  color: var(--primary-color);
 }
 
 .cart-badge {
@@ -1213,5 +1224,198 @@ html[data-theme="dark"] .product-details {
   
   .modal-close {
     display: none;
+  }
+}
+
+.filter-bar {
+  display: flex;
+  gap: 3px;
+}
+
+.filter-tab {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+html[data-theme="dark"] .filter-tab {
+  background: #1b2028;
+  border-color: rgba(255,255,255,0.12);
+  color: #e5e7eb;
+}
+
+
+.filter-tab.active {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.45);
+}
+
+html[data-theme="dark"] .welcome-header {
+  background: #1c1f26;
+  border-left-color: var(--primary-color);
+}
+
+
+/* Bottom sheet list */
+.sheet-item {
+  padding: 14px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .desktop-filters {
+    display: none !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* BACKDROP */
+.filter-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9998;
+  animation: fadeIn 0.2s ease;
+}
+
+/* SHEET */
+.filter-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 85vh;
+  background: var(--card-bg);
+  border-radius: 16px 16px 0 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+
+  transform: translateY(100%);
+  animation: slideUpSheet 0.25s ease-out forwards;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .filter-sheet {
+  background: #1c1f26; /* darker than page */
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* HEADER */
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* SLIDE UP */
+@keyframes sheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* FADE BACKDROP */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sheet-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-color);
+}
+
+html[data-theme="dark"] .sheet-title {
+  color: #ffffff;
+}
+
+.sheet-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+/* 🔥 SCROLLABLE AREA */
+.sheet-body {
+  overflow-y: auto;
+  max-height: calc(85vh - 56px); /* header height */
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheet-item {
+  width: 100%;
+  padding: 16px 20px;
+
+  border: none;
+  background: none;
+  text-align: left;
+
+  font-size: 1rem;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+html[data-theme="dark"] .sheet-item {
+  color: #e5e7eb;
+}
+
+html[data-theme="dark"] .sheet-item:active {
+  background: rgba(255,255,255,0.08);
+}
+
+.sheet-item:active {
+  background: rgba(0,0,0,0.08);
+}
+
+
+/* DEFAULT: DESKTOP */
+.desktop-filters {
+  display: flex;
+}
+
+.mobile-filters {
+  display: none;
+}
+
+/* MOBILE + TABLET */
+@media (max-width: 992px) {
+  .desktop-filters {
+    display: none !important;
+  }
+
+  .mobile-filters {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
   }
 }

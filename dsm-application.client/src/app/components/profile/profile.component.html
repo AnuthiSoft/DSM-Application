@@ -39,9 +39,9 @@
 </div>
  -->
 <div class="profile-section">
-  <div class="welcome-header">
+  <!-- <div class="welcome-header">
     <h2>My Profile</h2>
-  </div>
+  </div> -->
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loading-state">
@@ -148,44 +148,67 @@
             </div>
 
             <!-- SEND OTP BUTTON -->
-            <button type="button" class="send-otp-btn" *ngIf="!customer.phoneVerified" (click)="sendOtp()"
+            <button type="button" class="send-otp-ui" *ngIf="!customer.phoneVerified" (click)="sendOtp()"
               [disabled]="!customer.phoneNumber || customer.phoneNumber.length !== 10">
               Send OTP
             </button>
 
             <!-- OTP INPUT -->
-            <div *ngIf="showOtpInput && !customer.phoneVerified" class="otp-verify">
-              <input type="text" class="otp-box" placeholder="Enter OTP" [(ngModel)]="otp" name="otp" />
+            <div *ngIf="showOtpInput && !customer.phoneVerified" class="otp-ui-wrapper">
+              <input type="text" class="otp-input-ui" placeholder="Enter OTP" maxlength="6" [(ngModel)]="otp"
+                name="otp" />
 
-              <button type="button" class="verify-otp-btn" (click)="verifyOtp()">
+              <button type="button" class="verify-otp-ui" (click)="verifyOtp()">
                 Verify OTP
               </button>
             </div>
 
             <!-- VERIFIED STATE -->
-            <div *ngIf="customer.phoneVerified" class="verified-text">
-              <i class="fas fa-check-circle"></i> Phone verified
-            </div>
-
+            <div *ngIf="customer.phoneVerified" class="text-success mt-2">
+                ✔ verified
+              </div>
           </div>
+          
           <div class="form-group full-width">
-            <label class="form-label"><i class="fas fa-road"></i> Street</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.street" name="street" />
+            <label class="form-label">
+              <i class="fas fa-road"></i> Street
+            </label>
+
+            <input type="text" class="form-control" [(ngModel)]="customer.street" name="street" required
+              pattern="^[A-Za-z0-9 ]+$" #street="ngModel" />
+
+            <div class="text-danger" *ngIf="street.touched && street.errors">
+              <div *ngIf="street.errors['required']">
+                Street is required
+              </div>
+              <div *ngIf="street.errors['pattern']">
+                Only letters and numbers are allowed
+              </div>
+            </div>
           </div>
+
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-city"></i> City</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" required #city="ngModel" />
+            <input type="text" class="form-control" [(ngModel)]="customer.city" name="city" required
+              pattern="^[A-Za-z ]+$" #city="ngModel" />
 
-            <div class="text-danger" *ngIf="city.touched && city.invalid">
-              City is required
+            <div class="text-danger" *ngIf="city.touched && city.errors">
+              <div *ngIf="city.errors['required']">City is required</div>
+              <div *ngIf="city.errors['pattern']">Only letters allowed</div>
             </div>
 
           </div>
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-flag"></i> State</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.state" name="state" />
+            <input type="text" class="form-control" [(ngModel)]="customer.state" name="state" required
+              pattern="^[A-Za-z ]+$" #state="ngModel" />
+
+            <div class="text-danger" *ngIf="state.touched && state.errors">
+              <div *ngIf="state.errors['required']">State is required</div>
+              <div *ngIf="state.errors['pattern']">Only letters allowed</div>
+            </div>
           </div>
 
           <div class="form-group">
@@ -202,13 +225,19 @@
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-globe"></i> Country</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.country" name="country" />
+            <input type="text" class="form-control" [(ngModel)]="customer.country" name="country" required
+              pattern="^[A-Za-z ]+$" #country="ngModel" />
+
+            <div class="text-danger" *ngIf="country.touched && country.errors">
+              <div *ngIf="country.errors['required']">Country is required</div>
+              <div *ngIf="country.errors['pattern']">Only letters allowed</div>
+            </div>
           </div>
 
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving">
+          <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving || !customer.phoneVerified">
             <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
             {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>

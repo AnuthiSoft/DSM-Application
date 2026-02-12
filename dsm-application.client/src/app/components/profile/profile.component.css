@@ -287,7 +287,7 @@
   border: none;
   outline: none;
   padding: 0 12px;
-  font-size: 14px;
+  font-size: 17px;
   border-radius: 0 8px 8px 0;
   background: var(--card-bg);     /* ✅ FIX */
   color: var(--text-color); 
@@ -421,4 +421,53 @@
     gap: 4px;
   }
 }
+
+/* SEND OTP - Yellow */
+.send-otp-ui {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  background-color: #ffc107;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.send-otp-ui:disabled {
+  background-color: #f3d37a;
+  cursor: not-allowed;
+}
+
+/* OTP INPUT */
+.otp-ui-wrapper {
+  margin-top: 12px;
+}
+
+.otp-input-ui {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+/* VERIFY OTP - Green */
+.verify-otp-ui {
+  width: 100%;
+  padding: 12px;
+  background-color: #198754;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.verify-otp-ui:hover {
+  background-color: #157347;
+}
+
 

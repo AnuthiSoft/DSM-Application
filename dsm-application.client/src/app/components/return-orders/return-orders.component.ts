@@ -20,11 +20,11 @@ export class ReturnOrdersComponent implements OnInit {
   selectedMethod: Record<string, string> = {};
   selectedSlot: Record<string, string> = {};
 
-  constructor(private returnApiService: ReturnApiService) {}
+  constructor(private returnApiService: ReturnApiService) { }
 
   ngOnInit(): void {
-  this.loadReturnOrders();
-}
+    this.loadReturnOrders();
+  }
 
   loadReturnOrders() {
     this.loading = true;
@@ -46,9 +46,9 @@ export class ReturnOrdersComponent implements OnInit {
     return r.status === 'Pending';
   }
 
-isApproved(r: any) {
-  return r.status === 'Approved' || r.status === 'PickupConfirmed';
-}
+  isApproved(r: any) {
+    return r.status === 'Approved' || r.status === 'PickupConfirmed';
+  }
 
 
 
@@ -61,15 +61,15 @@ isApproved(r: any) {
   }
 
   timelineActive(step: string, r: any): boolean {
-  const order = [
-    'Pending',
-    'PickupConfirmed',
-    'Received',
-    'Completed'
-  ];
+    const order = [
+      'Pending',
+      'PickupConfirmed',
+      'Received',
+      'Completed'
+    ];
 
-  return order.indexOf(r.status) >= order.indexOf(step);
-}
+    return order.indexOf(r.status) >= order.indexOf(step);
+  }
 
 
   viewDetails(r: any) {
@@ -92,10 +92,10 @@ isApproved(r: any) {
     });
   }
   // ✅ Can customer cancel return?
-canCancel(r: any): boolean {
-  // Allow cancel only if still pending
-  return r.status === 'Pending';
-}
+  canCancel(r: any): boolean {
+    // Allow cancel only if still pending
+    return r.status === 'Pending';
+  }
 
 // ✅ Cancel return
 cancelReturn(r: any) {
@@ -121,28 +121,26 @@ cancelReturn(r: any) {
 }
  
 
-// ✅ Does this return need user action?
-needsAction(r: any): boolean {
-  // Example: customer needs to confirm pickup
-  return r.status === 'PickupConfirmed';
-}
+  // ✅ Does this return need user action?
+  needsAction(r: any): boolean {
+    // Example: customer needs to confirm pickup
+    return r.status === 'PickupConfirmed';
+  }
 
-// ✅ Customer confirms pickup
-confirmPickup(r: any) {
-  if (r.pickupConfirmed || r.status === 'Received') return;
+  // ✅ Customer confirms pickup
+  confirmPickup(r: any) {
+    if (r.pickupConfirmed || r.status === 'Received') return;
 
-  this.returnApiService.employeePickup(r.returnId).subscribe({
-    next: () => {
-      r.pickupConfirmed = true;
-      r.showPickupForm = false;
-      r.status = 'Received';   // MATCH backend
-      r.pickupTime = new Date();
-    },
-    error: err => {
-      Swal.fire('Error', err.error?.message || 'Failed', 'error');
-    }
-  });
-}
-
-
+    this.returnApiService.employeePickup(r.returnId).subscribe({
+      next: () => {
+        r.pickupConfirmed = true;
+        r.showPickupForm = false;
+        r.status = 'Received';   // MATCH backend
+        r.pickupTime = new Date();
+      },
+      error: err => {
+        Swal.fire('Error', err.error?.message || 'Failed', 'error');
+      }
+    });
+  }
 }

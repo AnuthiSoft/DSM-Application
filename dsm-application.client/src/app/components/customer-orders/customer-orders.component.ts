@@ -41,29 +41,28 @@ export class CustomerOrdersComponent {
   showProgressSteps: boolean = false;
   submitting: boolean = false;
 
-// Alert message
-returnMessage: string = '';
-returnMessageType: 'alert-success' | 'alert-error' | '' = '';
-selectedProductIds: string[] = [];
-returnQuantities: any = {}; 
-totalReturnQty: number = 0;
+  // Alert message
+  returnMessage: string = '';
+  returnMessageType: 'alert-success' | 'alert-error' | '' = '';
+  selectedProductIds: string[] = [];
+  returnQuantities: any = {};
+  totalReturnQty: number = 0;
 
-
+  cartCount = 0;
   orders: Order[] = [];
   loading = true;
   selectedOrder: any = null;
   selectedOrderss: any = null;
 
-    selectedFiles: File[] = [];
-returnQty: number = 1;
-selectedOrderForReturn: any = null;
+  selectedFiles: File[] = [];
+  returnQty: number = 1;
+  selectedOrderForReturn: any = null;
   activeTab: string = 'dashboard';
 
 
 
   createdReturnId: string = '';
   @Output() returnSubmitted = new EventEmitter<void>();
-
 
 
   customerId = localStorage.getItem('customerId') || '';
@@ -87,7 +86,7 @@ selectedOrderForReturn: any = null;
   filteredOrders: Order[] = [];
 
 
-  constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService, private cartService: CartService ) { }
+  constructor(private orderService: OrderService, private returnApiService: ReturnApiService, private router: Router, private http: HttpClient, private toastr: ToastrService, private cartService: CartService) { }
 
   ngOnInit(): void {
     this.loadOrders();
@@ -233,10 +232,10 @@ selectedOrderForReturn: any = null;
     this.currentOrderId = order.id;
     this.selectedOrderForReturn = order;
 
-this.selectedProductIds = [];
-this.returnQuantities = {};
-  this.returnQty = 1;
-  this.selectedFiles = [];
+    this.selectedProductIds = [];
+    this.returnQuantities = {};
+    this.returnQty = 1;
+    this.selectedFiles = [];
 
     this.returnData = {
       returnType: 'Return',
@@ -246,115 +245,115 @@ this.returnQuantities = {};
       files: null
     };
 
-  this.isReturnPopupOpen = true;
-}
-
-
-
-submitReturnRequest() {
-  const baseReason =
-    this.returnData.reason === 'Other'
-      ? this.returnData.otherReason
-      : this.returnData.reason;
-
-  const finalReason =
-    `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
-
-  // Build return items for all selected products
-  const items = this.selectedProductIds.map(pid => {
-    const product = this.selectedOrderForReturn.products
-      .find((p: any) => p.productId === pid);
-
-    return {
-      orderId: this.currentOrderId,
-      productId: pid,
-      productName: product?.productName,
-      returnQty: this.returnQuantities[pid] || 1,
-      reason: finalReason,
-      resolution: this.returnData.resolution
-    };
-  });
-
-  items.forEach(item => {
-    this.returnApiService.createReturn(item).subscribe({
-      next: (res) => {
-        const returnId = res.id;
-
-        if (this.selectedFiles.length > 0) {
-          this.returnApiService
-            .uploadReturnImages(returnId, this.selectedFiles)
-            .subscribe();
-        }
-      }
-    });
-  });
-
- this.toastr.success("Return request submitted");
-
-// 👉 Update UI instantly
-this.selectedOrderForReturn.status = "Return Initiated";
-
-const index = this.orders.findIndex(o => o.id === this.currentOrderId);
-if (index !== -1) {
-    this.orders[index].status = "Return Initiated";
-}
-
-this.isReturnPopupOpen = false;
-
-}
-
-dropdownOpen: boolean = false;
-toggleDropdown() {
-  this.dropdownOpen = !this.dropdownOpen;
-}
-
-toggleProductSelection(pid: string) {
-  const index = this.selectedProductIds.indexOf(pid);
-
-  if (index === -1) {
-    this.selectedProductIds.push(pid);
-    this.returnQuantities[pid] = 1; // default qty
-  } else {
-    this.selectedProductIds.splice(index, 1);
-    delete this.returnQuantities[pid];
+    this.isReturnPopupOpen = true;
   }
 
-  this.updateTotalReturnQty();
-}
 
 
-getProductName(pid: string) {
-  return this.selectedOrderForReturn?.products
-    .find((p: any) => p.productId === pid)?.productName || '';
-}
+  submitReturnRequest() {
+    const baseReason =
+      this.returnData.reason === 'Other'
+        ? this.returnData.otherReason
+        : this.returnData.reason;
 
-getMaxReturnQtyForProduct(pid: string): number {
-  const p = this.selectedOrderForReturn?.products
-    .find((x: any) => x.productId === pid);
-  return p ? p.quantity - (p.returnedQty || 0) : 1;
-}
+    const finalReason =
+      `[${this.returnData.returnType}] [${this.returnData.resolution}] ${baseReason}`;
 
-onProductSelectionChange() {
-  // Initialize quantity = 1 for any newly added product
-  this.selectedProductIds.forEach(pid => {
-    if (!this.returnQuantities[pid]) {
-      this.returnQuantities[pid] = 1;
+    // Build return items for all selected products
+    const items = this.selectedProductIds.map(pid => {
+      const product = this.selectedOrderForReturn.products
+        .find((p: any) => p.productId === pid);
+
+      return {
+        orderId: this.currentOrderId,
+        productId: pid,
+        productName: product?.productName,
+        returnQty: this.returnQuantities[pid] || 1,
+        reason: finalReason,
+        resolution: this.returnData.resolution
+      };
+    });
+
+    items.forEach(item => {
+      this.returnApiService.createReturn(item).subscribe({
+        next: (res) => {
+          const returnId = res.id;
+
+          if (this.selectedFiles.length > 0) {
+            this.returnApiService
+              .uploadReturnImages(returnId, this.selectedFiles)
+              .subscribe();
+          }
+        }
+      });
+    });
+
+    this.toastr.success("Return request submitted");
+
+    // 👉 Update UI instantly
+    this.selectedOrderForReturn.status = "Return Initiated";
+
+    const index = this.orders.findIndex(o => o.id === this.currentOrderId);
+    if (index !== -1) {
+      this.orders[index].status = "Return Initiated";
     }
-  });
 
-  // Remove quantities for unselected products
-  Object.keys(this.returnQuantities).forEach(pid => {
-    if (!this.selectedProductIds.includes(pid)) {
+    this.isReturnPopupOpen = false;
+
+  }
+
+  dropdownOpen: boolean = false;
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  toggleProductSelection(pid: string) {
+    const index = this.selectedProductIds.indexOf(pid);
+
+    if (index === -1) {
+      this.selectedProductIds.push(pid);
+      this.returnQuantities[pid] = 1; // default qty
+    } else {
+      this.selectedProductIds.splice(index, 1);
       delete this.returnQuantities[pid];
     }
-  });
 
-  this.updateTotalReturnQty();
-}
-updateTotalReturnQty() {
-  this.totalReturnQty = Object.values(this.returnQuantities)
-    .reduce((sum: number, qty: any) => sum + Number(qty), 0);
-}
+    this.updateTotalReturnQty();
+  }
+
+
+  getProductName(pid: string) {
+    return this.selectedOrderForReturn?.products
+      .find((p: any) => p.productId === pid)?.productName || '';
+  }
+
+  getMaxReturnQtyForProduct(pid: string): number {
+    const p = this.selectedOrderForReturn?.products
+      .find((x: any) => x.productId === pid);
+    return p ? p.quantity - (p.returnedQty || 0) : 1;
+  }
+
+  onProductSelectionChange() {
+    // Initialize quantity = 1 for any newly added product
+    this.selectedProductIds.forEach(pid => {
+      if (!this.returnQuantities[pid]) {
+        this.returnQuantities[pid] = 1;
+      }
+    });
+
+    // Remove quantities for unselected products
+    Object.keys(this.returnQuantities).forEach(pid => {
+      if (!this.selectedProductIds.includes(pid)) {
+        delete this.returnQuantities[pid];
+      }
+    });
+
+    this.updateTotalReturnQty();
+  }
+  updateTotalReturnQty() {
+    this.totalReturnQty = Object.values(this.returnQuantities)
+      .reduce((sum: number, qty: any) => sum + Number(qty), 0);
+  }
 
 
 
@@ -371,40 +370,40 @@ updateTotalReturnQty() {
 
   // Cancel an order
   cancelOrder(orderId: string): void {
-              Swal.fire({
-                  title: 'Are you sure you want to cancel this order?',
-                  icon: 'warning',
-                  showCancelButton: true,
-                  confirmButtonText: 'Ok',
-                  cancelButtonText: 'Cancel',
-                  confirmButtonColor: '#2e7d32',
-                  cancelButtonColor: '#aaa',
-                  backdrop: true
-              }).then((result) => {
-                  if (result.isConfirmed) {
-                      this.orderService.cancelOrder(orderId).subscribe({
-                          next: () => {
-                              this.toastr.success('Order cancelled successfully');
-                              this.loadOrders();
-                          },
-                          error: () => {
-                              this.toastr.error('Failed to cancel order');
-                          }
-                      });
-                  }
-              });
+    Swal.fire({
+      title: 'Are you sure you want to cancel this order?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ok',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#2e7d32',
+      cancelButtonColor: '#aaa',
+      backdrop: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.orderService.cancelOrder(orderId).subscribe({
+          next: () => {
+            this.toastr.success('Order cancelled successfully');
+            this.loadOrders();
+          },
+          error: () => {
+            this.toastr.error('Failed to cancel order');
           }
+        });
+      }
+    });
+  }
 
   // Reorder a previous order
 reorder(orderId: string): void {
 
-  this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`).subscribe({
-    next: (order) => {
+    this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`).subscribe({
+      next: (order) => {
 
-      if (!order || !order.products || order.products.length === 0) {
-        this.toastr.error('No products found in this order');
-        return;
-      }
+        if (!order || !order.products || order.products.length === 0) {
+          this.toastr.error('No products found in this order');
+          return;
+        }
 
       const distributorId = order.distributorId;
       const customerId = localStorage.getItem('customerId');
@@ -439,7 +438,7 @@ reorder(orderId: string): void {
       // ✅ Save where AddToCart actually reads
       localStorage.setItem(CART_KEY, JSON.stringify(orderProducts));
 
-      this.toastr.success('Order items loaded into cart');
+        this.toastr.success('Order items loaded into cart');
 
       this.router.navigate(['/add-to-cart']);
     },
@@ -468,24 +467,24 @@ reorder(orderId: string): void {
   }
 
   // Calculate total spent
- getTotalSpent(): number {
-  return this.orders
-    .filter(o => o.status?.toLowerCase() !== 'cancelled' && o.status?.toLowerCase() !== 'canceled')
-    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-}
+  getTotalSpent(): number {
+    return this.orders
+      .filter(o => o.status?.toLowerCase() !== 'cancelled' && o.status?.toLowerCase() !== 'canceled')
+      .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  }
 
-canReturn(order: any): boolean {
-  if (!order || !order.status) return false;
+  canReturn(order: any): boolean {
+    if (!order || !order.status) return false;
 
-  if (order.status.toLowerCase() !== 'delivered') return false;
+    if (order.status.toLowerCase() !== 'delivered') return false;
 
-  if (!order.products || order.products.length === 0) return false;
+    if (!order.products || order.products.length === 0) return false;
 
-  return order.products.every((p: any) => {
-    const returned = p.returnedQty ? p.returnedQty : 0;
-    return returned < p.quantity;
-  });
-}
+    return order.products.every((p: any) => {
+      const returned = p.returnedQty ? p.returnedQty : 0;
+      return returned < p.quantity;
+    });
+  }
 
 
   // getTotalSpent(): number {
@@ -557,11 +556,11 @@ canReturn(order: any): boolean {
         <p>
         <strong>GST (${order.products?.[0]?.gstPercentage ?? 0}%):</strong>
         ₹${Number(
-                              order.products?.reduce(
-                                  (sum: number, p: any) => sum + (p.gstAmount ?? 0),
-                                  0
-                              )
-                          ).toFixed(2)}
+            order.products?.reduce(
+              (sum: number, p: any) => sum + (p.gstAmount ?? 0),
+              0
+            )
+          ).toFixed(2)}
          
           </p>
             <hr>
@@ -666,23 +665,26 @@ canReturn(order: any): boolean {
   }
 
 
-getMaxReturnQuantity(): number {
-  if (!this.selectedOrderForReturn || !this.selectedProductIds) return 1;
+  getMaxReturnQuantity(): number {
+    if (!this.selectedOrderForReturn || !this.selectedProductIds) return 1;
 
-  const product = this.selectedOrderForReturn.products
-    .find((p: any) => p.productId === this.selectedProductIds);
+    const product = this.selectedOrderForReturn.products
+      .find((p: any) => p.productId === this.selectedProductIds);
 
-              return product ? product.quantity : 1;
-          }
+    return product ? product.quantity : 1;
+  }
 
   getFilePreview(file: File): string {
-              return URL.createObjectURL(file);
-          }
+    return URL.createObjectURL(file);
+  }
 
   removeFile(index: number) {
-              this.selectedFiles.splice(index, 1);
-          }
+    this.selectedFiles.splice(index, 1);
+  }
 
-      
-        }
-      
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+}
+

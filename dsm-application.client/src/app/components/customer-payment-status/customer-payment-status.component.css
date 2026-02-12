@@ -209,6 +209,8 @@
 .summary-value.order-id {
   color: var(--text-color);
   font-family: monospace;
+  word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .summary-value.total-amount {
@@ -512,4 +514,13 @@
     align-items: flex-start;
     gap: 4px;
   }
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.history-table {
+  min-width: 900px; /* important */
 }

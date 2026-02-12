@@ -5,7 +5,7 @@
       <i class="fas fa-users"></i>
       Customers Pending Payment
     </h4>
-    
+
     <!-- Customer Filter Dropdown -->
     <div class="customer-filter-container">
       <div class="customer-dropdown">
@@ -14,7 +14,7 @@
           <span>{{selectedCustomerFilter || 'All Customers'}}</span>
           <i class="fas fa-chevron-down dropdown-arrow"></i>
         </button>
-        
+
         <div class="customer-dropdown-menu" *ngIf="showCustomerDropdown">
           <div class="customer-dropdown-item" (click)="selectCustomerFilter('')">
             <i class="fas fa-users"></i>
@@ -22,9 +22,8 @@
           </div>
           <div class="customer-dropdown-divider"></div>
           <div class="customer-list-container">
-            <div class="customer-dropdown-item" 
-                 *ngFor="let customer of customers"
-                 (click)="selectCustomerFilter(customer.customerName)">
+            <div class="customer-dropdown-item" *ngFor="let customer of customers"
+              (click)="selectCustomerFilter(customer.customerName)">
               <i class="fas fa-user"></i>
               {{customer.customerName}}
               <span class="customer-pending-badge">
@@ -34,7 +33,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Selected Customer Info -->
       <div *ngIf="selectedCustomerName" class="selected-customer-info">
         <div class="selected-customer-card">
@@ -76,7 +75,7 @@
         Total Pending: ₹{{getTotalPending() | number:'1.2-2'}}
       </span>
     </div>
-    
+
     <table class="orders-table">
       <thead>
         <tr>
@@ -89,13 +88,19 @@
       <tbody>
         <tr *ngFor="let c of filteredCustomers">
           <td>
-            <button class="btn btn-sm btn-primary" (click)="openModal(c)">
-              <i class="fas fa-credit-card"></i> Collect
-            </button>
-            <button class="btn btn-sm btn-outline-info ms-2" (click)="viewDetails(c)">
-              <i class="fas fa-eye"></i> View Details
-            </button>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-primary" title="Collect Payment" (click)="openModal(c)">
+                <i class="fas fa-credit-card"></i>
+                <span class="btn-text">Collect</span>
+              </button>
+
+              <button class="btn btn-sm btn-outline-info" title="View Details" (click)="viewDetails(c)">
+                <i class="fas fa-eye"></i>
+                <span class="btn-text">View Details</span>
+              </button>
+            </div>
           </td>
+
           <td>{{ c.customerName }}</td>
           <td>{{ c.customerPhone }}</td>
           <td class="pending-amount">
@@ -176,13 +181,42 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group desktop-only">
           <label>Payment Mode</label>
           <select class="form-select" [(ngModel)]="form.paymentMode" (change)="onPaymentModeChange()">
             <option value="cash">Cash</option>
             <option value="upi">UPI</option>
             <option value="scanner">Scanner</option>
           </select>
+        </div>
+
+        <!-- TABLET + MOBILE: Inline expandable list -->
+        <div class="form-group mobile-only">
+          <label>Payment Mode</label>
+
+          <!-- Selected row -->
+          <div class="inline-select" (click)="togglePaymentOptions()">
+            <span>{{ form.paymentMode || 'Select Payment Mode' }}</span>
+            <i class="fas fa-chevron-down" [class.rotate]="showInlinePaymentOptions"></i>
+          </div>
+
+          <!-- Expandable options -->
+          <div class="inline-options" *ngIf="showInlinePaymentOptions" (click)="$event.stopPropagation()">
+
+            <div class="inline-option" [class.active]="form.paymentMode === 'cash'"
+              (click)="selectInlinePayment('cash')">
+              Cash
+            </div>
+
+            <div class="inline-option" [class.active]="form.paymentMode === 'upi'" (click)="selectInlinePayment('upi')">
+              UPI
+            </div>
+
+            <div class="inline-option" [class.active]="form.paymentMode === 'scanner'"
+              (click)="selectInlinePayment('scanner')">
+              Scanner
+            </div>
+          </div>
         </div>
 
         <!-- 🔥 SCANNER QR SECTION -->
@@ -233,11 +267,10 @@
         <strong>Total Pending:</strong>
         <span class="pending-amount">₹{{ orderDetails?.totalPending | number:'1.2-2' }}</span>
       </div>
-      
+
       <div class="mb-3 text-end">
         <button class="btn btn-sm btn-outline-secondary"
-                [routerLink]="['/distributor/customer-ledger', selectedCustomer?.customerId]"
-                (click)="closeDetailsModal()">
+          [routerLink]="['/distributor/customer-ledger', selectedCustomer?.customerId]" (click)="closeDetailsModal()">
           <i class="fas fa-receipt"></i>
           View Customer Receipts
         </button>
@@ -256,22 +289,20 @@
           </thead>
           <tbody>
             <tr *ngFor="let o of orderDetails?.orders">
-            <td class="d-flex gap-2">
+              <td class="d-flex gap-2">
 
-  <!-- View Order -->
-  <button class="view-details-btn"
-          (click)="openOrderDetails(o.id)">
-    <i class="fas fa-eye"></i> 
-  </button>
+                <!-- View Order -->
+                <button class="view-details-btn" (click)="openOrderDetails(o.id)">
+                  <i class="fas fa-eye"></i>
+                </button>
 
-  <!-- View Receipt -->
-  <button *ngIf="o.deliveryReceiptUrl"
-          class="btn btn-outline-primary btn-sm"
-          (click)="viewReceipt(o.deliveryReceiptUrl)">
-    <i class="fas fa-receipt"></i>
-  </button>
+                <!-- View Receipt -->
+                <button *ngIf="o.deliveryReceiptUrl" class="btn btn-outline-primary btn-sm"
+                  (click)="viewReceipt(o.deliveryReceiptUrl)">
+                  <i class="fas fa-receipt"></i>
+                </button>
 
-</td>
+              </td>
 
               <td>{{ o.id }}</td>
               <td>₹{{ o.totalAmount | number:'1.2-2' }}</td>
@@ -284,9 +315,8 @@
                   'badge-warning': o.remainingAmount > 0 && o.remainingAmount < o.totalAmount,
                   'badge-danger': o.remainingAmount === o.totalAmount
                 }">
-                  {{ o.remainingAmount === 0 ? 'Completed' : 
-                     o.remainingAmount < o.totalAmount ? 'Partial' : 'Pending' }}
-                </span>
+                  {{ o.remainingAmount === 0 ? 'Completed' :
+                  o.remainingAmount < o.totalAmount ? 'Partial' : 'Pending' }} </span>
               </td>
             </tr>
           </tbody>
@@ -303,10 +333,7 @@
 </div>
 
 <!-- ================= ORDER DETAILS POPUP ================= -->
-<app-order-details-modal
-  [visible]="showOrderPopup"
-  [orderId]="selectedOrderId!"
-  (closed)="showOrderPopup=false">
+<app-order-details-modal [visible]="showOrderPopup" [orderId]="selectedOrderId!" (closed)="showOrderPopup=false">
 </app-order-details-modal>
 
 <!-- ================= ORDER FULL DETAILS MODAL ================= -->
@@ -340,7 +367,7 @@
       <!-- PRODUCTS GRID -->
       <div class="products-grid">
         <div class="product-card" *ngFor="let p of orderFullDetails?.products">
-          <img [src]="p.imageUrls?.[0] || 'assets/no-image.png'" class="product-img"/>
+          <img [src]="p.imageUrls?.[0] || 'assets/no-image.png'" class="product-img" />
           <h5>{{p.productName}}</h5>
           <p>Qty: {{p.quantity}}</p>
           <p>₹{{p.price}}</p>

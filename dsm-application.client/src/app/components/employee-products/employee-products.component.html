@@ -19,35 +19,55 @@
 
 
   <!-- SEARCH & FILTERS -->
-  <div class="search-section d-flex gap-3 mb-4">
-
-
+  <!-- 🖥 DESKTOP FILTERS -->
+  <div class="search-section desktop-filters d-flex gap-3 mb-4">
 
     <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
-      (input)="onSmartSearch()" style="width: 260px;" />
+      (input)="onSmartSearch()" style="width:260px" />
 
     <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
-      style="width: 220px;">
+      style="width:220px">
       <option value="">All Distributors</option>
       <option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
         {{ d.name }}
       </option>
     </select>
 
-    <select class="form-select" [(ngModel)]="stockFilter" (change)="onStockFilterChange()" style="width: 180px;">
+    <select class="form-select" [(ngModel)]="stockFilter" (change)="onStockFilterChange()" style="width:180px">
       <option value="">All Stock</option>
       <option value="inStock">In Stock</option>
       <option value="outOfStock">Out of Stock</option>
     </select>
 
-    <select class="form-select" [(ngModel)]="selectedCustomerId" (change)="onCustomerChange()" style="width: 220px;">
+    <select class="form-select" [(ngModel)]="selectedCustomerId" (change)="onCustomerChange()" style="width:220px">
       <option value="">Select Customer</option>
-
       <option *ngFor="let c of customers" [value]="c.customerId">
         {{ c.name }}
       </option>
     </select>
 
+  </div>
+
+  <!-- 📱 MOBILE FILTER TRIGGERS -->
+  <div class="search-section mobile-filters mb-4">
+
+    <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
+      (input)="onSmartSearch()" />
+
+    <!-- 📱 MOBILE FILTER BAR (SIDE BY SIDE) -->
+    <div class="filter-bar mobile-only">
+      <button class="filter-tab" [class.active]="activeSheet === 'stock'" (click)="openSheet('stock')">
+        {{ stockFilterLabel }}
+      </button>
+
+      <button class="filter-tab" [class.active]="activeSheet === 'distributor'" (click)="openSheet('distributor')">
+        {{ distributorLabel }}
+      </button>
+
+      <button class="filter-tab" [class.active]="activeSheet === 'customer'" (click)="openSheet('customer')">
+        {{ customerLabel }}
+      </button>
+    </div>
 
   </div>
 
@@ -172,5 +192,43 @@
     </div>
   </div>
 
+
+  <!-- BACKDROP -->
+  <div class="filter-sheet-backdrop" *ngIf="activeSheet" (click)="closeSheet()"></div>
+
+  <div class="filter-sheet" *ngIf="activeSheet">
+
+    <!-- HEADER -->
+    <div class="sheet-header">
+      <h4 class="sheet-title">{{ sheetTitle }}</h4>
+      <button class="sheet-close" (click)="closeSheet()">✕</button>
+    </div>
+
+    <!-- SCROLLABLE BODY -->
+    <div class="sheet-body">
+
+      <!-- STOCK -->
+      <ng-container *ngIf="activeSheet === 'stock'">
+        <button class="sheet-item" (click)="setStock('')">All Stock</button>
+        <button class="sheet-item" (click)="setStock('inStock')">In Stock</button>
+        <button class="sheet-item" (click)="setStock('outOfStock')">Out of Stock</button>
+      </ng-container>
+
+      <!-- DISTRIBUTOR -->
+      <ng-container *ngIf="activeSheet === 'distributor'">
+        <button class="sheet-item" *ngFor="let d of connectedDistributors" (click)="setDistributor(d.distributorId)">
+          {{ d.name }}
+        </button>
+      </ng-container>
+
+      <!-- CUSTOMER -->
+      <ng-container *ngIf="activeSheet === 'customer'">
+        <button class="sheet-item" *ngFor="let c of customers" (click)="setCustomer(c.customerId)">
+          {{ c.name }}
+        </button>
+      </ng-container>
+
+    </div>
+  </div>
 
 </div>

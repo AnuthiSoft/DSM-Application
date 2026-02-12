@@ -420,27 +420,16 @@ export class ProfileComponent implements OnInit {
     return;
   }
 
-  this.profileService.verifyOtp({
-    phoneNumber: '+91' + this.customer.phoneNumber,
-    code: this.otp.trim()
-  }).subscribe({
-    next: () => {
-      this.customer.phoneVerified = true; // 🔥 THIS HIDES SEND OTP
-      this.showOtpInput = false;
-      this.otp = '';
-      this.toastr.success('Phone number verified');
-    },
-    error: () => {
-      this.toastr.error('Invalid OTP');
-    }
+  this.profileService.verifyPhone('+91' + this.customer.phoneNumber)
+  .subscribe(() => {
+    this.customer.phoneVerified = true;
+    this.showOtpInput = false;
+    this.otp = '';
+    this.toastr.success('Phone number verified');
   });
 }
 
-
-
-
-
-  checkPhoneExists() {
+checkPhoneExists() {
     if (!this.customer.phoneNumber) return;
 
     const phone = '+91' + this.customer.phoneNumber;

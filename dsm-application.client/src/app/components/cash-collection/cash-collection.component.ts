@@ -20,8 +20,8 @@ export class CashCollectionComponent implements OnInit {
 
   amountError: string | null = null;
   filteredCustomers: any[] = [];
-selectedOrderId: string | null = null;
-showOrderPopup = false;
+  selectedOrderId: string | null = null;
+  showOrderPopup = false;
   // Customer filter properties
   showCustomerDropdown: boolean = false;
   selectedCustomerFilter: string = '';
@@ -29,7 +29,8 @@ showOrderPopup = false;
   selectedCustomerPhone: string = '';
   selectedCustomerPending: number = 0;
   orderFullDetails: any = null;
-showOrderModal = false;
+  showOrderModal = false;
+  showInlinePaymentOptions = false;
 
   form = {
     customerId: '',
@@ -41,7 +42,28 @@ showOrderModal = false;
     distributorId: localStorage.getItem('distributorId') || ''
   };
 
-  constructor(private paymentService: PaymentService) {}
+  constructor(private paymentService: PaymentService) { }
+
+  ngAfterViewInit() {
+    const isMobileOrTab = window.innerWidth <= 1024;
+    const select = document.querySelector('.payment-select') as HTMLSelectElement;
+
+    if (isMobileOrTab && select) {
+      select.size = 1;
+
+      select.addEventListener('focus', () => {
+        select.size = select.options.length; // 🔥 inline expand
+      });
+
+      select.addEventListener('blur', () => {
+        select.size = 1; // collapse back
+      });
+
+      select.addEventListener('change', () => {
+        select.size = 1; // collapse after selection
+      });
+    }
+  }
 
   ngOnInit() {
     this.loadCustomersWithPending();
@@ -115,7 +137,7 @@ showOrderModal = false;
   }
 
   canSubmit() {
-    
+
     return this.form.amountPaid > 0 && !this.amountError;
   }
 
@@ -131,7 +153,7 @@ showOrderModal = false;
   }
 
   viewDetails(customer: any) {
-      this.selectedCustomer = customer;
+    this.selectedCustomer = customer;
     const distributorId = localStorage.getItem('distributorId')!;
 
     // 1️⃣ Load order-wise pending (existing)
@@ -165,7 +187,7 @@ showOrderModal = false;
   selectCustomerFilter(customerName: string) {
     this.selectedCustomerFilter = customerName;
     this.showCustomerDropdown = false;
-    
+
     if (!customerName) {
       // Show all customers
       this.filteredCustomers = [...this.customers];
@@ -193,7 +215,7 @@ showOrderModal = false;
   }
 
   getTotalPending(): number {
-    return this.filteredCustomers.reduce((sum, customer) => 
+    return this.filteredCustomers.reduce((sum, customer) =>
       sum + (customer.totalPending || 0), 0);
   }
 
@@ -206,31 +228,42 @@ showOrderModal = false;
     }
   }
   openOrderFullDetails(orderId: string) {
-  this.paymentService.getOrderFullDetails(orderId)
-    .subscribe(res => {
-      this.orderFullDetails = res;
-      this.showOrderModal = true;
-    });
-}
-
-closeOrderModal() {
-  this.showOrderModal = false;
-  this.orderFullDetails = null;
-}
-openOrderDetails(orderId: string) {
-  this.selectedOrderId = orderId;
-  this.showOrderPopup = true;
-}
-viewReceipt(blobName: string) {
-  if (!blobName) {
-    alert('Receipt not available');
-    return;
+    this.paymentService.getOrderFullDetails(orderId)
+      .subscribe(res => {
+        this.orderFullDetails = res;
+        this.showOrderModal = true;
+      });
   }
 
-  const receiptUrl =
-    `${environment.apiUrl}/orders/receipt/${blobName}`;
+  closeOrderModal() {
+    this.showOrderModal = false;
+    this.orderFullDetails = null;
+  }
+  openOrderDetails(orderId: string) {
+    this.selectedOrderId = orderId;
+    this.showOrderPopup = true;
+  }
+  viewReceipt(blobName: string) {
+    if (!blobName) {
+      alert('Receipt not available');
+      return;
+    }
 
-  window.open(receiptUrl, '_blank');
-}
+    const receiptUrl =
+      `${environment.apiUrl}/orders/receipt/${blobName}`;
 
+    window.open(receiptUrl, '_blank');
+  }
+
+  togglePaymentOptions() {
+    this.showInlinePaymentOptions = !this.showInlinePaymentOptions;
+  }
+
+  selectInlinePayment(mode: string) {
+    this.form.paymentMode = mode;
+    this.showInlinePaymentOptions = false;
+    this.onPaymentModeChange();
+  }
+
+  
 }

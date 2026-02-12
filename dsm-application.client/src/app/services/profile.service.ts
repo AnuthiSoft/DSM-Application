@@ -34,4 +34,11 @@ verifyOtp(data: { phoneNumber: string; code: string }) {
   return this.api.post<any>('otp/verify', data);
 }
 
+verifyPhone(phoneNumber: string) {
+    const formData = new FormData();
+    formData.append('phoneNumber', phoneNumber);
+
+    return this.api.post<any>('customers/verify-phone', formData);
+  }
+
 }

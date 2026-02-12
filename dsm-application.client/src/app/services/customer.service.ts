@@ -10,80 +10,80 @@ import {
 } from '../models/customer.model';
 import { ApiService } from './api.service';
 import { environment } from '../../environments/environment';
- 
+
 @Injectable({
   providedIn: 'root'
 })
 export class CustomerService {
- 
-   private apiUrl = environment.apiUrl; 
-  constructor(private api: ApiService, private http: HttpClient) {}
- 
+
+  private apiUrl = environment.apiUrl;
+  constructor(private api: ApiService, private http: HttpClient) { }
+
   // ---------------------- AUTH ----------------------
   register(request: CustomerRegisterRequest): Observable<any> {
     return this.api.post(`customers/register`, request);
   }
-login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
-  return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
-    tap(res => {
-      if (res.token && res.customer) {
-        localStorage.setItem('token', res.token);
+  login(request: CustomerLoginRequest): Observable<CustomerLoginResponse> {
+    return this.api.post<CustomerLoginResponse>(`customers/login`, request).pipe(
+      tap(res => {
+        if (res.token && res.customer) {
+          localStorage.setItem('token', res.token);
 
-       // CustomerService.login()
-localStorage.setItem('customerId', res.customer.customerId!);
-localStorage.setItem('customerName', res.customer.name!);
-localStorage.setItem('customerEmail', res.customer.email!);
-localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
+          // CustomerService.login()
+          localStorage.setItem('customerId', res.customer.customerId!);
+          localStorage.setItem('customerName', res.customer.name!);
+          localStorage.setItem('customerEmail', res.customer.email!);
+          localStorage.setItem('customerPhoneNumber', res.customer.phoneNumber!);
 
 
-        localStorage.setItem('role', res.role!);
-      }
-    })
-  );
-}
- 
+          localStorage.setItem('role', res.role!);
+        }
+      })
+    );
+  }
+
   // ---------------------- CUSTOMER CREATION ----------------------
   createByDistributor(customer: Customer): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
- 
+
     return this.api.post(`customers/create-by-distributor`, customer, { headers });
   }
- 
+
   setPassword(request: CustomerLoginRequest): Observable<any> {
     return this.api.post(`customers/set-password`, request);
   }
- 
+
   getRole(): string | null {
     return localStorage.getItem('role');
   }
-getCustomerId(): string {
-  return localStorage.getItem('customerId') || '';
-}
+  getCustomerId(): string {
+    return localStorage.getItem('customerId') || '';
+  }
   // ---------------------- MY CUSTOMERS ----------------------
   getMyCustomers(): Observable<Customer[]> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
- 
+
     return this.api.get<Customer[]>(`customers/my-customers`, { headers });
   }
- 
+
   updateCustomer(customerId: string, customer: Customer): Observable<any> {
     return this.api.put(`customers/update-customer/${customerId}`, customer);
   }
-getMyCustomersForCustomer() {
-  return this.http.get<any[]>(
-    `${environment.apiUrl}/customers/my-customers-for-customer`
-  );
-}
+  getMyCustomersForCustomer() {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/customers/my-customers-for-customer`
+    );
+  }
 
   getCustomersForCashCollector() {
-  return this.api.get<any[]>(
-    'customers/for-cash-collector'
-  );
-}
+    return this.api.get<any[]>(
+      'customers/for-cash-collector'
+    );
+  }
 
 
 
@@ -91,23 +91,23 @@ getMyCustomersForCustomer() {
 
 
 
-// getMyCustomers() {
-//   return this.http.get<any[]>(`${environment.apiUrl}/orders/my-customers`);
-// }
+  // getMyCustomers() {
+  //   return this.http.get<any[]>(`${environment.apiUrl}/orders/my-customers`);
+  // }
 
 
 
 
- getCustomerById(customerId: string): Observable<Customer> {
-  const token = localStorage.getItem('token');
+  getCustomerById(customerId: string): Observable<Customer> {
+    const token = localStorage.getItem('token');
 
-  return this.api.get<Customer>(
-    `customers/get-customer/${customerId}`,
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  );
-}
+    return this.api.get<Customer>(
+      `customers/get-customer/${customerId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
 
 
 
@@ -115,51 +115,51 @@ getMyCustomersForCustomer() {
   deleteCustomer(customerId: string): Observable<any> {
     return this.api.delete(`customers/delete-customer/${customerId}`);
   }
- 
+
   // ---------------------- PROFILE ----------------------
- 
+
   /** GET PROFILE (GET /customers/profile) */
   getProfile(): Observable<CustomerProfileDto> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     return this.api.get<CustomerProfileDto>(`customers/profile`, { headers });
   }
- 
- 
-  
- 
+
+
+
+
   /** UPDATE PROFILE (PUT /customers/profile) */
   updateProfile(data: CustomerProfileDto): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
     return this.api.put(`customers/profile`, data, { headers });
   }
- 
+
   /** UPLOAD IMAGE (POST /customers/upload-profile-picture) */
   uploadProfilePicture(file: File): Observable<any> {
-  const token = localStorage.getItem('token');
- 
-  const formData = new FormData();
-  formData.append('file', file);
- 
-  return this.api.post(`customers/upload-profile-picture`, formData, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+    const token = localStorage.getItem('token');
 
-}
- 
- 
-getAllCustomersForDistributor(): Observable<Customer[]> {
-  const token = localStorage.getItem('token');
-  const headers = { Authorization: `Bearer ${token}` };
- 
-  return this.api.get<Customer[]>(`customers/all-for-distributor`, { headers });
-}
- 
-// ================= PERMANENT EMPLOYEE ASSIGN =================
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.api.post(`customers/upload-profile-picture`, formData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+  }
+
+
+  getAllCustomersForDistributor(): Observable<Customer[]> {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    return this.api.get<Customer[]>(`customers/all-for-distributor`, { headers });
+  }
+
+  // ================= PERMANENT EMPLOYEE ASSIGN =================
   assignPermanentEmployee(distributorId: string, customerId: string, employeeId: string) {
     const token = localStorage.getItem('token');
- 
+
     return this.api.put(
       `distributor/assign-permanent-employee?distributorId=${distributorId}&customerId=${customerId}&employeeId=${employeeId}`,
       {},
@@ -168,24 +168,24 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
       }
     );
   }
- 
- 
+
+
   changePassword(data: { newPassword: string }) {
-  return this.http.post(
-    `${this.apiUrl}/customers/change-password`,
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    return this.http.post(
+      `${this.apiUrl}/customers/change-password`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    }
-  );
-}
- 
+    );
+  }
+
   // ================= GET EMPLOYEES FOR DROPDOWN =================
   getEmployees(distributorId: string): Observable<any[]> {
     const token = localStorage.getItem('token');
- 
+
     return this.api.get<any[]>(
       `orders/${distributorId}/employees`,
       {
@@ -193,23 +193,23 @@ getAllCustomersForDistributor(): Observable<Customer[]> {
       }
     );
   }
- 
+
   checkEmailExists(email: string): Observable<boolean> {
-  return this.api.get<boolean>(
-    `customers/check-email/${email}`
-  );
-}
- 
-checkPhoneExists(phoneNumber: string): Observable<boolean> {
-  return this.api.get<boolean>(
-    `customers/check-phone/${phoneNumber}`
-  );
-}
+    return this.api.get<boolean>(
+      `customers/check-email/${email}`
+    );
+  }
+
+  checkPhoneExists(phoneNumber: string): Observable<boolean> {
+    return this.api.get<boolean>(
+      `customers/check-phone/${phoneNumber}`
+    );
+  }
   getCustomerDashboard(customerId: string): Observable<any> {
     return this.api.get(`customers/dashboard/${customerId}`);
   }
 
-   // ✅ Connect distributor
+  // ✅ Connect distributor
   connectDistributor(customerId: string, distributorId: string): Observable<any> {
     return this.api.post(`customers/connect-distributor`, {
       customerId,
@@ -219,29 +219,29 @@ checkPhoneExists(phoneNumber: string): Observable<boolean> {
 
   // ================= OTP =================
 
-sendOtp(phoneNumber: string): Observable<any> {
-  const token = localStorage.getItem('token');
-  return this.http.post(
-    `${this.apiUrl}/otp/send`,
-    { phoneNumber },
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  );
-}
+  sendOtp(phoneNumber: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    return this.http.post(
+      `${this.apiUrl}/otp/send`,
+      { phoneNumber },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
 
-verifyOtp(phoneNumber: string, code: string): Observable<any> {
-  const token = localStorage.getItem('token');
-  return this.http.post(
-    `${this.apiUrl}/otp/verify`,
-    { phoneNumber, code },
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  );
-}
+  verifyOtp(phoneNumber: string, code: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    return this.http.post(
+      `${this.apiUrl}/otp/verify`,
+      { phoneNumber, code },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+  }
 
-  
+
 }
 
 

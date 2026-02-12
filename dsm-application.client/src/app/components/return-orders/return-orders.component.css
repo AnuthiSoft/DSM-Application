@@ -1,6 +1,7 @@
 /* Return Orders Styles */
 .return-orders-container {
-  padding: 20px;
+  padding: 0;
+  margin-top: 0;
 }
 
 /* Loading State */
@@ -53,7 +54,7 @@
 
 /* Return Card */
 .return-card {
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
@@ -68,6 +69,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
+  padding: 20px;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -118,7 +120,7 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   margin-bottom: 25px;
-  padding: 15px;
+  padding: 20px;
   background-color: rgba(var(--primary-color-rgb), 0.05);
   border-radius: 8px;
   border-left: 4px solid var(--primary-color);
@@ -230,6 +232,7 @@
 /* Timeline */
 .return-timeline {
   margin: 25px 0;
+  padding: 20px;
 }
 
 .timeline-container {
@@ -365,6 +368,7 @@
   gap: 10px;
   margin-top: 20px;
   padding-top: 20px;
+  padding: 20px;
   border-top: 1px solid var(--border-color);
 }
 
@@ -421,3 +425,6 @@
     gap: 10px;
   }
 }
+
+
+

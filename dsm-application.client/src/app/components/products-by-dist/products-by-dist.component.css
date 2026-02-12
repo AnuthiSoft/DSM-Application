@@ -1,6 +1,10 @@
+:root {
+  --header-height: 64px;
+}
+
 /* Products Section - Professional Style */
 .products-section {
-  padding: 20px;
+  padding: 0px;
 }
 
 /* Header */
@@ -36,6 +40,7 @@
   padding: 20px;
   margin-bottom: 25px;
   box-shadow: var(--shadow);
+  margin-top: 16px;
 }
 
 .filter-row {
@@ -976,11 +981,11 @@ html, body {
 }
 
 .dashboard-main,
-.products-section,
 .products-grid {
   overflow-x: hidden;
   max-width: 100%;
 }
+
 
 
 /* ============================= */
@@ -1224,3 +1229,105 @@ select option {
     -webkit-appearance: auto;
   }
 }
+
+html, body {
+  overflow-x: hidden;
+}
+
+/* Hide mobile trigger on desktop */
+@media (min-width: 769px) {
+  .mobile-filter-trigger {
+    display: none;
+  }
+}
+
+/* Hide select on mobile + tablet */
+/* ============================
+   DESKTOP (≥992px)
+   ============================ */
+@media (min-width: 992px) {
+
+  .mobile-filter-trigger {
+    display: none;
+  }
+
+  .desktop-select {
+    display: block;
+  }
+}
+
+
+/* ============================
+   TABLET + MOBILE (<992px)
+   ============================ */
+@media (max-width: 991px) {
+
+  .desktop-select {
+    display: none;
+  }
+
+  .mobile-filter-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-color);
+    cursor: pointer;
+    font-size: 14px;
+  }
+}
+
+
+/* Bottom Sheet */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 2000;
+}
+
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -100%;
+  background: var(--card-bg);
+  border-radius: 20px 20px 0 0;
+  transition: bottom 0.5s ease;
+  z-index: 2100;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bottom-sheet.active {
+  bottom: 0;
+}
+
+.sheet-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+
+.sheet-body {
+  overflow-y: auto;
+}
+
+.sheet-item {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.sheet-item:hover {
+  background: var(--bg-color);
+}
+
+
+
+

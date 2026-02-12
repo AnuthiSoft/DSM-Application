@@ -1,12 +1,9 @@
 <div class="return-orders-container">
-  <div class="welcome-header">
-    <h2>My Return Orders</h2>
-  </div>
 
   <!-- Loading -->
   <div *ngIf="loading" class="loading dashboard-card">
     <div class="loading-content">
-      <i class="fas fa-spinner fa-spin"></i> 
+      <i class="fas fa-spinner fa-spin"></i>
       <span>Loading return orders...</span>
     </div>
   </div>
@@ -23,19 +20,19 @@
   <!-- Return Orders List -->
   <div *ngIf="!loading && returnOrders.length > 0" class="return-orders-list">
     <div class="return-card dashboard-card" *ngFor="let r of returnOrders">
-      
+
       <!-- Header -->
       <div class="return-header">
         <h4>Return #{{ r.id }}</h4>
         <span class="status-badge" [class]="r.status.toLowerCase()">
-  {{
-    r.status === 'Rejected' && r.rejectedBy === 'Distributor'
-      ? 'Rejected by Distributor'
-      : r.status === 'Rejected' && r.rejectedBy === 'Customer'
-      ? 'Cancelled by You'
-      : r.status
-  }}
-</span>
+          {{
+          r.status === 'Rejected' && r.rejectedBy === 'Distributor'
+          ? 'Rejected by Distributor'
+          : r.status === 'Rejected' && r.rejectedBy === 'Customer'
+          ? 'Cancelled by You'
+          : r.status
+          }}
+        </span>
       </div>
 
       <!-- Summary -->
@@ -134,7 +131,7 @@
             </div>
           </div>
         </div>
-        
+
         <div *ngIf="r.reason.includes('Replacement')" class="replacement-info">
           <div class="replacement-header">
             <i class="fas fa-sync-alt"></i>
@@ -153,7 +150,7 @@
         <!-- <button *ngIf="canCancel(r)" class="btn btn-outline-primary" (click)="cancelReturn(r)">
           <i class="fas fa-times"></i> Cancel Return
         </button> -->
-        
+
 
       </div>
     </div>

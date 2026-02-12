@@ -1,10 +1,4 @@
 <div class="products-section">
-  <div class="welcome-header">
-    <h2>Distributor Products</h2>
-    <div class="header-badge">
-      <span class="badge">{{ filterProducts.length }} Products</span>
-    </div>
-  </div>
 
   <!-- Search and Filters Section -->
   <div class="filter-section">
@@ -29,7 +23,16 @@
           <label class="filter-label">
             <i class="fas fa-truck"></i> Distributor
           </label>
-          <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)">
+
+          <div class="mobile-filter-trigger" (click)="openFilterSheet('distributor')">
+            {{ distributorFilter
+            ? getDistributorName(distributorFilter)
+            : 'All Distributors' }}
+            <i class="fas fa-chevron-down"></i>
+          </div>
+
+          <select class="form-select desktop-select" [(ngModel)]="distributorFilter"
+            (change)="onDistributorChange(distributorFilter)">
             <option value="">All Distributors</option>
             <option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
               {{ d.name }}
@@ -41,7 +44,14 @@
           <label class="filter-label">
             <i class="fas fa-box"></i> Stock Status
           </label>
-          <select class="form-select" [(ngModel)]="stockFilter" (change)="filteredProducts()">
+
+          <div class="mobile-filter-trigger" (click)="openFilterSheet('stock')">
+            {{ stockFilter
+            ? getStockFilterLabel(stockFilter)
+            : 'All Stock' }}
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <select class="form-select desktop-select" [(ngModel)]="stockFilter" (change)="filteredProducts()">
             <option value="">All Stock</option>
             <option value="inStock">In Stock</option>
             <option value="lowStock">Low Stock</option>
@@ -53,7 +63,12 @@
           <label class="filter-label">
             <i class="fas fa-sort"></i> Sort By
           </label>
-          <select class="form-select" [(ngModel)]="sortBy" (change)="applySort()">
+
+          <div class="mobile-filter-trigger" (click)="openFilterSheet('sort')">
+            {{ sortByLabel() }}
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <select class="form-select desktop-select" [(ngModel)]="sortBy" (change)="applySort()">
             <option value="name">Name (A-Z)</option>
             <option value="priceLow">Price: Low to High</option>
             <option value="priceHigh">Price: High to Low</option>
@@ -181,29 +196,30 @@
               <span>{{ prod.brand || 'No Brand' }}</span>
             </div>
           </div>
-  <div class="bottom-section">
- 
-          <div class="product-stock">
-            <div class="stock-info">
-              <span class="stock-label">Available Stock:</span>
-              <span class="stock-value">{{ prod.currentStock }} units</span>
-            </div>
-            <div class="stock-bar">
-              <div class="stock-progress" [style.width.%]="getStockPercentage(prod.currentStock, prod.maxStock)"></div>
-            </div>
-          </div>
+          <div class="bottom-section">
 
-          <div class="product-price">
-            <div class="price-main">
-              <span class="price-currency">₹</span>
-              <span class="price-amount">{{ prod.price }}</span>
-              <span class="price-unit">/unit</span>
+            <div class="product-stock">
+              <div class="stock-info">
+                <span class="stock-label">Available Stock:</span>
+                <span class="stock-value">{{ prod.currentStock }} units</span>
+              </div>
+              <div class="stock-bar">
+                <div class="stock-progress" [style.width.%]="getStockPercentage(prod.currentStock, prod.maxStock)">
+                </div>
+              </div>
             </div>
-          </div>
 
-          <!-- Actions -->
-          <div class="product-actions">
-            <!-- <div class="quantity-control" *ngIf="prod.currentStock > 0">
+            <div class="product-price">
+              <div class="price-main">
+                <span class="price-currency">₹</span>
+                <span class="price-amount">{{ prod.price }}</span>
+                <span class="price-unit">/unit</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="product-actions">
+              <!-- <div class="quantity-control" *ngIf="prod.currentStock > 0">
               <button class="qty-btn" (click)="decreaseQty(prod)" [disabled]="getCartQty(prod) <= 1">
                 <i class="fas fa-minus"></i>
               </button>
@@ -213,12 +229,12 @@
               </button>
             </div> -->
 
-            <button class="btn btn-primary btn-add" (click)="openAddPopup(prod)" [disabled]="prod.currentStock === 0">
-              <i class="fas fa-cart-plus"></i>
-              {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
-            </button>
+              <button class="btn btn-primary btn-add" (click)="openAddPopup(prod)" [disabled]="prod.currentStock === 0">
+                <i class="fas fa-cart-plus"></i>
+                {{ prod.currentStock === 0 ? 'Out of Stock' : 'Add to Cart' }}
+              </button>
+            </div>
           </div>
-  </div>
         </div>
       </div>
     </div>
@@ -265,7 +281,8 @@
             <button class="btn-qty" (click)="popupDecrease()">
               <i class="fas fa-minus"></i>
             </button>
-           <input type="number" class="qty-input" [(ngModel)]="selectedQuantity" [min]="1" [max]="selectedProduct?.currentStock || 1" (ngModelChange)="onPopupQtyChange($event)" />
+            <input type="number" class="qty-input" [(ngModel)]="selectedQuantity" [min]="1"
+              [max]="selectedProduct?.currentStock || 1" (ngModelChange)="onPopupQtyChange($event)" />
 
 
             <button class="btn-qty" (click)="popupIncrease()"
@@ -294,4 +311,25 @@
       </div>
     </div>
   </div>
+
+  <!-- MOBILE BOTTOM SHEET -->
+  <div class="sheet-overlay" *ngIf="showSheet" (click)="closeSheet()"></div>
+
+  <div class="bottom-sheet" [class.active]="showSheet">
+
+    <div class="sheet-header">
+      <h4>Select Option</h4>
+      <button (click)="closeSheet()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="sheet-body">
+      <div class="sheet-item" *ngFor="let option of sheetOptions" (click)="selectSheetOption(option.value)">
+        {{ option.label }}
+      </div>
+    </div>
+
+  </div>
+
 </div>

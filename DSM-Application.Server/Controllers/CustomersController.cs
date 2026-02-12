@@ -827,6 +827,29 @@ namespace DSM_Application.Server.Controllers
         }
 
 
+        [HttpPost("verify-phone")]
+        public async Task<IActionResult> VerifyPhone([FromForm] string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+                return BadRequest("Phone number is required");
+
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerId))
+                return Unauthorized();
+
+            var update = Builders<Customer>.Update
+                .Set(c => c.PhoneVerified, true)
+                .Set(c => c.PhoneNumber, phoneNumber);
+
+            await _customersCollection.UpdateOneAsync(
+                c => c.CustomerId == customerId,
+                update
+            );
+
+            return Ok(new { message = "Phone verified successfully" });
+        }
+
+
         [HttpPost("upload-profile-picture")]
         public async Task<IActionResult> UploadProfilePicture([FromForm] IFormFile file)
         {

@@ -158,7 +158,9 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
         ...p,
         imageUrls: Array.isArray(p.imageUrls)
           ? p.imageUrls
-          : p.imageUrls ? [p.imageUrls] : []
+          : p.imageUrls ? [p.imageUrls] : [],
+                // currentStock: Number(p.currentStock ?? 0)   // ✅ FIX ADDED
+
       }));
 
       this.filterProducts = [...this.products];

@@ -50,25 +50,99 @@
         </tr>
       </thead>
 
-      <tbody>
-        <tr *ngFor="let item of cart">
-          <td>
-            <div class="product-box">
-              <span class="product-name">
-                {{ item.product.productName }}
-              </span>
+    <tbody>
+  <ng-container *ngFor="let item of cart">
 
-              <button class="remove-btn" (click)="removeFromCart(item.product.productId!)">
-                ✖
-              </button>
+    <!-- MAIN ROW -->
+    <tr>
+      <!-- PRODUCT COLUMN -->
+      <td>
+        <div class="product-header-row">
+          <span class="product-title">
+            {{ item.product.productName }}
+          </span>
+
+          <div class="product-actions">
+            <button class="arrow-btn"
+                    (click)="toggleProductDropdown(item.product.productId!)">
+              ▼
+            </button>
+
+            <button class="remove-btn"
+                    (click)="removeFromCart(item.product.productId!)">
+              ✖
+            </button>
+          </div>
+        </div>
+      </td>
+
+      <!-- QUANTITY COLUMN -->
+      <td class="quantity-cell">
+        <input type="number"
+       [(ngModel)]="item.quantity"
+       (ngModelChange)="onQuantityChange(item)"
+       min="1" />
+      </td>
+    </tr>
+
+    <!-- ✅ DROPDOWN ROW (SEPARATE ROW) -->
+    <tr *ngIf="expandedProduct[item.product.productId!]">
+      <td colspan="2">
+
+        <div class="expanded-card">
+
+          <div class="expanded-inner">
+
+            <div class="expanded-img">
+              <img [src]="getImageUrl(item.product.imageUrls)"
+                   (error)="onImgError($event)" />
             </div>
-          </td>
 
-          <td class="quantity-cell">
-            <input type="number" [(ngModel)]="item.quantity" min="1" />
-          </td>
-        </tr>
-      </tbody>
+            <div class="expanded-info">
+
+             <p><strong>MRP:</strong> ₹{{ item.product.price }}</p>
+
+<!-- <p *ngIf="item.discountData">
+  <strong>Discount:</strong>
+  - ₹{{ item.discountData.discountAmount | number:'1.2-2' }}
+</p>
+
+<p *ngIf="item.discountData">
+  <strong>GST ({{ item.discountData.gstPercentage }}%):</strong>
+  ₹{{ item.discountData.gstAmount | number:'1.2-2' }}
+</p> -->
+
+<p class="total-line" *ngIf="item.discountData">
+  <strong>Total for {{ item.quantity }} Qty:</strong>
+  ₹{{ item.discountData.finalPrice | number:'1.2-2' }}
+</p>
+
+<!-- Fallback if discount not loaded -->
+<p class="total-line" *ngIf="!item.discountData">
+  <strong>Total:</strong>
+  ₹{{ item.quantity * item.product.price }}
+</p>
+
+              <hr />
+
+              <p><strong>Brand:</strong> {{ item.product.brand }}</p>
+              <p><strong>Distributor:</strong> {{ item.product.distributorName }}</p>
+              <p>
+                <strong>Expected Delivery:</strong>
+                {{ computeDeliveryDate(item.product, orderedDate) }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </td>
+    </tr>
+
+  </ng-container>
+</tbody>
     </table>
 
     <!-- Actions -->
@@ -94,5 +168,80 @@
   <!-- <button class="btn btn-outline-secondary mb-3" (click)="close.emit()">
   ← Back to Products
 </button> -->
+
+
+<!-- PRODUCT DETAILS POPUP -->
+<!-- PRODUCT DETAILS MODAL -->
+<!-- <div class="product-modal-overlay" *ngIf="productDetailsPopup">
+  <div class="product-modal">
+
+    <button class="modal-close"
+            (click)="closeProductDetails()">✖</button> -->
+
+    <!-- IMAGE -->
+    <!-- <div class="modal-image">
+      <img *ngIf="productDetailsPopup?.product?.imageUrls"
+           [src]="getImageUrl(productDetailsPopup.product.imageUrls)"
+           (error)="onImgError($event)" />
+    </div> -->
+
+    <!-- BASIC DETAILS -->
+    <!-- <div class="product-info-section">
+      <h3>{{ productDetailsPopup.product.productName }}</h3>
+
+      <div class="info-row">
+        <span>Price</span>
+        <span>₹{{ productDetailsPopup.product.price }}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Brand</span>
+        <span>{{ productDetailsPopup.product.brand }}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Quantity</span>
+        <span>{{ productDetailsPopup.quantity }}</span>
+      </div>
+
+      <div class="info-row">
+        <span>Expected Delivery</span>
+        <span>
+          {{ computeDeliveryDate(productDetailsPopup.product, orderedDate) }}
+        </span>
+      </div>
+    </div> -->
+
+    <!-- DISCOUNT SECTION -->
+    <!-- <div class="discount-section"
+         *ngIf="productDetailsPopup.discount as d">
+
+      <h4 class="discount-heading">Discount Summary</h4>
+
+      <div class="discount-row">
+        <span>Subtotal</span>
+        <span>₹{{ (d.price * d.quantity) | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="discount-row discount-green">
+        <span>Discount</span>
+        <span>- ₹{{ d.discountAmount | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="discount-row">
+        <span>GST ({{ d.gstPercentage }}%)</span>
+        <span>₹{{ d.gstAmount | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="discount-row discount-total">
+        <span>Final Price</span>
+        <span>₹{{ d.finalPrice | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+  </div>
+</div> -->
+
+
 
 </div>

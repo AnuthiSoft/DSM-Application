@@ -25,8 +25,11 @@ interface DashboardResponse {
   totalOrders?: number;
   totalProducts?: number;
   totalDistributors?: number;
-
-
+}
+interface EmployeeCartItem {
+  product: Product;
+  quantity: number;
+  discountData?: any;
 }
 
 @Component({
@@ -61,11 +64,10 @@ export class EmployeeAddToCartComponent implements OnInit {
  
    filterProducts: Product[] = [];
    categories: string[] = [];
-   @Input() employeeCart: { product: Product; quantity: number }[] = [];
- 
-cart = this.employeeCart;
- 
- 
+@Input() employeeCart: EmployeeCartItem[] = []; 
+cart: EmployeeCartItem[] = []; 
+ productDetailsPopup: any = null;
+discountModal: any = null;
    
    orderProducts: any[] = [];
  
@@ -155,32 +157,21 @@ cart = this.employeeCart;
    //  INIT
    // ---------------------------------------------------
 ngOnInit(): void {
-  this.cart = this.employeeCartService.getCart();
+this.cart = this.employeeCartService.getCart() as EmployeeCartItem[];
   this.selectedCustomerId = this.employeeCartService.getCustomer() || '';
 
-   this.cart = this.employeeCartService.getCart();
-
+this.cart = this.employeeCartService.getCart() as EmployeeCartItem[];
   
-
-  
-  // 🟢 Load cart & customer
-  this.cart = this.employeeCartService.getCart();
-  this.selectedCustomerId = this.employeeCartService.getCustomer() || '';
-
   // 🟢 Compute expected delivery using distributor setting
   this.updateExpectedDate();
-  this.cart = this.employeeCartService.getCart();
+  this.cart = this.employeeCartService.getCart() as EmployeeCartItem[];
 
   // 2️⃣ Derive distributorId from cart
   if (this.cart.length && this.cart[0].product?.distributorId) {
     this.distributorId = this.cart[0].product.distributorId;
   }
-
- 
-
   // 4️⃣ Load customer
-   this.cart = this.employeeCartService.getCart();
-
+this.cart = this.employeeCartService.getCart() as EmployeeCartItem[];
   // Ordered date = today
   const today = new Date();
   this.orderedDate = today.toISOString().split('T')[0];
@@ -241,15 +232,79 @@ decrease(item: any) {
   }
 }
 
+openProductDetails(item: any) {
+
+  if (!item) return;
+
+  // Ensure image array format
+  if (item.product.imageUrls && !Array.isArray(item.product.imageUrls)) {
+    item.product.imageUrls = [item.product.imageUrls];
+  }
+
+  const payload = {
+    customerId: this.selectedCustomerId,
+    distributorId: this.distributorId,
+    products: [
+      {
+        productId: item.product.productId,
+        quantity: item.quantity
+      }
+    ],
+    specialDiscountPercent: 0
+  };
+
+  this.orderService.previewDiscount(payload).subscribe({
+    next: (res: any) => {
+
+      this.productDetailsPopup = {
+        product: item.product,
+        quantity: item.quantity,
+        discount: res.products[0]
+      };
+
+    },
+    error: () => {
+      this.toastr.error("Failed to load discount details");
+    }
+  });
+}
+closeProductDetails() {
+  this.productDetailsPopup = null;
+}
+
+closeDiscountModal() {
+  this.discountModal = null;
+}
+
+
+
 removeFromCart(productId: string) {
   this.employeeCartService.remove(productId);
-  this.cart = this.employeeCartService.getCart();
-}
+this.cart = this.employeeCartService.getCart() as EmployeeCartItem[];}
 
 persistCart() {
   localStorage.setItem('employee_cart', JSON.stringify(this.cart));
 }
+private refreshDiscount(item: any) {
 
+  const payload = {
+    customerId: this.selectedCustomerId,
+    distributorId: this.distributorId,
+    products: [
+      {
+        productId: item.product.productId,
+        quantity: item.quantity
+      }
+    ],
+    specialDiscountPercent: 0
+  };
+
+  this.orderService.previewDiscount(payload).subscribe({
+    next: (res: any) => {
+      item.discountData = res.products[0];
+    }
+  });
+}
  
 
    
@@ -443,31 +498,69 @@ persistCart() {
    }
  
  
-   toggleProductDropdown(productId: string) {
-     this.expandedProduct[productId] = !this.expandedProduct[productId];
-   }
+   toggleProductDropdown(productId?: string) {
+  if (!productId) return;
+
+  const isOpen = this.expandedProduct[productId];
+
+  this.expandedProduct[productId] = !isOpen;
+
+  // If opening → fetch discount
+  if (!isOpen) {
+    const item = this.cart.find(
+      c => c.product.productId === productId
+    );
+
+    if (!item) return;
+
+    const payload = {
+      customerId: this.selectedCustomerId,
+      distributorId: this.distributorId,
+      products: [
+        {
+          productId: item.product.productId,
+          quantity: item.quantity
+        }
+      ],
+      specialDiscountPercent: 0
+    };
+
+    this.orderService.previewDiscount(payload).subscribe({
+      next: (res: any) => {
+this.refreshDiscount(item);
+      },
+      error: () => {
+        this.toastr.error('Failed to load discount');
+      }
+    });
+  }
+}
  
-   getImageUrl(imageUrls: string[] | string | null | undefined): string {
-     if (!imageUrls) return 'assets/no-image.png';
- 
-     // Case 1: Already a string → return directly
-     if (typeof imageUrls === 'string') {
-       return this.apiBaseUrl + imageUrls;
-     }
- 
-     // Case 2: Array → return first image
-     if (Array.isArray(imageUrls) && imageUrls.length > 0) {
-       return this.apiBaseUrl + imageUrls[0];
-     }
- 
-     return 'assets/no-image.png';
-   }
- 
- 
+ getImageUrl(imageUrls: string[] | string | null | undefined): string {
+
+  if (!imageUrls) return 'assets/no-image.png';
+
+  let imageName = '';
+
+  if (Array.isArray(imageUrls)) {
+    imageName = imageUrls[0];
+  } else {
+    imageName = imageUrls;
+  }
+
+  if (!imageName) return 'assets/no-image.png';
+
+  // If already full URL
+  if (imageName.startsWith('http')) {
+    return imageName;
+  }
+
+  // ✅ SAME AS ProductsComponent
+  return `${environment.apiUrl}/images/${imageName}`;
+}
    onImgError(event: any) {
-     event.target.src = 'assets/no-image.png';
-   }
- 
+  event.target.src = 'assets/no-image.png';
+}
  
    modalProduct: Product | null = null;
  
@@ -479,7 +572,18 @@ persistCart() {
      this.modalProduct = null;
    }
  
- 
+ onQuantityChange(item: any) {
+
+  if (item.quantity < 1) {
+    item.quantity = 1;
+    return;
+  }
+
+  // If dropdown is open → refresh discount
+  if (this.expandedProduct[item.product.productId]) {
+    this.refreshDiscount(item);
+  }
+}
  
  
  
@@ -942,14 +1046,10 @@ persistCart() {
      // Reset internal table immediately
      this.orderProducts = [];
      this.cart = [];
- 
- 
      this.router.navigate(['/products', distributor.distributorId]);
      // localStorage.setItem("distributorId", distributor.distributorId);
      // this.router.navigate(['/products', distributor.distributorId]);
    }
- 
- 
  
    // ---------------------------------------------------
    //  NAVIGATE TO PRODUCTS

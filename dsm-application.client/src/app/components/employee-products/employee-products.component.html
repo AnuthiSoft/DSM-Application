@@ -25,13 +25,13 @@
     <input type="text" class="form-control" placeholder="Search products" [(ngModel)]="searchTerm"
       (input)="onSmartSearch()" style="width:260px" />
 
-    <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
-      style="width:220px">
+    <!-- <select class="form-select" [(ngModel)]="distributorFilter" (change)="onDistributorChange(distributorFilter)"
+      style="width: 220px;">
       <option value="">All Distributors</option>
       <option *ngFor="let d of connectedDistributors" [value]="d.distributorId">
         {{ d.name }}
       </option>
-    </select>
+    </select> -->
 
     <select class="form-select" [(ngModel)]="stockFilter" (change)="onStockFilterChange()" style="width:180px">
       <option value="">All Stock</option>

@@ -107,6 +107,6 @@ namespace DSM_Application.Server.Models
         // inside Product class
         public int? LeadTimeDays { get; set; } = 1; // nullable, default 1
         public decimal GstPercentage { get; set; }
-        public int CurrentStock { get; internal set; }
+        public int CurrentStock { get; set; }
     }
 }

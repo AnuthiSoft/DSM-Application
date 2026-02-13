@@ -45,6 +45,7 @@
   align-items: center;
 }
 
+
 .search-section .form-control,
 .search-section .form-select {
   background: var(--card-bg);
@@ -78,6 +79,8 @@ html[data-theme="dark"] .search-section .form-control {
   background: var(--card-bg);
   color: var(--text-color);
 }
+
+
 
 /* Loading State */
 .loading-state {
@@ -689,12 +692,7 @@ html[data-theme="dark"] .employee-cart .table td {
   position: relative;
   cursor: pointer;
   font-size: 22px;
-  color: var(--text-color);
-  transition: color 0.2s ease;
-}
-
-html[data-theme="dark"] .employee-cart-icon {
-  color: #ffffff;
+  color: rgba(var(--accent-color-rgb), 0.1);
 }
 
 .employee-cart-icon:hover {

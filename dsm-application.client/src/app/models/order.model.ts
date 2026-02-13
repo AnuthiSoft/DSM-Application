@@ -58,6 +58,14 @@ export interface DistributorOrder {
 //   quantity: number;
 // }
 
+
+export interface OrderPreview {
+  products: any[];
+  subtotal: number;
+  totalDiscount: number;
+  totalGst: number;
+  finalAmount: number;
+}
 export interface Order {
 
   id: string;

@@ -30,6 +30,14 @@ export interface Product {
   distributorName?: string; // Add this
   currentStock: number;
   
+
+  priceDiscountPercent?: number;
+  quantityDiscountPercent?: number;
+  specialDiscountPercent?: number;
+  generalDiscount?: number;
+  totalDiscount?: number;
+  gstPercentage?: number;
+  gstAmount?: number;
   // ✅ ADD THIS
   mainCategory: string;   // parent category ID
      // ✅ UI-only / optional fields (FIXES ALL ERRORS)
@@ -37,6 +45,9 @@ export interface Product {
   distributorVerified?: boolean;
   oldPrice?: number;
   maxStock?: number;
+
+  discountPercent: number;
+  gstPercent: number;
 }
 // export interface Product {
 // //   productId?: string;

@@ -152,6 +152,10 @@ footer {
   width: 0%;
   transition: width 0.3s, background 0.3s;
 }
+.form-control::placeholder {
+  color: var(--input-text);
+  opacity: 5;
+}
 
 .terms-text {
   font-size: 0.9rem;

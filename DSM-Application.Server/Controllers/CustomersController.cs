@@ -1127,6 +1127,8 @@ namespace DSM_Application.Server.Controllers
             return Ok(exists);
         }
 
+
+
         [HttpGet("check-phone/{phone}")]
         public async Task<IActionResult> CheckPhoneExists(string phone)
         {

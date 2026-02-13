@@ -1,5 +1,5 @@
 <div class="return-pickups-container">
-  
+
   <!-- Header -->
   <div class="pickup-header dashboard-card">
     <h2><i class="fas fa-truck-loading"></i> Return Pickups</h2>
@@ -25,7 +25,7 @@
   <!-- Pickup Cards -->
   <div class="pickups-grid" *ngIf="returns.length > 0">
     <div class="pickup-card dashboard-card" *ngFor="let r of returns; let i = index" [ngClass]="getPickupStatus(r)">
-      
+
       <!-- Card Header -->
       <div class="card-header">
         <div class="header-left">
@@ -34,7 +34,7 @@
             <span>{{ getStatusText(r) }}</span>
           </div>
           <h4>Order #{{ r.orderId }}</h4>
-          <small class="pickup-id">Pickup ID: PICK-{{ r.id | slice:0:8 }}</small>
+          <!-- <small class="pickup-id">Pickup ID: PICK-{{ r.id | slice:0:8 }}</small> -->
         </div>
         <div class="header-right">
           <span class="priority" *ngIf="r.priority === 'high'">⚠️ High Priority</span>
@@ -168,7 +168,7 @@
         </div>
       </div>
 
-    
+
 
 
       <!-- Additional Actions -->
@@ -184,13 +184,13 @@
         </button>
       </div>
 
-      
+
     </div>
   </div>
 </div>
-  <!-- ===========================
+<!-- ===========================
      PICKUP CONFIRMATION MODAL
-=========================== -->
+    =========================== -->
 <div class="pickup-modal-backdrop" *ngIf="showModal">
   <div class="pickup-modal">
 
@@ -212,9 +212,9 @@
         <b>{{ selected.productName }}</b>
       </div>
       <div class="summary-row">
-  <span><i class="fas fa-indian-rupee-sign"></i> Price:</span>
-  <b>₹{{ selected.productPrice }}</b>
-</div>
+        <span><i class="fas fa-indian-rupee-sign"></i> Price:</span>
+        <b>₹{{ selected.productPrice }}</b>
+      </div>
 
       <div class="summary-row">
         <span><i class="fas fa-hashtag"></i> Quantity:</span>

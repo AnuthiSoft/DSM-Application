@@ -1293,6 +1293,189 @@ namespace DSM_Application.Server.Controllers
 
             return File(data, "image/jpeg");
         }
+        [HttpPost("preview")]
+        public async Task<IActionResult> PreviewOrder([FromBody] OrderCreateDto dto)
+        {
+            if (dto == null || dto.Products == null || dto.Products.Count == 0)
+                return BadRequest("No products provided");
+
+            decimal totalSubtotal = 0;
+            decimal totalDiscountAmount = 0;
+            decimal totalGst = 0;
+            decimal totalFinalAmount = 0;
+
+            var resultProducts = new List<object>();
+
+            foreach (var p in dto.Products)
+            {
+                var product = await _products
+                    .Find(x => x.ProductId == p.ProductId)
+                    .FirstOrDefaultAsync();
+
+                if (product == null)
+                    return BadRequest($"Product not found {p.ProductId}");
+
+                decimal subtotal = product.Price * p.Quantity;
+
+                // General discount
+                decimal generalDiscountPercent = product.Discount;
+                decimal generalDiscountAmount = (subtotal * generalDiscountPercent) / 100m;
+
+                // Other discount logic using your discount service
+                var calc = _discountService.Calculate(
+                    p.Quantity,
+                    subtotal,
+                    dto.SpecialDiscountPercent
+                );
+
+                decimal totalDiscountForItem =
+                    calc.discountAmount + generalDiscountAmount;
+
+                decimal taxable = subtotal - totalDiscountForItem;
+
+                var category = await _mongo.Categories
+                    .Find(c => c.CategoryId == product.Category)
+                    .FirstOrDefaultAsync();
+
+                var hsn = await _mongo.HsnCodes
+                    .Find(h => h.HsnCode == category.HsnCode)
+                    .FirstOrDefaultAsync();
+
+                decimal gstPercent = hsn?.Gst ?? 0m;
+                decimal gstAmount = (taxable * gstPercent) / 100m;
+
+                decimal final = taxable + gstAmount;
+
+                resultProducts.Add(new
+                {
+                    productId = product.ProductId,
+                    name = product.ProductName,
+                    price = product.Price,
+                    qty = p.Quantity,
+
+                    subtotal,
+                    priceDiscountPercent = calc.pricePct,
+                    quantityDiscountPercent = calc.qtyPct,
+                    specialDiscountPercent = dto.SpecialDiscountPercent,
+                    generalDiscountPercent,
+
+                    discountAmount = totalDiscountForItem,
+
+                    gstPercent,
+                    gstAmount,
+                    finalPrice = final
+                });
+
+                totalSubtotal += subtotal;
+                totalDiscountAmount += totalDiscountForItem;
+                totalGst += gstAmount;
+                totalFinalAmount += final;
+            }
+
+            return Ok(new
+            {
+                products = resultProducts,
+                subtotal = totalSubtotal,
+                totalDiscount = totalDiscountAmount,
+                totalGst,
+                finalAmount = totalFinalAmount
+            });
+        }
+
+
+        [HttpPost("preview-discount")]
+        public async Task<IActionResult> PreviewDiscount([FromBody] OrderCreateDto dto)
+        {
+            if (dto == null || dto.Products == null || dto.Products.Count == 0)
+                return BadRequest("No products provided");
+
+            decimal totalSubtotal = 0;
+            decimal totalDiscount = 0;
+            decimal totalGst = 0;
+            decimal finalAmount = 0;
+
+            var orderProducts = new List<OrderProduct>();
+
+            foreach (var p in dto.Products)
+            {
+                var product = await _products
+                    .Find(x => x.ProductId == p.ProductId)
+                    .FirstOrDefaultAsync();
+
+                if (product == null)
+                    return BadRequest($"Product not found {p.ProductId}");
+
+                decimal subtotal = product.Price * p.Quantity;
+
+                decimal generalDiscountPercent = product.Discount;
+                decimal generalDiscountAmount = (subtotal * generalDiscountPercent) / 100m;
+
+                var calc = _discountService.Calculate(
+                    p.Quantity,
+                    subtotal,
+                    dto.SpecialDiscountPercent
+                );
+
+                decimal totalDiscountForItem =
+                    calc.discountAmount + generalDiscountAmount;
+
+                decimal taxable = subtotal - totalDiscountForItem;
+
+                var category = await _mongo.Categories
+                    .Find(c => c.CategoryId == product.Category)
+                    .FirstOrDefaultAsync();
+
+                var hsn = await _mongo.HsnCodes
+                    .Find(h => h.HsnCode == category.HsnCode)
+                    .FirstOrDefaultAsync();
+
+                decimal gstPercent = hsn?.Gst ?? 0m;
+                decimal gstAmount = (taxable * gstPercent) / 100m;
+
+                decimal finalPrice = taxable + gstAmount;
+
+                orderProducts.Add(new OrderProduct
+                {
+                    ProductId = product.ProductId,
+                    ProductName = product.ProductName,
+                    Price = product.Price,
+                    Quantity = p.Quantity,
+
+                    QuantityDiscountPercent = calc.qtyPct,
+                    PriceDiscountPercent = calc.pricePct,
+                    SpecialDiscountPercent = dto.SpecialDiscountPercent,
+                    TotalDiscountPercent = calc.totalPercent + generalDiscountPercent,
+
+                    DiscountAmount = totalDiscountForItem,
+                    FinalPrice = finalPrice,
+
+                    GstPercentage = gstPercent,
+                    GstAmount = gstAmount
+                });
+
+                totalSubtotal += subtotal;
+                totalDiscount += totalDiscountForItem;
+                totalGst += gstAmount;
+                finalAmount += finalPrice;
+            }
+
+            var preview = new DistributorOrderDto
+            {
+                Products = orderProducts,
+                Subtotal = totalSubtotal,
+                TotalDiscount = totalDiscount,
+                TotalAmount = finalAmount,
+                TotalGst = totalGst,
+                SpecialDiscountPercent = orderProducts.First().SpecialDiscountPercent,
+                QuantityDiscountPercent = orderProducts.First().QuantityDiscountPercent,
+                PriceDiscountPercent = orderProducts.First().PriceDiscountPercent,
+                TotalDiscountPercent = orderProducts.First().TotalDiscountPercent
+            };
+
+            return Ok(preview);
+        }
+
+
         [Authorize(Roles = "Customer")]
         [HttpGet("customer/{customerId}/last-quantities")]
         public async Task<IActionResult> GetLastBoughtQuantities(string customerId)

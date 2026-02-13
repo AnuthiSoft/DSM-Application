@@ -305,7 +305,7 @@
 
       <div class="popup-footer">
         <button class="btn btn-secondary" (click)="closePopup()">Cancel</button>
-        <button class="btn btn-primary" (click)="confirmAddToCart()">
+        <button class="btn btn-primary" (click)="confirmAddToCart()" [disabled]="selectedProduct?.currentStock === 0">
           <i class="fas fa-cart-plus"></i> Add to Cart
         </button>
       </div>

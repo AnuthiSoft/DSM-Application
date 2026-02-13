@@ -258,8 +258,9 @@ export class ProfileComponent implements OnInit {
         this.originalCustomer = { ...res };
 
         this.previewImage = res.profileImageUrl
-          ? this.apiBaseUrl + res.profileImageUrl
-          : 'assets/default-user.png';
+  ? this.apiBaseUrl + res.profileImageUrl
+  : '/assets/default-user.png';
+
 
         this.isLoading = false;
       },
@@ -324,7 +325,7 @@ export class ProfileComponent implements OnInit {
     formData.append("country", this.customer.country || "");
 
     if (this.selectedFile) {
-      formData.append("profileImage", this.selectedFile);
+      formData.append("ProfileImage", this.selectedFile);
     }
 
     this.profileService.updateProfile(formData).subscribe({

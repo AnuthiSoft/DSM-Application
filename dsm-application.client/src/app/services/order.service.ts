@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
-import { DistributorOrder, Employee, Order } from '../models/order.model';
+import { DistributorOrder, Employee, Order, OrderPreview } from '../models/order.model';
 import { Product } from '../models/products.model';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
@@ -14,7 +14,7 @@ private baseUrl = environment.apiUrl + '/orders';
 
    private readonly endpoint = 'orders';
  apiUrl = environment.apiUrl;
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService,private http: HttpClient) {}
 
   reorderToCart(orderId: string) {
   return this.api.post(`${this.endpoint}/${orderId}/reorder-to-cart`, {});
@@ -23,7 +23,17 @@ getCart() {
   return this.api.get('orders/customer/cart');
 }
 
- 
+ previewOrder(payload: any) {
+  const token = localStorage.getItem("token");
+  return this.http.post(
+    `${environment.apiUrl}/orders/preview`,
+    payload,
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+}
+
 
   
 
@@ -47,6 +57,12 @@ getLastBoughtQuantities(customerId: string) {
 }
 
 
+previewDiscount(payload: any) {
+  return this.http.post<OrderPreview>(
+    `${environment.apiUrl}/orders/preview-discount`,
+    payload
+  );
+}
 
 
  

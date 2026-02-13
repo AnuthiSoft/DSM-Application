@@ -278,6 +278,16 @@ this.route.queryParams.subscribe(params => {
             distributorId: d.distributor.distributorId,
             name: d.distributor.companyName || d.distributor.name || 'Distributor'
           }));
+          // 🔥 AUTO-SET distributorId if not set
+const currentDist = localStorage.getItem('distributorId');
+
+if (!currentDist && this.connectedDistributors.length >= 1) {
+  localStorage.setItem(
+    'distributorId',
+    this.connectedDistributors[0].distributorId
+  );
+}
+
 
         // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
         this.products = data.distributors

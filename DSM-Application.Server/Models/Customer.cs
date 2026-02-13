@@ -36,6 +36,8 @@ namespace DSM_Application.Server.Models
         public string? ProfileImageUrl { get; set; }
         public bool PhoneVerified { get; set; } = false;
 
+        [BsonElement("CreditBalance")]
+        public decimal CreditBalance { get; set; } = 0;
 
 
         // Address

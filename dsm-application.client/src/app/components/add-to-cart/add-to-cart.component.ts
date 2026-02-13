@@ -898,7 +898,10 @@ for (const item of this.orderProducts) {
 
       this.toastr.success('Orders placed successfully');
       this.resetOrder();
-      this.router.navigate(['/customerOrder']);
+     this.router.navigate(['/customer-dashboard'], {
+  queryParams: { tab: 'orders' }
+});
+
 
     } finally {
       this.isPlacingOrder = false;   // 🔓 RELEASE LOCK
@@ -943,7 +946,10 @@ viewProducts(distributor: any) {
     this.cart = [];
 
 
-    this.router.navigate(['/products', distributor.distributorId]);
+   this.router.navigate(['/customer-dashboard'], {
+  queryParams: { tab: 'products' }
+});
+
     // localStorage.setItem("distributorId", distributor.distributorId);
     // this.router.navigate(['/products', distributor.distributorId]);
   }
@@ -962,7 +968,10 @@ viewProducts(distributor: any) {
     return;
   }
 
-  this.router.navigate(['/products', distributorId]);
+ this.router.navigate(['/customer-dashboard'], {
+  queryParams: { tab: 'products' }
+});
+
 }
 
 

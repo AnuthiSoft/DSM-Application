@@ -96,9 +96,24 @@ export class CustomerDashboardComponent {
     }
 
     // Load active tab
-    const savedTab = localStorage.getItem('customerActiveTab');
-    this.activeTab = savedTab ? savedTab : 'dashboard';
+   // 🔥 Priority: URL tab > localStorage > dashboard
+this.route.queryParams.subscribe(params => {
+  const tabFromUrl = params['tab'];
 
+  // 🔥 If URL has tab → use it
+  if (tabFromUrl) {
+    this.activeTab = tabFromUrl;
+    localStorage.setItem('customerActiveTab', tabFromUrl);
+  } 
+  else {
+    // 🔥 Always default to dashboard on fresh load
+    this.activeTab = 'dashboard';
+    localStorage.setItem('customerActiveTab', 'dashboard');
+  }
+});
+
+
+ 
     // Check screen width
     this.checkScreenWidth();
     this.cartService.cartCount$.subscribe(count => {

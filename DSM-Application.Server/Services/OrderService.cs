@@ -134,6 +134,23 @@ public class OrderService
 
             .FirstOrDefaultAsync();
 
+        // 🔥 APPLY CUSTOMER CREDIT
+        if (customer != null && customer.CreditBalance > 0)
+        {
+            var usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
+
+            order.TotalAmount -= usableCredit;
+            order.RemainingAmount = order.TotalAmount;
+
+            customer.CreditBalance -= usableCredit;
+
+            await _customers.ReplaceOneAsync(
+                c => c.CustomerId == customer.CustomerId,
+                customer
+            );
+        }
+
+
         if (customer == null)
 
             throw new Exception("Customer not found");
@@ -191,7 +208,7 @@ public class OrderService
         order.AssignedEmployeeId = assignedEmployeeId;
 
         order.CreatedAt = DateTime.UtcNow;
-
+        
         await _orders.InsertOneAsync(order);
 
     }

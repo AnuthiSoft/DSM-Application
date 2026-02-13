@@ -363,13 +363,17 @@ namespace DSM_Application.Server.Services
         // 4️⃣ COMPLETE RETURN (INVENTORY + ORDER)
         public async Task CompleteReturnAsync(string returnId)
         {
-            var distributorId = GetDistributorId();
-            if (string.IsNullOrEmpty(distributorId))
-                throw new Exception("Unauthorized");
+            
 
+            // Get distributor from Return itself (NOT from token)
             var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
             if (ret == null)
                 throw new Exception("Return not found");
+
+            var distributorId = ret.DistributorId;
+
+
+
 
             if (ret.Status != "Received")
                 throw new Exception("Item not yet picked up");
@@ -389,25 +393,59 @@ namespace DSM_Application.Server.Services
 
             await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
-            // 2️⃣ UPDATE ORDER (🔥 IMPORTANT — IN RIGHT ORDER)
+            // 2️⃣ UPDATE ORDER
             var order = await _orders.Find(o => o.Id == ret.OrderId).FirstOrDefaultAsync();
+
             if (order != null)
             {
-                // Update returned quantity FIRST
-                var product = order.Products.FirstOrDefault(p => p.ProductId == ret.ProductId);
-                if (product != null)
-                {
-                    product.ReturnedQty += ret.ReturnQty;
+                var orderProduct = order.Products
+                    .FirstOrDefault(p => p.ProductId == ret.ProductId);
 
-                    // never exceed original quantity
-                    if (product.ReturnedQty > product.Quantity)
-                        product.ReturnedQty = product.Quantity;
+                if (orderProduct != null)
+                {
+                    // Update returned qty
+                    orderProduct.ReturnedQty += ret.ReturnQty;
+
+                    if (orderProduct.ReturnedQty > orderProduct.Quantity)
+                        orderProduct.ReturnedQty = orderProduct.Quantity;
+
+                    // Calculate return value using final price
+                    var unitFinalPrice = orderProduct.FinalPrice / orderProduct.Quantity;
+                    var returnValue = unitFinalPrice * ret.ReturnQty;
+
+                    // Initialize remaining amount first time
+                    if (!order.HasReturn)
+                        order.RemainingAmount = order.TotalAmount;
+
+
+                    // Accounting
+                    order.ReturnedAmount += returnValue;
+                    order.RemainingAmount -= returnValue;
+
+                    if (order.RemainingAmount < 0)
+                        order.RemainingAmount = 0;
+
+                    order.HasReturn = true;
+                   
+
+                    //  Add credit to customer
+                    var filter = Builders<Customer>.Filter.Eq(
+       "_id",
+       new ObjectId(order.CustomerId)
+   );
+
+
+
+                    var update = Builders<Customer>.Update.Inc("CreditBalance", returnValue);
+                    await _customers.UpdateOneAsync(filter, update);
+
                 }
 
-                // NOW update order status
                 order.Status = "Return Completed";
+                order.UpdatedAt = DateTime.UtcNow;
+            
 
-                // Save together
+                // 🔥 SAVE ORDER
                 await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
             }
 

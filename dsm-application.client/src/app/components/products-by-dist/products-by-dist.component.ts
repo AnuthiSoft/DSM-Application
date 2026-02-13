@@ -612,9 +612,9 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     this.showPopup = false;
     this.selectedProduct = null;
 
-    // 🔥 Redirect to cart
-    this.router.navigate(['/add-to-cart']);
-  }
+  // 🔥 Redirect to cart
+  this.router.navigate(['/add-to-cart']);
+}
 
 
 

@@ -130,7 +130,19 @@
           <div class="stat-value">₹{{ revenueStats.total | number:'1.2-2' }}</div>
           <div class="stat-label">Total Spent</div>
         </div>
+         <div class="stat-card credit-card">
+  <div class="stat-icon">₹</div>
+  <div class="stat-value">
+    ₹ {{ creditBalance | number:'1.2-2' }}
+  </div>
+  <div class="stat-label">
+    Available Credit
+  </div>
+</div>
+
       </div>
+
+   
 
       <!-- Recent Orders -->
       <div class="dashboard-card">

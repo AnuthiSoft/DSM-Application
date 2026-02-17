@@ -29,5 +29,6 @@ namespace DSM_Application.Server.Models.DTOs
         public string AddedByDistributorId { get; set; }
 
         public bool PhoneVerified { get; set; } = false;
+        public decimal CreditBalance { get; set; }
     }
 }

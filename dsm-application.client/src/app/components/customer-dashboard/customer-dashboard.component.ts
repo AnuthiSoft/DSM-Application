@@ -53,6 +53,7 @@ export class CustomerDashboardComponent {
   // products: any[] = [];
   productsLoading: boolean = true;
   connectedDistributors: { distributorId: string; name: string }[] = [];
+creditBalance: number = 0;
 
 
   selectedCartProduct: Product | null = null;
@@ -143,6 +144,7 @@ this.route.queryParams.subscribe(params => {
 
     this.loadDashboard();
 
+this.loadCustomerCredit();
 
 
   }
@@ -621,5 +623,15 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
     this.setActiveTab(tab);
   }
 
+loadCustomerCredit() {
+  this.customerService.getProfile().subscribe({
+    next: (res: any) => {
+      this.creditBalance = res.creditBalance || 0;
+    },
+    error: () => {
+      this.creditBalance = 0;
+    }
+  });
+}
 
 }

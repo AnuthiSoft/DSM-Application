@@ -89,6 +89,7 @@ using DSM_Application.Server.Models.DTOs;
 using DSM_Application.Server.Services;
 
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 public class OrderService
 
@@ -103,7 +104,7 @@ public class OrderService
     private readonly IMongoCollection<CustomerDistributorConnection> _connections;
     private readonly MongoDbService _mongo;
     private readonly InventoryService _inventoryService;
-
+    private readonly IMongoCollection<Product> _products;
 
     public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo, InventoryService inventoryService)
 
@@ -120,6 +121,8 @@ public class OrderService
         _mongo = mongo;
         _inventoryService = inventoryService;
 
+        _products = db.GetCollection<Product>("products");
+
     }
 
     public async Task CreateOrderAsync(Order order)
@@ -127,33 +130,71 @@ public class OrderService
     {
 
         // Validate customer
-
         var customer = await _customers
-
-            .Find(x => x.CustomerId == order.CustomerId)
-
-            .FirstOrDefaultAsync();
-
-        // 🔥 APPLY CUSTOMER CREDIT
-        if (customer != null && customer.CreditBalance > 0)
-        {
-            var usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
-
-            order.TotalAmount -= usableCredit;
-            order.RemainingAmount = order.TotalAmount;
-
-            customer.CreditBalance -= usableCredit;
-
-            await _customers.ReplaceOneAsync(
-                c => c.CustomerId == customer.CustomerId,
-                customer
-            );
-        }
+     .Find(c => c.CustomerId == order.CustomerId)
+     .FirstOrDefaultAsync();
 
 
         if (customer == null)
-
             throw new Exception("Customer not found");
+
+
+
+
+      
+
+        // 🔥 CALCULATE TOTAL AMOUNT FROM PRODUCTS (Backend controlled)
+        //decimal totalAmount = 0;
+
+        //foreach (var item in order.Products)
+        //{
+        //    var product = await _products
+        //        .Find(p => p.ProductId == item.ProductId)
+        //        .FirstOrDefaultAsync();
+
+        //    if (product == null)
+        //        throw new Exception($"Product not found: {item.ProductId}");
+
+        //    totalAmount += product.Price * item.Quantity;
+        //}
+
+        //order.TotalAmount = totalAmount;
+
+        
+
+
+
+        // 🔥 APPLY CUSTOMER CREDIT (FINAL - USING _id)
+
+        //decimal usableCredit = 0;
+
+        //if (customer.CreditBalance > 0 && order.TotalAmount > 0)
+        //{
+           
+
+        //    usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
+        //    Console.WriteLine($"Credit Before: {customer.CreditBalance}");
+        //    Console.WriteLine($"UsableCredit: {usableCredit}");
+
+        //    order.RemainingAmount = order.TotalAmount - usableCredit;
+
+        //    // Update by Mongo _id
+        //    await _customers.UpdateOneAsync(
+        //        Builders<Customer>.Filter.Eq(
+        //            "_id",
+        //            new ObjectId(order.CustomerId)
+        //        ),
+        //        Builders<Customer>.Update.Inc(
+        //            c => c.CreditBalance,
+        //            -usableCredit
+        //        )
+        //    );
+        //}
+        //else
+        //{
+        //    order.RemainingAmount = order.TotalAmount;
+        //}
+
 
         // Fetch distributor-customer connection
 
@@ -212,6 +253,43 @@ public class OrderService
         await _orders.InsertOneAsync(order);
 
     }
+
+
+
+    //public async Task ApplyCustomerCreditAsync(Order order)
+    //{
+    //    if (string.IsNullOrEmpty(order.CustomerId))
+    //        return;
+
+    //    var customer = await _customers
+    //        .Find(c => c.CustomerId == order.CustomerId)
+    //        .FirstOrDefaultAsync();
+
+    //    if (customer == null)
+    //        return;
+
+    //    if (customer.CreditBalance <= 0 || order.TotalAmount <= 0)
+    //    {
+    //        order.RemainingAmount = order.TotalAmount;
+    //        return;
+    //    }
+
+    //    decimal usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
+
+    //    // Set remaining payable
+    //    order.RemainingAmount = order.TotalAmount - usableCredit;
+
+    //    // Deduct credit (atomic)
+    //    var result = await _customers.UpdateOneAsync(
+    //        c => c.CustomerId == order.CustomerId,
+    //        Builders<Customer>.Update.Inc(c => c.CreditBalance, -usableCredit)
+    //    );
+
+       
+    //}
+
+
+
 
     //public async Task<Order> CreateByCollector(OrderCreateDto dto, string userId, string role)
     //{

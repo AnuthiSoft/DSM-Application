@@ -440,7 +440,7 @@ reorder(orderId: string): void {
 
         this.toastr.success('Order items loaded into cart');
 
-      this.router.navigate(['/add-to-cart']);
+      this.router.navigate(['//customer-dashboard/add-to-cart']);
     },
     error: () => {
       this.toastr.error('Failed to load previous order');

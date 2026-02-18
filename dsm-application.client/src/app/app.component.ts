@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { ThemeService } from './shared/theme.service';
 import { Router } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -8,22 +9,38 @@ import { Router } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  constructor(private themeService: ThemeService, private router: Router) { }
-  activeTab = '';
-  toggleTheme() {
-    this.themeService.toggleTheme();
-  }
-  title = 'distributormanagementsystem.client';
+ 
+  constructor(
+    private themeService: ThemeService,
+    private router: Router,
+    private auth: AuthService
+  ) {}
 
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
+  ngOnInit(): void {
 
-    if (tab === 'tasks') {
-      this.router.navigate(['/tasks/my']);
+    const token = this.auth.getToken();
+
+    if (token) {
+
+      const role = this.auth.getRole();
+
+      if (role === 'Admin') {
+        this.router.navigate(['/admin-dashboard']);
+      }
+      else if (role === 'Distributor') {
+        this.router.navigate(['/distributor-dashboard']);
+      }
+      else if (role === 'Employee') {
+        this.router.navigate(['/employee-dashboard']);
+      }
+      else if (role === 'Customer') {
+        this.router.navigate(['/customer-dashboard']);
+      }
+
     }
   }
 
-  isActive(tab: string) {
-    return this.activeTab === tab;
+  toggleTheme() {
+    this.themeService.toggleTheme();
   }
 }

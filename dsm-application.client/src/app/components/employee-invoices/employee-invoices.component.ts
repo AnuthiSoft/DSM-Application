@@ -35,6 +35,10 @@ apiUrl = environment.apiUrl;
       window.open(this.apiUrl + inv.fileUrl, '_blank');
     }
   }
+  viewInvoice(inv: any) {
+  const url = `${environment.apiUrl}/invoice-upload/download/${inv.pdfUrl}`;
+  window.open(url, '_blank');
+}
 
   // ✅ ADD THIS
   exportAll() {
@@ -43,5 +47,23 @@ apiUrl = environment.apiUrl;
     // Example logic
     alert('Export all invoices feature coming soon');
   }
+downloadInvoice(inv: any) {
+  const url = `${environment.apiUrl}/invoice-upload/download/${inv.pdfUrl}`;
+  window.open(url, '_blank');
+}
+deleteInvoice(inv: any) {
+
+  if (!confirm('Are you sure you want to delete this invoice?'))
+    return;
+
+  this.http.delete(`${this.apiUrl}/invoice-upload/${inv.id}`)
+    .subscribe({
+      next: () => {
+        this.invoices = this.invoices.filter(i => i.id !== inv.id);
+      },
+      error: err => console.error(err)
+    });
+}
+
 
 }

@@ -1,5 +1,6 @@
 ﻿using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Models;
+using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.IO;
@@ -11,11 +12,12 @@ namespace DSM_Application.Server.Controllers
     public class InvoiceUploadController : ControllerBase
     {
         private readonly IMongoCollection<DeliveryInvoice> _invoiceCollection;
-
-        public InvoiceUploadController(IMongoDatabase db)
+        private readonly BlobService _blobService;
+        public InvoiceUploadController(IMongoDatabase db, BlobService blobService )
         {
 
             _invoiceCollection = db.GetCollection<DeliveryInvoice>("DeliveryInvoices");
+            _blobService = blobService;
         }
 
         // ================================
@@ -23,40 +25,61 @@ namespace DSM_Application.Server.Controllers
         // ================================
         [HttpPost("upload")]
         public async Task<IActionResult> UploadInvoice(
-            [FromForm] IFormFile file,
-            [FromForm] string employeeId)
+       [FromForm] IFormFile file,
+       [FromForm] string employeeId)
         {
             if (file == null)
                 return BadRequest("File required");
 
             if (string.IsNullOrWhiteSpace(employeeId))
-                return BadRequest(new { message = "employeeId is required" });
+                return BadRequest("employeeId required");
 
-            // Create folder if not exists
-            var folder = Path.Combine("wwwroot", "invoices");
-            Directory.CreateDirectory(folder);
-
-            // Create random filename
-            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-            var path = Path.Combine(folder, fileName);
-
-            // Save file
-            using var stream = new FileStream(path, FileMode.Create);
-            await file.CopyToAsync(stream);
-
-            // Return public URL
-            var url = $"{Request.Scheme}://{Request.Host}/invoices/{fileName}";
+            // 🔥 Upload to Azure Blob
+            var blobName = await _blobService.UploadAsync(file);
 
             var record = new DeliveryInvoice
             {
                 EmployeeId = employeeId,
-                PdfUrl = url,
-                UploadedOn = DateTime.Now
+                PdfUrl = blobName,   // store ONLY blob name
+                UploadedOn = DateTime.UtcNow
             };
 
             await _invoiceCollection.InsertOneAsync(record);
 
-            return Ok(new { pdfUrl = url });
+            return Ok(new { pdfUrl = blobName });
+        }
+        [HttpGet("download/{blobName}")]
+        public async Task<IActionResult> Download(string blobName)
+        {
+            var fileBytes = await _blobService.DownloadAsync(blobName);
+
+            if (fileBytes == null)
+                return NotFound("File not found");
+
+            var contentType = "application/pdf"; // 👈 IMPORTANT
+
+            return File(fileBytes, contentType);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteInvoice(string id)
+        {
+            var invoice = await _invoiceCollection
+                .Find(i => i.Id == id)
+                .FirstOrDefaultAsync();
+
+            if (invoice == null)
+                return NotFound("Invoice not found");
+
+            // 🔥 Delete from Blob
+            if (!string.IsNullOrEmpty(invoice.PdfUrl))
+            {
+                await _blobService.DeleteAsync(invoice.PdfUrl);
+            }
+
+            // 🔥 Delete from MongoDB
+            await _invoiceCollection.DeleteOneAsync(i => i.Id == id);
+
+            return Ok(new { message = "Invoice deleted successfully" });
         }
 
         // ================================
@@ -85,14 +108,14 @@ namespace DSM_Application.Server.Controllers
             if (invoice == null)
                 return NotFound("Invoice not found");
 
-            var fileName = Path.GetFileName(invoice.PdfUrl);
-            var filePath = Path.Combine("wwwroot", "invoices", fileName);
+            var fileBytes = await _blobService.DownloadAsync(invoice.PdfUrl);
 
-            if (!System.IO.File.Exists(filePath))
-                return NotFound("PDF missing");
+            if (fileBytes == null)
+                return NotFound("PDF missing in blob storage");
 
-            return PhysicalFile(filePath, "application/pdf", fileName);
+            return File(fileBytes, "application/pdf");
         }
+
     }
 }
 

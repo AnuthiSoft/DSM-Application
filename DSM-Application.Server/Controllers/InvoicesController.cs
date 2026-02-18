@@ -12,15 +12,17 @@ namespace DSM_Application.Server.Controllers
     public class InvoicesController : ControllerBase
     {
         private readonly IMongoCollection<Invoice> _invoiceCollection;
+        private readonly BlobService _blobService;
 
         // ✅ ADD THIS
         private readonly EmailService _emailService;
 
         // ✅ FIXED CONSTRUCTOR
-        public InvoicesController(IMongoDatabase db, EmailService emailService)
+        public InvoicesController(IMongoDatabase db, EmailService emailService, BlobService blobService)
         {
             _invoiceCollection = db.GetCollection<Invoice>("Invoices");
             _emailService = emailService;
+            _blobService = blobService;
         }
 
         // CREATE INVOICE
@@ -89,6 +91,17 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(new { message = "Email sent" });
         }
+        [HttpGet("download/{blobName}")]
+        public async Task<IActionResult> Download(string blobName)
+        {
+            var fileBytes = await _blobService.DownloadAsync(blobName);
+
+            if (fileBytes == null)
+                return NotFound("File not found in blob");
+
+            return File(fileBytes, "application/octet-stream", blobName);
+        }
+
 
         public class EmailInvoiceDto
         {

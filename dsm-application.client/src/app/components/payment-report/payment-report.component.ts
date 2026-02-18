@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { PaymentService } from '../../services/payment.service';
 
 @Component({
@@ -7,6 +7,10 @@ import { PaymentService } from '../../services/payment.service';
   styleUrl: './payment-report.component.css'
 })
 export class PaymentReportComponent implements OnInit {
+
+  
+ 
+  
 
   distributorId: string = '';
   fromDate: string = '';
@@ -172,4 +176,5 @@ export class PaymentReportComponent implements OnInit {
     this.handoverStatus = val;
     this.closeSheet();
   }
+  
 }

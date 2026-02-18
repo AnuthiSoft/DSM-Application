@@ -230,11 +230,28 @@
           </ng-template>
         </div>
 
-        <div *ngIf="form.paymentMode !== 'cash'" class="form-group">
-          <label>Transaction Reference</label>
-          <input type="text" class="form-input" [(ngModel)]="form.transactionReference"
-            placeholder="Enter reference number">
-        </div>
+       <div *ngIf="form.paymentMode !== 'cash'" class="form-group">
+  <label>
+    Transaction Reference
+    <span class="text-danger">*</span>
+  </label>
+
+  <input 
+    type="text" 
+    class="form-input" 
+    [(ngModel)]="form.transactionReference"
+    #transactionRef="ngModel"
+    name="transactionReference"
+    required
+    placeholder="Enter reference number">
+
+  <!-- Validation Message -->
+  <div class="error-message" 
+       *ngIf="transactionRef.invalid && transactionRef.touched">
+    Transaction Reference is required
+  </div>
+</div>
+
       </div>
     </div>
 

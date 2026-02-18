@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 
 import { CustomerService } from '../../services/customer.service';
 import { AuthService } from '../../services/auth.service';
@@ -12,7 +12,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './customer-login.component.html',
   styleUrls: ['./customer-login.component.css']
 })
-export class CustomerLoginComponent {
+export class CustomerLoginComponent implements OnInit {
   request: CustomerLoginRequest = { email: '', phoneNumber: '', password: '' };
   email = '';
   message = '';
@@ -34,7 +34,14 @@ export class CustomerLoginComponent {
     private toastr: ToastrService
   ) { }
 
+ngOnInit() {
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
 
+  if (token && role === 'Customer') {
+    this.router.navigate(['/customer-dashboard']);
+  }
+}
 
 
   restrictPhoneInput(event: any) {
@@ -110,8 +117,7 @@ export class CustomerLoginComponent {
 
         // Clear old data
         // Remove only auth-related old data — NOT the cart!
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
+    
 
 
 

@@ -407,6 +407,7 @@ namespace DSM_Application.Server.Services
 
                 h.TotalAmountSubmitted,
                 h.CashAmountSubmitted,
+               
 
                 CashierName = cashierMap.ContainsKey(h.CashierId)
                     ? cashierMap[h.CashierId]
@@ -426,6 +427,7 @@ namespace DSM_Application.Server.Services
             r.CustomerName,
             r.AmountPaid,
             r.PaymentMode,
+            r.TransactionReference,   // 🔥 ADD THIS
             r.PaidOn,
             r.HandoverStatus,
             r.IsRehandover,
@@ -821,6 +823,7 @@ namespace DSM_Application.Server.Services
                             x.PendingAmount,
 
                             x.PaymentMode,
+                            x.TransactionReference,   // 🔥 ADD THIS
 
                             x.IsHandedOver,
                             x.HandoverStatus,

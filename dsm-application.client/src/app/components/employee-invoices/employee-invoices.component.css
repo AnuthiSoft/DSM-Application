@@ -257,7 +257,11 @@ html, body {
   padding: 40px 20px;
   text-align: center;
 }
-
+.delete-btn {
+  background: #ffe6e6;
+  border: 1px solid #ff4d4d;
+  color: #d60000;
+}
 /* =========================
    RESPONSIVE - TABLET & MOBILE
 ========================= */

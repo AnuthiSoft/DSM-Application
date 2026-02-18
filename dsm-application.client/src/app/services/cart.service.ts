@@ -66,14 +66,20 @@ localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
 }
 
 
-  private emitCount() {
-    const count = this.getCart().reduce((s, c) => s + (c.quantity || 0), 0);
-    this.cartCountSubject.next(count);
-  }
+private emitCount() {
+  const cart = this.getCart();
 
-  getCount(): number {
-    return this.getCart().reduce((s, c) => s + c.quantity, 0);
-  }
+  const count = cart.length;   // ✅ count distinct products
+
+  this.cartCountSubject.next(count);
+}
+
+
+
+ getCount(): number {
+  return this.getCart().length;   // ✅ product count
+}
+
    addToCart(product: Product) {
   const customerId = localStorage.getItem('customerId');
   if (!customerId) return;
@@ -106,5 +112,13 @@ localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
 updateCartCount() {
   this.emitCount();
 }
+saveFullCart(cart: any[]) {
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
+
+  localStorage.setItem(`cart_customer_${customerId}`, JSON.stringify(cart));
+  this.emitCount();
+}
+
 
 }

@@ -45,6 +45,7 @@
           <th>Customer</th>
           <th>Date & Time</th>
           <th>Payment Mode</th>
+          <th>Transaction Reference</th>
         </tr>
       </thead>
 
@@ -86,6 +87,9 @@
               <i [class]="getPaymentModeIcon(p.paymentMode)"></i>
               {{ p.paymentMode }}
             </span>
+          </td>
+                <td>
+            {{ p.transactionReference }}
           </td>
         </tr>
       </tbody>

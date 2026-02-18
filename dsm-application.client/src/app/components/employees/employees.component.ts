@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/admin.service';
 import { environment } from '../../../environments/environment';
 
+
 @Component({
   selector: 'app-employees',
   templateUrl: './employees.component.html',
@@ -505,14 +506,13 @@ export class EmployeesComponent {
     control.setErrors(Object.keys(errors).length ? errors : null);
   }
 
-  viewInvoice(emp: any) {
-    const url = `${this.apiUrl}/invoice-upload/view/${emp.employeeId}`;
-    window.open(url, '_blank');
-  }
+viewInvoice(emp: any) {
+  const url = `${this.apiUrl}/invoice-upload/view/${emp.employeeId}`;
+  window.open(url, '_blank');
+}
 
-  viewPdf(url: string) {
-    window.open(url, '_blank');
-  }
+
+
 
   openSheet(type: 'designation' | 'status') {
     this.sheetType = type;
@@ -543,4 +543,5 @@ export class EmployeesComponent {
   isDeliveryBoyUser(): boolean {
     return this.currentUserRole === 'Delivery Boy';
   }
+
 }

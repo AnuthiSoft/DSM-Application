@@ -85,12 +85,17 @@
     </div>
     <div class="filter-controls">
       <label class="filter-label">Status Filter:</label>
-      <select class="form-select" [ngModel]="statusFilter" (mousedown)="openStatusSheet($event)"
+   <select class="form-select"
+        [(ngModel)]="statusFilter"
+        (change)="loadOrders()"
+        (mousedown)="openStatusSheet($event)"
         (click)="openStatusSheet($event)">
 
-        <option value="">All Statuses</option>
-        <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
-      </select>
+  <option value="All">All Statuses</option>
+  <option *ngFor="let s of statuses" [value]="s">
+    {{ s }}
+  </option>
+</select>
 
     </div>
   </div>

@@ -119,20 +119,7 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 
-    options.AddPolicy("AllowAngular", policy =>
-    {
-        policy.WithOrigins(
-            "https://dsm-application.web.app",
-   
-
-            "https://dsm-application.onrender.com" ,
-                "http://localhost:58555",
-                "http://localhost:4200"
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
-    });
+  
 });
 
 //builder.Services.AddCors(options =>

@@ -30,6 +30,7 @@
           <th>Customer</th>
           <th>Total Paid</th>
           <th>Payment Mode</th>
+          <!-- <th>Transaction Reference</th> -->
           <th>Status</th>
           <th>Details</th>
         </tr>
@@ -42,6 +43,7 @@
             <i [class]="getPaymentModeIcon(c.paymentMode)"></i>
             {{ c.paymentMode | titlecase }}
           </td>
+         
           <td data-label="Status">
             <span class="status-badge success">Collected</span>
           </td>
@@ -129,6 +131,7 @@
             <tr>
               <th>Date</th>
               <th>Receipt</th>
+              <th>Transaction Reference</th>
               <th>Amount Paid</th>
               <th>Mode</th>
             </tr>
@@ -146,6 +149,12 @@
               <td class="receipt">
                 {{ receipt.receiptId }}
               </td>
+              <td>
+  <span *ngIf="receipt.paymentMode === 'scanner' || receipt.paymentMode === 'upi'">
+    {{ receipt.transactionReference }}
+  </span>
+  <span *ngIf="receipt.paymentMode === 'cash'">—</span>
+</td>
               <td class="paid-amount">
                 ₹{{ receipt.amountPaid | number:'1.2-2' }}
               </td>

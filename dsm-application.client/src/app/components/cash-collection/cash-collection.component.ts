@@ -86,6 +86,10 @@ export class CashCollectionComponent implements OnInit {
     } else {
       this.scannerQrUrl = null;
     }
+      // 🔥 If cash selected, clear reference
+  if (this.form.paymentMode === 'cash') {
+    this.form.transactionReference = '';
+  }
   }
 
   // 🔥 GROUP ORDERS BY CUSTOMER
@@ -136,10 +140,17 @@ export class CashCollectionComponent implements OnInit {
     }
   }
 
-  canSubmit() {
+canSubmit() {
+  const isReferenceRequired =
+    this.form.paymentMode === 'upi' ||
+    this.form.paymentMode === 'scanner';
 
-    return this.form.amountPaid > 0 && !this.amountError;
+  if (isReferenceRequired && !this.form.transactionReference?.trim()) {
+    return false;
   }
+
+  return this.form.amountPaid > 0 && !this.amountError;
+}
 
   submit() {
     this.paymentService.collectCustomerPayment(this.form).subscribe({

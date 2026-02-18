@@ -67,13 +67,15 @@ this.flatRows.push({
   customerName: r.customerName,
   amountPaid: r.amountPaid,
   paymentMode: r.paymentMode,
+   transactionReference: r.transactionReference,  // ✅ ADD THIS
   paidOn: r.paidOn,
   receiptStatus: r.handoverStatus,
 
   // 🔥 re-handover flags
   receiptIsRehandover: r.isRehandover,
   distributorRejectReason: r.previousRejectReason,
-  cashierRehandoverNote: r.rehandoverNote
+  cashierRehandoverNote: r.rehandoverNote,
+ 
 });
   });
 });

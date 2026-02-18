@@ -208,6 +208,7 @@
             <th>Paid</th>
             <th>Pending</th>
             <th>Payment Mode</th>
+            <th>Transaction Ref</th>
             <th>Payment Date</th>
             
             <th>Cashier Name</th>
@@ -234,6 +235,16 @@
   {{ o.paymentMode | uppercase }}
 </span>
 </td>
+<td>
+  <span *ngIf="o.transactionReference; else noRef">
+    {{ o.transactionReference }}
+  </span>
+
+  <ng-template #noRef>
+    —
+  </ng-template>
+</td>
+
             <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td> {{ o.cashierName }}</td>
             <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>

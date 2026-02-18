@@ -3,6 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { ConnectionRequestDto, DistributorService } from '../../services/distributor.service';
 import { CustomerService } from '../../services/customer.service';
 import { HttpClient } from '@angular/common/http';
+import { EmployeeService } from '../../services/employee.service';
 
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -35,7 +36,8 @@ orderStatusFromDashboard: string | null = null;
     private distributorService: DistributorService,
     private router: Router,   // ✅ ADD THIS
     private customerService: CustomerService,
-    private http: HttpClient
+    private http: HttpClient, private employeeService: EmployeeService
+
   ) { }
 
 
@@ -94,12 +96,96 @@ orderStatusFromDashboard: string | null = null;
     const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
     this.expectedDays = stored ? Number(stored) : 1;
     this.loadRetailerCount();
-    this.loadEmployees();              // ⬅ added
+    this.loadEmployees();   // ⬅ added
+   
     this.loadScannerQr();
     // Check screen width on init
     this.checkScreenWidth();
   }
   
+
+ updateAvailability(employeeId: string, isAvailable: boolean) {
+
+  const today = new Date().toISOString().split('T')[0];
+
+  if (!isAvailable) {
+
+    Swal.fire({
+      title: 'Reason for unavailability',
+      input: 'text',
+      inputPlaceholder: 'Enter reason...',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel'
+    }).then(result => {
+
+      if (result.isConfirmed) {
+
+        const reason = result.value;
+
+        if (!reason || !reason.trim()) {
+          Swal.fire('Error', 'Reason is required', 'error');
+          return;
+        }
+
+        this.saveAvailability(employeeId, false, reason, today);
+      }
+    });
+
+  } else {
+
+    this.saveAvailability(employeeId, true, '', today);
+
+  }
+}
+
+saveAvailability(employeeId: string, isAvailable: boolean, reason: string, date: string) {
+
+  this.employeeService.markAvailability({
+    employeeId: employeeId,
+    date: date,
+    isAvailable: isAvailable,
+    reason: reason
+  }).subscribe({
+    next: () => {
+Swal.fire({
+  toast: true,
+  position: 'top-end',
+  icon: 'success',
+  title: 'Availability updated successfully',
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+  background: getComputedStyle(document.documentElement)
+    .getPropertyValue('--card-bg'),
+  color: getComputedStyle(document.documentElement)
+    .getPropertyValue('--text-color'),
+  didOpen: (toast) => {
+    toast.addEventListener('mouseenter', Swal.stopTimer);
+    toast.addEventListener('mouseleave', Swal.resumeTimer);
+  }
+});
+      this.loadEmployees();   // refresh distributor list
+    },
+    error: () => {
+Swal.fire({
+  toast: true,
+  position: 'top-end',
+  icon: 'error',
+  title: 'Failed to update availability',
+  showConfirmButton: false,
+  timer: 2500,
+  timerProgressBar: true,
+  background: getComputedStyle(document.documentElement)
+    .getPropertyValue('--card-bg'),
+  color: getComputedStyle(document.documentElement)
+    .getPropertyValue('--text-color')
+});
+    }
+  });
+}
+
+
 openOrdersWithStatus(status: string) {
   this.orderStatusFromDashboard = status;
   this.setActiveTab('order-list');
@@ -147,13 +233,53 @@ openOrdersWithStatus(status: string) {
   // ==============================
   // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
   // ==============================
-  loadEmployees() {
-    this.http.get(`${environment.apiUrl}/Employees/by-distributor/${this.distributorId}`)
-      .subscribe((res: any) => {
-        this.employees = res;
-        console.log("Loaded Employees:", res);
-      });
-  }
+loadEmployees() {
+  if (!this.distributorId) return;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  this.http
+    .get<any[]>(`${environment.apiUrl}/Employees/by-distributor/${this.distributorId}`)
+    .subscribe({
+      next: (res) => {
+
+        // First map employees
+        this.employees = res.map(emp => ({
+          ...emp,
+          availabilityStatus: 'unknown',
+          availabilityReason: ''
+        }));
+
+        // Then update each employee availability safely
+        this.employees.forEach((emp, index) => {
+
+          this.employeeService
+            .getAvailability(emp.employeeId, today)
+            .subscribe({
+              next: (a: any) => {
+
+                this.employees[index].availabilityStatus =
+                  a?.isAvailable ? 'available' : 'not-available';
+
+                this.employees[index].availabilityReason =
+                  a?.reason || '';
+
+              },
+              error: () => {
+
+                this.employees[index].availabilityStatus = 'unknown';
+                this.employees[index].availabilityReason = '';
+
+              }
+            });
+
+        });
+      }
+    });
+}
+
+
+
 
 
   // ==============================

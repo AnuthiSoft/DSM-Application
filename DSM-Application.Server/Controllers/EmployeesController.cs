@@ -587,10 +587,7 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("by-distributor/{distributorId}")]
         public async Task<IActionResult> GetEmployeesByDistributor(string distributorId)
         {
-            // IST day range
             var istToday = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date;
-            var start = istToday.AddHours(-5).AddMinutes(-30);
-            var end = start.AddDays(1);
 
             var employees = await _service.GetEmployeesAsync(distributorId);
 
@@ -600,32 +597,27 @@ namespace DSM_Application.Server.Controllers
                     e.Designation.ToLower().Contains("delivery"))
                 .ToList();
 
-            var employeeIds = deliveryEmployees
-                .Select(e => e.EmployeeId)
-                .ToList();
+            var result = new List<object>();
 
-            var availability = await _db.EmployeeAvailability
-                .Find(a =>
-                    employeeIds.Contains(a.EmployeeId) &&
-                    a.Date >= start &&
-                    a.Date < end
-                )
-                .SortByDescending(a => a.Date)
-                .ToListAsync();
+            foreach (var emp in deliveryEmployees)
+            {
+                var availability = await _db.EmployeeAvailability
+                    .Find(a => a.EmployeeId == emp.EmployeeId && a.Date == istToday)
+                    .FirstOrDefaultAsync();
 
-            var availableEmployeeIds = availability
-                .GroupBy(a => a.EmployeeId)
-                .Select(g => g.First())      // ✅ latest record
-                .Where(a => a.IsAvailable)   // ✅ respect NOT available
-                .Select(a => a.EmployeeId)
-                .ToHashSet();
-
-            var result = deliveryEmployees
-                .Where(e => availableEmployeeIds.Contains(e.EmployeeId))
-                .ToList();
+                result.Add(new
+                {
+                    emp.EmployeeId,
+                    emp.Name,
+                    emp.Designation,
+                    IsAvailable = availability?.IsAvailable ?? true,
+                    Reason = availability?.Reason
+                });
+            }
 
             return Ok(result);
         }
+
 
 
 

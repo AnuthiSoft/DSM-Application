@@ -731,6 +731,336 @@ html[data-theme="dark"] .chart-card h3 {
   border-radius: 32px;
   background: rgba(20, 184, 166, 0.03);
 }
+/* ===============================
+   AVAILABILITY SECTION
+================================= */
+
+.availability-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  margin-top: 25px;
+}
+
+.availability-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Employee Card */
+.employee-card {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 15px;
+  transition: 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.employee-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* Status colors */
+.employee-card.available {
+  border-left: 5px solid #28a745;
+}
+
+.employee-card.not-available {
+  border-left: 5px solid #dc3545;
+}
+
+.employee-card.unknown {
+  border-left: 5px solid #6c757d;
+}
+
+/* Top section */
+.employee-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.employee-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Badge */
+.employee-status-badge {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.badge-available {
+  background: #e6f4ea;
+  color: #28a745;
+}
+
+.badge-not-available {
+  background: #fdecea;
+  color: #dc3545;
+}
+
+.badge-unknown {
+  background: #f1f1f1;
+  color: #6c757d;
+}
+
+/* Reason */
+.availability-reason {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #dc3545;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Buttons */
+.availability-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-available,
+.btn-not-available {
+  border: none;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-available {
+  background: #28a745;
+  color: white;
+}
+
+.btn-available:hover {
+  background: #218838;
+}
+
+.btn-not-available {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-not-available:hover {
+  background: #c82333;
+}
+
+/* ===============================
+   AVAILABILITY SECTION
+================================= */
+
+.availability-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin-top: 25px;
+  border: 1px solid var(--border-color);
+}
+
+.availability-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: var(--text-color);
+}
+
+/* Employee Card */
+.employee-card {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 15px;
+  transition: 0.3s ease;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.employee-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Status border indicators */
+.employee-card.available {
+  border-left: 5px solid #28a745;
+}
+
+.employee-card.not-available {
+  border-left: 5px solid #dc3545;
+}
+
+.employee-card.unknown {
+  border-left: 5px solid #6c757d;
+}
+
+/* Top layout */
+.employee-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.employee-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.employee-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-color);
+}
+
+/* Badge */
+.employee-status-badge {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Light theme badge colors */
+.badge-available {
+  background: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.badge-not-available {
+  background: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.badge-unknown {
+  background: rgba(108, 117, 125, 0.15);
+  color: #6c757d;
+}
+
+/* Dark mode badge boost */
+html[data-theme="dark"] .badge-available {
+  background: rgba(40, 167, 69, 0.25);
+}
+
+html[data-theme="dark"] .badge-not-available {
+  background: rgba(220, 53, 69, 0.25);
+}
+
+html[data-theme="dark"] .badge-unknown {
+  background: rgba(150, 150, 150, 0.25);
+}
+
+/* Reason */
+.availability-reason {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #dc3545;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Buttons */
+.availability-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-available,
+.btn-not-available {
+  border: none;
+  padding: 8px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  font-weight: 500;
+  min-width: 140px;
+}
+
+/* Available Button */
+.btn-available {
+  background: #28a745;
+  color: white;
+}
+
+.btn-available:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+/* Not Available Button */
+.btn-not-available {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-not-available:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Active button highlight */
+.active-btn {
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+
+/* Dark mode active button glow */
+html[data-theme="dark"] .active-btn {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+}
+
+/* No employee */
+.no-employee {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+  opacity: 0.6;
+}
+
+
+/* No Employee */
+.no-employee {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+
+/* SweetAlert Toast Custom Style */
+.swal2-popup.swal2-toast {
+  border-radius: 10px !important;
+  padding: 12px 16px !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+  font-weight: 500;
+}
+
+.swal2-toast .swal2-title {
+  font-size: 14px !important;
+}
+
 
 /* ===================================== */
 /* 📱 MOBILE RESPONSIVE STYLES */

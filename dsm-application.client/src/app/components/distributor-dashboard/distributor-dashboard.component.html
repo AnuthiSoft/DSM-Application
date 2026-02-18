@@ -165,6 +165,7 @@
           (click)="setActiveTab('connection-requests'); closeMobileMenu()" data-title="Connection Requests">
           <span>Connection Requests</span>
         </div>
+ 
         <div class="submenu-item" [class.active]="isActive('settings')"
           (click)="setActiveTab('settings'); closeMobileMenu()" data-title="Distributor Settings">
           <span>Distributor Settings</span>
@@ -238,6 +239,79 @@
 
       </div>
 
+      <!-- Employee Availability Section -->
+<div class="availability-card">
+
+  <div class="availability-header">
+    <h3><i class="fas fa-user-check"></i> Employee Availability Today</h3>
+  </div>
+
+  <div *ngIf="employees?.length; else noEmployees">
+
+    <div *ngFor="let e of employees"
+         class="employee-card"
+         [ngClass]="{
+           'available': e.availabilityStatus === 'available',
+           'not-available': e.availabilityStatus === 'not-available',
+           'unknown': e.availabilityStatus === 'unknown'
+         }">
+
+      <div class="employee-top">
+
+        <div class="employee-info">
+          <div class="employee-name">{{ e.name }}</div>
+          <div class="employee-status-badge"
+               [ngClass]="{
+                 'badge-available': e.availabilityStatus === 'available',
+                 'badge-not-available': e.availabilityStatus === 'not-available',
+                 'badge-unknown': e.availabilityStatus === 'unknown'
+               }">
+            {{ e.availabilityStatus === 'available' ? 'Available' :
+               e.availabilityStatus === 'not-available' ? 'Not Available' :
+               'Unknown' }}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Reason -->
+      <div *ngIf="e.availabilityStatus === 'not-available' && e.availabilityReason"
+           class="availability-reason">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ e.availabilityReason }}
+      </div>
+
+     <!-- Buttons -->
+<div class="availability-actions">
+
+  <button class="btn-available"
+          [class.active-btn]="e.availabilityStatus === 'available'"
+          (click)="updateAvailability(e.employeeId, true)">
+    <i class="fas fa-check"></i> Mark Available
+  </button>
+
+  <button class="btn-not-available"
+          [class.active-btn]="e.availabilityStatus === 'not-available'"
+          (click)="updateAvailability(e.employeeId, false)">
+    <i class="fas fa-times"></i> Mark Not Available
+  </button>
+
+</div>
+
+
+    </div>
+
+  </div>
+
+  <ng-template #noEmployees>
+    <div class="no-employee">
+      No delivery employees found.
+    </div>
+  </ng-template>
+
+</div>
+
+
       <!-- Charts Section -->
       <div class="charts-grid">
         <div class="dashboard-card chart-card">
@@ -309,7 +383,10 @@
 </app-distributor-orders>
 
     <app-distributor-connection-requests *ngIf="isActive('connection-requests')"></app-distributor-connection-requests>
+    
+  
     <!-- return request -->
+
     <app-distributor-return-requests *ngIf="isActive('return-requests')">
     </app-distributor-return-requests>
     <!-- Sales -->

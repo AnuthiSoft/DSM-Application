@@ -87,7 +87,9 @@ selectedEmployeeId: string = '';
 
     this.loading = true; // Set loading to true
 
-    const status = this.statusFilter === 'All' ? undefined : this.statusFilter;
+const status = !this.statusFilter || this.statusFilter === 'All'
+  ? undefined
+  : this.statusFilter;
 
     this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
       next: (data) => {

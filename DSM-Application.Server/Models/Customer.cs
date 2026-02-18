@@ -29,8 +29,8 @@ namespace DSM_Application.Server.Models
         [BsonElement("IsRegistered")]
         public bool IsRegistered { get; set; } = false;
 
-        [BsonElement("AddedByDistributorId")]
-        public string? AddedByDistributorId { get; set; } // null if global signup
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string AddedByDistributorId { get; set; }
         [BsonElement("ConnectedDistributors")]
         public List<string>? ConnectedDistributors { get; set; } // for global customers
         public string? ProfileImageUrl { get; set; }

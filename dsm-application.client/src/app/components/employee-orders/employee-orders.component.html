@@ -87,10 +87,19 @@
         </div>
 
         <hr />
-        <div class="fs-5 text-success">
-          <strong>Amount to Collect:</strong>
-          {{ o.totalAmount | currency:'INR' }}
-        </div>
+       <hr />
+
+<div *ngIf="o?.creditUsed && o.creditUsed > 0" class="text-danger">
+  <strong>Credit Used:</strong>
+  -{{ o.creditUsed | currency:'INR' }}
+</div>
+
+<div class="fs-5 text-success">
+  <strong>Amount to Collect:</strong>
+  {{ (o?.payableAmount || o?.totalAmount) | currency:'INR' }}
+</div>
+
+
       </div>
 
 
@@ -107,15 +116,27 @@
         <h5 class="modal-title">Collect Payment for Order #{{ selectedOrder?.id }}</h5>
         <button type="button" class="btn-close" (click)="closePaymentModal()"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" *ngIf="selectedOrder as so">
+
         <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p> -->
-        <p><strong>Amount to Collect:</strong> {{ selectedOrder?.totalAmount | currency:'INR' }}</p>
+   <p *ngIf="so.creditUsed && so.creditUsed > 0" class="text-danger">
+  Credit Used: -{{ so.creditUsed | currency:'INR' }}
+</p>
+
+<p>
+  <strong>Amount to Collect:</strong>
+  {{ (so.payableAmount || so.totalAmount) | currency:'INR' }}
+</p>
+
+
 
 
         <div class="mb-3">
           <label class="form-label">Payment Method</label>
           <select class="form-select" [(ngModel)]="paymentMethod">
             <option value="Cash">Cash</option>
+
+            
             <option value="Online">Online</option>
           </select>
         </div>

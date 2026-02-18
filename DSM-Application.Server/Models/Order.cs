@@ -127,7 +127,8 @@ namespace DSM_Application.Server.Models
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
         public decimal CreditUsed { get; set; }
 
-
+        public decimal PayableAmount { get; set; }
+       
     }
 
 }

@@ -70,6 +70,11 @@ namespace DSM_Application.Server.Models.DTOs
         public decimal TotalDiscount { get; set; }
         public decimal TotalAmount { get; set; }
 
+
+        public decimal CreditUsed { get; set; }
+        public decimal PayableAmount { get; set; }
+
+
         public decimal SpecialDiscountPercent { get; set; }
         public decimal QuantityDiscountPercent { get; set; }
         public decimal PriceDiscountPercent { get; set; }
@@ -98,6 +103,8 @@ namespace DSM_Application.Server.Models.DTOs
 
         public string? DeliveryReceiptUrl { get; set; } // ⭐ FULL Azure Blob URL
         public string DistributorName { get; internal set; }
+       
+
 
         // ⭐ REQUIRED for per-product delivery date
         //public DateTime? DeliveryEta { get; set; }

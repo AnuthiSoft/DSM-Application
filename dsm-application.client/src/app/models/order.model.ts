@@ -42,6 +42,8 @@ export interface DistributorOrder {
   gstAmount: number;
   totalAmount: number;
   // totalAmount: number;
+creditUsed: number;
+payableAmount: number;
 
   paymentCollectedByEmployee?: boolean;
   collectedAmount?: number;
@@ -72,6 +74,8 @@ export interface Order {
   expectedDeliveryDate: string;
   returnStatus?: 'NONE' | 'PENDING' | 'COMPLETED';
 
+creditUsed: number;
+payableAmount: number;
 
   status: string;
   subtotal: number;

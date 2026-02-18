@@ -11,6 +11,7 @@ import { HostListener } from '@angular/core';
 import { Product } from '../../models/products.model';
 import { ToastrService } from 'ngx-toastr';
 import { CustomerApiService, DistributorDto } from '../../services/customer-api.service';
+import { CartService } from '../../services/cart.service';
 
 interface Distributor {
   distributorId: string;
@@ -121,6 +122,7 @@ showCustomerPopup = false;
     private orderService: OrderService,
     private router: Router,
     private customerService: CustomerService,  //  ADD THIS
+    private cartService:CartService,
     private http: HttpClient,
     private distributorService: DistributorService,
     private customerApiService: CustomerApiService,
@@ -398,10 +400,8 @@ getCartKey(): string {
 }
 
 
-  syncProductTable() {
-  const key = this.getCartKey();
-  this.cart = [...this.orderProducts];
-  localStorage.setItem(key, JSON.stringify(this.orderProducts));
+ syncProductTable() {
+  this.cartService.saveFullCart(this.orderProducts);
 }
 
 
@@ -710,41 +710,19 @@ getCartKey(): string {
 confirmAddToCart() {
   if (!this.selectedProduct) return;
 
-  const customerId = localStorage.getItem('customerId');
-  if (!customerId) return;
-
-  // 🔥 Customer-specific key
-  const key = `cart_customer_${customerId}`;
-
-  // Get existing cart for this customer
-  const saved = localStorage.getItem(key);
-  let cart = saved ? JSON.parse(saved) : [];
-
-  const existing = cart.find(
-    (x: any) => x.product.productId === this.selectedProduct!.productId
+  this.cartService.addWithQuantity(
+    this.selectedProduct,
+    this.selectedQuantity
   );
 
-  if (existing) {
-    existing.quantity += this.selectedQuantity;
-  } else {
-    cart.push({
-      product: this.selectedProduct,
-      quantity: this.selectedQuantity
-    });
-  }
-
-  // 🔥 Save ONLY to customer cart
-  localStorage.setItem(key, JSON.stringify(cart));
-
-  // 🔥 Also update global cart for UI
-
-
-  this.orderProducts = cart;
-  this.cart = [...cart];
+  // refresh table from service
+  this.loadCartForCustomer();
 
   this.showPopup = false;
   this.selectedProduct = null;
+  this.selectedQuantity = 1;
 }
+
 
 
 
@@ -798,6 +776,7 @@ onQuantityChange(item: any) {
   removeFromOrder(productId: string) {
     this.orderProducts = this.orderProducts.filter(x => x.product.productId !== productId);
     this.syncProductTable();
+      this.cartService.updateCartCount();
   }
 
   // ---------------------------------------------------
@@ -832,6 +811,7 @@ onQuantityChange(item: any) {
   this.orderProducts = [];
 
   this.cartUpdated.emit([]);
+  this.cartService.updateCartCount();
 }
 
   // ---------------------------------------------------
@@ -898,10 +878,8 @@ for (const item of this.orderProducts) {
 
       this.toastr.success('Orders placed successfully');
       this.resetOrder();
-     this.router.navigate(['/customer-dashboard'], {
-  queryParams: { tab: 'orders' }
-});
-
+      this.router.navigate(['/customer-dashboard/customerOrder']);
+        queryParams: { tab: 'orders' }
 
     } finally {
       this.isPlacingOrder = false;   // 🔓 RELEASE LOCK
@@ -936,7 +914,7 @@ for (const item of this.orderProducts) {
 
 
 viewProducts(distributor: any) {
- localStorage.setItem("distributorId", distributor.distributorId);
+localStorage.setItem("distributorId", distributor.distributorId);
 
 
 
@@ -999,6 +977,52 @@ loadCartForCustomer() {
   const raw = localStorage.getItem(`cart_customer_${customerId}`);
   this.orderProducts = raw ? JSON.parse(raw) : [];
 }
+getFullImageUrl(img: string) {
+  if (!img) return 'assets/no-image.png';
+  return `${environment.apiUrl}/images/${img}`;
+}
+
+// 💰 Discounted price
+getDiscountedPrice(product: Product): number {
+  if (!product.discount) return product.price;
+
+  return +(product.price -
+    (product.price * product.discount) / 100).toFixed(2);
+}
+
+// 💸 GST amount
+getGstAmount(product: Product): number {
+  if (!product.gst) return 0;
+
+  const discounted = this.getDiscountedPrice(product);
+  return +(discounted * product.gst / 100).toFixed(2);
+}
+
+// 🧾 Final payable
+getFinalPrice(product: Product): number {
+  return +(
+    this.getDiscountedPrice(product) +
+    this.getGstAmount(product)
+  ).toFixed(2);
+}
+// 🔢 Final price for ONE unit
+getUnitFinalPrice(product: Product): number {
+  const discount = product.discount || 0;
+  const gst = product.gst || 0;
+
+  let priceAfterDiscount =
+    product.price - (product.price * discount) / 100;
+
+  const gstAmount = (priceAfterDiscount * gst) / 100;
+
+  return +(priceAfterDiscount + gstAmount).toFixed(2);
+}
+
+// 🧾 TOTAL for quantity
+getRowTotal(product: Product, qty: number): number {
+  return +(this.getUnitFinalPrice(product) * qty).toFixed(2);
+}
+
 
 
 }

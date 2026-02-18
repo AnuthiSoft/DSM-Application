@@ -127,22 +127,80 @@
     </tr>
 
     <!-- DROPDOWN DETAILS ROW (EXPANDS BELOW WITHOUT MOVING QUANTITY) -->
-    <tr *ngIf="expandedProduct[item.product.productId]" class="dropdown-row">
-      <td colspan="2">
-        <div class="product-dropdown">
+ <tr *ngIf="expandedProduct[item.product.productId]" class="dropdown-row">
+  <td colspan="2">
 
-          <p><strong>Price:</strong> ₹{{ item.product.price }}</p>
-          <p><strong>Stock:</strong> {{ item.product.currentStock }}</p>
-          <p><strong>Brand:</strong> {{ item.product.brand }}</p>
-          <p><strong>Category:</strong> {{ item.product.category }}</p>
-          <p><strong>Distributor:</strong> {{ item.product.distributorName }}</p>
-          <p><strong>Expected Delivery:</strong>
-            {{ computeDeliveryDate(item.product, orderedDate) }}
-          </p>
+    <div class="product-dropdown enhanced">
 
+      <!-- IMAGE -->
+      <div class="dropdown-image">
+
+        <img
+          *ngIf="item.product.imageUrls?.length"
+          [src]="getFullImageUrl(item.product.imageUrls[0])"
+          class="preview-img"
+        />
+
+        <div *ngIf="!item.product.imageUrls?.length" class="no-img">
+          No Image
         </div>
-      </td>
-    </tr>
+
+      </div>
+
+      <!-- DETAILS -->
+      <div class="dropdown-info">
+
+        <p><strong>MRP:</strong> ₹{{ item.product.price }}</p>
+
+        <p *ngIf="item.product.discount > 0">
+          <strong>Discount:</strong>
+          {{ item.product.discount }} %
+        </p>
+
+        <p>
+          <strong>After Discount:</strong>
+          ₹{{ getDiscountedPrice(item.product) }}
+        </p>
+
+        <p *ngIf="item.product.gst > 0">
+          <strong>GST ({{ item.product.gst }}%):</strong>
+          ₹{{ getGstAmount(item.product) }}
+        </p>
+
+     <!-- <p><strong>MRP (per item):</strong> ₹{{ item.product.price }}</p> -->
+
+<p *ngIf="item.product.discount > 0">
+  <strong>Discount:</strong> {{ item.product.discount }} %
+</p>
+
+<!-- <p>
+  <strong>After Discount (1 qty):</strong>
+  ₹{{ getUnitFinalPrice(item.product) }}
+</p> -->
+
+<p class="final-price">
+  <strong>Total for {{ item.quantity }} Qty:</strong>
+  ₹{{ getRowTotal(item.product, item.quantity) }}
+</p>
+
+        <hr>
+
+        <!-- <p><strong>Stock:</strong> {{ item.product.currentStock }}</p> -->
+        <p><strong>Brand:</strong> {{ item.product.brand }}</p>
+        <!-- <p><strong>Category:</strong> {{ item.product.category }}</p> -->
+        <p><strong>Distributor:</strong> {{ item.product.distributorName }}</p>
+
+        <p>
+          <strong>Expected Delivery:</strong>
+          {{ computeDeliveryDate(item.product, orderedDate) }}
+        </p>
+
+      </div>
+    </div>
+
+  </td>
+</tr>
+
 
   </ng-container>
 </tbody>

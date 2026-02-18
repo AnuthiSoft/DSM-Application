@@ -323,9 +323,9 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
 
     localStorage.setItem(key, JSON.stringify(cart));
 
-    // 🔥 Redirect to cart
-    this.router.navigate(['/add-to-cart']);
-  }
+  // 🔥 Redirect to cart
+  this.router.navigate(['/customer-dashboard/add-to-cart']);
+}
 
 
 
@@ -613,7 +613,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     this.selectedProduct = null;
 
   // 🔥 Redirect to cart
-  this.router.navigate(['/add-to-cart']);
+  this.router.navigate(['/customer-dashboard/add-to-cart']);
 }
 
 

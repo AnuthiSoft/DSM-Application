@@ -44,6 +44,10 @@ namespace DSM_Application.Server.Services
                 return null;
             }
         }
-
+        public async Task DeleteAsync(string blobName)
+        {
+            var blobClient = _container.GetBlobClient(blobName);
+            await blobClient.DeleteIfExistsAsync();
+        }
     }
 }

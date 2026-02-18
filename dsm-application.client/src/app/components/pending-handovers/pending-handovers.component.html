@@ -69,6 +69,7 @@
     <th>Receipt</th>
     <!-- <th>Handover</th> -->
     <th>Mode</th>
+    <th>Transaction Ref</th>
     <th>Amount</th>
     <th>Cashier</th>
     <th>Actions</th>
@@ -129,6 +130,16 @@
       {{ h.paymentMode | uppercase }}
     </span>
   </td>
+  <td>
+  <span *ngIf="h.paymentMode === 'scanner' || h.paymentMode === 'upi'; else noTxn">
+    {{ h.transactionReference || '-' }}
+  </span>
+
+  <ng-template #noTxn>
+    —
+  </ng-template>
+</td>
+
 
   <!-- AMOUNT -->
   <td>

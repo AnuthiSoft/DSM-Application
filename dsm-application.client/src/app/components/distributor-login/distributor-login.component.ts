@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, NgZone } from '@angular/core';
+import { Component, ViewEncapsulation, NgZone, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -10,7 +10,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrl: './distributor-login.component.css',
   encapsulation: ViewEncapsulation.None
 })
-export class DistributorLoginComponent {
+export class DistributorLoginComponent implements OnInit {
   email = '';
   password = '';
   error = '';
@@ -20,6 +20,25 @@ export class DistributorLoginComponent {
     private router: Router,
     private toastr: ToastrService,
   private ngZone: NgZone) { }
+  ngOnInit() {
+  if (this.auth.isLoggedIn()) {
+
+    const role = this.auth.getRole();
+
+    if (role === 'Distributor') {
+      this.router.navigate(['/distributor-dashboard']);
+    }
+    else if (role === 'Employee') {
+      this.router.navigate(['/employee-dashboard']);
+    }
+    else if (role === 'Admin') {
+      this.router.navigate(['/admin-dashboard']);
+    }
+      else if (role === 'Customer') {
+      this.router.navigate(['/customer-dashboard']);
+    }
+  }
+}
  
   togglePassword(): void {
     this.showPassword = !this.showPassword;

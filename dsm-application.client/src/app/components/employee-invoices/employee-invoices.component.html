@@ -64,14 +64,18 @@
             </td>
             <td class="actions-cell">
               <div class="action-buttons">
-                <a [href]="inv.pdfUrl" target="_blank" class="action-btn view-btn">
+                <a (click)="viewInvoice(inv)" class="action-btn view-btn">
                   <i class="fas fa-eye"></i>
                   <span>View</span>
                 </a>
-                <a [href]="inv.pdfUrl" download class="action-btn download-btn">
-                  <i class="fas fa-download"></i>
-                  <span>Download</span>
-                </a>
+               <button class="action-btn download-btn" (click)="downloadInvoice(inv)">
+  <i class="fas fa-download"></i>
+  <span>Download</span>
+</button>
+<button class="action-btn delete-btn" (click)="deleteInvoice(inv)">
+  <i class="fas fa-trash"></i>
+  <span>Delete</span>
+</button>
                 <!-- <button class="action-btn share-btn" (click)="shareInvoice(inv)">
                   <i class="fas fa-share-alt"></i>
                   <span>Share</span>

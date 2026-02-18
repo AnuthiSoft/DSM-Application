@@ -14,14 +14,14 @@ import { InventoryService } from '../../services/inventory.service';
 import { CustomerApiService, CustomerDashboardResponse } from '../../services/customer-api.service';
 import { Distributor } from '../../services/admin.service';
 import { CartService } from '../../services/cart.service';
-
+ 
 @Component({
   selector: 'app-customer-dashboard',
   templateUrl: './customer-dashboard.component.html',
   styleUrl: './customer-dashboard.component.css'
 })
 export class CustomerDashboardComponent {
-
+ 
   customerEmail: string | null = '';
   customerName: string | null = '';
   dashboardData!: CustomerDashboardResponse;
@@ -31,7 +31,7 @@ export class CustomerDashboardComponent {
   products: Product[] = [];
   cartCount = 0;
   expectedDays: number = 1;
-
+ 
   orderedDate: string = '';
   expectedDate: string = '';
   productForm: FormGroup;
@@ -58,7 +58,7 @@ creditBalance: number = 0;
 
   selectedCartProduct: Product | null = null;
   customerId = localStorage.getItem('customerId') ?? '';
-
+ 
   constructor(private customerService: CustomerService,
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -88,14 +88,14 @@ creditBalance: number = 0;
       distributorName: ['']
     });
   }
-
+ 
   ngOnInit(): void {
     // Load sidebar state
     const savedSidebarState = localStorage.getItem('customerSidebarCollapsed');
     if (savedSidebarState !== null) {
       this.isSidebarCollapsed = savedSidebarState === 'true';
     }
-
+ 
     // Load active tab
    // 🔥 Priority: URL tab > localStorage > dashboard
 this.route.queryParams.subscribe(params => {
@@ -120,47 +120,47 @@ this.route.queryParams.subscribe(params => {
     this.cartService.cartCount$.subscribe(count => {
       this.cartCount = count; // 🔥 auto updates UI
     });
-
+ 
     this.customerEmail = localStorage.getItem('customerEmail');
     this.customerName = localStorage.getItem('customerName'); // ✅ FIXED
-
+ 
     this.customerId = localStorage.getItem('customerId') || '';
     this.distributorId = localStorage.getItem('distributorId') || '';
     this.updateCartBadge();
-
-
-
-
+ 
+ 
+ 
+ 
     if (!this.customerId) {
       this.toastr.error('Customer ID not found in localStorage', 'Error');
-
-
-
+ 
+ 
+ 
       // console.error('No customerId found in localStorage');
-
+ 
       return;
     }
-
-
+ 
+ 
     this.loadDashboard();
 
 this.loadCustomerCredit();
 
 
   }
-
-
+ 
+ 
   //  @HostListener('window:resize', ['$event'])
   onResize() {
     this.checkScreenWidth();
   }
-
+ 
   checkScreenWidth() {
     if (window.innerWidth <= 768) {
       this.isSidebarCollapsed = false;
     }
   }
-
+ 
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
     localStorage.setItem('customerSidebarCollapsed', this.isSidebarCollapsed.toString());
@@ -173,14 +173,14 @@ this.loadCustomerCredit();
       document.body.style.overflow = '';
     }
   }
-
+ 
   closeMobileMenu() {
     if (this.isMobileMenuOpen) {
       this.isMobileMenuOpen = false;
       document.body.style.overflow = '';
     }
   }
-
+ 
   toggleTheme() {
     this.isDarkTheme = !this.isDarkTheme;
     if (this.isDarkTheme) {
@@ -189,10 +189,10 @@ this.loadCustomerCredit();
       document.body.removeAttribute('data-theme');
     }
   }
-
+ 
   setActiveTab(tab: string) {
     this.activeTab = tab;
-
+ 
     // ✅ CLOSE MOBILE SIDEBAR AFTER CLICK
     if (this.isMobileMenuOpen) {
       this.isMobileMenuOpen = false;
@@ -202,27 +202,27 @@ this.loadCustomerCredit();
       case 'distributors':
         this.pageTitle = 'My Distributors';
         break;
-
+ 
       case 'products':
         this.pageTitle = 'Distributor Products';
         break;
-
+ 
       case 'orders':
         this.pageTitle = 'My Orders';
         break;
-
+ 
       case 'returns':
         this.pageTitle = 'Return Orders';
         break;
-
+ 
       case 'profile':
         this.pageTitle = 'My Profile';
         break;
-
+ 
       default:
         this.pageTitle = 'Dashboard';
     }
-
+ 
     if (tab === 'orders' && this.ordersNeedRefresh) {
       const customerOrdersComponent = document.querySelector('app-customer-orders') as any;
       if (customerOrdersComponent?.loadOrders) {
@@ -231,8 +231,8 @@ this.loadCustomerCredit();
       this.ordersNeedRefresh = false;
     }
   }
-
-
+ 
+ 
   refreshOrders() {
     // If user is currently viewing the Orders tab, reload immediately
     if (this.activeTab === 'orders') {
@@ -241,41 +241,41 @@ this.loadCustomerCredit();
         customerOrdersComponent.loadOrders();
       }
     }
-
+ 
     // If user is NOT on orders, next time they open Orders tab → reload
     this.ordersNeedRefresh = true;
   }
   ordersNeedRefresh: boolean = false;
-
-
-
+ 
+ 
+ 
   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
     if (!orderDate || !distributorId) return '';
-
+ 
     const lead = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
-
+ 
     const date = new Date(orderDate);
     date.setDate(date.getDate() + lead);
-
+ 
     return date.toISOString().split("T")[0]; // YYYY-MM-DD
   }
-
-
+ 
+ 
   loadDashboard() {
     this.loading = true;
-
+ 
     // 🔹 1. LOAD DASHBOARD (distributors + products)
     this.customerApiService.getDashboard(this.customerId).subscribe({
       next: (data: CustomerDashboardResponse) => {
         this.dashboardData = data;
-
+ 
         // ✅ CONNECTED DISTRIBUTORS
         this.connectedDistributors = data.distributors
           .filter(d =>
             d.distributor.status === 'Accepted' ||
             d.distributor.status === 'Connected'
           )
-
+ 
           .map(d => ({
             distributorId: d.distributor.distributorId,
             name: d.distributor.companyName || d.distributor.name || 'Distributor'
@@ -297,25 +297,25 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
             d.distributor.status === 'Accepted' ||
             d.distributor.status === 'Connected'
           )
-
+ 
           .flatMap(d => d.products || []);
-
+ 
         // ✅ DISTRIBUTOR + PRODUCT COUNTS
         this.distributorStats.total = this.connectedDistributors.length;
         this.productStats.total = this.products.length;
-
+ 
         // 🔹 2. LOAD ORDERS (THIS FIXES YOUR ISSUE)
         this.orderService.getOrdersByCustomer(this.customerId).subscribe(orders => {
-
+ 
           // ✅ TOTAL ORDERS
           this.orderStats.total = orders.length;
-
+ 
           // ✅ TOTAL SPENT
           this.revenueStats.total = orders.reduce(
             (sum: number, o: any) => sum + (o.totalAmount || 0),
             0
           );
-
+ 
           // ✅ RECENT ORDERS (LATEST 5)
           this.recentOrders = orders
             .sort(
@@ -325,7 +325,7 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
             )
             .slice(0, 5);
         });
-
+ 
         this.loading = false;
       },
       error: () => {
@@ -334,17 +334,17 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
       }
     });
   }
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
   //   getExpectedDeliveryDate(orderDate: string, distributorId: string): string {
   //   const leadTime = Number(localStorage.getItem(`leadTime_${distributorId}`)) || 1;
-
+ 
   //   const date = new Date(orderDate);
   //   date.setDate(date.getDate() + leadTime);
-
+ 
   //   return date.toDateString();  // or format as you like
   // }
   connectDistributor(distributor: Distributor) {
@@ -357,7 +357,7 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
       cancelButtonText: 'Cancel'
     }).then(result => {
       if (!result.isConfirmed) return;
-
+ 
       this.customerApiService
         .connectDistributor(this.customerId, distributor.distributorId)
         .subscribe({
@@ -379,33 +379,33 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
         });
     });
   }
-
+ 
   viewProducts(distributor: any) {
-
-
+ 
+ 
     localStorage.setItem("distributorId", distributor.distributorId);
     this.router.navigate(['/products', distributor.distributorId]);
   }
-
-
+ 
+ 
   openProductsForDistributor(distributorId: string) {
     this.distributorId = distributorId;
     localStorage.setItem('distributorId', distributorId);
-
+ 
     this.inventoryService.getStock(distributorId).subscribe(invList => {
-
+ 
       console.log('Inventory:', invList); // 🔍 verify once
-
+ 
       if (!invList || invList.length === 0) {
         this.products = [];
         this.activeTab = 'products';
         return;
       }
-
+ 
       const requests = invList.map(inv =>
         this.productService.getById(inv.productId)
       );
-
+ 
       forkJoin(requests).subscribe(products => {
         this.products = products.map((p, i) => ({
           ...p,
@@ -415,74 +415,74 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
             invList[i].stock ??
             0
         }));
-
+ 
         this.activeTab = 'products';
       });
     });
   }
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
   // setActiveTab(tab: string) {
   //   this.activeTab = tab;
   // }
-
+ 
   // onAddToCart(product: Product) {
   //   let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
+ 
   //   const existing = cart.find(
   //     (c: any) => c.product.productId === product.productId
   //   );
-
+ 
   //   if (existing) {
   //     existing.quantity += 1;   // ✅ increment ONLY when user clicks +
   //   } else {
   //     cart.push({ product, quantity: 1 }); // ✅ FIRST TIME = 1
   //   }
-
+ 
   //   localStorage.setItem('cart', JSON.stringify(cart));
   //   this.updateCartBadge();
   // }
   onAddToCart(product: Product) {
     const customerId = localStorage.getItem('customerId');
     if (!customerId) return;
-
+ 
     const key = `cart_customer_${customerId}`;
     const raw = localStorage.getItem(key);
     const cart = raw ? JSON.parse(raw) : [];
-
+ 
     const existing = cart.find(
       (c: any) => c.product.productId === product.productId
     );
-
+ 
     if (existing) {
       existing.quantity += 1;
     } else {
       cart.push({ product, quantity: 1 });
     }
-
+ 
     localStorage.setItem(key, JSON.stringify(cart));
     this.updateCartBadge();
   }
-
-
-
-
+ 
+ 
+ 
+ 
   // updateCartBadge() {
   //   const raw = localStorage.getItem('cart');
-
+ 
   //   let cart: any[] = [];
-
+ 
   //   try {
   //     const parsed = raw ? JSON.parse(raw) : [];
   //     cart = Array.isArray(parsed) ? parsed : [];
   //   } catch {
   //     cart = [];
   //   }
-
+ 
   //   this.cartCount = cart.reduce(
   //     (sum: number, c: any) => sum + (c?.quantity || 0),
   //     0
@@ -494,32 +494,32 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
       this.cartCount = 0;
       return;
     }
-
+ 
     const key = `cart_customer_${customerId}`;
     const raw = localStorage.getItem(key);
     const cart = raw ? JSON.parse(raw) : [];
-
+ 
     this.cartCount = cart.reduce(
       (sum: number, c: any) => sum + (c?.quantity || 0),
       0
     );
   }
-
-
-
+ 
+ 
+ 
   goToProducts(product: Product) {
     this.selectedCartProduct = product;   // store selected product
     this.activeTab = 'cart';              // switch to Add-to-Cart tab
   }
-
+ 
   logout(): void {
-
+ 
     // Close mobile sidebar if open
     if (this.isMobileMenuOpen) {
       this.isMobileMenuOpen = false;
       document.body.style.overflow = '';
     }
-
+ 
     Swal.fire({
       title: 'Logout Confirmation',
       text: 'Are you sure you want to logout?',
@@ -530,16 +530,16 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
       reverseButtons: true,
       backdrop: 'rgba(0,0,0,0.6)'
     }).then((result) => {
-
+ 
       if (!result.isConfirmed) return;
-
+ 
       // 🔐 CLEAR SESSION
       localStorage.removeItem('token');
       localStorage.removeItem('customerId');
       localStorage.removeItem('customerEmail');
       localStorage.removeItem('customerName');
       localStorage.removeItem('distributorId');
-
+ 
       // ✅ SHOW SUCCESS POPUP FIRST
       Swal.fire({
         html: `
@@ -572,43 +572,43 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
               You have been logged out successfully
             </p>
           `,
-
+ 
         width: 360,
         padding: '1.5rem 1.5rem 1.8rem',
-
+ 
         showConfirmButton: false,
         timer: 1300,
         timerProgressBar: true,
-
+ 
         allowOutsideClick: false,
         allowEscapeKey: false,
-
+ 
         backdrop: 'rgba(0,0,0,0.55)',
-
+ 
         background: getComputedStyle(document.documentElement)
           .getPropertyValue('--card-bg'),
         color: getComputedStyle(document.documentElement)
           .getPropertyValue('--text-color')
       });
-
+ 
       // ✅ AFTER 1.5s → Navigate
       setTimeout(() => {
         this.router.navigate(['/customer/login']);
       }, 1500);
-
+ 
     });
   }
-
-
+ 
+ 
   switchToProducts() {
     this.activeTab = 'products';
   }
-
-
+ 
+ 
   isActive(tab: string): boolean {
     return this.activeTab === tab;
   }
-
+ 
   addToCart(product: any) {
     // console.log('Add to cart:', product);
     // Call your cart service here
@@ -618,7 +618,7 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
     this.updateCartBadge();   // 🔥 ADD THIS
     this.activeTab = 'cart';   // ✅ OPEN CART TAB
   }
-
+ 
   goToTab(tab: string) {
     this.setActiveTab(tab);
   }
@@ -635,3 +635,5 @@ loadCustomerCredit() {
 }
 
 }
+ 
+ 

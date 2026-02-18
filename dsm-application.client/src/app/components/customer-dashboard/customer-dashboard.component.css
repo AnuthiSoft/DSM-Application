@@ -59,7 +59,7 @@ body {
   cursor: pointer;
   z-index: 3000;
 }
-
+ 
 /* Sidebar Navigation */
 .dashboard-sidebar {
   width: 250px;
@@ -256,14 +256,14 @@ body {
   z-index: 900;
   margin: 0; /* Ensure no margin */
 }
-
+ 
 /* LEFT */
 .topbar-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
+ 
 .sidebar-toggle {
   background: transparent;
   border: none;
@@ -271,20 +271,20 @@ body {
   font-size: 20px;
   cursor: pointer;
 }
-
+ 
 .page-title {
   font-size: 22px;
   font-weight: 600;
   color: var(--text-color);
 }
-
+ 
 /* CENTER */
 .topbar-center {
   max-width: 520px;
   width: 100%;
   margin: auto;
 }
-
+ 
 .search-box {
   display: flex;
   align-items: center;
@@ -292,7 +292,7 @@ body {
   padding: 10px 14px;
   border-radius: 8px;
 }
-
+ 
 .search-box input {
   background: transparent;
   border: none;
@@ -300,13 +300,13 @@ body {
   color: var(--text-color);
   width: 100%;
 }
-
+ 
 /* RIGHT */
 .topbar-right {
   display: flex;
   align-items: center;
 }
-
+ 
 .cart-btn {
   position: relative;
   background: var(--primary-color);
@@ -318,18 +318,18 @@ body {
   font-size: 18px;
   cursor: pointer;
 }
-
+ 
 .dashboard-sidebar.collapsed + .dashboard-main {
   margin-left: 70px;
   width: calc(100% - 70px);
 }
-
+ 
 /* Cart inside top bar */
 .top-cart {
   position: relative;
   width: 44px;
   height: 44px;
-  border-radius: 65%; 
+  border-radius: 65%;
   background-color: var(--primary-color);
   display: flex;
   align-items: center;
@@ -337,7 +337,7 @@ body {
   margin-right: 20px;
   cursor: pointer;              /* 🔥 important */
   pointer-events: auto;         /* 🔥 important */
-  z-index: 5100;     
+  z-index: 5100;    
 }
  
 .top-cart i {
@@ -351,7 +351,7 @@ body {
 .top-cart::after {
   pointer-events: none;
 }
-
+ 
 .floating-cart:hover {
   transform: scale(1.1);
   background: #2980b9;
@@ -496,58 +496,58 @@ body {
 /* ============================= */
 /* 🔝 FIXED TOP DASHBOARD BAR */
 /* ============================= */
-
+ 
 .top-dashboard-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-
+ 
   height: 70px;
-
+ 
   display: grid;
   grid-template-columns: 60px 1fr 60px;
   align-items: center;
-
+ 
   padding: 0 10px;
-
+ 
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
-
+ 
   z-index: 100;
 }
-
+ 
 /* 🔥 Gmail-style blur */
 /* .sidebar-open .top-dashboard-bar {
   filter: blur(2px);
   opacity: 0.9;
-  pointer-events: none; 
+  pointer-events: none;
 } */
-
-
+ 
+ 
 /* when sidebar expanded */
 .dashboard-main .top-dashboard-bar {
   left: 250px;
 }
-
+ 
 /* when sidebar collapsed */
 .dashboard-sidebar.collapsed + .dashboard-main .top-dashboard-bar {
   left: 70px;
 }
-
+ 
 /* mobile */
 @media (max-width: 768px) {
   .top-dashboard-bar {
     left: 0 !important;
   }
 }
-
+ 
 /* push content down */
 .dashboard-main {
   padding-top: 90px;
 }
-
-
+ 
+ 
 /* Responsive Design */
 @media (max-width: 992px) {
   .dashboard-sidebar:not(.collapsed) {
@@ -557,17 +557,17 @@ body {
   .dashboard-sidebar.collapsed {
     width: 70px;
   }
-  
+ 
   /* .dashboard-main {
     margin-left: 70px;
     width: calc(100% - 70px);
   } */
-  
+ 
   .dashboard-sidebar:not(.collapsed) + .dashboard-main {
     margin-left: 250px;
     width: calc(100% - 250px);
   }
-
+ 
   .dashboard-sidebar.collapsed + .dashboard-main .dashboard-topbar {
   padding-left: 30px; /* Match padding when collapsed */
 }
@@ -625,11 +625,11 @@ body {
   .dashboard-topbar {
     padding: 16px 15px;
   }
-
+ 
   .dashboard-content {
     padding: 15px;
   }
-
+ 
   .floating-cart {
     bottom: 15px;
     right: 15px;
@@ -674,13 +674,13 @@ body {
 .floating-cart {
   z-index: 1500;   /* 🔽 below toggle */
 }
-
+ 
 /* =================================================
    TABLET HARD RESET (768px – 1199px)
    Kill desktop sidebar behavior completely
 ================================================= */
 @media (min-width: 768px) and (max-width: 1199px) {
-
+ 
   /* Sidebar becomes overlay */
   .dashboard-sidebar {
     position: fixed;
@@ -691,45 +691,45 @@ body {
     transform: translateX(-100%);
     z-index: 3000;
   }
-
+ 
   .dashboard-sidebar.mobile-open {
     transform: translateX(0);
   }
-
+ 
   /* Header must be FULL WIDTH */
   .top-dashboard-bar {
     left: 0 !important;
     width: 100% !important;
   }
-
+ 
   /* Content must be FULL WIDTH */
   .dashboard-main {
     margin-left: 0 !important;
     width: 100% !important;
     padding: 90px 24px 24px !important;
   }
-
+ 
   /* Menu toggle visible */
   .mobile-menu-toggle {
     display: block !important;
   }
 }
-
-
+ 
+ 
 /* DESKTOP (≥1200px) → 4 cards */
 @media (min-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(5, 1fr);
   }
 }
-
+ 
 /* TABLET (768px – 1199px) → 2 cards per row */
 @media (min-width: 768px) and (max-width: 1199px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
+ 
 /* MOBILE (<768px) → 1 card per row */
 @media (max-width: 767px) {
   .stats-grid {
@@ -742,10 +742,10 @@ body {
 ========================================= */
 /* @media (min-width: 768px) and (max-width: 1199px) {
   .welcome-header {
-    padding-left: 56px;   
+    padding-left: 56px;  
   }
 } */
-
+ 
 /* Page title */
 .page-heading {
   text-align: center;
@@ -754,26 +754,26 @@ body {
   margin: 0;
   white-space: nowrap;
 }
-
-
+ 
+ 
 /* Sidebar collapsed */
 .dashboard-sidebar.collapsed + .dashboard-main .top-dashboard-bar {
   left: 70px;
 }
-
+ 
 /* Mobile */
 @media (max-width: 768px) {
   .top-dashboard-bar {
     left: 0;
   }
-
+ 
   .page-heading {
     font-size: 18px;
   }
 }
-
+ 
 @media (max-width: 767px) {
-
+ 
   .dashboard-sidebar {
     position: fixed;
     top: 74px;              /* 🔥 START BELOW HEADER */
@@ -784,87 +784,87 @@ body {
     transition: transform 0.3s ease;
     z-index: 3000;
   }
-
+ 
   .dashboard-sidebar.mobile-open {
     transform: translateX(0);
   }
-
+ 
   .top-dashboard-bar {
     left: 0 !important;
     width: 100% !important;
   }
-
+ 
   .dashboard-main {
     margin-left: 0 !important;
     width: 100% !important;
     padding: 80px 16px 16px !important;
   }
-
+ 
   .mobile-menu-toggle {
     display: block !important;
   }
 }
-
+ 
 @media (max-width: 1199px) {
-
+ 
   .mobile-menu-toggle {
   display: flex !important;
   align-items: center;
   justify-content: center;
-
+ 
   width: 38px;
   height: 38px;
   border-radius: 8px;
-
+ 
   background: var(--primary-color);
   color: #fff;
   border: none;
-
+ 
   cursor: pointer;
 }
 }
-
+ 
 /* ===== MOBILE & TABLET SLIDE SIDEBAR ===== */
 @media (max-width: 1199px) {
-
+ 
   .dashboard-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     width: 260px;
-
+ 
     transform: translateX(-100%);
     transition: transform 0.35s ease;
-
+ 
     z-index: 4000;
   }
-
+ 
   .dashboard-sidebar.mobile-open {
     transform: translateX(0);
   }
-
+ 
   .dashboard-main {
     margin-left: 0 !important;
     width: 100% !important;
   }
-
+ 
 }
-
-
+ 
+ 
 @media (max-width: 767px) {
-
+ 
   .top-cart {
     width: 32px;        /* 🔽 smaller circle */
     height: 32px;
     margin-right: 12px;
-    
+   
   }
-
+ 
   .top-cart i {
     font-size: 14px;    /* 🔽 smaller cart icon */
   }
-
+ 
   .cart-badge {
     width: 16px;        /* optional: smaller badge */
     height: 16px;
@@ -873,19 +873,19 @@ body {
     right: -5px;
   }
 }
-
+ 
 /* 🔥 Force entire dashboard (including fixed header) to blur */
 body.swal2-shown > *:not(.swal2-container) {
   filter: blur(4px);
   pointer-events: none;
 }
-
+ 
 @media (max-width: 1199px) {
   .collapse-toggle {
     display: none !important;
   }
 }
-
+ 
 @media (max-width: 1199px) {
   .mobile-menu-toggle {
     display: flex;
@@ -893,35 +893,37 @@ body.swal2-shown > *:not(.swal2-container) {
     justify-content: center;
   }
 }
-
+ 
 .sidebar-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
-
+ 
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-
+ 
   z-index: 3500;
 }
-
+ 
 .sidebar-overlay.active {
   opacity: 1;
   visibility: visible;
 }
-
+ 
 /* =========================================
    DESKTOP ONLY (≥1200px)
    Move cart to RIGHT side
 ========================================= */
 @media (min-width: 1200px) {
-
+ 
   .top-cart {
     grid-column: 3;        /* force to right column */
     justify-self: end;     /* align to right */
     margin-right: 20px;
   }
-
+ 
 }
+ 
+ 

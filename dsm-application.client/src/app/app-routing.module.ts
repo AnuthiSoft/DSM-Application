@@ -64,6 +64,7 @@ import { DistributorReturnRequestsComponent } from './components/distributor-ret
 import { EmployeeReturnOrdersComponent } from './components/employee-return-orders/employee-return-orders.component';
 import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
 import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/employee-add-to-cart.component';
+import { CustomerLedgerComponent } from './components/customer-ledger/customer-ledger.component';
 
 
 
@@ -82,17 +83,32 @@ const routes: Routes = [
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
   { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
   { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
-  { path: 'customer-dashboard', component: CustomerDashboardComponent, canActivate: [AuthGuard] },
+ { path: 'customer-dashboard',
+  component: CustomerDashboardComponent,
+  canActivate: [AuthGuard],
+  children: [
+
+{ path: 'add-to-cart', component: AddToCartComponent, canActivate: [AuthGuard] },
+  { path: 'products/:distributorId', component: ProductsByDistComponent, canActivate: [AuthGuard] },
+
+     { path: 'customerOrder', component: CustomerOrdersComponent, canActivate: [AuthGuard] },
+      {
+    path: 'returns',
+    component: ReturnOrdersComponent
+  },
+    { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+
+  ]},
   { path: 'main-page', component: MainPageComponent },
   { path: 'distributor-login', component: DistributorLoginComponent },
   { path: 'distributor-signup', component: DistributorSignupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   // { path: 'employees', component: EmployeesComponent },
   { path: 'set-password', component: SetPasswordComponent },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'products/:distributorId', component: ProductsByDistComponent, canActivate: [AuthGuard] },
+
+
   { path: 'orders', component: OrderHistoryComponent, canActivate: [AuthGuard] },
-  { path: 'customerOrder', component: CustomerOrdersComponent, canActivate: [AuthGuard] },
+
   { path: 'employee-orders', component: EmployeeOrdersComponent, canActivate: [AuthGuard] },
   { path: 'cust-dash', component: CustDashboardComponent , canActivate: [AuthGuard]},
   { path: 'connectionrequests', component: DistributorConnectionRequestsComponent, canActivate: [AuthGuard] },
@@ -116,7 +132,7 @@ const routes: Routes = [
   },
   { path: 'admin/review-history', component: AdminReviewHistoryComponent, canActivate: [AuthGuard] },
 
-  { path: 'add-to-cart', component: AddToCartComponent, canActivate: [AuthGuard] },
+  
   { path: 'employee-profile', component: EmployeeProfileComponent, canActivate: [AuthGuard] },
   { path: 'cash-collection', component: CashCollectionComponent, canActivate: [AuthGuard] },
   { path: 'cash-summary', component: CashSummaryComponent, canActivate: [AuthGuard] },
@@ -141,10 +157,7 @@ const routes: Routes = [
     { path: 'inventry-batches', component: InventoryBatchesComponent, canActivate: [AuthGuard] },
 
   {path:'return-requests', component:DistributorReturnRequestsComponent},
- {
-    path: 'returns',
-    component: ReturnOrdersComponent
-  },
+
 
   {
   path: 'employee-add-to-cart',
@@ -152,7 +165,12 @@ const routes: Routes = [
 },
 
   {path:'return-orders',component:EmployeeReturnOrdersComponent},
-  { path: '', redirectTo: 'main-page', pathMatch: 'full' }
+  {
+  path: 'distributor/customer-ledger/:customerId',
+  component: CustomerLedgerComponent
+}
+,
+ { path: '', component: MainPageComponent }
 
   
 ];

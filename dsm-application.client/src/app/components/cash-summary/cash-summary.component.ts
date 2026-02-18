@@ -57,6 +57,7 @@ export class CashSummaryComponent {
               customerId: p.customerId,
               customerName: p.customerName,
               paymentMode: p.paymentMode,
+              transactionReference: p.transactionReference,   // ✅ ADD THIS
               totalPaid: 0,
               orders: new Map<string, any>()
             });

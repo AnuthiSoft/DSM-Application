@@ -64,8 +64,7 @@ import { EmployeeTrackingComponent } from './components/employee-tracking/employ
 import { GoogleMapsModule } from '@angular/google-maps';
 import { InventoryBatchesComponent } from './components/inventory-batches/inventory-batches.component';
 import { CustomerSearchComponent } from './components/customer-search/customer-search.component';
-import { DistributorViewComponent } from './components/distributor-view/distributor-view.component';
-import { AddPaymentNoteComponent } from './components/add-payment-note/add-payment-note.component';
+
 // import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { InvoiceCreateComponent } from './components/invoice-create/invoice-create.component';
 import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
@@ -80,6 +79,10 @@ import { ReturnOrdersComponent } from './components/return-orders/return-orders.
 import { EmployeeAddToCartComponent } from './components/employee-add-to-cart/employee-add-to-cart.component';
 import { DistributorLoginComponent } from './components/distributor-login/distributor-login.component';
 import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
+import { CustomerLedgerComponent } from './components/customer-ledger/customer-ledger.component';
+import { OrderDetailsModalComponent } from './components/order-details-modal/order-details-modal.component';
+
+
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
 
 
@@ -108,8 +111,7 @@ import { EmployeeProductsComponent } from './components/employee-products/employ
     ThemeToggleComponent,
     ProductsByDistComponent,
 
-    AddPaymentNoteComponent,
-    DistributorViewComponent,
+   
 
 
     FraudHistoryComponent,
@@ -176,9 +178,16 @@ import { EmployeeProductsComponent } from './components/employee-products/employ
     // AdminDistributorsComponent
 
     DistributorReturnRequestsComponent,
+    EmployeeReturnOrdersComponent,
+     ReturnOrdersComponent,
+      EmployeeAddToCartComponent,
+      CustomerLedgerComponent,
+      OrderDetailsModalComponent,
 
 
-
+ 
+ 
+ 
   ],
   imports: [
     BrowserModule, HttpClientModule, GoogleMapsModule, CommonModule,           // ✅ ADD THIS      // ✅ you already imported but forgot here

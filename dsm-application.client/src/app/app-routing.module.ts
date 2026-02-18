@@ -157,8 +157,6 @@ const routes: Routes = [
     { path: 'inventry-batches', component: InventoryBatchesComponent, canActivate: [AuthGuard] },
 
   {path:'return-requests', component:DistributorReturnRequestsComponent},
-
-
   {
   path: 'employee-add-to-cart',
   component: EmployeeAddToCartComponent

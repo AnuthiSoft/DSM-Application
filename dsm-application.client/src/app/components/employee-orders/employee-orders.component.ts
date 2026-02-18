@@ -76,7 +76,8 @@ applyStatusFilter() {
     this.selectedOrder = order;
     this.paymentMethod = 'Cash';
     // this.collectedAmount = this.subtotal(order); // pre-fill with subtotal
-    this.collectedAmount = order.totalAmount;
+    this.collectedAmount = order.payableAmount ?? order.totalAmount;
+
 
     this.showPaymentModal = true;
   }

@@ -284,6 +284,8 @@
 
       </div>
 
+
+      
       <!-- ACTIVE EMPLOYEE -->
       <div class="alert alert-info mt-3">
         <strong>Active Employee for Today:</strong><br>
@@ -444,10 +446,23 @@
 
         <hr>
 
-        <h5 class="text-success">
-          <strong>Total Amount:</strong>
-          ₹{{ selectedOrder.totalAmount | number:'1.2-2' }}
-        </h5>
+   <div *ngIf="selectedOrder.creditUsed && selectedOrder.creditUsed !== 0" style="color:#d32f2f;">
+
+  Credit Used: -₹{{ selectedOrder.creditUsed | number:'1.2-2' }}
+</div>
+
+<div style="font-weight:600; margin-top:5px;">
+  Amount to Collect: ₹{{ (selectedOrder.payableAmount ?? selectedOrder.totalAmount) | number:'1.2-2' }}
+
+</div>
+
+
+        
+
+
+
+
+
 
       </div>
 

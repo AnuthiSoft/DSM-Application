@@ -53,6 +53,7 @@ export class CustomerDashboardComponent {
   // products: any[] = [];
   productsLoading: boolean = true;
   connectedDistributors: { distributorId: string; name: string }[] = [];
+creditBalance: number = 0;
 
 
   selectedCartProduct: Product | null = null;
@@ -143,6 +144,7 @@ this.route.queryParams.subscribe(params => {
 
     this.loadDashboard();
 
+this.loadCustomerCredit();
 
 
   }
@@ -278,6 +280,16 @@ this.route.queryParams.subscribe(params => {
             distributorId: d.distributor.distributorId,
             name: d.distributor.companyName || d.distributor.name || 'Distributor'
           }));
+          // 🔥 AUTO-SET distributorId if not set
+const currentDist = localStorage.getItem('distributorId');
+
+if (!currentDist && this.connectedDistributors.length >= 1) {
+  localStorage.setItem(
+    'distributorId',
+    this.connectedDistributors[0].distributorId
+  );
+}
+
 
         // ✅ PRODUCTS FROM CONNECTED DISTRIBUTORS
         this.products = data.distributors
@@ -611,5 +623,15 @@ this.route.queryParams.subscribe(params => {
     this.setActiveTab(tab);
   }
 
+loadCustomerCredit() {
+  this.customerService.getProfile().subscribe({
+    next: (res: any) => {
+      this.creditBalance = res.creditBalance || 0;
+    },
+    error: () => {
+      this.creditBalance = 0;
+    }
+  });
+}
 
 }

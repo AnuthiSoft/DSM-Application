@@ -738,8 +738,8 @@ namespace DSM_Application.Server.Controllers
                 Country = customer.Country,
                 Role = customer.Role,
                 IsRegistered = customer.IsRegistered,
-                AddedByDistributorId = customer.AddedByDistributorId
-
+                AddedByDistributorId = customer.AddedByDistributorId,
+                 CreditBalance = customer.CreditBalance
             };
 
             return Ok(dto);

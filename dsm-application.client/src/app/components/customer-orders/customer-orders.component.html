@@ -194,6 +194,14 @@
                 ₹{{ order.totalAmount }}
               </span>
             </div>
+              
+<div *ngIf="order.creditUsed > 0">
+  Credit Used: -₹{{ order.creditUsed | number:'1.2-2' }}
+</div>
+
+<div>
+  Amount to Pay: ₹{{ order.payableAmount | number:'1.2-2' }}
+</div>
 
 
           </div>

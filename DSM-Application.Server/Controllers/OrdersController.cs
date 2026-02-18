@@ -240,12 +240,47 @@ namespace DSM_Application.Server.Controllers
 
                     OrderDate = DateTime.UtcNow,
                     Status = "Pending",
-                    RemainingAmount = totalFinalAmount,
+                   
                     TotalGst = totalGst
                 };
 
-                //  STOCK DEDUCTION (SAFE)
-                foreach (var item in orderProducts)
+            // APPLY CUSTOMER CREDIT
+            var customer = await _mongo.Customers
+                .Find(c => c.CustomerId == dto.CustomerId)
+                .FirstOrDefaultAsync();
+
+            if (customer != null && customer.CreditBalance > 0)
+            {
+                var usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
+
+                order.CreditUsed = usableCredit;
+                order.PayableAmount = order.TotalAmount - usableCredit;
+                order.RemainingAmount = order.PayableAmount;
+
+
+                if (usableCredit > 0)
+                {
+                    await _mongo.Customers.UpdateOneAsync(
+                        c => c.CustomerId == dto.CustomerId,
+                        Builders<Customer>.Update.Inc(c => c.CreditBalance, -usableCredit)
+                    );
+                }
+            }
+            else
+            {
+                order.CreditUsed = 0;
+                order.PayableAmount = order.TotalAmount;   // ⭐ ADD
+                order.RemainingAmount = order.TotalAmount;
+            }
+            // ⭐ FINAL SAFETY CALCULATION (ADD THIS)
+            order.PayableAmount = order.TotalAmount - order.CreditUsed;
+            order.RemainingAmount = order.PayableAmount;
+
+
+           
+
+            //  STOCK DEDUCTION (SAFE)
+            foreach (var item in orderProducts)
                 {
                     await _inventoryService.RemoveStockAsync(
                         item.ProductId,
@@ -254,8 +289,8 @@ namespace DSM_Application.Server.Controllers
                         "ORDER_PLACED"
                     );
                 }
-
-                await _orders.InsertOneAsync(order);
+           
+            await _orders.InsertOneAsync(order);
 
                 return Ok(new
                 {
@@ -329,10 +364,14 @@ namespace DSM_Application.Server.Controllers
                     ExpectedDeliveryDate = o.ExpectedDeliveryDate,
                     DistributorId = o.DistributorId,
                     DistributorName = distributor?.Name ?? "Unknown Distributor",
+                    CreditUsed = o.CreditUsed,
+                    PayableAmount = o.RemainingAmount,
 
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
+
+                   
 
                     SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                     QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
@@ -418,6 +457,7 @@ namespace DSM_Application.Server.Controllers
                             .Find(e => e.EmployeeId == o.EmployeeId)
                             .FirstOrDefaultAsync();
                     }
+                    
 
                     result.Add(new DistributorOrderDto
                     {
@@ -430,6 +470,11 @@ namespace DSM_Application.Server.Controllers
                         Subtotal = o.Subtotal,
                         TotalDiscount = o.TotalDiscount,
                         TotalAmount = o.TotalAmount,
+                        CreditUsed = o.CreditUsed,
+                        PayableAmount = o.TotalAmount - o.CreditUsed,
+
+
+
                         SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                         QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,
                         PriceDiscountPercent = o.Products.First().PriceDiscountPercent,
@@ -509,10 +554,14 @@ namespace DSM_Application.Server.Controllers
                     }),
                     subtotal = order.Subtotal,
                     discount = order.TotalDiscount,
-                    payableAmount = order.TotalAmount,
+                    //payableAmount = order.TotalAmount,
                      // ✅ ADD
                     gstAmount = order.TotalGst,
                     totalAmount = order.TotalAmount,
+                    creditUsed = order.CreditUsed,
+                    payableAmount = order.RemainingAmount,
+
+
                     status = order.Status,
                     paymentCollectedByEmployee = order.PaymentCollectedByEmployee,
                     collectedAmount = order.CollectedAmount,
@@ -586,6 +635,9 @@ namespace DSM_Application.Server.Controllers
 
                 OrderedDate = order.OrderedDate,
                 ExpectedDeliveryDate = order.ExpectedDeliveryDate,
+                CreditUsed = order.CreditUsed,
+                PayableAmount = order.RemainingAmount,
+
 
                 Status = order.Status,
                 EmployeeId = order.EmployeeId,

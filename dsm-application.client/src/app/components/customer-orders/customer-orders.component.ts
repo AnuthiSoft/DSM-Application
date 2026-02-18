@@ -615,24 +615,52 @@ reorder(orderId: string): void {
           0
         );
 
-        Swal.fire({
-          title: 'Order Items',
-          html: `
-          <div style="text-align:left; font-size:15px;">
- 
-            ${itemsHtml}
- 
-            <hr>
- 
-            <div style="display:flex; justify-content:space-between; font-size:16px;">
-              <strong>Total Price</strong>
-              <strong>₹${totalPrice.toFixed(2)}</strong>
-            </div>
- 
-            <div style="display:flex; justify-content:space-between; margin-top:6px;">
-              <strong>Final Price</strong>
-              <strong>₹${order.totalAmount ?? 0}</strong>
-            </div>
+      const creditUsed = order.creditUsed ?? 0;
+const payable = order.payableAmount ?? order.remainingAmount ?? order.totalAmount ?? 0;
+
+
+
+
+const creditHtml = creditUsed > 0
+  ? `
+    <div style="display:flex; justify-content:space-between; margin-top:6px;">
+      <strong>Credit Used</strong>
+      <strong>-₹${creditUsed.toFixed(2)}</strong>
+    </div>
+  `
+  : '';
+
+Swal.fire({
+  title: 'Order Items',
+  html: `
+  <div style="text-align:left; font-size:15px;">
+
+    ${itemsHtml}
+
+    <hr>
+
+    <div style="display:flex; justify-content:space-between; font-size:16px;">
+      <strong>Total Price</strong>
+      <strong>₹${totalPrice.toFixed(2)}</strong>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; margin-top:6px;">
+      <strong>Final Price</strong>
+      <strong>₹${(order.totalAmount ?? 0).toFixed(2)}</strong>
+    </div>
+
+    ${creditUsed > 0 ? `
+      <div style="display:flex; justify-content:space-between; margin-top:6px; color:#d32f2f;">
+        <strong>Credit Used</strong>
+        <strong>-₹${creditUsed.toFixed(2)}</strong>
+      </div>
+    ` : ''}
+
+    <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:17px; color:#2e7d32;">
+      <strong>Amount to Pay</strong>
+      <strong>₹${payable.toFixed(2)}</strong>
+    </div>
+
  
           </div>
         `,

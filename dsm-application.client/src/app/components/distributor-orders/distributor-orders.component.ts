@@ -91,7 +91,11 @@ selectedEmployeeId: string = '';
 
     this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
       next: (data) => {
-        this.orders = data;
+        this.orders = data.map((o: any) => ({
+  ...o,
+  creditUsed: o.creditUsed ?? 0,
+  payableAmount: o.payableAmount ?? o.totalAmount ?? 0
+}));
         this.loading = false; // Set loading to false when done
 
         // 🔥 Load availability for each customer on list load
@@ -225,6 +229,15 @@ selectedEmployeeId: string = '';
     // small delay so DOM updates cleanly
     setTimeout(() => {
       this.selectedOrder = order;
+      // ADD ↓↓↓
+this.selectedOrder.creditUsed = order.creditUsed ?? 0;
+
+this.selectedOrder.payableAmount =
+  order.payableAmount ??
+  order.remainingAmount ??
+  order.totalAmount ?? 0;
+// ADD ↑↑↑
+
       this.nextAction = action;
 
       order.products = order.products || [];

@@ -1329,5 +1329,16 @@ html, body {
 }
 
 
+/* ===== Quantity Input Center Fix ===== */
+.qty-input {
+  text-align: center;
+  width: 60px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  box-sizing: border-box;
+  font-weight: 400;
+}
 
 

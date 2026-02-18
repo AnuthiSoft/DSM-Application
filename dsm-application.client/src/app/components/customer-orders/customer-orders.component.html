@@ -188,12 +188,19 @@
 
 
 
-            <div class="detail-item">
-              <span class="detail-label fw-bold">Total Amount:</span>
-              <span class="detail-value amount fw-bold">
-                ₹{{ order.totalAmount }}
-              </span>
-            </div>
+           <div class="detail-item">
+  <span class="detail-label fw-bold">Total Amount:</span>
+  <span class="detail-value amount fw-bold">
+    ₹{{
+      (
+        order.payableAmount !== null && order.payableAmount !== undefined
+          ? order.payableAmount
+          : (order.totalAmount - (order.creditUsed || 0))
+      ) | number:'1.2-2'
+    }}
+  </span>
+</div>
+
               
 <div *ngIf="order.creditUsed > 0">
   Credit Used: -₹{{ order.creditUsed | number:'1.2-2' }}

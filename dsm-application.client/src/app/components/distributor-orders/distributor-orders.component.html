@@ -139,9 +139,16 @@
               <td class="customer-name">{{ o.customerName }}</td>
 
               <!-- ✅ Correct total amount column -->
-              <td class="order-total text-success fw-bold">
-                {{ o.totalAmount | currency:'INR' }}
-              </td>
+             <td class="order-total text-success fw-bold">
+  {{
+    (
+      o.payableAmount !== null && o.payableAmount !== undefined
+        ? o.payableAmount
+        : (o.totalAmount - (o.creditUsed || 0))
+    ) | currency:'INR'
+  }}
+</td>
+
 
               <td class="order-status">
                 <span class="status-badge" [class]="getStatusClass(o.status)">

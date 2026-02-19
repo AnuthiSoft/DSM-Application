@@ -5,6 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { EmployeeService } from '../../services/employee.service';
 
 @Component({
   selector: 'app-employee-orders',
@@ -16,8 +17,8 @@ export class EmployeeOrdersComponent implements OnInit {
   orders: DistributorOrder[] = [];
   loading = false;
 
-     apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
-  
+  apiBaseUrl = environment.apiUrl.replace('/api', ''); // ✅ remove '/api' for file access
+
   // Payment modal state
   showPaymentModal = false;
   selectedOrder: DistributorOrder | null = null;
@@ -25,47 +26,52 @@ export class EmployeeOrdersComponent implements OnInit {
   collectedAmount: number = 0;
 
   allOrders: DistributorOrder[] = [];
-filteredOrders: DistributorOrder[] = [];
-selectedStatus: string = 'All';
+  filteredOrders: DistributorOrder[] = [];
+  selectedStatus: string = 'All';
+  showSheet = false;
+  availabilityStatus: 'available' | 'not-available' | 'unknown' = 'unknown';
 
 
   constructor(
-  private http: HttpClient, 
-  private orderService: OrderService,
-  private toastr: ToastrService
-) {}
+    private http: HttpClient,
+    private orderService: OrderService,
+    private toastr: ToastrService,
+    private employeeService: EmployeeService
+  ) { }
+
   ngOnInit(): void {
     console.log('Employee ID:', this.employeeId);
     this.loadOrders();
+    this.loadAvailability();
   }
 
- loadOrders(): void {
-  if (!this.employeeId) return;
+  loadOrders(): void {
+    if (!this.employeeId) return;
 
-  this.loading = true;
-  this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
-    next: (data) => {
-      this.allOrders = data;
-      this.applyStatusFilter(); // 👈 filter after load
-      this.loading = false;
-    },
-    error: (err) => {
-      console.error(err);
-      this.loading = false;
+    this.loading = true;
+    this.orderService.getOrdersByEmployee(this.employeeId).subscribe({
+      next: (data) => {
+        this.allOrders = data;
+        this.applyStatusFilter(); // 👈 filter after load
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+      }
+    });
+  }
+
+
+  applyStatusFilter() {
+    if (this.selectedStatus === 'All') {
+      this.filteredOrders = this.allOrders;
+    } else {
+      this.filteredOrders = this.allOrders.filter(
+        o => o.status === this.selectedStatus
+      );
     }
-  });
-}
-
-
-applyStatusFilter() {
-  if (this.selectedStatus === 'All') {
-    this.filteredOrders = this.allOrders;
-  } else {
-    this.filteredOrders = this.allOrders.filter(
-      o => o.status === this.selectedStatus
-    );
   }
-}
 
 
   subtotal(order: DistributorOrder) {
@@ -82,24 +88,27 @@ applyStatusFilter() {
     this.showPaymentModal = true;
   }
 
-//   placeOrder(orderData: any) {
-//   return this.http.post('http://localhost:5164/api/orders/place', orderData);
-// }
+  //   placeOrder(orderData: any) {
+  //   return this.http.post('http://localhost:5164/api/orders/place', orderData);
+  // }
   closePaymentModal() {
     this.showPaymentModal = false;
     this.selectedOrder = null;
   }
 
   confirmPayment() {
+
+    if (this.blockIfUnavailable()) return;
+
     if (!this.selectedOrder) return;
 
     if (!this.paymentMethod) {
-      this.toastr.warning("Please select a payment method","warning");
+      this.toastr.warning("Please select a payment method");
       return;
     }
 
     if (this.collectedAmount <= 0 || isNaN(this.collectedAmount)) {
-      this.toastr.error("Invalid collected amount","Error");
+      this.toastr.error("Invalid collected amount");
       return;
     }
 
@@ -108,90 +117,139 @@ applyStatusFilter() {
       paymentMethod: this.paymentMethod
     }).subscribe({
       next: () => {
-        this.toastr.success("Payment collected successfully!", "Success"); // ✅ toastr
+        this.toastr.success("Payment collected successfully!");
         this.closePaymentModal();
         this.loadOrders();
       },
       error: (err) => {
-        console.error("Error collecting payment", err);
-        this.toastr.error(err.error?.message || "Failed to collect payment","Error");
+        this.toastr.error(err.error?.message || "Failed to collect payment");
       }
     });
   }
+
+
   markDelivered(order: DistributorOrder) {
-  this.orderService.updateEmployeeOrderStatus(order.id, {
-    status: "Delivered"
-  }).subscribe({
-    next: () => {
-      this.toastr.success("Order marked as Delivered!","Success");
-      this.loadOrders();
-    },
-    error: (err) => {
-      console.error(err);
-      this.toastr.error("Failed to update order status.","Error");
-    }
-  });
-}
 
-// getDiscount(order: DistributorOrder): number {
-//   if (order.totalDiscount && order.totalDiscount > 0) {
-//     return order.totalDiscount;
-//   }
+    if (this.blockIfUnavailable()) return;
 
-//   if (order.subtotal && order.totalAmount) {
-//     return Math.max(order.subtotal - order.totalAmount, 0);
-//   }
-
-//   return 0;
-// }
-
-getTaxableAmount(order: any): number {
-  if (order.subtotal && order.discount !== undefined) {
-    return order.subtotal - order.discount;
-  }
-  return order.subtotal || 0;
-}
-
-openReceiptUpload(order: DistributorOrder) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment';
-
-  input.onchange = (event: any) => {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadReceiptFile(order.id, file);
-    }
-  };
-
-  input.click();
-}
-
-uploadReceiptFile(orderId: string, file: File) {
-  const formData = new FormData();
-  formData.append('receipt', file);
-
-  this.orderService.uploadDeliveryReceipt(orderId, formData)
-    .subscribe({
+    this.orderService.updateEmployeeOrderStatus(order.id, {
+      status: "Delivered"
+    }).subscribe({
       next: () => {
-        this.toastr.success('Receipt uploaded. Order delivered 🚚');
+        this.toastr.success("Order marked as Delivered!");
         this.loadOrders();
       },
-      error: (err) => {
-        console.error(err);
-        this.toastr.error(err.error?.message || 'Upload failed');
+      error: () => {
+        this.toastr.error("Failed to update order status.");
       }
     });
-}
-
-  onReceiptSelected(event: any, order: DistributorOrder) {
-  const file: File = event.target.files[0];
-
-  if (!file) {
-    return;
   }
 
-  this.uploadReceiptFile(order.id, file);
-}
+
+  // getDiscount(order: DistributorOrder): number {
+  //   if (order.totalDiscount && order.totalDiscount > 0) {
+  //     return order.totalDiscount;
+  //   }
+
+  //   if (order.subtotal && order.totalAmount) {
+  //     return Math.max(order.subtotal - order.totalAmount, 0);
+  //   }
+
+  //   return 0;
+  // }
+
+  getTaxableAmount(order: any): number {
+    if (order.subtotal && order.discount !== undefined) {
+      return order.subtotal - order.discount;
+    }
+    return order.subtotal || 0;
+  }
+
+  openReceiptUpload(order: DistributorOrder) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        this.uploadReceiptFile(order.id, file);
+      }
+    };
+
+    input.click();
+  }
+
+  uploadReceiptFile(orderId: string, file: File) {
+
+    if (this.blockIfUnavailable()) return;
+
+    const formData = new FormData();
+    formData.append('receipt', file);
+
+    this.orderService.uploadDeliveryReceipt(orderId, formData)
+      .subscribe({
+        next: () => {
+          this.toastr.success('Receipt uploaded. Order delivered 🚚');
+          this.loadOrders();
+        },
+        error: (err) => {
+          this.toastr.error(err.error?.message || 'Upload failed');
+        }
+      });
+  }
+
+
+  onReceiptSelected(event: any, order: DistributorOrder) {
+    const file: File = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.uploadReceiptFile(order.id, file);
+  }
+
+  openBottomSheet() {
+    this.showSheet = true;
+  }
+
+  closeBottomSheet() {
+    this.showSheet = false;
+  }
+
+  selectStatus(status: string) {
+    this.selectedStatus = status;
+    this.applyStatusFilter();
+    this.closeBottomSheet();
+  }
+
+  loadAvailability() {
+    if (!this.employeeId) return;
+
+    const today = new Date().toISOString().split('T')[0];
+
+    this.employeeService.getAvailability(this.employeeId, today).subscribe({
+      next: (res) => {
+        this.availabilityStatus = res.isAvailable ? 'available' : 'not-available';
+      },
+      error: () => {
+        this.availabilityStatus = 'unknown';
+      }
+    });
+  }
+
+  isAvailable(): boolean {
+    return this.availabilityStatus === 'available';
+  }
+
+  blockIfUnavailable(): boolean {
+    if (!this.isAvailable()) {
+      this.toastr.error("You are marked as Not Available today.");
+      return true;
+    }
+    return false;
+  }
+
 }

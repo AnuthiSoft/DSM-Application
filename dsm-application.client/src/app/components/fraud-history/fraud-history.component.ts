@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FraudReport } from '../../models/fraud.model';
 import { FraudService } from '../../services/fraud.service';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 
 @Component({
   selector: 'app-fraud-history',
@@ -12,7 +13,7 @@ export class FraudHistoryComponent implements OnInit {
   historyFrauds: FraudReport[] = [];
   loading = true;
 
-  constructor(private fraudService: FraudService) {}
+  constructor(private fraudService: FraudService, private dashboard: AdminDashboardComponent) {}
 
   ngOnInit() {
     this.loadHistory();
@@ -44,4 +45,8 @@ export class FraudHistoryComponent implements OnInit {
       default: return 'fa-question-circle';
     }
   }
+
+  goBack() {
+  this.dashboard.setActiveTab('fraud-reports');
+}
 }

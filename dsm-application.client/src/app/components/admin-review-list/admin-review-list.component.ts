@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Review } from '../../models/review.model';
 import { ReviewService } from '../../services/review.service';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 
 @Component({
   selector: 'app-admin-review-list',
@@ -11,7 +12,7 @@ export class AdminReviewListComponent implements OnInit {
 
   pending: Review[] = [];
 
-  constructor(private reviewService: ReviewService) {}
+  constructor(private reviewService: ReviewService, private dashboard: AdminDashboardComponent) {}
 
   ngOnInit(): void {
     this.loadPendingReviews();
@@ -44,5 +45,9 @@ getTargetTypeClass(type: string) {
 // ⭐ Add this method for star display
 getStars(rating: number): number[] {
   return [1, 2, 3, 4, 5];
+}
+
+goToReviewHistory() {
+  this.dashboard.setActiveTab('review-history');
 }
 }

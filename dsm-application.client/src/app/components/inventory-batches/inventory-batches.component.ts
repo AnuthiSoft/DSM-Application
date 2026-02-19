@@ -31,10 +31,18 @@ export class InventoryBatchesComponent implements OnInit {
 
 
 
-          
+
           quantityAvailable: b.quantityAvailable,
-          manufactureDate: b.manufactureDate,
-          expiryDate: b.expiryDate
+          manufactureDate:
+            b.manufactureDate && !b.manufactureDate.startsWith('0001')
+              ? b.manufactureDate
+              : null,
+
+          expiryDate:
+            b.expiryDate && !b.expiryDate.startsWith('0001')
+              ? b.expiryDate
+              : null,
+
         }));
 
       },
@@ -42,15 +50,18 @@ export class InventoryBatchesComponent implements OnInit {
     });
   }
 
+  getStatus(expiryDate: string | null):
+    'Expired' | 'Near Expiry' | 'Valid' | 'Not Set' {
 
+    // ✅ If no date selected
+    if (!expiryDate) return 'Not Set';
 
-
-  getStatus(expiryDate: string): 'Expired' | 'Near Expiry' | 'Valid' {
-    if (!expiryDate) return 'Valid';
-
-    const today = new Date();
     const exp = new Date(expiryDate);
 
+    // ✅ Block 0001 year
+    if (exp.getFullYear() === 1) return 'Not Set';
+
+    const today = new Date();
     const diffDays =
       (exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -58,21 +69,21 @@ export class InventoryBatchesComponent implements OnInit {
     if (diffDays <= 30) return 'Near Expiry';
     return 'Valid';
   }
-
+  
   updateBatchDates(row: any, value: string, type: 'mfg' | 'exp') {
-  if (type === 'mfg') {
-    row.manufactureDate = value;
-  } else {
-    row.expiryDate = value;
-  }
+    if (type === 'mfg') {
+      row.manufactureDate = value;
+    } else {
+      row.expiryDate = value;
+    }
 
-  this.inventoryService.updateBatchDates({
-    batchId: row.batchId,
-    manufactureDate: row.manufactureDate, // ✅ string "YYYY-MM-DD"
-    expiryDate: row.expiryDate              // ✅ string "YYYY-MM-DD"
-  }).subscribe({
-    error: () => alert('Failed to update batch dates')
-  });
-}
+    this.inventoryService.updateBatchDates({
+      batchId: row.batchId,
+      manufactureDate: row.manufactureDate, // ✅ string "YYYY-MM-DD"
+      expiryDate: row.expiryDate              // ✅ string "YYYY-MM-DD"
+    }).subscribe({
+      error: () => alert('Failed to update batch dates')
+    });
+  }
 
 }

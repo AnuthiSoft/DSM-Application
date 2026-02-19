@@ -3,13 +3,14 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DSM_Application.Server.Models
 {
+    [BsonIgnoreExtraElements]
     public class FraudReport
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-        public string ReportedById { get; set; }
+        public string? ReportedById { get; set; }
         public string TargetId { get; set; }
         public string TargetType { get; set; } // "Distributor" or "Customer"
         public string Reason { get; set; }

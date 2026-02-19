@@ -886,11 +886,11 @@ input[type="file"] {
   width: 90%;
   max-width: 420px;
   max-height: 90vh;
-  background: #fff;
+  /* background: #fff; */
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-  overflow-y: auto;        /* Prevent page scroll */
+  overflow-y: auto;        
   animation: fadeIn 0.25s ease-out;
 }
 
@@ -914,13 +914,13 @@ input[type="file"] {
 
 .modal-header p {
   margin: 0;
-  color: #666;
+  /* color: #666; */
   font-size: 13px;
 }
 
 /* Sections */
 .modal-section {
-  background: #f8f9fb;
+  /* background: #f8f9fb; */
   border: 1px solid #e5e7eb;
   padding: 15px;
   border-radius: 10px;
@@ -935,13 +935,13 @@ input[type="file"] {
   font-size: 14px;
 }
 
-.summary-row span {
+/* .summary-row span {
   color: #555;
-}
+} */
 
-.summary-row b {
+/* .summary-row b {
   color: #111;
-}
+} */
 
 /* File Upload */
 .upload-label {
@@ -974,7 +974,7 @@ input[type="file"] {
 
 .checkbox span {
   font-size: 14px;
-  color: #333;
+  /* color: #333; */
 }
 
 /* Buttons */
@@ -1002,7 +1002,7 @@ input[type="file"] {
 
 .cancel-btn {
   flex: 1;
-  background: #ddd;
+  /* background: #ddd; */
   padding: 12px;
   border-radius: 8px;
   font-weight: bold;
@@ -1011,7 +1011,7 @@ input[type="file"] {
 }
 
 .cancel-btn:hover {
-  background: #ccc;
+  background: grey;
 }
 
 /* Animation */
@@ -1206,4 +1206,60 @@ html[data-theme="dark"] .secondary-actions {
     padding: 5px 12px;
     font-size: 0.8rem;
   }
+}
+
+/* =====================================
+   🔥 FIX LONG ORDER ID BREAKING MOBILE
+===================================== */
+
+/* Allow order ID to wrap safely */
+.header-left h4 {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Extra protection for very small screens */
+@media (max-width: 576px) {
+  .header-left h4 {
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+}
+
+/* =====================================
+   🌙 DARK MODE – PICKUP MODAL FIX
+===================================== */
+
+html[data-theme="dark"] .pickup-modal {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+html[data-theme="dark"] .modal-section {
+  background: var(--hover-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .modal-header h3,
+html[data-theme="dark"] .modal-header p,
+html[data-theme="dark"] .upload-label,
+html[data-theme="dark"] .summary-row span,
+html[data-theme="dark"] .summary-row b,
+html[data-theme="dark"] .checkbox span {
+  color: var(--text-color) !important;
+}
+
+html[data-theme="dark"] input[type="file"] {
+  background: var(--card-bg) !important;
+  color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+html[data-theme="dark"] .cancel-btn {
+  background: var(--hover-color) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
 }

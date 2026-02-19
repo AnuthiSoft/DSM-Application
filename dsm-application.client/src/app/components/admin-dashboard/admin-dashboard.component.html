@@ -1,6 +1,6 @@
 <div class="body">
   <!-- Mobile Menu Toggle -->
-  <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+  <button *ngIf="!isModalOpen" class="mobile-menu-toggle" (click)="toggleMobileMenu()">
     <i class="fas fa-bars"></i>
   </button>
 
@@ -8,66 +8,53 @@
   <div class="mobile-overlay" [class.active]="isMobileMenuOpen" (click)="toggleMobileMenu()"></div>
 
   <!-- Sidebar Navigation -->
-  <div class="dashboard-sidebar" 
-       [class.mobile-open]="isMobileMenuOpen"
-       [class.collapsed]="isSidebarCollapsed">
-    
+  <div class="dashboard-sidebar" [class.mobile-open]="isMobileMenuOpen"
+    [class.collapsed]="isSidebarCollapsed && !isMobileMenuOpen">
+
     <div class="sidebar-header">
       <!-- <h3><i class="fas fa-building"></i> 
         <span *ngIf="!isSidebarCollapsed">BusinessPortal</span>
       </h3> -->
       <div>
         <button class="collapse-toggle" (click)="toggleSidebar()" title="Toggle Sidebar">
-          <i class="fas"
-             [class.fa-columns]="!isSidebarCollapsed"
-             [class.fa-bars]="isSidebarCollapsed">
+          <i class="fas" [class.fa-columns]="!isSidebarCollapsed" [class.fa-bars]="isSidebarCollapsed">
           </i>
         </button>
       </div>
     </div>
-    
+
     <div class="nav-items">
       <!-- Dashboard -->
-      <div class="nav-item" 
-           [class.active]="isActive('dashboard')"
-           (click)="setActiveTab('dashboard')"
-           data-title="Dashboard">
-        <i class="fas fa-th-large"></i> 
+      <div class="nav-item" [class.active]="isActive('dashboard')"
+        (click)="setActiveTab('dashboard'); closeMobileMenu()" data-title="Dashboard">
+        <i class="fas fa-th-large"></i>
         <span>Dashboard</span>
       </div>
 
       <!-- Distributors -->
-      <div class="nav-item" 
-           [class.active]="isActive('distributors')"
-           (click)="setActiveTab('distributors')"
-           data-title="Distributors">
+      <div class="nav-item" [class.active]="isActive('distributors')"
+        (click)="setActiveTab('distributors'); closeMobileMenu()" data-title="Distributors">
         <i class="fas fa-truck"></i>
         <span>Distributors</span>
       </div>
 
       <!-- Category Requests -->
-      <div class="nav-item" 
-           [class.active]="isActive('category-requests')"
-           (click)="setActiveTab('category-requests')"
-           data-title="Category Requests">
+      <div class="nav-item" [class.active]="isActive('category-requests')"
+        (click)="setActiveTab('category-requests'); closeMobileMenu()" data-title="Category Requests">
         <i class="fas fa-tags"></i>
         <span>Category Requests</span>
       </div>
 
       <!-- Reviews -->
-      <div class="nav-item" 
-           [class.active]="isActive('admin/reviews')"
-           (click)="setActiveTab('admin/reviews')"
-           data-title="Reviews">
+      <div class="nav-item" [class.active]="isActive('admin/reviews')"
+        (click)="setActiveTab('admin/reviews'); closeMobileMenu()" data-title="Reviews">
         <i class="fas fa-star"></i>
         <span>Reviews</span>
       </div>
 
       <!-- Fraud Reports -->
-      <div class="nav-item" 
-           [class.active]="isActive('fraud-reports')"
-           (click)="setActiveTab('fraud-reports')"
-           data-title="Fraud Reports">
+      <div class="nav-item" [class.active]="isActive('fraud-reports')"
+        (click)="setActiveTab('fraud-reports'); closeMobileMenu()" data-title="Fraud Reports">
         <i class="fas fa-exclamation-triangle"></i>
         <span>Fraud Reports</span>
       </div>
@@ -130,14 +117,19 @@
     <div class="tab-content" *ngIf="activeTab === 'distributors'">
       <!-- Controls -->
       <div class="dashboard-card">
-        <div class="d-flex justify-content-between align-items-center">
-          <button class="btn btn-add" (click)="openAdd()">
-            <i class="fas fa-plus-circle me-1"></i> Add Distributor
-          </button>
+        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
+
           <input type="text" [(ngModel)]="searchText" (input)="applyFilter()" class="form-control search-box"
             placeholder="Search by Name, Company, Email" />
+
+          <button class="btn btn-add" (click)="openAdd()">
+            <i class="fas fa-plus-circle me-1"></i>
+            Add Distributor
+          </button>
+
         </div>
       </div>
+
 
       <!-- Distributors Table -->
       <div class="dashboard-table">
@@ -153,7 +145,7 @@
                 <th class="text-center">GST</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Premium</th>
-                <th class="text-center">Categories</th>
+                <!-- <th class="text-center">Categories</th> -->
                 <th class="text-center">Actions</th>
               </tr>
             </thead>
@@ -166,20 +158,21 @@
                 <td class="fw-semibold">{{ d.phoneNumber }}</td>
                 <td class="fw-semibold">{{ d.gst }}</td>
                 <td class="fw-semibold">
-                  <span class="status-badge bg-success" *ngIf="d.isActive" >Active</span>
+                  <span class="status-badge bg-success" *ngIf="d.isActive">Active</span>
                   <span class="status-badge bg-secondary" *ngIf="!d.isActive">Inactive</span>
                 </td>
                 <td class="fw-semibold">
-                  <span *ngIf="d.isPremium" class="premium-indicator" >
+                  <span *ngIf="d.isPremium" class="premium-indicator">
                     <i class="fas fa-crown fa-sm text-warning"></i> Premium
                   </span>
                   <span *ngIf="!d.isPremium" class="text-muted">Standard</span>
                 </td>
-                <td class="fw-semibold">
+                <!-- <td class="fw-semibold">
                   <div class="categories-list">
                     {{ d.categories?.join(", ") || "-" }}
                   </div>
-                </td>
+                </td> -->
+
                 <!-- Actions -->
                 <td class="text-center action-buttons">
                   <button class="btn-action btn-edit me-1" (click)="openEdit(d)">
@@ -251,10 +244,22 @@
       <app-admin-review-list></app-admin-review-list>
     </div>
 
+    <!-- Review History Tab -->
+<div class="tab-content" *ngIf="activeTab === 'review-history'">
+  <app-admin-review-history></app-admin-review-history>
+</div>
+
+
     <!-- Fraud Reports Tab -->
     <div class="tab-content" *ngIf="activeTab === 'fraud-reports'">
       <app-admin-fraud-list></app-admin-fraud-list>
     </div>
+
+    <!-- Fraud History Tab -->
+<div class="tab-content" *ngIf="activeTab === 'fraud-history'">
+  <app-fraud-history></app-fraud-history>
+</div>
+
 
     <!-- Other Tabs (Placeholders) -->
     <div class="tab-content" *ngIf="activeTab === 'products'">
@@ -277,150 +282,150 @@
         <p>Admin settings interface will be implemented here.</p>
       </div>
     </div>
+  </div>
+</div>
+<!-- Add Distributor Modal -->
+<div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="distributorModalLabel">
+          {{ isEdit ? 'Edit Distributor' : 'Add New Distributor' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="distributorForm" (ngSubmit)="saveDistributor()">
 
-    <!-- Add Distributor Modal -->
-    <div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="distributorModalLabel">
-              {{ isEdit ? 'Edit Distributor' : 'Add New Distributor' }}
-            </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form [formGroup]="distributorForm" (ngSubmit)="saveDistributor()">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Company Name *</label>
+                <input type="text" class="form-control" formControlName="companyName"
+                  [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
 
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Company Name *</label>
-                    <input type="text" class="form-control" formControlName="companyName"
-                      [class.is-invalid]="distributorForm.get('companyName')?.invalid && distributorForm.get('companyName')?.touched">
-
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']">
-                      Name must start with a capital letter
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Contact Name *</label>
-                    <input type="text" class="form-control" formControlName="name"
-                      [class.is-invalid]="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.errors?.['firstLetterCapital']">
-                      Name must start with a capital letter
-                    </div>
-                  </div>
+                <div class="invalid-feedback"
+                  *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']">
+                  Name must start with a capital letter
                 </div>
               </div>
+            </div>
 
-              <div class="row">
-                <!-- EMAIL -->
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Email *</label>
-                    <input type="email" class="form-control" formControlName="email" maxlength="254" [class.is-invalid]="distributorForm.get('email')?.invalid 
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Contact Name *</label>
+                <input type="text" class="form-control" formControlName="name"
+                  [class.is-invalid]="distributorForm.get('name')?.invalid && distributorForm.get('name')?.touched">
+                <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.errors?.['firstLetterCapital']">
+                  Name must start with a capital letter
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- EMAIL -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" formControlName="email" maxlength="254" [class.is-invalid]="distributorForm.get('email')?.invalid 
           && (distributorForm.get('email')?.touched || formSubmitted)" (blur)="checkEmailExists()" />
 
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required']">
-                      Email is required
-                    </div>
+                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required']">
+                  Email is required
+                </div>
 
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email']">
-                      Enter a valid email address
-                    </div>
+                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email']">
+                  Enter a valid email address
+                </div>
 
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['exists']">
-                      This email already exists
-                    </div>
-                  </div>
+                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['exists']">
+                  This email already exists
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- PHONE & OTP SECTION -->
-              <div class="row">
-                <!-- Phone Number -->
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Phone Number *</label>
+          <!-- PHONE & OTP SECTION -->
+          <div class="row">
+            <!-- Phone Number -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Phone Number *</label>
 
-                    <div class="phone-group">
-                      <span class="phone-prefix">+91</span>
+                <div class="phone-group">
+                  <span class="phone-prefix">+91</span>
 
-                      <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
-                        placeholder="Enter phone number" [readonly]="phoneVerifiedUI" (input)="onPhoneInput($event)" />
-                    </div>
+                  <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
+                    placeholder="Enter phone number" [readonly]="phoneVerifiedUI" (input)="onPhoneInput($event)" />
+                </div>
 
-                    <!-- Verified -->
-                    <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-                      <i class="fas fa-check-circle"></i> Verified
-                    </div>
+                <!-- Verified -->
+                <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+                  <i class="fas fa-check-circle"></i> Verified
+                </div>
 
-                    <!-- Error -->
-                    <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.invalid &&
+                <!-- Error -->
+                <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.invalid &&
                 distributorForm.get('phoneNumber')?.touched">
-                      Phone number is required
-                    </div>
-                  </div>
+                  Phone number is required
                 </div>
+              </div>
+            </div>
 
-                <!-- OTP -->
-                <div class="col-md-6" *ngIf="!phoneVerifiedUI">
-                  <div class="mb-3">
-                    <label class="form-label">&nbsp;</label>
+            <!-- OTP -->
+            <div class="col-md-6" *ngIf="!phoneVerifiedUI">
+              <div class="mb-3">
+                <label class="form-label">&nbsp;</label>
 
-                    <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
-                      Send OTP
-                    </button>
+                <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                  Send OTP
+                </button>
 
-                    <div *ngIf="otpSent" class="mt-3">
-                      <label>Enter OTP</label>
+                <div *ngIf="otpSent" class="mt-3">
+                  <label>Enter OTP</label>
 
-                      <input type="text" maxlength="6" class="form-control" [(ngModel)]="otpCode"
-                        [ngModelOptions]="{ standalone: true }" />
+                  <input type="text" maxlength="6" class="form-control" [(ngModel)]="otpCode"
+                    [ngModelOptions]="{ standalone: true }" />
 
-                      <button class="btn btn-success mt-2 w-100" type="button" (click)="verifyOtp()">
-                        Verify OTP
-                      </button>
+                  <button class="btn btn-success mt-2 w-100" type="button" (click)="verifyOtp()">
+                    Verify OTP
+                  </button>
 
-                      <div *ngIf="otpFailed" class="text-danger mt-2">
-                        ✖ Invalid or Expired OTP
-                      </div>
-                    </div>
+                  <div *ngIf="otpFailed" class="text-danger mt-2">
+                    ✖ Invalid or Expired OTP
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">GST Number *</label>
-                    <input type="text" class="form-control" formControlName="gst" maxlength="15"
-                      [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
-                    <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.errors?.['invalidGST']">
-                      Enter a valid 15-digit GST number
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Address *</label>
-                    <textarea class="form-control" formControlName="address" rows="2"
-                      [class.is-invalid]="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched"></textarea>
-                    <div class="invalid-feedback"
-                      *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
-                      Address is required
-                    </div>
-                  </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">GST Number *</label>
+                <input type="text" class="form-control" formControlName="gst" maxlength="15"
+                  [class.is-invalid]="distributorForm.get('gst')?.invalid && distributorForm.get('gst')?.touched">
+                <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.errors?.['invalidGST']">
+                  Enter a valid 15-digit GST number
                 </div>
               </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Address *</label>
+                <textarea class="form-control" formControlName="address" rows="2"
+                  [class.is-invalid]="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched"></textarea>
+                <div class="invalid-feedback"
+                  *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
+                  Address is required
+                </div>
+              </div>
+            </div>
+          </div>
 
-                    <!-- <div class="row">
-                    <!-- <div class="row">
+          <!-- <div class="row">
+                     <div class="row">
                       <div class="col-md-6">
                         <div class="mb-3">
                           <label class="form-label">Categories</label>
@@ -446,49 +451,49 @@
                       </div>
                     </div> -->
 
-              <div class="row">
-                <div class="mb-3">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive"
-                      [class.is-invalid]="distributorForm.get('isActive')?.invalid 
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive"
+                    [class.is-invalid]="distributorForm.get('isActive')?.invalid 
         && (distributorForm.get('isActive')?.touched || formSubmitted)" />
 
-                    <label class="form-check-label" for="isActive">
-                      Active Distributor
-                    </label>
-                  </div>
+                  <label class="form-check-label" for="isActive">
+                    Active Distributor
+                  </label>
+                </div>
 
-                  <!-- INLINE ERROR -->
-                  <div class="text-danger small mt-1" *ngIf="distributorForm.get('isActive')?.errors?.['requiredTrue']
+                <!-- INLINE ERROR -->
+                <div class="text-danger small mt-1" *ngIf="distributorForm.get('isActive')?.errors?.['requiredTrue']
               && (distributorForm.get('isActive')?.touched || formSubmitted)">
-                    Active Distributor must be enabled
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" formControlName="isPremium" id="isPremium">
-                      <label class="form-check-label" for="isPremium">
-                        Premium Distributor
-                      </label>
-                    </div>
-                  </div>
+                  Active Distributor must be enabled
                 </div>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" (click)="saveDistributor()">
-                  {{ isEdit ? 'Update' : 'Save' }} Distributor
-                </button>
+            </div>
+            <div class="col-12">
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" formControlName="isPremium" id="isPremium">
+                  <label class="form-check-label" for="isPremium">
+                    Premium Distributor
+                  </label>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" (click)="saveDistributor()">
+              {{ isEdit ? 'Update' : 'Save' }} Distributor
+            </button>
+          </div>
+        </form>
       </div>
     </div>
-    <!-- END OF MODAL -->
   </div>
 </div>
+<!-- END OF MODAL -->
 
 <!-- Footer -->
 <footer>

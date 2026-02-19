@@ -22,7 +22,7 @@ export class EmployeeDashboardComponent implements OnInit {
 
   activeTab: string = 'dashboard';
   showAddToCart = false; // 👈 NEW
-  
+
 
   employeeName: string = '';
   employeeId: string = '';
@@ -119,35 +119,35 @@ export class EmployeeDashboardComponent implements OnInit {
     }
   }
 
-openEmployeeAddToCart() {
-  this.activeTab = 'employee-add-to-cart';
-}
+  openEmployeeAddToCart() {
+    this.activeTab = 'employee-add-to-cart';
+  }
 
-backToProducts() {
-  this.activeTab = 'products';
-}
+  backToProducts() {
+    this.activeTab = 'products';
+  }
 
 
-setActiveTab(tab: string) {
-  console.log("Switched to tab:", tab);
-  this.activeTab = tab;
-  // Save active tab to localStorage
-  localStorage.setItem('employeeActiveTab', tab);
-  this.closeMobileMenu();
-}
+  setActiveTab(tab: string) {
+    console.log("Switched to tab:", tab);
+    this.activeTab = tab;
+    // Save active tab to localStorage
+    localStorage.setItem('employeeActiveTab', tab);
+    this.closeMobileMenu();
+  }
 
   openAddToCart() {
-  this.showAddToCart = true;
-}
+    this.showAddToCart = true;
+  }
 
 
 
 
- 
 
-closeAddToCart() {
-  this.showAddToCart = false;
-}
+
+  closeAddToCart() {
+    this.showAddToCart = false;
+  }
 
 
 

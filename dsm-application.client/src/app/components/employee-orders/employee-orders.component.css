@@ -907,3 +907,183 @@ textarea.form-control {
     gap: 8px;
   }
 }
+
+/* =====================================
+   🔥 FIX LONG ORDER ID BREAKING MOBILE
+===================================== */
+
+.order-title h4,
+.card-header h4 {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================
+   🔥 UNIVERSAL MOBILE TABLE PROTECTION
+========================================= */
+
+/* 1️⃣ Never allow card to stretch */
+.order-card {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 2️⃣ Table container always scrolls properly */
+.table-container,
+.table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 3️⃣ Force table to respect container */
+.table {
+  width: 100% !important;
+  table-layout: fixed;   /* Important */
+}
+
+/* 4️⃣ Prevent content breaking layout */
+.table th,
+.table td {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* 5️⃣ Prevent amount wrapping weirdly */
+.table td:nth-child(3),
+.table td:nth-child(4) {
+  white-space: nowrap;
+}
+
+/* 6️⃣ Extra safety for very small screens */
+@media (max-width: 576px) {
+
+  .table {
+    font-size: 13px;
+  }
+
+  .table th,
+  .table td {
+    padding: 6px 6px !important;
+  }
+}
+
+/* Hide mobile button on desktop */
+.mobile-filter-btn {
+  display: none;
+}
+
+/* Bottom Sheet Backdrop */
+.bottom-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 9999;
+}
+
+/* Bottom Sheet Panel */
+.bottom-sheet {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  animation: slideUp 0.3s ease;
+}
+
+.sheet-header {
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.sheet-option {
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sheet-option:hover {
+  background: rgba(52,152,219,0.1);
+}
+
+/* 📱 Mobile & Tablet */
+@media (max-width: 991px) {
+
+  .desktop-filter {
+    display: none;
+  }
+
+  .mobile-filter-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+/* Animation */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* =====================================
+   🌙 DARK THEME FIX — FILTER SECTION
+===================================== */
+
+html[data-theme="dark"] .form-label {
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .filter-box {
+  background: #1f2937 !important;     /* dark background */
+  color: #ffffff !important;          /* white text */
+  border: 1px solid #374151 !important;
+}
+
+/* Dropdown text color */
+html[data-theme="dark"] .form-select option {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+/* Filter icon color */
+html[data-theme="dark"] .filter-icon,
+html[data-theme="dark"] .fa-sliders-h {
+  color: #ffffff !important;
+}
+
+/* Placeholder / Selected text fix */
+html[data-theme="dark"] .form-select:focus {
+  color: #ffffff !important;
+  background: #1f2937 !important;
+  border-color: var(--primary-color) !important;
+}
+
+/* =====================================
+   🌙 PROPER DARK INPUT VARIABLES FIX
+===================================== */
+
+html[data-theme="dark"] {
+  --input-bg: #1f2937;
+  --input-text: #ffffff;
+  --text-color: #e5e7eb;
+  --card-bg: #111827;
+  --border-color: #374151;
+  --hover-color: #1f2937;
+}
+

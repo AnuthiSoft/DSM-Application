@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.dashboard-card::before {
+/* .dashboard-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -29,7 +29,7 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
+} */
 
 /* Search Section */
 .search-section {

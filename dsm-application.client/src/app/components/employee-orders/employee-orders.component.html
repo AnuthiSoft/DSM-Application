@@ -6,12 +6,18 @@
   <div class="row mb-3">
     <div class="col-md-4">
       <label class="form-label fw-bold">Filter by Status</label>
-      <select class="form-select" [(ngModel)]="selectedStatus" (change)="applyStatusFilter()">
+      <select class="form-select desktop-filter" [(ngModel)]="selectedStatus" (change)="applyStatusFilter()">
         <option value="All">All</option>
         <option value="Pending">Pending</option>
         <option value="Shipped">Shipped</option>
         <option value="Delivered">Delivered</option>
       </select>
+
+      <!-- 📱 Mobile Bottom Sheet Button -->
+      <button class="mobile-filter-btn" (click)="openBottomSheet()">
+        {{ selectedStatus }}
+        <i class="fas fa-sliders-h"></i>
+      </button>
     </div>
   </div>
 
@@ -26,9 +32,11 @@
         <strong>Order #{{ o.id }}</strong> —
         <span [class.text-success]="o.status === 'Delivered'">{{ o.status }}</span>
       </div>
-      <button *ngIf="o.status === 'Shipped'" class="btn btn-success btn-sm" (click)="openReceiptUpload(o)">
+      <button *ngIf="o.status === 'Shipped'" class="btn btn-success btn-sm" (click)="openReceiptUpload(o)"
+        [disabled]="!isAvailable()">
         📸 Upload Receipt & Deliver
       </button>
+
 
       <input type="file" accept="image/*" capture="environment" hidden #receiptInput
         (change)="onReceiptSelected($event, o)" />
@@ -65,6 +73,7 @@
           </tr>
         </tbody>
       </table>
+
       <!-- <div class="text-end">
         <strong>Subtotal:</strong> {{ subtotal(o) | currency:'INR' }}
       </div> -->
@@ -87,17 +96,17 @@
         </div>
 
         <hr />
-       <hr />
+        <hr />
 
-<div *ngIf="o?.creditUsed && o.creditUsed > 0" class="text-danger">
-  <strong>Credit Used:</strong>
-  -{{ o.creditUsed | currency:'INR' }}
-</div>
+        <div *ngIf="o?.creditUsed && o.creditUsed > 0" class="text-danger">
+          <strong>Credit Used:</strong>
+          -{{ o.creditUsed | currency:'INR' }}
+        </div>
 
-<div class="fs-5 text-success">
-  <strong>Amount to Collect:</strong>
-  {{ (o?.payableAmount || o?.totalAmount) | currency:'INR' }}
-</div>
+        <div class="fs-5 text-success">
+          <strong>Amount to Collect:</strong>
+          {{ (o?.payableAmount || o?.totalAmount) | currency:'INR' }}
+        </div>
 
 
       </div>
@@ -119,14 +128,14 @@
       <div class="modal-body" *ngIf="selectedOrder as so">
 
         <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p> -->
-   <p *ngIf="so.creditUsed && so.creditUsed > 0" class="text-danger">
-  Credit Used: -{{ so.creditUsed | currency:'INR' }}
-</p>
+        <p *ngIf="so.creditUsed && so.creditUsed > 0" class="text-danger">
+          Credit Used: -{{ so.creditUsed | currency:'INR' }}
+        </p>
 
-<p>
-  <strong>Amount to Collect:</strong>
-  {{ (so.payableAmount || so.totalAmount) | currency:'INR' }}
-</p>
+        <p>
+          <strong>Amount to Collect:</strong>
+          {{ (so.payableAmount || so.totalAmount) | currency:'INR' }}
+        </p>
 
 
 
@@ -136,7 +145,7 @@
           <select class="form-select" [(ngModel)]="paymentMethod">
             <option value="Cash">Cash</option>
 
-            
+
             <option value="Online">Online</option>
           </select>
         </div>
@@ -148,5 +157,33 @@
         <button type="button" class="btn btn-success" (click)="confirmPayment()">Confirm Payment</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Bottom Sheet -->
+<div class="bottom-sheet-backdrop" *ngIf="showSheet" (click)="closeBottomSheet()">
+
+  <div class="bottom-sheet" (click)="$event.stopPropagation()">
+
+    <div class="sheet-header">
+      <h5>Select Status</h5>
+    </div>
+
+    <div class="sheet-option" (click)="selectStatus('All')">
+      All
+    </div>
+
+    <div class="sheet-option" (click)="selectStatus('Pending')">
+      Pending
+    </div>
+
+    <div class="sheet-option" (click)="selectStatus('Shipped')">
+      Shipped
+    </div>
+
+    <div class="sheet-option" (click)="selectStatus('Delivered')">
+      Delivered
+    </div>
+
   </div>
 </div>

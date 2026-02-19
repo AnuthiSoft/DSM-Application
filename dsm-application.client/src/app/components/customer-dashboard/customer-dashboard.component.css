@@ -855,22 +855,21 @@ body {
 @media (max-width: 767px) {
  
   .top-cart {
-    width: 32px;        /* 🔽 smaller circle */
-    height: 32px;
-    margin-right: 12px;
-   
+    width: 42px;        /* 🔽 smaller circle */
+    height: 42px;
+    bottom: auto;
+    right: -5px;
   }
  
   .top-cart i {
-    font-size: 14px;    /* 🔽 smaller cart icon */
+    font-size: 20px;    /* 🔽 smaller cart icon */
   }
  
   .cart-badge {
     width: 16px;        /* optional: smaller badge */
     height: 16px;
-    font-size: 10px;
-    top: -2px;
-    right: -5px;
+    font-size: 20px;
+    right: -8px;
   }
 }
  

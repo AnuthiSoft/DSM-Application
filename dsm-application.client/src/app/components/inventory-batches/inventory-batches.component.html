@@ -35,7 +35,7 @@
               <input 
                 type="date" 
                 class="form-control form-control-sm date-input" 
-                [ngModel]="row.manufactureDate | date:'yyyy-MM-dd'"
+                [ngModel]="row.manufactureDate ? (row.manufactureDate | date:'yyyy-MM-dd') : null"
                 (ngModelChange)="updateBatchDates(row, $event, 'mfg')" 
               />
             </td>
@@ -43,7 +43,7 @@
               <input 
                 type="date" 
                 class="form-control form-control-sm date-input" 
-                [ngModel]="row.expiryDate | date:'yyyy-MM-dd'"
+                [ngModel]="row.expiryDate ? (row.expiryDate | date:'yyyy-MM-dd') : null"
                 (ngModelChange)="updateBatchDates(row, $event, 'exp')" 
               />
             </td>
@@ -51,7 +51,8 @@
               <span class="status-badge" 
                 [class.expired]="getStatus(row.expiryDate) === 'Expired'"
                 [class.near-expiry]="getStatus(row.expiryDate) === 'Near Expiry'"
-                [class.valid]="getStatus(row.expiryDate) === 'Valid'">
+                [class.valid]="getStatus(row.expiryDate) === 'Valid'"
+                [class.not-set]="getStatus(row.expiryDate) === 'Not Set'">
                 {{ getStatus(row.expiryDate) }}
               </span>
             </td>

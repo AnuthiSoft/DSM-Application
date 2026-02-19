@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FraudReport } from '../../models/fraud.model';
 import { FraudService } from '../../services/fraud.service';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 
 @Component({
   selector: 'app-admin-fraud-list',
@@ -13,7 +14,7 @@ export class AdminFraudListComponent implements OnInit {
   loading = true;
   historyFrauds: FraudReport[] = [];   // <-- ADD THI
 
-  constructor(private fraudService: FraudService) {}
+  constructor(private fraudService: FraudService, private dashboard: AdminDashboardComponent) {}
 
   ngOnInit() {
     this.loadPendingReports();
@@ -69,4 +70,7 @@ getStatusIcon(status: string): string {
   }
 }
 
+viewHistory() {
+  this.dashboard.setActiveTab('fraud-history');
+}
 }

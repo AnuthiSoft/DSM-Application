@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Review } from '../../models/review.model';
 import { ReviewService } from '../../services/review.service';
+import { AdminDashboardComponent } from '../admin-dashboard/admin-dashboard.component';
 
 @Component({
   selector: 'app-admin-review-history',
@@ -13,7 +14,7 @@ export class AdminReviewHistoryComponent implements OnInit {
   //  historyFrauds: FraudReport[] = [];
   //   loading = true;
 
-  constructor(private reviewService: ReviewService) {}
+  constructor(private reviewService: ReviewService, private dashboard: AdminDashboardComponent) {}
 
   ngOnInit() {
    this.loadHistory();
@@ -64,6 +65,10 @@ getStatusIcon(status: string): string {
     case 'pending': return 'fa-clock text-warning';
     default: return 'fa-question-circle text-muted';
   }
+}
+
+goBack() {
+  this.dashboard.setActiveTab('admin/reviews');
 }
 
 }

@@ -28,8 +28,8 @@
         </div>
       </div>
 
- 
-      
+
+
 
 
       <!-- Action Buttons -->
@@ -193,6 +193,8 @@
       </button>
     </div>
   </div>
+  </div>
+  
   <div class="modal" *ngIf="showCustomerModal">
     <div class="modal-content">
 
@@ -210,7 +212,7 @@
             <th>Payment Mode</th>
             <th>Transaction Ref</th>
             <th>Payment Date</th>
-            
+
             <th>Cashier Name</th>
             <th>Handed Over</th>
             <th>Status</th>
@@ -230,32 +232,32 @@
                 ₹{{ o.pendingAmount }}
               </span>
             </td>
-         <td>
-<span class="payment-mode-pill">
-  {{ o.paymentMode | uppercase }}
-</span>
-</td>
-<td>
-  <span *ngIf="o.transactionReference; else noRef">
-    {{ o.transactionReference }}
-  </span>
+            <td>
+              <span class="payment-mode-pill">
+                {{ o.paymentMode | uppercase }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="o.transactionReference; else noRef">
+                {{ o.transactionReference }}
+              </span>
 
-  <ng-template #noRef>
-    —
-  </ng-template>
-</td>
+              <ng-template #noRef>
+                —
+              </ng-template>
+            </td>
 
             <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
             <td> {{ o.cashierName }}</td>
             <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
             <td>
-           <span class="badge" [ngClass]="{
+              <span class="badge" [ngClass]="{
   'badge-success': o.handoverStatus === 'Accepted',
   'badge-danger': o.handoverStatus === 'Rejected',
   'badge-warning': o.handoverStatus === 'Pending'
 }">
-  {{ o.handoverStatus || 'Pending' }}
-</span>
+                {{ o.handoverStatus || 'Pending' }}
+              </span>
 
 
               <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
@@ -275,38 +277,35 @@
     </div>
   </div>
 
+  <!-- BOTTOM SHEET -->
+  <div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
 
-</div>
+  <div class="bottom-sheet" *ngIf="sheetOpen">
+    <div class="sheet-handle"></div>
 
-<!-- BOTTOM SHEET -->
-<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
-
-<div class="bottom-sheet" *ngIf="sheetOpen">
-  <div class="sheet-handle"></div>
-
-  <div class="sheet-header">
-    <h4>{{ sheetTitle }}</h4>
-    <button (click)="closeSheet()">✕</button>
-  </div>
-
-  <div class="sheet-body">
-
- 
-    <div *ngIf="sheetType === 'payment'">
-      <div class="sheet-option" (click)="setPayment('')">All Modes</div>
-      <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
-      <div class="sheet-option" (click)="setPayment('online')">Online</div>
-      <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
-      <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
+    <div class="sheet-header">
+      <h4>{{ sheetTitle }}</h4>
+      <button (click)="closeSheet()">✕</button>
     </div>
 
-  
-    <div *ngIf="sheetType === 'handover'">
-      <div class="sheet-option" (click)="setHandover('')">All Status</div>
-      <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
-      <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
+    <div class="sheet-body">
+
+
+      <div *ngIf="sheetType === 'payment'">
+        <div class="sheet-option" (click)="setPayment('')">All Modes</div>
+        <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
+        <div class="sheet-option" (click)="setPayment('online')">Online</div>
+        <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
+        <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
+      </div>
+
+
+      <div *ngIf="sheetType === 'handover'">
+        <div class="sheet-option" (click)="setHandover('')">All Status</div>
+        <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
+        <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
+      </div>
+
+
     </div>
-
-
   </div>
-</div>

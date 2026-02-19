@@ -795,3 +795,25 @@ html[data-theme="dark"] .product-image {
 .return-requests-container .return-card {
   animation: fadeInUp 0.4s ease-out;
 }
+
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+}
+
+.header-left h4 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.header-left h4 span {
+  word-break: break-all;
+}

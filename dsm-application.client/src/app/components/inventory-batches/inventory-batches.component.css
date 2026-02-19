@@ -1,3 +1,17 @@
+:root {
+  --expired-color: #e74c3c;
+  --expired-bg: rgba(231, 76, 60, 0.12);
+
+  --warning-color: #f1c40f;
+  --warning-bg: rgba(241, 196, 15, 0.15);
+
+  --valid-color: #2ecc71;
+  --valid-bg: rgba(46, 204, 113, 0.15);
+
+  --notset-color: #6c757d;
+  --notset-bg: rgba(108, 117, 125, 0.12);
+}
+
 /* Inventory Batches Styles */
 .dashboard-card {
   background: var(--card-bg);
@@ -100,37 +114,34 @@
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
-
-/* Status badge styles */
 .status-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 6px 14px;
+  border-radius: 30px;
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
-  min-width: 90px;
-  text-align: center;
-}
-
-.status-badge.expired {
-  background-color: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
-  border: 1px solid rgba(231, 76, 60, 0.3);
-}
-
-.status-badge.near-expiry {
-  background-color: rgba(241, 196, 15, 0.1);
-  color: #f1c40f;
-  border: 1px solid rgba(241, 196, 15, 0.3);
+  text-transform: uppercase;
+  color: #fff;
 }
 
 .status-badge.valid {
-  background-color: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
-  border: 1px solid rgba(46, 204, 113, 0.3);
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
 }
+
+.status-badge.near-expiry {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+
+.status-badge.expired {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.status-badge.not-set {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  color: #ffffff;
+  border: none;
+}
+
 
 /* Dark mode adjustments */
 html[data-theme="dark"] .table thead th {
@@ -255,3 +266,5 @@ html[data-theme="dark"] .date-input:focus {
     white-space: nowrap;
   }
 }
+
+

@@ -6,7 +6,7 @@ import { CategoryService } from '../../services/category.service';
 import { ToastrService } from 'ngx-toastr';
 import * as bootstrap from 'bootstrap';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
-
+import Swal from 'sweetalert2';
 
 
 // Capital letter validator
@@ -58,7 +58,8 @@ export class AdminDashboardComponent implements OnInit {
 
   categories: any[] = [];
   pendingCategories: any[] = [];
-
+  isModalOpen = false;
+  isMobileView = false;
 
 
 
@@ -162,6 +163,13 @@ export class AdminDashboardComponent implements OnInit {
     const modalEl = document.getElementById('distributorModal');
     if (modalEl) {
       this.distributorModal = new bootstrap.Modal(modalEl);
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        this.isModalOpen = false;
+      });
+
+      modalEl.addEventListener('shown.bs.modal', () => {
+        this.isModalOpen = true;
+      });
     }
   }
   @HostListener('window:resize', ['$event'])
@@ -173,6 +181,13 @@ export class AdminDashboardComponent implements OnInit {
     if (window.innerWidth <= 768) {
       this.isSidebarCollapsed = true;
     }
+
+    this.checkScreen();
+    window.addEventListener('resize', () => this.checkScreen());
+  }
+
+  checkScreen() {
+    this.isMobileView = window.innerWidth <= 768;
   }
 
   // Toggle sidebar collapse/expand
@@ -186,7 +201,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   closeMobileMenu() {
-    if (this.isMobileMenuOpen) {
+    if (window.innerWidth <= 768) {
       this.isMobileMenuOpen = false;
     }
   }
@@ -324,22 +339,10 @@ export class AdminDashboardComponent implements OnInit {
     this.selectedDistributor = null;
     this.distributorForm.reset({ isActive: true });
     this.distributorForm.reset({ isPremium: true });
+    this.isMobileMenuOpen = false;
+    this.isModalOpen = true;
     this.distributorModal?.show();
   }
-  togglePremium(d: Distributor) {
-    if (d.isPremium) {
-      this.adminService.removePremium(d.distributorId).subscribe({
-        next: () => d.isPremium = false,
-        error: (err) => console.error(err)
-      });
-    } else {
-      this.adminService.setPremium(d.distributorId).subscribe({
-        next: () => d.isPremium = true,
-        error: (err) => console.error(err)
-      });
-    }
-  }
-
 
   openEdit(d: Distributor): void {
     this.isEdit = true;
@@ -362,10 +365,25 @@ export class AdminDashboardComponent implements OnInit {
       isActive: d.isActive,
       isPremium: d.isPremium
     });
-
+    this.isMobileMenuOpen = false;
+    this.isModalOpen = true;
+    this.selectedDistributor = d;
     this.distributorModal?.show();
   }
 
+  togglePremium(d: Distributor) {
+    if (d.isPremium) {
+      this.adminService.removePremium(d.distributorId).subscribe({
+        next: () => d.isPremium = false,
+        error: (err) => console.error(err)
+      });
+    } else {
+      this.adminService.setPremium(d.distributorId).subscribe({
+        next: () => d.isPremium = true,
+        error: (err) => console.error(err)
+      });
+    }
+  }
 
   // saveDistributor(): void {
   //   if (this.distributorForm.invalid) {
@@ -409,47 +427,53 @@ export class AdminDashboardComponent implements OnInit {
   // }
 
   saveDistributor(): void {
-  this.formSubmitted = true;
- 
-  if (this.distributorForm.invalid) {
-    this.distributorForm.markAllAsTouched();
-    return;
-  }
- 
-  const dist = { ...this.distributorForm.value };
- 
-  if (this.isEdit && this.selectedDistributor) {
-    this.adminService
-      .updateDistributor(this.selectedDistributor.distributorId, dist)
-      .subscribe(() => {
-        this.toastr.success('Distributor updated successfully');
-        this.loadDistributors();
-        this.distributorModal?.hide();
-      });
-  } else {
-    this.adminService.addDistributor(dist).subscribe({
-      next: () => {
-        this.toastr.success('Distributor added successfully');
-        this.loadDistributors();
-        this.distributorModal?.hide();
-      },
-      error: (err) => {
-        const msg = err.error;
-        if (typeof msg === 'string') {
-          if (msg.toLowerCase().includes('email')) {
-            this.distributorForm.get('email')?.setErrors({ exists: true });
-            return;
-          }
-          if (msg.toLowerCase().includes('phone')) {
-            this.distributorForm.get('phoneNumber')?.setErrors({ exists: true });
-            return;
-          }
-        }
-        this.toastr.error(msg || 'Failed to add distributor');
-      }
-    });
-  }
+    this.formSubmitted = true;
+
+    if (this.distributorForm.invalid) {
+      this.distributorForm.markAllAsTouched();
+      return;
+    }
+
+    const dist = { ...this.distributorForm.value };
+
+    if (this.isEdit && this.selectedDistributor) {
+      this.adminService
+        .updateDistributor(this.selectedDistributor.distributorId, dist)
+        .subscribe(() => {
+          this.toastr.success('Distributor updated successfully');
+          this.loadDistributors();
+          this.distributorModal?.hide();
+        });
+    } else {
+      this.adminService.addDistributor(dist).subscribe({
+        next: () => {
+          if (this.isMobileView) {
+  alert('Distributor added successfully');
+} else {
+  this.toastr.success('Distributor added successfully');
 }
+
+          this.loadDistributors();
+          this.distributorModal?.hide();
+        },
+        error: (err) => {
+          const msg = err.error;
+          if (typeof msg === 'string') {
+            if (msg.toLowerCase().includes('email')) {
+              this.distributorForm.get('email')?.setErrors({ exists: true });
+              return;
+            }
+            if (msg.toLowerCase().includes('phone')) {
+              this.distributorForm.get('phoneNumber')?.setErrors({ exists: true });
+              return;
+            }
+          }
+          this.toastr.error(msg || 'Failed to add distributor');
+        }
+      });
+    }
+  }
+
   deactivate(id: string): void {
     this.adminService.deactivateDistributor(id).subscribe({
       next: () => {
@@ -472,26 +496,49 @@ export class AdminDashboardComponent implements OnInit {
 
 
   delete(id: string): void {
-    if (!confirm('Are you sure to delete?')) return;
 
-    this.adminService.deleteDistributor(id).subscribe({
-      next: (res: any) => {
-        const message = res?.message || 'Distributor deleted successfully';
-        this.toastr.success(message, 'Success');
-        this.loadDistributors();
-      },
+    // 🔹 MOBILE → Native confirm
+    if (this.isMobileView) {
+      const confirmDelete = confirm('This distributor will be permanently deleted. Continue?');
 
-      error: err => {
-        const message =
-          typeof err.error === 'string'
-            ? err.error
-            : 'Failed to delete distributor';
+      if (!confirmDelete) return;
 
-        this.toastr.error(message, 'Error');
+      this.adminService.deleteDistributor(id).subscribe({
+        next: () => {
+          alert('Distributor deleted successfully');
+          this.loadDistributors();
+        },
+        error: () => {
+          alert('Failed to delete distributor');
+        }
+      });
+
+      return;
+    }
+
+    // 🔹 DESKTOP → SweetAlert
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This distributor will be permanently deleted.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33'
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.adminService.deleteDistributor(id).subscribe({
+          next: (res: any) => {
+            this.toastr.success(res?.message || 'Distributor deleted successfully');
+            this.loadDistributors();
+          },
+          error: () => {
+            this.toastr.error('Failed to delete distributor');
+          }
+        });
       }
     });
   }
-
 
 
 

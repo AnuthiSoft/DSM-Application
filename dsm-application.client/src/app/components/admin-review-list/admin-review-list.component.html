@@ -9,9 +9,9 @@
         <button class="btn btn-refresh" (click)="loadPendingReviews()">
           <i class="fas fa-sync-alt me-1"></i> Refresh
         </button>
-        <button routerLink="/admin/review-history" class="btn btn-primary">
-  <i class="fas fa-history me-1"></i> View History
-</button>
+        <button (click)="goToReviewHistory()" class="btn btn-primary">
+          <i class="fas fa-history me-1"></i> View History
+        </button>
       </div>
     </div>
   </div>

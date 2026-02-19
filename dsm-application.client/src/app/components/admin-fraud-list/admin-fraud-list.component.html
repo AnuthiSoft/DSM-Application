@@ -6,14 +6,15 @@
       <i class="fas fa-exclamation-triangle me-2"></i>Fraud Reports Management
     </h2>
 
-    <div class="header-actions">
+    <div class="header-actions d-flex flex-wrap gap-2">
       <!-- Refresh Button -->
-      <button class="btn btn-refresh me-2" (click)="loadPendingReports()">
+      <button class="btn btn-refresh" (click)="loadPendingReports()">
         <i class="fas fa-sync-alt me-1"></i> Refresh
       </button>
 
       <!-- NEW: View History Button -->
-      <button routerLink="/admin/fraud-history" class="btn btn-primary">
+      <button class="btn btn-primary" (click)="viewHistory()">
+
         <i class="fas fa-history me-1"></i> View History
       </button>
     </div>

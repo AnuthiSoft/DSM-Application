@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { AddReviewDto } from '../../models/review.model';
 import { CustomerService } from '../../services/customer.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-review-submit',
@@ -28,7 +29,8 @@ export class ReviewSubmitComponent {
     private reviewService: ReviewService,
     private route: ActivatedRoute,
     private auth: AuthService,
-    private cust :CustomerService
+    private cust :CustomerService,
+      private router: Router 
   ) {}
 
   ngOnInit() {
@@ -49,15 +51,22 @@ export class ReviewSubmitComponent {
     this.reviewService.submitReview(this.model).subscribe({
       next: (res) => {
         this.success = res.message;
-      },
+         setTimeout(() => {
+        this.router.navigate(['/customer-dashboard'], {
+          queryParams: { tab: 'distributors' }
+        });
+      }, 1500); // wait 1.5 sec so message is visible
+    },
+      
       error: () => {
         this.error = 'Failed to submit review.';
       }
     });
   }
-  close() {
-  // Go back to customer dashboard tab
-  window.location.href = '/customer-dashboard'; 
+close() {
+  this.router.navigate(['/customer-dashboard'], {
+    queryParams: { tab: 'distributors' }
+  });
 }
 
 }

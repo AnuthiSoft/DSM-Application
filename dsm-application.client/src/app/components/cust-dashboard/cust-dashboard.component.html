@@ -136,13 +136,10 @@
       </button>
 
 
-          <button class="btn btn-warning mt-2" [routerLink]="[
-          '/review',
-          'Distributor',
-          d.distributorId
-        ]">
-            <i class="fas fa-star"></i> Review
-          </button>
+         <button class="btn btn-warning mt-2"
+        (click)="openReview(d.distributorId)">
+  <i class="fas fa-star"></i> Review
+</button>
 
 
           <!-- <button class="btn-view-products mt-2"
@@ -166,3 +163,4 @@
     <p>There are no distributors available at the moment.</p>
   </div>
 </div>
+<router-outlet></router-outlet>

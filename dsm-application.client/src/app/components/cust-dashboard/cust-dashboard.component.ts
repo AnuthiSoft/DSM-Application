@@ -181,6 +181,12 @@ loadDistributors() {
     });
 }
 
+openReview(id: string) {
+  this.router.navigate(
+    ['/customer-dashboard/review', 'Distributor', id],
+    { queryParams: { tab: 'distributors' } }
+  );
+}
 
 }
 

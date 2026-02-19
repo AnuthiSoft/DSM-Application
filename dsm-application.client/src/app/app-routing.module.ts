@@ -87,6 +87,11 @@ const routes: Routes = [
   component: CustomerDashboardComponent,
   canActivate: [AuthGuard],
   children: [
+{ 
+  path: 'review/:targetType/:targetId',
+  component: ReviewSubmitComponent,
+  canActivate: [AuthGuard]
+},
 
 { path: 'add-to-cart', component: AddToCartComponent, canActivate: [AuthGuard] },
   { path: 'products/:distributorId', component: ProductsByDistComponent, canActivate: [AuthGuard] },
@@ -124,7 +129,7 @@ const routes: Routes = [
     path: 'report-fraud/:targetType/:targetId',
     component: FraudReportComponent, canActivate: [AuthGuard]
   },
-  { path: 'review/:targetType/:targetId', component: ReviewSubmitComponent, canActivate: [AuthGuard] },
+  
   { path: 'admin/reviews', component: AdminReviewListComponent, canActivate: [AuthGuard] },
   {
     path: 'admin/fraud-history',

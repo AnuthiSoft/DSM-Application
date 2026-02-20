@@ -18,7 +18,7 @@ export class ReviewSubmitComponent {
     targetType: '',
     title: '',
     description: '',
-    rating: 0
+    rating: null as any
   };
 
   ratings = [1, 2, 3, 4, 5];
@@ -43,10 +43,34 @@ export class ReviewSubmitComponent {
     this.model.targetId = this.route.snapshot.paramMap.get('targetId') || '';
     this.model.targetType = this.route.snapshot.paramMap.get('targetType') || '';
   }
-
-  submit() {
+setRating(value: number) {
+  this.model.rating = value;
+}
+ submit(form: any) {
+    this.success = '';
+  this.error = '';
+   if (form.invalid) {
+      form.control.markAllAsTouched(); 
+    this.error = 'Please fill all required fields';
+    return;
+  }
     this.success = '';
     this.error = '';
+    // 🔥 Validation
+if (!this.model.title || this.model.title.trim() === '') {
+  this.error = 'Title is required';
+  return;
+}
+
+if (!this.model.description || this.model.description.trim() === '') {
+  this.error = 'Description is required';
+  return;
+}
+
+if (!this.model.rating || this.model.rating === 0) {
+  this.error = 'Rating is required';
+  return;
+}
 
     this.reviewService.submitReview(this.model).subscribe({
       next: (res) => {

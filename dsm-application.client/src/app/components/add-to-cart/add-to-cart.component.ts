@@ -876,10 +876,18 @@ for (const item of this.orderProducts) {
         await this.orderService.placeOrder(payload).toPromise();
       }
 
-      this.toastr.success('Orders placed successfully');
-      this.resetOrder();
-      this.router.navigate(['/customer-dashboard/customerOrder']);
-        queryParams: { tab: 'orders' }
+    this.toastr.success('Orders placed successfully');
+this.resetOrder();
+
+// 🔥 Clear saved tab so refresh goes to Dashboard
+localStorage.removeItem('customerActiveTab');
+
+// 🔥 Navigate to My Orders tab
+this.router.navigate(
+  ['/customer-dashboard'],
+  { queryParams: { tab: 'orders' } }
+);
+
 
     } finally {
       this.isPlacingOrder = false;   // 🔓 RELEASE LOCK
@@ -924,9 +932,8 @@ localStorage.setItem("distributorId", distributor.distributorId);
     this.cart = [];
 
 
-   this.router.navigate(['/customer-dashboard'], {
-  queryParams: { tab: 'products' }
-});
+  this.goToProductsClicked.emit();
+
 
     // localStorage.setItem("distributorId", distributor.distributorId);
     // this.router.navigate(['/products', distributor.distributorId]);
@@ -938,19 +945,9 @@ localStorage.setItem("distributorId", distributor.distributorId);
   //  NAVIGATE TO PRODUCTS
   // ---------------------------------------------------
   goToProducts() {
-  const distributorId =
-    this.distributorId || localStorage.getItem('distributorId');
-
-  if (!distributorId) {
-    this.toastr.error('Distributor not found');
-    return;
-  }
-
- this.router.navigate(['/customer-dashboard'], {
-  queryParams: { tab: 'products' }
-});
-
+  this.goToProductsClicked.emit();
 }
+
 
 
 

@@ -818,7 +818,12 @@ namespace DSM_Application.Server.Controllers
 
                 customer.ProfileImageUrl = $"/uploads/{fileName}";
             }
-
+            // 🔥 FIX: avoid Mongo ObjectId serialization error
+            if (string.IsNullOrEmpty(customer.AddedByDistributorId)
+                || customer.AddedByDistributorId == "int")
+            {
+                customer.AddedByDistributorId = null;
+            }
 
             await _customersCollection.ReplaceOneAsync(x => x.CustomerId == customerId, customer);
 

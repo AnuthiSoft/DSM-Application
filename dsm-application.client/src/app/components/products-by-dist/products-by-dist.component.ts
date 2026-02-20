@@ -324,9 +324,17 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     }
 
     localStorage.setItem(key, JSON.stringify(cart));
+    this.cartService.updateCartCount();
 
-  // 🔥 Redirect to cart
-  this.router.navigate(['/customer-dashboard/add-to-cart']);
+this.cartService.updateCartCount();
+
+this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+  this.router.navigate(
+    ['/customer-dashboard'],
+    { queryParams: { tab: 'cart' } }
+  );
+});
+
 }
 
 
@@ -609,13 +617,21 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     }
 
     localStorage.setItem(key, JSON.stringify(cart));
+    this.cartService.updateCartCount();
 
     // Close popup
     this.showPopup = false;
     this.selectedProduct = null;
 
-  // 🔥 Redirect to cart
-  this.router.navigate(['/customer-dashboard/add-to-cart']);
+this.cartService.updateCartCount();
+
+this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+  this.router.navigate(
+    ['/customer-dashboard'],
+    { queryParams: { tab: 'cart' } }
+  );
+});
+
 }
 
 

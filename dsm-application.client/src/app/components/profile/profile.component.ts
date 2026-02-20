@@ -297,10 +297,9 @@ export class ProfileComponent implements OnInit {
   saveProfile(): void {
 
     this.isSaving = true;
-    if (!this.customer.name ||
-      !/^[A-Z]/.test(this.customer.name) ||
-      !/^[6-9]\d{9}$/.test(this.customer.phoneNumber || '') ||
-      !this.customer.pincode) {
+  if (!this.customer.name ||
+  !this.customer.email ||
+  !/^[6-9]\d{9}$/.test(this.customer.phoneNumber || '')) {
 
       this.toastr.error('Please fill all required fields correctly', 'Validation Error');
       this.isSaving = false;

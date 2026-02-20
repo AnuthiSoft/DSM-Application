@@ -16,41 +16,64 @@
       </div>
     </div>
 
-    <form (ngSubmit)="submit()" class="popup-form">
-      <div class="form-group">
-        <label class="form-label">Title *</label>
-        <input class="form-control"
-               [(ngModel)]="model.title"
-               name="title" 
-               required 
-               placeholder="Enter title" />
-      </div>
+  <form #reviewForm="ngForm" (ngSubmit)="submit(reviewForm)" class="popup-form" novalidate>
+    <div class="form-group">
+  <label class="form-label">Title *</label>
+
+  <input class="form-control"
+         [(ngModel)]="model.title"
+         name="title"
+         required
+         #title="ngModel"
+         placeholder="Enter title"
+         [class.is-invalid]="title.invalid && (title.touched || reviewForm.submitted)" />
+
+  <div class="text-danger"
+       *ngIf="title.invalid && (title.touched || reviewForm.submitted)">
+    Title is required
+  </div>
+</div>
 
       <div class="form-group">
         <label class="form-label">Description *</label>
-        <textarea rows="3" class="form-control"
-                  [(ngModel)]="model.description"
-                  name="description" 
-                  required
-                  placeholder="Write your review..."></textarea>
-      </div>
+       <textarea rows="3" class="form-control"
+          [(ngModel)]="model.description"
+          name="description"
+          required
+          #description="ngModel"
+          placeholder="Write your review..."
+          [class.is-invalid]="description.invalid && (description.touched || reviewForm.submitted)">
+</textarea>
 
-      <div class="form-group">
-        <label class="form-label">Rating *</label>
-        <select class="form-control rating-select" [(ngModel)]="model.rating" name="rating" required >
-        <option value="">Select Rating</option>
-        <option *ngFor="let r of ratings" [value]="r">
-          {{ r }} ⭐
-        </option>
-      </select>
+<div class="text-danger" *ngIf="description.invalid && (description.touched || reviewForm.submitted)">
+  Description is required
+</div>
+</div>
 
-      </div>
+    <div class="form-group">
+  <label class="form-label">Rating *</label>
 
+ <div class="star-rating"
+     [class.is-invalid]="!model.rating && (reviewForm.submitted)">
+  <span *ngFor="let r of ratings"
+        (click)="setRating(r)"
+        [class.filled]="r <= model.rating">
+    ★
+  </span>
+</div>
+
+  <!-- 🔥 Move error OUTSIDE select -->
+ <div class="text-danger"
+     *ngIf="!model.rating && reviewForm.submitted">
+  Rating is required
+</div>
+</div>
       <div class="form-actions">
         <button class="btn btn-cancel" type="button" (click)="close()">
           Cancel
         </button>
-        <button class="btn btn-submit" type="submit">
+     <button class="btn btn-submit" type="submit"
+        [disabled]="reviewForm.invalid || !model.rating">
           <i class="fas fa-paper-plane me-2"></i>Submit
         </button>
       </div>

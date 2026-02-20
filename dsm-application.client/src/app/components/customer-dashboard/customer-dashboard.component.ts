@@ -108,8 +108,8 @@ this.route.queryParams.subscribe(params => {
   } 
   else {
     // 🔥 Always default to dashboard on fresh load
-    this.activeTab = 'dashboard';
-    localStorage.setItem('customerActiveTab', 'dashboard');
+     const savedTab = localStorage.getItem('customerActiveTab');
+    this.activeTab = savedTab ? savedTab : 'dashboard';
   }
 });
 
@@ -192,6 +192,7 @@ this.loadCustomerCredit();
  
   setActiveTab(tab: string) {
     this.activeTab = tab;
+      localStorage.setItem('customerActiveTab', tab);
  
     // ✅ CLOSE MOBILE SIDEBAR AFTER CLICK
     if (this.isMobileMenuOpen) {
@@ -498,11 +499,7 @@ if (!currentDist && this.connectedDistributors.length >= 1) {
     const key = `cart_customer_${customerId}`;
     const raw = localStorage.getItem(key);
     const cart = raw ? JSON.parse(raw) : [];
- 
-    this.cartCount = cart.reduce(
-      (sum: number, c: any) => sum + (c?.quantity || 0),
-      0
-    );
+   this.cartCount = Array.isArray(cart) ? cart.length : 0;
   }
  
  

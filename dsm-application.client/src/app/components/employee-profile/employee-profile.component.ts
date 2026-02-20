@@ -187,10 +187,21 @@ export class EmployeeProfileComponent implements OnInit {
   // UPDATE PROFILE
   // ======================
   updateProfile() {
+    // 🔥 ADD THIS AT TOP
+if (
+  this.profile.phoneNumber !== this.originalPhoneNumber &&
+  !this.profile.phoneVerified
+) {
+  this.toastr.error('Please verify phone number before saving');
+  return;
+}
+
     const formData = new FormData();
 
     formData.append('Name', this.profile.name || '');
-    formData.append('PhoneNumber', this.profile.phoneNumber || '');
+    formData.append('PhoneNumber', '+91' + (this.profile.phoneNumber || ''));
+formData.append('PhoneVerified', this.profile.phoneVerified ? 'true' : 'false');
+
     formData.append('Street', this.profile.street || '');
     formData.append('City', this.profile.city || '');
     formData.append('State', this.profile.state || '');
@@ -204,6 +215,7 @@ export class EmployeeProfileComponent implements OnInit {
     this.employeeService.updateMyProfile(formData).subscribe({
       next: () => {
         this.toastr.success('Profile updated successfully', 'Success');
+              this.originalPhoneNumber = this.profile.phoneNumber;
 
         setTimeout(() => {
           this.loadProfile();

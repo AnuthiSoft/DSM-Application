@@ -329,3 +329,19 @@ select.form-control {
   font-size: 1rem;
   line-height: 1.2;
 }
+.star-rating span {
+  font-size: 28px;
+  cursor: pointer;
+  color: #ccc;
+  margin-right: 6px;
+}
+
+.star-rating span.filled {
+  color: #f5b301;
+}
+
+.star-rating.is-invalid {
+  border: 1px solid #dc3545;
+  padding: 4px;
+  border-radius: 4px;
+}

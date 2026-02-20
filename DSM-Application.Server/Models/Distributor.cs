@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
+using DistributorManagementSystem.Server.Models;
 
 namespace DistributorManagementSystem.Server.Models
 {
@@ -19,6 +20,10 @@ namespace DistributorManagementSystem.Server.Models
         [BsonElement("Pincodes")]
         public List<string> Pincodes { get; set; } = new();
 
+
+        // ✅ Multiple Godowns / Branches
+        [BsonElement("Godowns")]
+        public List<GodownLocation> Godowns { get; set; } = new();
 
         public string PhoneNumber { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty; // Primary contact name

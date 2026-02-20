@@ -1,0 +1,451 @@
+<div class="profile-section">
+
+  <div class="welcome-header">
+    <h2>My Profile</h2>
+  </div>
+
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <span>Loading profile...</span>
+  </div>
+
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="error-state">
+    <i class="fas fa-exclamation-triangle"></i>
+
+    <div class="error-content">
+      <h4>Error</h4>
+      <p>{{ errorMessage }}</p>
+    </div>
+  </div>
+
+
+  <!-- Profile -->
+  <div *ngIf="!isLoading && distributor" class="profile-content">
+
+
+    <div class="profile-card">
+
+
+      <!-- Header -->
+      <div class="profile-header">
+
+        <div class="profile-avatar">
+
+          <img *ngIf="previewImage" [src]="previewImage" class="avatar-img" />
+
+          <i *ngIf="!previewImage" class="fas fa-user avatar-placeholder"></i>
+
+
+          <div class="edit-icon" (click)="triggerFileInput()">
+            <i class="fas fa-pencil-alt"></i>
+          </div>
+
+          <input
+            type="file"
+            #fileInput
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            style="display:none;"
+          >
+
+        </div>
+
+
+        <!-- Info -->
+        <div class="profile-info">
+
+          <h3>{{ distributor.name }}</h3>
+
+          <p class="profile-email">
+            {{ distributor.email }}
+          </p>
+
+          <span class="profile-badge">
+            {{ distributor.role || 'Distributor' }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- Form -->
+      <form
+        #profileForm="ngForm"
+        (ngSubmit)="saveProfile()"
+        class="profile-form"
+      >
+
+
+        <div class="form-grid">
+
+
+          <!-- Name -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-user"></i> Full Name
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.name"
+              name="name"
+              required
+              pattern="^[A-Z][a-zA-Z ]*$"
+              #name="ngModel"
+            />
+
+            <div class="text-danger" *ngIf="name.touched && name.errors">
+
+              <div *ngIf="name.errors['required']">
+                Name is required
+              </div>
+
+              <div *ngIf="name.errors['pattern']">
+                Name must start with capital letter
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Email -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-envelope"></i> Email
+            </label>
+
+            <input
+              type="email"
+              class="form-control"
+              [(ngModel)]="distributor.email"
+              name="email"
+              required
+              email
+              #email="ngModel"
+            />
+
+            <div class="text-danger" *ngIf="email.touched && email.errors">
+
+              <div *ngIf="email.errors['required']">
+                Email is required
+              </div>
+
+              <div *ngIf="email.errors['email']">
+                Enter valid email
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Phone -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-phone"></i> Phone
+            </label>
+
+            <div class="phone-wrapper">
+
+              <span class="phone-prefix">+91</span>
+
+              <input
+                type="text"
+                class="form-control phone-input"
+                [(ngModel)]="distributor.phoneNumber"
+                name="phone"
+                required
+                pattern="^[6-9]\d{9}$"
+                maxlength="10"
+                (input)="restrictPhoneInput($event)"
+                #phone="ngModel"
+              />
+
+            </div>
+
+
+            <div class="text-danger" *ngIf="phone.touched && phone.errors">
+
+              <div *ngIf="phone.errors['required']">
+                Phone is required
+              </div>
+
+              <div *ngIf="phone.errors['pattern']">
+                Invalid phone number
+              </div>
+
+            </div>
+
+
+            <!-- OTP -->
+            <button
+              type="button"
+              class="send-otp-btn"
+              *ngIf="!distributor.phoneVerified"
+              (click)="sendOtp()"
+              [disabled]="!distributor.phoneNumber || distributor.phoneNumber.length !== 10"
+            >
+              Send OTP
+            </button>
+
+
+            <div
+              *ngIf="showOtpInput && !distributor.phoneVerified"
+              class="otp-verify"
+            >
+
+              <input
+                type="text"
+                class="otp-box"
+                placeholder="Enter OTP"
+                [(ngModel)]="otp"
+                name="otp"
+              />
+
+              <button
+                type="button"
+                class="verify-otp-btn"
+                (click)="verifyOtp()"
+              >
+                Verify OTP
+              </button>
+
+            </div>
+
+
+            <div *ngIf="distributor.phoneVerified" class="verified-text">
+              <i class="fas fa-check-circle"></i> Verified
+            </div>
+
+          </div>
+
+
+
+          <!-- Street -->
+          <div class="form-group full-width">
+
+            <label class="form-label">
+              <i class="fas fa-road"></i> Street
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.street"
+              name="street"
+            />
+
+          </div>
+
+
+
+          <!-- City -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-city"></i> City
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.city"
+              name="city"
+              required
+              #city="ngModel"
+            />
+
+          </div>
+
+
+
+          <!-- State -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-flag"></i> State
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.state"
+              name="state"
+            />
+
+          </div>
+
+
+
+          <!-- Pincode -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-hashtag"></i> Pincode
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.pincode"
+              name="pincode"
+              required
+              pattern="^[0-9]{6}$"
+              maxlength="6"
+              #pincode="ngModel"
+            />
+
+          </div>
+
+
+
+          <!-- Country -->
+          <div class="form-group">
+
+            <label class="form-label">
+              <i class="fas fa-globe"></i> Country
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="distributor.country"
+              name="country"
+            />
+
+          </div>
+
+
+        </div>
+
+
+
+        <!-- Actions -->
+        <div class="form-actions">
+
+            <!-- ================= GODOWN LOCATION ================= -->
+<div class="godown-section">
+
+  <hr />
+
+  <h4>
+    📍 Godown Location
+  </h4>
+
+  <p class="text-muted">
+    Set your godown location using GPS (one-time setup).
+  </p>
+
+  <button
+    type="button"
+    class="btn btn-success"
+    (click)="setGodownLocation()"
+    [disabled]="isSavingLocation">
+
+    <i class="fas fa-map-marker-alt"></i>
+    {{ isSavingLocation ? 'Saving...' : 'Set My Godown Location' }}
+
+  </button>
+
+  <div *ngIf="locationSaved" class="text-success mt-2">
+    ✅ Location saved successfully
+  </div>
+
+</div>
+
+          <button
+            class="btn btn-primary save-btn"
+            type="submit"
+            [disabled]="isSaving"
+          >
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
+
+
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="cancelEdit()"
+            *ngIf="hasChanges()"
+          >
+            Cancel
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+
+
+    <!-- Info -->
+    <div class="info-card">
+
+      <h4>
+        <i class="fas fa-info-circle"></i>
+        Profile Information
+      </h4>
+
+
+      <div class="info-grid">
+
+        <div class="info-item">
+
+          <span class="info-label">Member Since</span>
+
+          <span class="info-value">
+            {{ distributor.createdDate
+              ? (distributor.createdDate | date:'mediumDate')
+              : 'Not available'
+            }}
+          </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-label">Last Updated</span>
+
+          <span class="info-value">
+            {{ distributor.updatedDate
+              ? (distributor.updatedDate | date:'mediumDate')
+              : 'Not available'
+            }}
+          </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-label">Account Status</span>
+
+          <span class="info-value status-active">
+            Active
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
+</div>

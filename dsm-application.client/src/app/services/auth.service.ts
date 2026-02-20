@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
-
+import { Preferences } from '@capacitor/preferences';
 import { ApiService } from './api.service';
+import { Capacitor } from '@capacitor/core';
+
 
 @Injectable({
   providedIn: 'root'
@@ -133,30 +135,197 @@ resetPassword(email: string, otp: string, newPassword: string) {
   }
   
   //Me added this
-  employeeLogin(email: string, password: string): Observable<any> {
+//   employeeLogin(email: string, password: string): Observable<any> {
+//   return this.api.post<any>('auth/employee-login', { email, password }).pipe(
+//     tap(res => {
+//       const token = res.token;
+//       const refreshToken = res.refreshToken;
+
+//       if (token) {
+//         localStorage.setItem('token', token);
+//         if (refreshToken) {
+//           localStorage.setItem('refreshToken', refreshToken);
+//         }
+
+//         localStorage.setItem('role', res.role);
+//         localStorage.setItem('EmployeeId', res.employeeId);
+//         localStorage.setItem('DistributorId', res.distributorId);
+
+//         // ✅ THIS LINE IS THE KEY
+//         localStorage.setItem('designation', res.designation);
+//       }
+//     })
+//   );
+// }
+
+// employeeLogin(email: string, password: string): Observable<any> {
+//   return this.api.post<any>('auth/employee-login', { email, password }).pipe(
+//     tap(res => {
+//       console.log('EMPLOYEE LOGIN RESPONSE:', res);
+
+//       const token = res.token || res.Token;
+//       const refreshToken = res.refreshToken || res.RefreshToken;
+
+//       if (!token) {
+//         console.error('Employee login failed: token missing');
+//         return;
+//       }
+
+//       localStorage.setItem('token', token);
+//       if (refreshToken) {
+//         localStorage.setItem('refreshToken', refreshToken);
+//       }
+
+//       localStorage.setItem('role', res.role || res.Role);
+//       localStorage.setItem('EmployeeId', res.employeeId || res.EmployeeId);
+//       localStorage.setItem('DistributorId', res.distributorId || res.DistributorId);
+//       localStorage.setItem('designation', res.designation || res.Designation);
+
+//       this.authStatus.next(true);
+
+//       // 🔥 PHASE-3.2 — START GPS SILENTLY
+//       if (Capacitor.getPlatform() === 'android') {
+//         (window as any).Capacitor?.Plugins?.LocationService?.startTracking();
+//       }
+
+//       // 🔷 PHASE-4 — REGISTER GEOFENCE
+//       if (Capacitor.getPlatform() === 'android') {
+        
+//         console.log('🔥 PHASE-4: Calling setupGeofence from JS');
+
+//         const GODOWN_LAT = 12.9716;   // 🔴 replace later with backend value
+//         const GODOWN_LNG = 77.5946;   // 🔴 replace later with backend value
+
+//       //  (window as any).Capacitor?.Plugins?.LocationService
+//       //   ?.setupGeofence({
+//       //     lat: GODOWN_LAT,
+//       //     lng: GODOWN_LNG,
+//       //     radius: 200
+//       //   })
+//       //   .then(() => {
+//       //     console.log('✅ PHASE-4: setupGeofence SUCCESS');
+//       //   })
+//       //   .catch((err: any) => {
+//       //     console.error('❌ PHASE-4: setupGeofence FAILED', err);
+//       //   });
+
+//       }
+//     })
+//   );
+// }
+
+
+// employeeLogin(email: string, password: string): Observable<any> {
+//   return this.api.post<any>('auth/employee-login', { email, password }).pipe(
+//     tap(res => {
+
+//       const token = res.token || res.Token;
+//       const refreshToken = res.refreshToken || res.RefreshToken;
+
+//       if (!token) return;
+
+//       localStorage.setItem('token', token);
+//       if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
+
+//       localStorage.setItem('role', res.role || res.Role);
+//       localStorage.setItem('EmployeeId', res.employeeId || res.EmployeeId);
+//       localStorage.setItem('DistributorId', res.distributorId || res.DistributorId);
+//       localStorage.setItem('designation', res.designation || res.Designation);
+
+//       this.authStatus.next(true);
+
+//       // ✅ ONLY THIS IS REQUIRED ON ANDROID
+//       if (Capacitor.getPlatform() === 'android') {
+//         (window as any).Capacitor?.Plugins?.LocationService?.startTracking();
+//       }
+//     })
+//   );
+// }
+
+// employeeLogin(email: string, password: string): Observable<any> {
+//   return this.api.post<any>('auth/employee-login', { email, password }).pipe(
+//     tap(async res => {
+
+//       const token = res.token || res.Token;
+//       const refreshToken = res.refreshToken || res.RefreshToken;
+
+//       if (!token) return;
+
+//       // 🔥 SAVE TO CAPACITOR STORAGE (ANDROID READS THIS)
+//       await Preferences.set({ key: 'token', value: token });
+
+//       if (refreshToken) {
+//         await Preferences.set({ key: 'refreshToken', value: refreshToken });
+//       }
+
+//       await Preferences.set({
+//         key: 'EmployeeId',
+//         value: res.employeeId || res.EmployeeId || ''
+//       });
+
+//       await Preferences.set({
+//         key: 'DistributorId',
+//         value: res.distributorId || res.DistributorId || ''
+//       });
+
+//       await Preferences.set({
+//         key: 'role',
+//         value: res.role || res.Role || ''
+//       });
+
+//       await Preferences.set({
+//         key: 'designation',
+//         value: res.designation || res.Designation || ''
+//       });
+
+//       this.authStatus.next(true);
+
+//       // ✅ START GPS SILENTLY
+//       if (Capacitor.getPlatform() === 'android') {
+//         (window as any).Capacitor?.Plugins?.LocationService?.startTracking();
+//       }
+//     })
+//   );
+// }
+
+employeeLogin(email: string, password: string): Observable<any> {
   return this.api.post<any>('auth/employee-login', { email, password }).pipe(
-    tap(res => {
-      const token = res.token;
-      const refreshToken = res.refreshToken;
+    tap(async res => {
 
-      if (token) {
-        localStorage.setItem('token', token);
-        if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-        }
+      const token = res.token || res.Token;
+      if (!token) return;
 
-        localStorage.setItem('role', res.role);
-        localStorage.setItem('EmployeeId', res.employeeId);
-        localStorage.setItem('DistributorId', res.distributorId);
+      const employeeId = res.employeeId || res.EmployeeId || '';
+      const distributorId = res.distributorId || res.DistributorId || '';
+      const role = res.role || res.Role || 'Employee';
 
-        // ✅ THIS LINE IS THE KEY
-        localStorage.setItem('designation', res.designation);
+      // ✅ 1. SAVE FOR WEB (guards, role checks)
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+      localStorage.setItem('EmployeeId', employeeId);
+      localStorage.setItem('DistributorId', distributorId);
+
+      // ✅ 2. SAVE FOR ANDROID (Java reads this)
+      await Preferences.set({ key: 'token', value: token });
+      await Preferences.set({ key: 'EmployeeId', value: employeeId });
+      await Preferences.set({ key: 'DistributorId', value: distributorId });
+      await Preferences.set({ key: 'role', value: role });
+
+      console.log('✅ Employee Login OK', employeeId, distributorId);
+
+      this.authStatus.next(true);
+
+      // ✅ 3. START GPS ONLY AFTER LOGIN
+      if (Capacitor.getPlatform() === 'android') {
+        setTimeout(() => {
+          (window as any).Capacitor?.Plugins?.LocationService?.startTracking();
+        }, 500);
       }
     })
   );
 }
 
 
-}
+ }
 
 

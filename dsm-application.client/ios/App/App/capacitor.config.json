@@ -1,10 +1,12 @@
 {
 	"appId": "com.dsm.application",
 	"appName": "DistNet",
-	"webDir": "dist/dsm-application.client",
+	"webDir": "dist/dsm-application.client/browser",
 	"server": {
-		"url": "https://dsm-application.web.app",
 		"cleartext": true
 	},
-	"packageClassList": []
+	"packageClassList": [
+		"GeolocationPlugin",
+		"PreferencesPlugin"
+	]
 }

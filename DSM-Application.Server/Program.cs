@@ -2,6 +2,7 @@
 using DistributorManagementSystem.Server.Services;
 using DSM_Application.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -17,7 +18,13 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 // 👇 Add this line to allow access from other devices (mobile)
-builder.WebHost.UseUrls("http://0.0.0.0:5164", "http://localhost:5164");
+//builder.WebHost.UseUrls("http://0.0.0.0:5164", "http://localhost:5164");
+builder.WebHost.UseUrls(
+    "http://0.0.0.0:5164",
+    "http://192.168.1.15:5164",
+    "http://localhost:5164"
+);
+
 // MongoDB
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDb"));
@@ -147,6 +154,12 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());// me added
 });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<ProductService>();
@@ -178,6 +191,13 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
 
@@ -220,18 +240,20 @@ app.UseStaticFiles(new StaticFileOptions
 //    FileProvider = new PhysicalFileProvider(uploadsPath),
 //    RequestPath = "/uploads"
 //});
-//app.UseCors("AllowAngular");
-app.UseCors("AllowAll");   // 📌 allow mobile calls
+//app.UseCors("AllowAngular");  // 📌 allow mobile calls
 
 
 //app.UseHttpsRedirection();
+app.UseCors("AllowAll");// 📌 allow mobile calls
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapFallbackToFile("/index.html");
+
+//app.MapFallbackToFile("index.html");
 
 
 app.Run();

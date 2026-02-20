@@ -521,6 +521,25 @@ namespace DSM_Application.Server.Controllers
             });
         }
 
+        // ============================
+        // 🔥 GET DISTRIBUTOR BY ID (FOR FRAUD REPORT)
+        // ============================
+        [HttpGet("{distributorId}")]
+        public async Task<IActionResult> GetDistributorById(string distributorId)
+        {
+            if (string.IsNullOrEmpty(distributorId))
+                return BadRequest("distributorId is required");
+
+            var distributor = await _db.Distributors
+                .Find(d => d.DistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            if (distributor == null)
+                return NotFound();
+
+            return Ok(distributor);
+        }
+
         public class RespondRequest
         {
             //[JsonPropertyName("connectionId")]

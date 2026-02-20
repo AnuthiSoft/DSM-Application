@@ -71,22 +71,19 @@ export class EmployeeLoginComponent {
 
       const role = this.auth.getRole();
 
-      if (role === 'Employee') {
-        // ✅ SHOW TOAST FIRST
-        this.toastr.success('Welcome Employee', 'Login Successful');
-
-        // ✅ THEN NAVIGATE (ONCE)
-        setTimeout(() => {
-          this.router.navigate(['/employee-dashboard']);
-        }, 1500);
-      }
-      else if (role === 'Admin') {
+      if (role === 'Admin') {
         this.router.navigate(['/admin-dashboard']);
       }
       else if (role === 'Distributor') {
         this.router.navigate(['/distributor-dashboard']);
-      }
-      else {
+      } else if (role === 'Employee') {
+        this.toastr.success('Welcome Distributor', 'Login Successfull');
+          setTimeout(() => {
+            this.ngZone.run(() => {
+              this.router.navigate(['/employee-dashboard']);
+            });
+          }, 1000);
+      } else {
         this.error = 'Unauthorized role';
       }
     },

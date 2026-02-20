@@ -10,7 +10,8 @@ using MongoDB.Driver;
 
 namespace DSM_Application.Server.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/employees")]
     [ApiController]
     public class EmployeesController : ControllerBase
     {
@@ -688,5 +689,56 @@ namespace DSM_Application.Server.Controllers
             return Ok(exists);
         }
 
+        // ============================================================
+        // GET ALL DELIVERY EMPLOYEES (FOR DISTRIBUTOR DROPDOWN)
+        // ============================================================
+        [HttpGet("dropdown/{distributorId}")]
+        public async Task<IActionResult> GetEmployeesForDropdown(string distributorId)
+        {
+            var employees = await _db.Employees
+                .Find(e =>
+                    e.DistributorId == distributorId &&
+                    e.IsActive &&
+                    e.Designation.ToLower().Contains("delivery"))
+                .Project(e => new
+                {
+                    employeeId = e.EmployeeId,
+                    name = e.Name
+                })
+                .ToListAsync();
+
+            return Ok(employees);
+        }
+
+        // ============================================================
+        // DISTRIBUTOR → MARK EMPLOYEE AVAILABILITY
+        // ============================================================
+
+        [HttpPost("mark-availability-by-distributor")]
+        public async Task<IActionResult> MarkAvailabilityByDistributor(
+            [FromBody] EmployeeAvailability dto)
+        {
+            if (string.IsNullOrEmpty(dto.EmployeeId))
+                return BadRequest("EmployeeId required");
+
+            // Today (IST)
+            var istToday = DateTime.UtcNow.AddHours(5).AddMinutes(30).Date;
+
+            dto.Date = istToday;
+
+            // Remove old record for today (if exists)
+            await _db.EmployeeAvailability.DeleteManyAsync(a =>
+                a.EmployeeId == dto.EmployeeId &&
+                a.Date == istToday
+            );
+
+            // Insert new record
+            await _db.EmployeeAvailability.InsertOneAsync(dto);
+
+            return Ok(new
+            {
+                message = "Availability updated by distributor"
+            });
+        }
     }
 }

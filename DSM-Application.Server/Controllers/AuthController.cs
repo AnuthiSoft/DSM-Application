@@ -18,12 +18,15 @@ namespace DistributorManagementSystem.Server.Controllers
         private readonly MongoDbService _db;
         private readonly JwtService _jwt;
         private readonly EmailService _emailService;
+        private readonly IMongoCollection<DeliverySession> _sessions;
 
         public AuthController(MongoDbService db, JwtService jwt, EmailService emailService)
         {
             _db = db;
             _jwt = jwt;
             _emailService = emailService;
+            _sessions = db.Database.GetCollection<DeliverySession>("DeliverySessions");
+
         }
 
         // ============================================================
@@ -54,13 +57,32 @@ namespace DistributorManagementSystem.Server.Controllers
                 return Unauthorized("Invalid password");
 
             // Assign employeeId if missing
+            //if (string.IsNullOrEmpty(user.EmployeeId))
+            //{
+            //    user.EmployeeId = ObjectId.GenerateNewId().ToString();
+            //    await _db.Users.UpdateOneAsync(
+            //        u => u.Id == user.Id,
+            //        Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
+            //}
+
+            // 🔥 Ensure EmployeeId exists (DO NOT generate new one)
             if (string.IsNullOrEmpty(user.EmployeeId))
             {
-                user.EmployeeId = ObjectId.GenerateNewId().ToString();
+                var empRecord = await _db.Employees
+                    .Find(e => e.Email == user.Email || e.PhoneNumber == user.PhoneNumber)
+                    .FirstOrDefaultAsync();
+
+                if (empRecord == null || string.IsNullOrEmpty(empRecord.EmployeeId))
+                    return Unauthorized("EmployeeId not assigned. Contact distributor.");
+
+                user.EmployeeId = empRecord.EmployeeId;
+
                 await _db.Users.UpdateOneAsync(
                     u => u.Id == user.Id,
-                    Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
+                    Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId)
+                );
             }
+
 
             // ⭐ Get employee record (name, designation)
             var employee = await _db.Employees
@@ -83,6 +105,24 @@ namespace DistributorManagementSystem.Server.Controllers
                 .FirstOrDefaultAsync();
 
             string designation = emp?.Designation ?? "";
+
+            // 🔥 AUTO START DELIVERY SESSION ON LOGIN
+            var activeSession = await _sessions
+                .Find(s => s.EmployeeId == user.EmployeeId && s.IsActive)
+                .FirstOrDefaultAsync();
+
+            if (activeSession == null)
+            {
+                await _sessions.InsertOneAsync(new DeliverySession
+                {
+                    Id = ObjectId.GenerateNewId(),
+                    EmployeeId = user.EmployeeId,
+                    StartTime = DateTime.UtcNow,
+                    IsActive = true,
+                    Route = new List<LatLongPoint>()
+                });
+            }
+
 
             // Return login response
             return Ok(new
@@ -231,17 +271,35 @@ namespace DistributorManagementSystem.Server.Controllers
                 return Unauthorized("Invalid password");
 
             // Assign employee ID if missing
+            //if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
+            //{
+            //    user.EmployeeId = ObjectId.GenerateNewId().ToString();
+            //    await _db.Users.UpdateOneAsync(
+            //        u => u.Id == user.Id,
+            //        Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
+
+            //    await _db.Employees.UpdateOneAsync(
+            //        e => e.Email == user.Email,
+            //        Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId));
+            //}
+
             if (user.Role == "Employee" && string.IsNullOrEmpty(user.EmployeeId))
             {
-                user.EmployeeId = ObjectId.GenerateNewId().ToString();
+                var emp = await _db.Employees
+                    .Find(e => e.Email == user.Email || e.PhoneNumber == user.PhoneNumber)
+                    .FirstOrDefaultAsync();
+
+                if (emp == null || string.IsNullOrEmpty(emp.EmployeeId))
+                    return Unauthorized("EmployeeId missing. Contact distributor.");
+
+                user.EmployeeId = emp.EmployeeId;
+
                 await _db.Users.UpdateOneAsync(
                     u => u.Id == user.Id,
-                    Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId));
-
-                await _db.Employees.UpdateOneAsync(
-                    e => e.Email == user.Email,
-                    Builders<Employee>.Update.Set(e => e.EmployeeId, user.EmployeeId));
+                    Builders<User>.Update.Set(u => u.EmployeeId, user.EmployeeId)
+                );
             }
+
 
             var token = _jwt.GenerateToken(user);
             var refreshToken = _jwt.GenerateRefreshToken();
@@ -481,12 +539,39 @@ namespace DistributorManagementSystem.Server.Controllers
         // ============================================================
         // LOGOUT
         // ============================================================
+        //[HttpPost("logout")]
+        //public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
+        //{
+        //    await _db.RefreshTokens.UpdateOneAsync(
+        //        r => r.Token == request.RefreshToken,
+        //        Builders<RefreshToken>.Update.Set(r => r.IsRevoked, true));
+
+        //    return Ok("Logged out");
+        //}
+
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest request)
         {
             await _db.RefreshTokens.UpdateOneAsync(
                 r => r.Token == request.RefreshToken,
                 Builders<RefreshToken>.Update.Set(r => r.IsRevoked, true));
+
+            // 🔥 AUTO STOP DELIVERY SESSION
+            //var employeeId = User.FindFirst("EmployeeId")?.Value;
+            var employeeId = User.FindFirst("EmployeeId")?.Value
+              ?? User.FindFirst("employeeId")?.Value;
+
+
+            if (!string.IsNullOrEmpty(employeeId))
+            {
+                await _sessions.UpdateOneAsync(
+                    s => s.EmployeeId == employeeId && s.IsActive,
+                    Builders<DeliverySession>.Update
+                        .Set(s => s.IsActive, false)
+                        .Set(s => s.EndTime, DateTime.UtcNow)
+                );
+            }
 
             return Ok("Logged out");
         }

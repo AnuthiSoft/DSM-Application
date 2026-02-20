@@ -1353,6 +1353,10 @@ html[data-theme="dark"] .active-btn {
     height: 44px;
     padding: 10px;
   }
+
+  .text-danger {
+  color: #e74c3c !important;
+}
   
   .tracking-controls {
     flex-wrap: wrap;

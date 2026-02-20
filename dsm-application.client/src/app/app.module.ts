@@ -38,11 +38,11 @@ import { AddToCartComponent } from './components/add-to-cart/add-to-cart.compone
 import { EmployeeProfileComponent } from './components/employee-profile/employee-profile.component';
 import { FraudReportComponent } from './components/fraud-report/fraud-report.component';
 import { AdminFraudListComponent } from './components/admin-fraud-list/admin-fraud-list.component';
-
+ 
 import { TruncatePipe } from './pipe/truncate.pipe';
 import { ReviewSubmitComponent } from './components/review-submit/review-submit.component';
 import { AdminReviewListComponent } from './components/admin-review-list/admin-review-list.component';
-
+ 
 import { FraudHistoryComponent } from './components/fraud-history/fraud-history.component';
 import { AdminReviewHistoryComponent } from './components/admin-review-history/admin-review-history.component';
 import { CashCollectionComponent } from './components/cash-collection/cash-collection.component';
@@ -53,11 +53,11 @@ import { CustomerPaymentStatusComponent } from './components/customer-payment-st
 import { PaymentReportComponent } from './components/payment-report/payment-report.component';
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 import { MainInventoryComponent } from './components/main-inventory/main-inventory.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { EmployeeTrackingComponent } from './components/employee-tracking/employee-tracking.component';
@@ -72,7 +72,7 @@ import { EmployeeInvoicesComponent } from './components/employee-invoices/employ
 import { PaymentsComponent } from './components/payments/payments.component';
 import { DistributorSettingsComponent } from './components/distributor-settings/distributor-settings.component';
 import { PaymentCollectionForCashcollectorComponent } from './components/payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
-
+ 
 import { EmployeeReturnOrdersComponent } from './components/employee-return-orders/employee-return-orders.component';
 import { DistributorReturnRequestsComponent } from './components/distributor-return-requests/distributor-return-requests.component';
 import { ReturnOrdersComponent } from './components/return-orders/return-orders.component';
@@ -81,16 +81,17 @@ import { DistributorLoginComponent } from './components/distributor-login/distri
 import { EmployeeProductsComponent } from './components/employee-products/employee-products.component';
 import { CustomerLedgerComponent } from './components/customer-ledger/customer-ledger.component';
 import { OrderDetailsModalComponent } from './components/order-details-modal/order-details-modal.component';
-
-
+import { DistributorProfileComponent } from './components/distributor-profile/distributor-profile.component';
+//import { AuthorsAdressComponent } from './authors-adress/authors-adress.component';
+ 
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
-
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 @NgModule({
   declarations: [
     AppComponent,
@@ -110,23 +111,23 @@ import { OrderDetailsModalComponent } from './components/order-details-modal/ord
     ProfileComponent,
     ThemeToggleComponent,
     ProductsByDistComponent,
-
+ 
    
-
-
+ 
+ 
     FraudHistoryComponent,
     AdminReviewListComponent,
     AdminReviewHistoryComponent,
-
-
-
-
+ 
+ 
+ 
+ 
     InventoryBatchesComponent,
-
+ 
     InvoiceCreateComponent,
     InvoiceDetailComponent,
     EmployeeInvoicesComponent,
-
+ 
     OrderHistoryComponent,
     DistributorOrdersComponent,
     CustomerOrdersComponent,
@@ -140,13 +141,13 @@ import { OrderDetailsModalComponent } from './components/order-details-modal/ord
     EmployeeProfileComponent,
     CustomerDashboardComponent,
     FraudReportComponent,
-
+ 
     AdminFraudListComponent,
-
+ 
     TruncatePipe,
     ReviewSubmitComponent,
-
-
+ 
+ 
     FraudHistoryComponent,
     AdminReviewHistoryComponent,
     CashCollectionComponent,
@@ -169,22 +170,23 @@ import { OrderDetailsModalComponent } from './components/order-details-modal/ord
     EmployeeProductsComponent,
     EmployeeAddToCartComponent,
     ReturnOrdersComponent,
-
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
     // AdminDistributorsComponent
-
+ 
     DistributorReturnRequestsComponent,
     EmployeeReturnOrdersComponent,
      ReturnOrdersComponent,
       EmployeeAddToCartComponent,
       CustomerLedgerComponent,
       OrderDetailsModalComponent,
-
-
+      DistributorProfileComponent,
+      //AuthorsAdressComponent,
+ 
  
  
  
@@ -195,7 +197,7 @@ import { OrderDetailsModalComponent } from './components/order-details-modal/ord
       timeOut: 1000,
       positionClass: 'toast-top-right',
       preventDuplicates: true,
-
+ 
     }),
   ],
   providers: [{
@@ -206,3 +208,5 @@ import { OrderDetailsModalComponent } from './components/order-details-modal/ord
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+ 
+ 

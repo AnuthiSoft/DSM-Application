@@ -230,10 +230,13 @@
       <h2><i class="fas fa-users"></i> Employee Management</h2>
 
       <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
+
+      <button *ngIf="!loading" class="btn btn-primary" (click)="openEmployeeModal()">
         <i class="fas fa-plus"></i> Add Employee
       </button>
-    </div>
-    </div>
+    <!-- </div> -->
+    <!-- </div> -->
+<!-- </div> -->
 
 
     <!-- Search and Filter Card -->
@@ -618,7 +621,7 @@
       </div>
     </div>
   <!-- </div> -->
-</div>
+<!-- </div> -->
 
 <!-- BACKDROP -->
 <div class="sheet-backdrop" [class.active]="sheetOpen" (click)="closeSheet()"></div>

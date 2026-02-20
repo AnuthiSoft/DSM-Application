@@ -11,12 +11,14 @@ public class DeliveryController : ControllerBase
     private readonly IMongoCollection<DeliverySession> _sessions;
     private readonly IMongoCollection<LiveLocation> _live;
     private readonly IMongoCollection<EmployeeDevice> _devices;
+    private readonly IMongoCollection<Employee> _employees;
 
     public DeliveryController(IMongoDatabase db)
     {
         _sessions = db.GetCollection<DeliverySession>("DeliverySessions");
         _live = db.GetCollection<LiveLocation>("LiveLocations");
         _devices = db.GetCollection<EmployeeDevice>("EmployeeDevices"); // ✅ ADD
+        _employees = db.GetCollection<Employee>("Employees");
     }
 
     // 1) DISTRIBUTOR: start trip for an employee
@@ -46,6 +48,13 @@ public class DeliveryController : ControllerBase
         };
 
         await _sessions.InsertOneAsync(session);
+        // ⭐ MARK EMPLOYEE ON DUTY
+        await _employees.UpdateOneAsync(
+            e => e.EmployeeId == dto.EmployeeId,
+            Builders<Employee>.Update
+                .Set(e => e.IsOnDuty, true)
+                .Set(e => e.UpdatedDate, DateTime.UtcNow)
+        );
 
         return Ok(new { started = true });
     }
@@ -71,6 +80,14 @@ public class DeliveryController : ControllerBase
         {
             return BadRequest("No active trip found to stop");
         }
+
+        // ⭐ MARK EMPLOYEE OFF DUTY
+        await _employees.UpdateOneAsync(
+            e => e.EmployeeId == dto.EmployeeId,
+            Builders<Employee>.Update
+                .Set(e => e.IsOnDuty, false)
+                .Set(e => e.UpdatedDate, DateTime.UtcNow)
+        );
 
         return Ok(new { stopped = true });
     }

@@ -128,12 +128,20 @@ uploadScannerQr(distributorId: string, file: File) {
     });
   }
 
-  // ✅ GET DISTRIBUTOR BY ID (for Fraud Report)
+//   // ✅ GET DISTRIBUTOR BY ID (for Fraud Report)
+// getDistributorById(distributorId: string) {
+//   return this.http.get<any>(
+//     `/api/Distributors/${distributorId}`
+//   );
+// }
+
+// ✅ GET DISTRIBUTOR BY ID (FIXED)
 getDistributorById(distributorId: string) {
   return this.http.get<any>(
-    `/api/Distributors/${distributorId}`
+    `${this.apiUrl}/Distributor/${distributorId}`
   );
 }
+
 
 
 getDistributorName(distributorId: string) {
@@ -142,5 +150,12 @@ getDistributorName(distributorId: string) {
   );
 }
 
+
+sendOtp(phone: string) {
+  return this.http.post(
+    `${environment.apiUrl}/otp/send`,
+    { phoneNumber: phone }
+  );
+}
 }
 

@@ -14,6 +14,7 @@ import { RouterModule } from '@angular/router';
 
 import { AppModule } from '../../app.module';
 
+
 @Component({
   selector: 'app-distributor-dashboard',
 templateUrl: './distributor-dashboard.component.html',
@@ -29,6 +30,10 @@ export class DistributorDashboardComponent implements OnInit {
   selectedQrFile: File | null = null;
   scannerQrUrl: string | null = null;
 orderStatusFromDashboard: string | null = null;
+// Availability Control
+selectedEmployeeForAvailability: string = '';
+availabilityReasonByDistributor: string = '';
+selectedEmployeeId: string = '';
 
   constructor(
 
@@ -42,6 +47,7 @@ orderStatusFromDashboard: string | null = null;
 
 
   retailerCount: number = 0;
+  pendingConnectionRequestsCount: number = 0;
   activeTab: string = 'dashboard'; // default tab
   isMobileMenuOpen = false;
   isDarkTheme = false;
@@ -53,11 +59,13 @@ orderStatusFromDashboard: string | null = null;
   // ==============================
   // 🚀 LIVE TRACKING VARIABLES
   // ==============================
-  selectedEmployeeId: string = "";     // ⬅ added
-  employees: any[] = [];               // ⬅ added
+  // selectedEmployeeId: string = "";     // ⬅ added
+  // employees: any[] = [];               // ⬅ added
   //polylinePath: any[] =[];
+    employees: any[] = [];               // ⬅ added
 
-  @ViewChild('trackingComp') trackingComp: any;
+  // @ViewChild('trackingComp') trackingComp: any;
+  @ViewChild('trackingComp', { static: false }) trackingComp: any;
 
 
   submenuState: { [key: string]: boolean } = {
@@ -72,6 +80,20 @@ orderStatusFromDashboard: string | null = null;
   // toggleSubmenu(menu: string) {
   //   this.submenuState[menu] = !this.submenuState[menu];
   // }
+  // ngOnInit() {
+  //   this.distributorId = localStorage.getItem('distributorId') || '';
+  //   // this.loadRequests();
+  //   // this.loadAcceptedCustomers();
+  //   // this.distributorId = localStorage.getItem('distributorId') || '';
+
+  // // Load only ONCE when component is created
+  // const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
+  // this.expectedDays = stored ? Number(stored) : 1;
+  //      this.loadRetailerCount();
+  //       // this.loadEmployees();              // ⬅ added
+  //       this.loadScannerQr();
+  // }
+
   ngOnInit() {
     this.distributorId = localStorage.getItem('distributorId') || '';
     // ✅ RESTORE ACTIVE TAB
@@ -99,6 +121,7 @@ orderStatusFromDashboard: string | null = null;
     this.loadEmployees();   // ⬅ added
    
     this.loadScannerQr();
+    this.loadPendingConnectionRequestsCount();
     // Check screen width on init
     this.checkScreenWidth();
   }
@@ -216,6 +239,22 @@ openOrdersWithStatus(status: string) {
       }
     });
   }
+
+  loadPendingConnectionRequestsCount() {
+  if (!this.distributorId) return;
+
+  this.distributorService
+    .getPendingRequests(this.distributorId)
+    .subscribe({
+      next: (res: any[]) => {
+        this.pendingConnectionRequestsCount = res.length;
+      },
+      error: () => {
+        this.pendingConnectionRequestsCount = 0;
+      }
+    });
+}
+
   loadScannerQr() {
     if (!this.distributorId) return;
 
@@ -233,54 +272,154 @@ openOrdersWithStatus(status: string) {
   // ==============================
   // ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
   // ==============================
+  // loadEmployees() {
+  //   this.http.get(`${environment.apiUrl}/Employees/by-distributor/${this.distributorId}`)
+  //     .subscribe((res: any) => {
+  //       this.employees = res;
+  //       console.log("Loaded Employees:", res);
+  //     });
+  // }
+
+  // ==============================
+// ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN ---> Azure
+// ==============================
+// loadEmployees() {
+
+//   const url = `${environment.apiUrl}/api/employees/by-distributor/${this.distributorId}`;
+
+//   console.log("Calling Employees API:", url); // 👈 Debug
+
+//   this.http.get<any[]>(url).subscribe({
+
+//     next: (res) => {
+//       console.log("Loaded Employees:", res);
+//       this.employees = res;
+//     },
+
+//     error: (err) => {
+//       console.error("Failed to load employees:", err);
+//     }
+
+//   });
+// }
+
+// ==============================
+// ⭐ LOAD ALL EMPLOYEES FOR DROPDOWN
+// ==============================
+// loadEmployees() {
+
+//   const url = `${environment.apiUrl}/employees/by-distributor/${this.distributorId}`;
+
+//   console.log("API URL:", url);
+//   console.log("Distributor ID:", this.distributorId);
+
+//   this.http.get<any[]>(url).subscribe({
+
+//     next: (res) => {
+//       console.log("Loaded Employees:", res);
+//       this.employees = res;
+//     },
+
+//     error: (err) => {
+//       console.error("Employee API Error:", err);
+//     }
+
+//   });
+// }
+
+// loadEmployees() {
+//   this.http
+//     .get(`${environment.apiUrl}/employees/dropdown/${this.distributorId}`)
+//     .subscribe((res: any) => {
+//       this.employees = res;
+//       console.log("Loaded Employees:", res);
+//     });
+// }
+
 loadEmployees() {
-  if (!this.distributorId) return;
+  this.http
+    .get(`${environment.apiUrl}/employees/dropdown/${this.distributorId}`)
+    .subscribe((res: any) => {
+      this.employees = res;
+      console.log("Loaded Employees:", res);
+    });
+}
+// loadEmployees() {
+
+//   console.log("DistributorId:", this.distributorId);
+
+//   const url = `${environment.apiUrl}/api/employees/dropdown/${this.distributorId}`;
+
+//   console.log("Calling:", url);
+
+//   this.http.get<any[]>(url).subscribe({
+
+//     next: (res) => {
+//       console.log("Employees API Response:", res);
+
+//       this.employees = res;
+//     },
+
+//     error: (err) => {
+//       console.error("Employees API FAILED:", err);
+//     }
+
+//   });
+// }
+  // =====================================
+// DISTRIBUTOR → MARK EMPLOYEE AVAILABLE
+// =====================================
+markEmployeeAvailable() {
+
+  if (!this.selectedEmployeeForAvailability) return;
 
   const today = new Date().toISOString().split('T')[0];
 
-  this.http
-    .get<any[]>(`${environment.apiUrl}/Employees/by-distributor/${this.distributorId}`)
-    .subscribe({
-      next: (res) => {
+  this.http.post(
+    `${environment.apiUrl}/Employees/mark-availability-by-distributor`,
+    {
+      employeeId: this.selectedEmployeeForAvailability,
+      date: today,
+      isAvailable: true,
+      reason: ''
+    }
+  ).subscribe(() => {
 
-        // First map employees
-        this.employees = res.map(emp => ({
-          ...emp,
-          availabilityStatus: 'unknown',
-          availabilityReason: ''
-        }));
+    alert("Employee marked Available");
 
-        // Then update each employee availability safely
-        this.employees.forEach((emp, index) => {
+    this.selectedEmployeeForAvailability = '';
+    this.availabilityReasonByDistributor = '';
 
-          this.employeeService
-            .getAvailability(emp.employeeId, today)
-            .subscribe({
-              next: (a: any) => {
-
-                this.employees[index].availabilityStatus =
-                  a?.isAvailable ? 'available' : 'not-available';
-
-                this.employees[index].availabilityReason =
-                  a?.reason || '';
-
-              },
-              error: () => {
-
-                this.employees[index].availabilityStatus = 'unknown';
-                this.employees[index].availabilityReason = '';
-
-              }
-            });
-
-        });
-      }
-    });
+  });
 }
 
 
+// =====================================
+// DISTRIBUTOR → MARK EMPLOYEE NOT AVAILABLE
+// =====================================
+markEmployeeNotAvailable() {
 
+  if (!this.selectedEmployeeForAvailability) return;
 
+  const today = new Date().toISOString().split('T')[0];
+
+  this.http.post(
+    `${environment.apiUrl}/Employees/mark-availability-by-distributor`,
+    {
+      employeeId: this.selectedEmployeeForAvailability,
+      date: today,
+      isAvailable: false,
+      reason: this.availabilityReasonByDistributor
+    }
+  ).subscribe(() => {
+
+    alert("Employee marked Not Available");
+
+    this.selectedEmployeeForAvailability = '';
+    this.availabilityReasonByDistributor = '';
+
+  });
+}
 
   // ==============================
   // ▶ START TRIP
@@ -291,15 +430,18 @@ loadEmployees() {
       return;
     }
 
-    this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
-      employeeId: this.selectedEmployeeId
-    }).subscribe({
+    // this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
+    //   employeeId: this.selectedEmployeeId
+    // })
+          this.http.post(`${environment.apiUrl}/Delivery/start`, {
+        employeeId: this.selectedEmployeeId
+      }).subscribe({
       next: () => {
         alert("Trip Started");
 
         // ✅ START MAP POLLING
         if (this.trackingComp) {
-          this.trackingComp.startPolling();
+         // this.trackingComp.startPolling();
         }
       },
       error: (err) => {
@@ -320,7 +462,10 @@ loadEmployees() {
       return;
     }
 
-    this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
+    // this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
+    //   employeeId: this.selectedEmployeeId
+    // })
+        this.http.post(`${environment.apiUrl}/Delivery/stop`, {
       employeeId: this.selectedEmployeeId
     }).subscribe({
       next: () => {
@@ -328,7 +473,7 @@ loadEmployees() {
 
         // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
         if (this.trackingComp) {
-          this.trackingComp.removeEmployee(this.selectedEmployeeId);
+          //this.trackingComp.removeEmployee(this.selectedEmployeeId);
         }
       },
       error: err => {
@@ -640,6 +785,55 @@ loadEmployees() {
         }
       });
   }
+
+  openConnectionRequestsFromDashboard() {
+  // Open settings submenu
+  if (!this.openSubmenus.includes('settings')) {
+    this.openSubmenus = ['settings'];
+    localStorage.setItem(
+      'distributorOpenSubmenus',
+      JSON.stringify(this.openSubmenus)
+    );
+  }
+
+  // Navigate to connection requests tab
+  this.setActiveTab('connection-requests');
+}
+
+markAvailability(isAvailable: boolean) {
+
+  if (!this.selectedEmployeeForAvailability) {
+    alert("Select employee first");
+    return;
+  }
+
+  const today = new Date();
+
+  const payload = {
+    employeeId: this.selectedEmployeeForAvailability,
+    isAvailable: isAvailable,
+    date: today, // IMPORTANT ✅
+    reason: this.availabilityReasonByDistributor || '',
+    markedBy: "Distributor"
+  };
+
+  this.http.post(
+    `${environment.apiUrl}/employees/mark-availability-by-distributor`,
+    payload
+  ).subscribe({
+    next: () => {
+      alert("Availability updated by distributor");
+
+      this.selectedEmployeeForAvailability = '';
+      this.availabilityReasonByDistributor = '';
+
+    },
+    error: err => {
+      console.error(err);
+      alert("Failed to update availability");
+    }
+  });
+}
 
   @HostListener('window:resize')
   onResize() {

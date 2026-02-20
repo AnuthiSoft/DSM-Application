@@ -53,7 +53,7 @@ import { CustomerPaymentStatusComponent } from './components/customer-payment-st
 import { PaymentReportComponent } from './components/payment-report/payment-report.component';
 import { PendingPaymentsComponent } from './components/pending-payments/pending-payments.component';
 import { PendingHandoversComponent } from './components/pending-handovers/pending-handovers.component';
- 
+import { DistributorProfileComponent } from './components/distributor-profile/distributor-profile.component';
 import { CustomersListComponent } from './components/customers-list/customers-list.component';
 import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
 import { PaymentsComponent } from './components/payments/payments.component';
@@ -81,7 +81,33 @@ const routes: Routes = [
   { path: 'customer/login', component: CustomerLoginComponent },
   { path: 'distributor/create-customer', component: CreateCustomerDistributorComponent },
   { path: 'admin-dashboard', component: AdminDashboardComponent, canActivate: [AuthGuard], data: { role: 'Admin' } },
-  { path: 'distributor-dashboard', component: DistributorDashboardComponent, canActivate: [AuthGuard], data: { role: 'Distributor' } },
+  {
+  path: 'distributor-dashboard',
+  component: DistributorDashboardComponent,
+  canActivate: [AuthGuard],
+  data: { role: 'Distributor' },
+
+  children: [
+
+    // ✅ Distributor Profile
+    {
+      path: 'profile',
+      component: DistributorProfileComponent
+    },
+
+    // (optional later)
+    // { path: 'orders', component: DistributorOrdersComponent },
+    // { path: 'settings', component: DistributorSettingsComponent },
+
+    // Default page
+    {
+      path: '',
+      redirectTo: 'profile',
+      pathMatch: 'full'
+    }
+
+  ]
+},
   { path: 'employee-dashboard', component: EmployeeDashboardComponent, canActivate: [AuthGuard], data: { role: 'Employee' } },
  { path: 'customer-dashboard',
   component: CustomerDashboardComponent,
@@ -108,7 +134,7 @@ const routes: Routes = [
   { path: 'distributor-login', component: DistributorLoginComponent },
   { path: 'distributor-signup', component: DistributorSignupComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
-  // { path: 'employees', component: EmployeesComponent },
+  { path: 'employees', component: EmployeesComponent },
   { path: 'set-password', component: SetPasswordComponent },
 
 

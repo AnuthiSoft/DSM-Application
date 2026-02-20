@@ -32,7 +32,7 @@ public class Employee
 
     public bool IsRegistered { get; set; }
     public bool IsActive { get; set; } = true;
-
+    public bool IsOnDuty { get; set; } = false;
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
 

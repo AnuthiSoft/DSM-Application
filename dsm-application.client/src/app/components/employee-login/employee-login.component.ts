@@ -66,7 +66,7 @@ export class EmployeeLoginComponent {
       // Save IDs
       localStorage.setItem('distributorId', res.distributorId);
       localStorage.setItem('employeeId', res.employeeId);
-      localStorage.setItem('employeeDesignation', res.designation);
+      localStorage.setItem('designation', res.designation);  
       localStorage.setItem('employeeName', res.name);
 
       const role = this.auth.getRole();

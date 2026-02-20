@@ -66,12 +66,20 @@ this.returnRequests = res.map(r => ({
   }
 
   loadEmployees() {
-    this.employeeService
-      .getEmployees(this.distributorId)
-      .subscribe((res: Employee[]) => {
+  this.employeeService.getDeliveryEmployees(this.distributorId)
+    .subscribe({
+      next: (res: any[]) => {
+        console.log("Delivery Employees:", res);
+
+        // Backend already returns only delivery employees
         this.employees = res;
-      });
-  }
+      },
+      error: (err) => {
+        console.error("Failed to load delivery employees:", err);
+        this.toastr.error("Unable to load delivery employees");
+      }
+    });
+}
 
   approveAndSchedule(r: any) {
     // Prevent action if already scheduled
@@ -222,27 +230,6 @@ this.returnRequests = res.map(r => ({
                 `).join('')}
               </select>
             </div>
-            
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; 
-                  padding: 12px; background: rgba(52, 152, 219, 0.05); border-radius: 8px;">
-              <input type="checkbox" id="notifyCustomer" checked 
-                    style="width: 18px; height: 18px; accent-color: #3498db; cursor: pointer;">
-              <label style="color: #2c3e50; font-weight: 500; cursor: pointer;">
-                <i class="fas fa-bell" style="color: #3498db; margin-right: 6px;"></i>
-                Notify customer via SMS & Email
-              </label>
-            </div>
-            
-            <div style="background: rgba(52, 152, 219, 0.1); padding: 12px; border-radius: 8px; 
-                  border-left: 4px solid #3498db; margin-top: 10px;">
-              <div style="display: flex; align-items: flex-start; gap: 10px;">
-                <i class="fas fa-info-circle" style="color: #3498db; margin-top: 2px;"></i>
-                <div style="font-size: 0.9rem; color: #2c3e50;">
-                  <div style="font-weight: 600; margin-bottom: 4px;">Important:</div>
-                  <div style="color: #7f8c8d;">
-                    Customer will receive pickup confirmation with scheduled date, time, 
-                    and assigned employee details.
-                  </div>
                 </div>
               </div>
             </div>

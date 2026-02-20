@@ -110,6 +110,18 @@ button.btn-primary:hover {
   gap: 15px;
 }
 
+
+/* Placeholder text color */
+::placeholder {
+  color: var(--input-placeholder) !important;
+  opacity: 1;
+}
+
+/* For inputs inside forms */
+.form-control::placeholder {
+  color: var(--input-placeholder) !important;
+  opacity: 1;
+}
 /* Responsive */
 @media (max-width: 768px) {
   .main-box {

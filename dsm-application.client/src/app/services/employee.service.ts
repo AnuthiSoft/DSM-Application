@@ -43,6 +43,12 @@ export class EmployeeService {
     return this.http.post(`${this.baseUrl}/${distributorId}`, employee);
   }
 
+  getDeliveryEmployees(distributorId: string) {
+  return this.http.get<any[]>(
+    `${environment.apiUrl}/employees/by-distributor/${distributorId}`
+  );
+}
+
   updateEmployee(distributorId: string, employeeId: string, employee: Employee): Observable<any> {
     return this.http.put(`${this.baseUrl}/${distributorId}/${employeeId}`, employee);
   }

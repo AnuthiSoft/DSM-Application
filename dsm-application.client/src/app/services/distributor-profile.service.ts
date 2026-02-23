@@ -16,10 +16,9 @@ export class DistributorProfileService {
   return this.http.get<DistributorDto>(`${this.api}/distributors/profile`);
 }
 
-  updateProfile(data: any) {
-  return this.http.put(`${this.api}/distributors/profile`, data);
+ updateProfile(formData: FormData) {
+  return this.http.post(`${environment.apiUrl}/distributors/update-profile`, formData);
 }
-
   verifyOtp(data: any) {
   return this.http.post(`${this.api}/otp/verify`, data);
 }

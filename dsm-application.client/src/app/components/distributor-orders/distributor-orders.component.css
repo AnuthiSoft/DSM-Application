@@ -73,6 +73,15 @@
   font-weight: 600;
   font-size: 0.95rem;
 }
+.form-control{
+  color: var(--text-color);
+  background-color: var(--card-bg);
+  color: var(--text-color);
+}
+.form-control::placeholder {
+  color: var(--input-text);
+  opacity: 5;
+}
  
 .form-select {
   padding: 10px 12px;

@@ -20,7 +20,8 @@ export class DistributorOrdersComponent implements OnInit, OnChanges {
   distributorId = localStorage.getItem('distributorId') || '';
   empId = localStorage.getItem('employeeId') || '';
   apiBaseUrl = environment.apiUrl.replace('/api', '');
-
+customerSearch: string = '';
+allOrders: DistributorOrder[] = [];  // keep original list
   orders: DistributorOrder[] = [];
   employees: Employee[] = [];
   loading = false;
@@ -82,36 +83,62 @@ selectedEmployeeId: string = '';
   }
 }
 
-  loadOrders(): void {
-    if (!this.distributorId) return;
 
-    this.loading = true; // Set loading to true
+loadOrders(): void {
+  if (!this.distributorId) return;
 
-const status = !this.statusFilter || this.statusFilter === 'All'
-  ? undefined
-  : this.statusFilter;
+  this.loading = true;
 
-    this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
-      next: (data) => {
-        this.orders = data.map((o: any) => ({
-  ...o,
-  creditUsed: o.creditUsed ?? 0,
-  payableAmount: o.payableAmount ?? o.totalAmount ?? 0
-}));
-        this.loading = false; // Set loading to false when done
+  const status = !this.statusFilter || this.statusFilter === 'All'
+    ? undefined
+    : this.statusFilter;
 
-        // 🔥 Load availability for each customer on list load
-        this.orders.forEach(o => {
-          this.loadAvailabilityForCustomer(o.customerId);
-        });
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading = false; // Also set loading to false on error
-        alert('Failed to load orders');
-      }
-    });
+  this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
+    next: (data) => {
+      // Store ORIGINAL list
+      this.allOrders = data.map((o: any) => ({
+        ...o,
+        creditUsed: o.creditUsed ?? 0,
+        payableAmount: o.payableAmount ?? o.totalAmount ?? 0
+      }));
+
+      // Apply search + status filters
+      this.applyFilters();
+
+      this.loading = false;
+
+      // Load employee availability for each customer
+      this.orders.forEach(o => {
+        this.loadAvailabilityForCustomer(o.customerId);
+      });
+    },
+    error: (err) => {
+      console.error(err);
+      this.loading = false;
+      alert('Failed to load orders');
+    }
+  });
+}
+
+
+  applyFilters() {
+  let list = [...this.allOrders];
+
+  // 🔍 Customer name search
+  if (this.customerSearch.trim()) {
+    const term = this.customerSearch.toLowerCase();
+    list = list.filter(o =>
+      o.customerName?.toLowerCase().includes(term)
+    );
   }
+
+  // 🟦 Status filter
+  if (this.statusFilter && this.statusFilter !== 'All') {
+    list = list.filter(o => o.status === this.statusFilter);
+  }
+
+  this.orders = list;
+}
   loadAvailabilityForCustomer(customerId: string) {
     this.distService.getCustomerEmployeeStatus(this.distributorId, customerId)
       .subscribe(status => {

@@ -46,6 +46,7 @@ export interface DistributorDto {
 
   // ✅ Verification
   phoneVerified?: boolean;
+  profileImageBase64?: string;
 
 
   // ✅ Role

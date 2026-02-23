@@ -30,5 +30,8 @@ namespace DSM_Application.Server.Models.DTOs
 
         public bool PhoneVerified { get; set; } = false;
         public decimal CreditBalance { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedDate { get; set; }
     }
 }

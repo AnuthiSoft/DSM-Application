@@ -739,7 +739,9 @@ namespace DSM_Application.Server.Controllers
                 Role = customer.Role,
                 IsRegistered = customer.IsRegistered,
                 AddedByDistributorId = customer.AddedByDistributorId,
-                 CreditBalance = customer.CreditBalance
+                 CreditBalance = customer.CreditBalance,
+                CreatedDate = customer.CreatedDate,
+                UpdatedDate = customer.UpdatedDate
             };
 
             return Ok(dto);
@@ -800,6 +802,7 @@ namespace DSM_Application.Server.Controllers
             customer.State = dto.State ?? customer.State;
             customer.Pincode = dto.Pincode ?? customer.Pincode;
             customer.Country = dto.Country ?? customer.Country;
+            customer.UpdatedDate = DateTime.UtcNow;
 
             // Image upload
             if (dto.ProfileImage != null)

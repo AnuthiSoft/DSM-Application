@@ -547,21 +547,82 @@ namespace DSM_Application.Server.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
-            // DistributorId should come from token
-            var distributorId = User.FindFirst("distributorId")?.Value
-                ?? User.FindFirst("DistributorId")?.Value;
+            var userId = User.FindFirst("DistributorId")?.Value;
 
-            if (string.IsNullOrEmpty(distributorId))
+            if (string.IsNullOrEmpty(userId))
                 return Unauthorized("Invalid token");
 
             var distributor = await _db.Distributors
-                .Find(d => d.DistributorId == distributorId)
+                .Find(d => d.DistributorId == userId)
                 .FirstOrDefaultAsync();
 
             if (distributor == null)
                 return NotFound("Distributor not found");
 
-            return Ok(distributor);
+            var dto = new DistributorProfileDto
+            {
+                DistributorId = distributor.DistributorId,
+                Name = distributor.Name,
+                Email = distributor.Email,
+                PhoneNumber = distributor.PhoneNumber,
+                Street = distributor.Street,
+                City = distributor.City,
+                State = distributor.State,
+                Pincode = distributor.Pincode,
+                Country = distributor.Country,
+                PhoneVerified = distributor.PhoneVerified,
+                CreatedDate = distributor.CreatedDate,
+                UpdatedDate = distributor.UpdatedDate,
+                ProfileImageBase64 = distributor.ProfileImage != null
+                    ? Convert.ToBase64String(distributor.ProfileImage)
+                    : null
+            };
+
+            return Ok(dto);
+        }
+
+        [HttpPost("update-profile")]
+        public async Task<IActionResult> UpdateProfile([FromForm] DistributorProfileUpdateDto dto)
+        {
+            var userId = User.FindFirst("DistributorId")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Invalid token");
+
+            var distributor = await _db.Distributors
+                .Find(x => x.DistributorId == userId)
+                .FirstOrDefaultAsync();
+
+            if (distributor == null)
+                return NotFound("Distributor not found");
+
+            // Update fields
+            distributor.Name = dto.Name;
+            distributor.Email = dto.Email;
+            distributor.PhoneNumber = dto.PhoneNumber;
+            distributor.Street = dto.Street;
+            distributor.City = dto.City;
+            distributor.State = dto.State;
+            distributor.Pincode = dto.Pincode;
+            distributor.Country = dto.Country;
+
+            // Update Last Updated Timestamp
+            distributor.UpdatedDate = DateTime.UtcNow;
+
+            // Image handling
+            if (dto.ProfileImage != null)
+            {
+                using var ms = new MemoryStream();
+                await dto.ProfileImage.CopyToAsync(ms);
+                distributor.ProfileImage = ms.ToArray();
+            }
+
+            await _db.Distributors.ReplaceOneAsync(
+                x => x.DistributorId == userId,
+                distributor
+            );
+
+            return Ok(new { message = "Profile updated successfully." });
         }
 
         public class RespondRequest

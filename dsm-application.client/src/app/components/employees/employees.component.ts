@@ -9,7 +9,6 @@ import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/admin.service';
 import { environment } from '../../../environments/environment';
 
-
 @Component({
   selector: 'app-employees',
   templateUrl: './employees.component.html',
@@ -25,13 +24,9 @@ export class EmployeesComponent {
   isEdit = false;
   loading = false;
   selectedEmployee: any = null;
-  selectedFile: File | null = null;
-  selectedFileName: string = '';   // ✅ ADD THIS
-  showUploadModal = false;
-  sheetOpen = false;
-  sheetType: 'designation' | 'status' | '' = '';
-  sheetTitle = '';
-  currentUserRole: string = '';
+selectedFile: File | null = null;
+selectedFileName: string = '';   // ✅ ADD THIS
+showUploadModal = false;
 
   // selectedEmployee: any = null;
   // selectedFile: File | null = null;
@@ -69,7 +64,6 @@ export class EmployeesComponent {
   ngOnInit(): void {
     this.distributorId = this.auth.getDistributorId();
     this.employeeId = this.auth.getEmployeeId();
-    this.currentUserRole = localStorage.getItem('role') || '';
 
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
@@ -85,6 +79,7 @@ export class EmployeesComponent {
       designation: ['', Validators.required],
       isActive: [true] // ensures value exists
     });
+
 
     this.loadEmployees();
   }
@@ -395,12 +390,10 @@ export class EmployeesComponent {
     });
 
     this.showModal = true;
-    document.body.classList.add('modal-open');
   }
 
   closeEmployeeModal(): void {
     this.showModal = false;
-    document.body.classList.remove('modal-open');
   }
 
   openUploadModal(emp: any) {
@@ -506,42 +499,14 @@ export class EmployeesComponent {
     control.setErrors(Object.keys(errors).length ? errors : null);
   }
 
-viewInvoice(emp: any) {
-  const url = `${this.apiUrl}/invoice-upload/view/${emp.employeeId}`;
-  window.open(url, '_blank');
-}
-
-
-
-
-  openSheet(type: 'designation' | 'status') {
-    this.sheetType = type;
-    this.sheetTitle = type === 'designation' ? 'Select Designation' : 'Select Status';
-    this.sheetOpen = true;
+  viewInvoice(emp: any) {
+    const url = `${this.apiUrl}/invoice-upload/view/${emp.employeeId}`;
+    window.open(url, '_blank');
   }
 
-  closeSheet() {
-    this.sheetOpen = false;
-  }
-
-  setDesignation(value: string) {
-    this.roleFilter = value;
-    this.applyFilters();
-    this.closeSheet();
-  }
-
-  setStatus(value: string) {
-    this.statusFilter = value;
-    this.applyFilters();
-    this.closeSheet();
-  }
-
-  isDistributor(): boolean {
-    return this.currentUserRole === 'Distributor';
-  }
-
-  isDeliveryBoyUser(): boolean {
-    return this.currentUserRole === 'Delivery Boy';
+  viewPdf(url: string) {
+    window.open(url, '_blank');
   }
 
 }
+

@@ -62,10 +62,11 @@ locationSaved = false;
         };
 
         this.originalDistributor = { ...res };
-
-        this.previewImage = res.profileImageUrl
-          ? this.apiBaseUrl + res.profileImageUrl
-          : 'assets/default-user.png';
+if (res.profileImageBase64) {
+  this.previewImage = `data:image/jpeg;base64,${res.profileImageBase64}`;
+} else {
+  this.previewImage = null;  // No default image
+}
 
         this.isLoading = false;
       },

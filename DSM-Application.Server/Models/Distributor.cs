@@ -59,5 +59,22 @@ namespace DistributorManagementSystem.Server.Models
         public double Rating { get; set; }
         // ✅ QR CODE IMAGE (Azure / S3 / CDN / local)
         public string? ScannerQrUrl { get; set; }
+
+        // ===============================
+        // ⭐ PROFILE FIELDS TO ADD
+        // ===============================
+        public string? Street { get; set; }
+        public string? State { get; set; }
+        public string? Pincode { get; set; }      // single pincode for profile
+        public string? Country { get; set; }
+
+        // ⭐ IMAGE stored as BLOB (just like customer)
+        public byte[]? ProfileImage { get; set; }
+
+        // ⭐ Phone Verification Support
+        public bool PhoneVerified { get; set; } = false;
+
+        // ⭐ Track edits
+        public DateTime? UpdatedDate { get; set; }
     }
 }

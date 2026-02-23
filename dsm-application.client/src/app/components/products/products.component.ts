@@ -196,13 +196,16 @@ export class ProductsComponent {
         this.productForm.patchValue({ gst });
       });
   }
-
+get paginatedProducts(): Product[] {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.filteredProducts.slice(start, start + this.pageSize);
+}
   loadProducts(_: string) {
     this.productService.getMyProducts().subscribe({
       next: (products) => {
         this.products = products;
         this.filteredProducts = [...products];
-
+this.updatePagination();
         // 🔥 init slider
         products.forEach(p => {
           this.imageIndexMap[p.productId!] = 0;
@@ -417,7 +420,8 @@ export class ProductsComponent {
           // No stock → just reload
           this.loadProducts(distributorId);
         }
-
+this.currentPage = 1;        // ← ADD THIS
+this.updatePagination();  
         this.toastr.success('Product created successfully');
         this.closeModal();
         this.resetForm();
@@ -508,6 +512,7 @@ export class ProductsComponent {
         next: () => {
           this.products = this.products.filter(p => p.productId !== id);
           this.filteredProducts = this.filteredProducts.filter(p => p.productId !== id);
+          this.updatePagination(); 
           this.toastr.success('Product deleted successfully');
         },
         error: () => this.toastr.error('Delete failed')
@@ -558,15 +563,16 @@ export class ProductsComponent {
     });
   }
 
-  onCategoryChange(category: string) {
+ onCategoryChange(category: string) {
   if (!category) {
     this.filteredProducts = [...this.products];
-    return;
+  } else {
+    this.filteredProducts = this.products.filter(
+      p => p.category === category
+    );
   }
 
-  this.filteredProducts = this.products.filter(
-    p => p.category === category
-  );
+  this.updatePagination();   // ← ADD THIS
 }
 
 
@@ -647,8 +653,10 @@ export class ProductsComponent {
         (nameMatch || categoryMatch || colorMatch || brandMatch) &&
         priceMatch &&
         stockMatch
+        
       );
     });
+    this.updatePagination();
   }
 
 
@@ -682,6 +690,7 @@ export class ProductsComponent {
         matchesMaxPrice
       );
     });
+    this.updatePagination();
   }
 
 
@@ -813,6 +822,7 @@ export class ProductsComponent {
   clearSearch() {
     this.searchTerm = '';
     this.filteredProducts = [...this.products];
+      this.updatePagination();
   }
 
   hasActiveFilters(): boolean {
@@ -844,6 +854,7 @@ export class ProductsComponent {
     this.minPriceFilter = undefined;
     this.maxPriceFilter = undefined;
     this.filteredProducts = [...this.products];
+    this.updatePagination();
   }
 
   getStockFilterLabel(filter: string) {
@@ -873,6 +884,7 @@ export class ProductsComponent {
         (a, b) => (b.currentStock || 0) - (a.currentStock || 0)
       );
     }
+    this.updatePagination();
   }
   getInStockCount() {
     return this.products.filter(p => p.currentStock > 10).length;

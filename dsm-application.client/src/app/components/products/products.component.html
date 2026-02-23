@@ -154,7 +154,7 @@
 
     <!-- Product Cards -->
     <div *ngIf="filteredProducts.length > 0" class="products-grid">
-      <div class="product-card" *ngFor="let product of filteredProducts">
+      <div class="product-card" *ngFor="let product of paginatedProducts">
         <!-- Product Image -->
         <div class="product-image">
           <!-- Image Slider for multiple images -->
@@ -252,7 +252,7 @@
     </div>
 
     <!-- Pagination -->
-    <div class="pagination" *ngIf="filteredProducts.length > 12">
+<div class="pagination" *ngIf="totalPages > 1">
       <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
         <i class="fas fa-chevron-left"></i> Previous
       </button>

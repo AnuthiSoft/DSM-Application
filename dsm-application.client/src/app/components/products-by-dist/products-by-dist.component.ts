@@ -24,7 +24,10 @@ import { CartService } from '../../services/cart.service';
 export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit {
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
-
+// ===== Pagination =====
+pageSize = 8;
+currentPage = 1;
+totalPages = 1;
   @Input() distributorId?: string;  // ✅ accept from parent
   @Input() customerId!: string;
   @Input() products: Product[] = [];
@@ -95,31 +98,37 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
       imageUrls: [''],
     });
   }
-  ngOnInit(): void {
+ ngOnInit(): void {
 
-    this.route.paramMap.subscribe(params => {
-      const distId = params.get('distributorId');
+  this.route.paramMap.subscribe(params => {
+    let distId = params.get('distributorId');
 
-      console.log('Route distributorId =', distId);  // Debug
+    console.log('Route distributorId =', distId);
 
-      if (!distId) {
-        this.loading = false;
-        return;
-      }
+    // 🔥 FIX: if route param is empty, take from localStorage
+    if (!distId) {
+      distId = localStorage.getItem('distributorId');
+    }
 
-      this.distributorId = distId;
+    // If still not available, stop
+    if (!distId) {
+      this.loading = false;
+      return;
+    }
 
-      // Save for other screens
-      localStorage.setItem('distributorId', distId);
-      localStorage.setItem('DistributorId', distId);
+    this.distributorId = distId;
 
-      // Load products for this distributor
-      this.loadProducts(distId);
-    });
+    // Save again
+    localStorage.setItem('distributorId', distId);
+    localStorage.setItem('DistributorId', distId);
 
-    this.extractConnectedDistributors();
-    this.loadPreviousQuantities();
-  }
+    // ALWAYS load products
+    this.loadProducts(distId);
+  });
+
+  this.extractConnectedDistributors();
+  this.loadPreviousQuantities();
+}
 
   ngAfterViewInit(): void {
     this.initCarousels();
@@ -138,6 +147,8 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
         }));
 
         this.filterProducts = [...this.products];
+        this.currentPage = 1;
+this.updatePagination();
         this.extractCategories();
         this.loading = false;
 
@@ -215,19 +226,19 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
   }
 
 
-
-  onDistributorChange(distributorId: string) {
-    if (!distributorId) {
-      this.filterProducts = [...this.products];
-      return;
-    }
-
-
-
+onDistributorChange(distributorId: string) {
+  if (!distributorId) {
+    this.filterProducts = [...this.products];
+  } else {
     this.filterProducts = this.products.filter(
       p => p.distributorId === distributorId
     );
   }
+
+  // IMPORTANT
+  this.currentPage = 1;
+  this.updatePagination();
+}
 
   extractConnectedDistributors() {
     this.connectedDistributors = Array.from(
@@ -355,6 +366,8 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
       this.filterProducts = [...this.products];
+      this.currentPage = 1;
+this.updatePagination();
       return;
     }
 
@@ -426,6 +439,8 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
 
     if (!category || category.trim() === '') {
       this.filterProducts = [...this.products];
+      this.currentPage = 1;
+this.updatePagination();
       return;
     }
 
@@ -464,6 +479,8 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
         matchesMaxPrice
       );
     });
+    this.currentPage = 1;
+this.updatePagination();
   }
 
   // 🧩 Apply filters
@@ -493,6 +510,8 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
 
       return matchesSearch && matchesCategory && matchesStock && matchesPrice;
     });
+    this.currentPage = 1;
+this.updatePagination();
   }
 
 
@@ -646,6 +665,8 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
   clearSearch() {
     this.searchTerm = '';
     this.filterProducts = [...this.products];
+    this.currentPage = 1;
+this.updatePagination();
   }
   applySort() {
     switch (this.sortBy) {
@@ -691,14 +712,19 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
     this.minPriceFilter = undefined;
     this.maxPriceFilter = undefined;
     this.filterProducts = [...this.products];
+    this.currentPage = 1;
+this.updatePagination();
   }
   getDistributorName(id: string): string {
     return this.connectedDistributors.find(d => d.distributorId === id)?.name || '';
   }
 
-  clearDistributorFilter() {
-    this.distributorFilter = '';
-  }
+ clearDistributorFilter() {
+  this.distributorFilter = '';
+  this.filterProducts = [...this.products];
+  this.currentPage = 1;
+  this.updatePagination();
+}
   getStockFilterLabel(stock: string) {
     return stock === 'inStock'
       ? 'In Stock'
@@ -819,5 +845,29 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
   closeSheet() {
     this.showSheet = false;
   }
+updatePagination() {
+  this.totalPages = Math.ceil(this.filterProducts.length / this.pageSize) || 1;
 
+  if (this.currentPage > this.totalPages) {
+    this.currentPage = this.totalPages;
+  }
+
+  if (this.currentPage < 1) {
+    this.currentPage = 1;
+  }
+}
+
+get paginatedProducts(): Product[] {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.filterProducts.slice(start, start + this.pageSize);
+}
+
+get pages(): number[] {
+  return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+}
+
+goToPage(page: number) {
+  if (page < 1 || page > this.totalPages) return;
+  this.currentPage = page;
+}
 }

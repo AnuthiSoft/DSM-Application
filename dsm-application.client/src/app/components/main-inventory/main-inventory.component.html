@@ -14,14 +14,8 @@
 
     <!-- 🔥 DYNAMIC LEGEND -->
     <div class="custom-legend">
-      <div
-        class="legend-item"
-        *ngFor="let item of stockList; let i = index"
-      >
-        <span
-          class="legend-box"
-          [style.backgroundColor]="pieColors[i % pieColors.length]"
-        ></span>
+      <div class="legend-item" *ngFor="let item of stockList; let i = index">
+        <span class="legend-box" [style.backgroundColor]="pieColors[i % pieColors.length]"></span>
 
         <span>{{ item.productName }}</span>
       </div>
@@ -38,7 +32,7 @@
       <th>Product</th>
       <th>Code</th>
       <th>Measure</th>
-      
+
       <th>Available Stock</th>
       <th>Reorder</th>
       <th>Updated</th>
@@ -46,12 +40,12 @@
   </thead>
 
   <tbody>
-    <tr *ngFor="let s of filteredStock">
+    <tr *ngFor="let s of paginatedStock">
       <td>{{ s.productName }}</td>
       <td>{{ s.productCode }}</td>
       <td>{{ s.measure }}</td>
-      
-      
+
+
       <td [ngClass]="{
     'low-stock': s.currentStock <= 5,
     'medium-stock': s.currentStock > 5 && s.currentStock <= 20,
@@ -64,3 +58,49 @@
     </tr>
   </tbody>
 </table>
+
+<nav *ngIf="totalPages > 1">
+  <ul class="pagination justify-content-center flex-wrap mt-3">
+
+    <!-- Previous -->
+    <li class="page-item" [class.disabled]="currentPage === 1">
+      <button class="page-link" (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">
+        Prev
+      </button>
+    </li>
+
+    <!-- First Page Shortcut -->
+    <li *ngIf="pageNumbers[0] > 1" class="page-item">
+      <button class="page-link" (click)="currentPage = 1">1</button>
+    </li>
+
+    <li *ngIf="pageNumbers[0] > 2" class="page-item disabled">
+      <span class="page-link">...</span>
+    </li>
+
+    <!-- Dynamic Pages -->
+    <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="currentPage === page">
+      <button class="page-link" (click)="currentPage = page">
+        {{ page }}
+      </button>
+    </li>
+
+    <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1" class="page-item disabled">
+      <span class="page-link">...</span>
+    </li>
+
+    <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages" class="page-item">
+      <button class="page-link" (click)="currentPage = totalPages">
+        {{ totalPages }}
+      </button>
+    </li>
+
+    <!-- Next -->
+    <li class="page-item" [class.disabled]="currentPage === totalPages">
+      <button class="page-link" (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">
+        Next
+      </button>
+    </li>
+
+  </ul>
+</nav>

@@ -10,6 +10,7 @@ export class PaymentsComponent {
   activeTab = 'payments';
   // activeSection: 'reports' | 'handovers' | 'customers' = 'reports';
   isMobileSheetOpen = false;
+  isPaymentsActive = true; // or set properly when switching
 
   isActive(tab: string): boolean {
     return this.activeTab === tab;

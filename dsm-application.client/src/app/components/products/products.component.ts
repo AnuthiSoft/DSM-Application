@@ -604,6 +604,7 @@ this.updatePagination();
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
       this.filteredProducts = [...this.products];
+      this.updatePagination();
       return;
     }
 
@@ -839,11 +840,13 @@ this.updatePagination();
   clearCategoryFilter() {
     this.categoryFilter = '';
     this.filteredProducts = [...this.products];
+    this.updatePagination();
   }
 
   clearStockFilter() {
     this.stockFilter = '';
     this.filteredProducts = [...this.products];
+    this.updatePagination();
   }
 
   clearAllFilters() {
@@ -886,6 +889,7 @@ this.updatePagination();
     }
     this.updatePagination();
   }
+
   getInStockCount() {
     return this.products.filter(p => p.currentStock > 10).length;
   }
@@ -904,28 +908,66 @@ this.updatePagination();
     if (!current || current <= 0) return 0;
     return Math.min(100, (current / max) * 100);
   }
+
   updatePagination() {
     this.totalPages = Math.ceil(this.filteredProducts.length / this.pageSize);
+
     if (this.currentPage > this.totalPages) {
       this.currentPage = 1;
     }
+
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
   }
 
-  getPageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (this.totalPages <= 7) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+
+    pages.push(1);
+
+    if (this.currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, this.currentPage - 1);
+    const end = Math.min(this.totalPages - 1, this.currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (this.currentPage < this.totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(this.totalPages);
+
+    return pages;
   }
 
   goToPage(page: number) {
     this.currentPage = page;
+    this.updatePagination();
   }
 
   prevPage() {
-    if (this.currentPage > 1) this.currentPage--;
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
   nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
   }
+
   removePreview(img: string) {
     this.previewUrls = this.previewUrls.filter(i => i !== img);
   }
@@ -945,55 +987,60 @@ this.updatePagination();
     document.body.classList.remove('modal-open');
   }
 
-selectCategory(category: string) {
-  this.categoryFilter = category;
-  this.onCategoryChange(category);
-  this.closeCategorySheet();
-}
-
-openStockSheet() {
-  this.showStockSheet = true;
-  document.body.classList.add('modal-open');
-}
-
-closeStockSheet() {
-  this.showStockSheet = false;
-  document.body.classList.remove('modal-open');
-}
-
-selectStock(value: string) {
-  this.stockFilter = value;
-  this.filterProducts();
-  this.closeStockSheet();
-}
-
-openSortSheet() {
-  this.showSortSheet = true;
-  document.body.classList.add('modal-open');
-}
-
-closeSortSheet() {
-  this.showSortSheet = false;
-  document.body.classList.remove('modal-open');
-}
-
-selectSort(value: string) {
-  this.sortBy = value;
-  this.applySort();
-  this.closeSortSheet();
-}
-
-getSortLabel(value: string): string {
-  switch (value) {
-    case 'priceLow': return 'Price: Low to High';
-    case 'priceHigh': return 'Price: High to Low';
-    case 'stock': return 'Stock: High to Low';
-    case 'newest': return 'Newest First';
-    default: return 'Name (A–Z)';
+  selectCategory(category: string) {
+    this.categoryFilter = category;
+    this.onCategoryChange(category);
+    this.closeCategorySheet();
   }
-}
+
+  openStockSheet() {
+    this.showStockSheet = true;
+    document.body.classList.add('modal-open');
+  }
+
+  closeStockSheet() {
+    this.showStockSheet = false;
+    document.body.classList.remove('modal-open');
+  }
+
+  selectStock(value: string) {
+    this.stockFilter = value;
+    this.filterProducts();
+    this.closeStockSheet();
+  }
+
+  openSortSheet() {
+    this.showSortSheet = true;
+    document.body.classList.add('modal-open');
+  }
+
+  closeSortSheet() {
+    this.showSortSheet = false;
+    document.body.classList.remove('modal-open');
+  }
+
+  selectSort(value: string) {
+    this.sortBy = value;
+    this.applySort();
+    this.closeSortSheet();
+  }
+
+  getSortLabel(value: string): string {
+    switch (value) {
+      case 'priceLow': return 'Price: Low to High';
+      case 'priceHigh': return 'Price: High to Low';
+      case 'stock': return 'Stock: High to Low';
+      case 'newest': return 'Newest First';
+      default: return 'Name (A–Z)';
+    }
+  }
 
 
+  handlePageClick(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
 }
 
 

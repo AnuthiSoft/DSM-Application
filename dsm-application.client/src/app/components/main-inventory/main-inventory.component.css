@@ -512,20 +512,56 @@ h3 {
         width: 140px;
         font-size: 0.85rem;
     }
+}
 
-    /* Table scroll on tablet */
-    table {
-        display: table;
-        /* 🔥 important */
-        width: 100%;
-        table-layout: fixed;
-        /* 🔥 key fix */
-    }
+.pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
 
-    th,
-    td {
-        white-space: normal;
-        /* allow wrapping */
-        word-break: break-word;
+.page-link {
+    padding: 6px 10px;
+    font-size: 14px;
+    min-width: 34px;
+    text-align: center;
+}
+
+@media (max-width: 576px) {
+    .page-link {
+        padding: 4px 8px;
+        font-size: 12px;
     }
+}
+
+.pagination {
+    gap: 8px;
+    /* 🔥 space between buttons */
+}
+
+.page-item {
+    margin: 0 4px;
+    /* extra spacing */
+}
+
+.page-link {
+    min-width: 36px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+@media (max-width: 576px) {
+
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .page-link {
+    padding: 4px 8px;
+    font-size: 12px;
+    min-width: 32px;
+  }
+
 }

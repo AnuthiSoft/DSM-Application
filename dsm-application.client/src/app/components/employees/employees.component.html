@@ -235,142 +235,160 @@
     </div>
 
 
-    <!-- Search and Filter Card -->
-    <div class="dashboard-card">
-      <div class="filter-header">
-        <h3><i class="fas fa-filter"></i> Filter Employees</h3>
+  <!-- Search and Filter Card -->
+  <div class="dashboard-card">
+    <div class="filter-header">
+      <h3><i class="fas fa-filter"></i> Filter Employees</h3>
+    </div>
+    <div class="search-filter-grid">
+      <div class="search-box">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="form-control search-input"
+            placeholder="    Search employees by name, email, or phone..." [(ngModel)]="searchTerm"
+            (input)="applyFilters()" />
+        </div>
       </div>
-      <div class="search-filter-grid">
-        <div class="search-box">
-          <div class="search-input-wrapper">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" class="form-control search-input"
-              placeholder="    Search employees by name, email, or phone..." [(ngModel)]="searchTerm"
-              (input)="applyFilters()" />
-          </div>
-        </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Designation</label>
-          <select class="form-select" [(ngModel)]="roleFilter" (change)="applyFilters()">
-            <option value="">All Designations</option>
-            <option value="Delivery Boy">Delivery Boy</option>
-            <option value="Cash Collector">Cash Collector</option>
-            <option value="Manager">Manager</option>
-            <option value="Sales Representative">Sales Representative</option>
-          </select>
-        </div>
+      <div class="filter-group desktop-only">
+        <label class="filter-label">Designation</label>
+        <select class="form-select" [(ngModel)]="roleFilter" (change)="applyFilters()">
+          <option value="">All Designations</option>
+          <option value="Delivery Boy">Delivery Boy</option>
+          <option value="Cash Collector">Cash Collector</option>
+          <option value="Manager">Manager</option>
+          <option value="Sales Representative">Sales Representative</option>
+        </select>
+      </div>
 
-        <div class="filter-group">
-          <label class="filter-label">Status</label>
-          <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+      <!-- MOBILE / TABLET -->
+      <div class="filter-group mobile-only">
+        <label class="filter-label">Designation</label>
+        <div class="mobile-select" (click)="openSheet('designation')">
+          {{ roleFilter || 'All Designations' }}
+        </div>
+      </div>
+
+      <div class="filter-group desktop-only">
+        <label class="filter-label">Status</label>
+        <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <!-- MOBILE / TABLET -->
+      <div class="filter-group mobile-only">
+        <label class="filter-label">Status</label>
+        <div class="mobile-select" (click)="openSheet('status')">
+          {{ statusFilter || 'All Status' }}
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Employee Table Card -->
-    <div class="dashboard-card">
-      <div class="card-header">
-        <h3><i class="fas fa-users-cog"></i> Employee Directory</h3>
-        <span class="employee-count">{{ filteredEmployees.length }} employee(s)</span>
+  <!-- Employee Table Card -->
+  <div class="dashboard-card">
+    <div class="card-header">
+      <h3><i class="fas fa-users-cog"></i> Employee Directory</h3>
+      <span class="employee-count">{{ filteredEmployees.length }} employee(s)</span>
+    </div>
+
+    <div class="table-container">
+      <table class="employee-table">
+        <thead>
+          <tr>
+            <th>Employee</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Designation</th>
+            <th>Status</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of filteredEmployees" class="employee-row">
+            <td class="employee-info">
+              <div class="employee-avatar">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="employee-details">
+                <strong>{{ emp.name }}</strong>
+              </div>
+            </td>
+            <td class="employee-email" data-label="Email">{{ emp.email }}</td>
+            <td class="employee-phone" data-label="Phone">{{ emp.phoneNumber || '-' }}</td>
+            <td class="employee-role" data-label="Role">{{ emp.role }}</td>
+            <td class="employee-designation" data-label="Designation">
+              <span class="designation-badge">{{ emp.designation }}</span>
+            </td>
+            <td class="employee-status" data-label="Status">
+              <span class="status-badge" [class]="emp.isActive ? 'active' : 'inactive'">
+                {{ emp.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="employee-actions" data-label="Actions">
+              <div class="action-buttons">
+                <button class="btn btn-outline-primary btn-sm action-btn" (click)="editEmployee(emp)">
+                  <i class="fas fa-edit"></i>
+                  Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm action-btn" (click)="deleteEmployee(emp)">
+                  <i class="fas fa-trash"></i>
+                  Delete
+                </button>
+
+                <button *ngIf="isDistributor() && (emp.designation || '').toLowerCase().trim() === 'delivery boy'"
+                  class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  Upload Invoice
+                </button>
+
+
+                <button *ngIf="emp.invoicePdfUrl && (emp.designation || '').toLowerCase().trim() === 'delivery boy'"
+                  class="btn btn-outline-secondary btn-sm action-btn" (click)="viewInvoice(emp)">
+                  <i class="fas fa-eye"></i>
+                  <span>View PDF</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div *ngIf="loading" class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <span>Loading employees...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredEmployees.length === 0" class="empty-state">
+      <i class="fas fa-users"></i>
+      <h4>No Employees Found</h4>
+      <p>Try adjusting your search or filter criteria</p>
+      <button class="btn btn-primary" (click)="openEmployeeModal()">
+        <i class="fas fa-plus"></i> Add First Employee
+      </button>
+    </div>
+
+    <!-- Table Footer -->
+    <div class="table-footer">
+      <div class="footer-info">
+        Showing {{ filteredEmployees.length }} of {{ employees.length }} employees
       </div>
-
-      <div class="table-container">
-        <table class="employee-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Designation</th>
-              <th>Status</th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let emp of filteredEmployees" class="employee-row">
-              <td class="employee-info">
-                <div class="employee-avatar">
-                  <i class="fas fa-user"></i>
-                </div>
-                <div class="employee-details">
-                  <strong>{{ emp.name }}</strong>
-                </div>
-              </td>
-              <td class="employee-email">{{ emp.email }}</td>
-              <td class="employee-phone">{{ emp.phoneNumber || '-' }}</td>
-              <td class="employee-role">{{ emp.role }}</td>
-              <td class="employee-designation">
-                <span class="designation-badge">{{ emp.designation }}</span>
-              </td>
-              <td class="employee-status">
-                <span class="status-badge" [class]="emp.isActive ? 'active' : 'inactive'">
-                  {{ emp.isActive ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
-              <td class="employee-actions">
-                <div class="action-buttons">
-                  <button class="btn btn-outline-primary btn-sm action-btn" (click)="editEmployee(emp)">
-                    <i class="fas fa-edit"></i>
-                    Edit
-                  </button>
-                  <button class="btn btn-outline-danger btn-sm action-btn" (click)="deleteEmployee(emp)">
-                    <i class="fas fa-trash"></i>
-                    Delete
-                  </button>
-
-                  <button *ngIf="(emp.designation || '').toLowerCase().trim() === 'delivery boy'"
-                    class="btn btn-outline-success btn-sm action-btn" (click)="openUploadModal(emp)">
-                    <i class="fas fa-file-upload"></i> Tax Invoice
-                  </button>
-
-                  <button *ngIf="emp.invoicePdfUrl" class="btn btn-outline-secondary btn-sm action-btn"
-                    (click)="viewPdf(emp.invoicePdfUrl)">
-                    <i class="fas fa-eye"></i> View PDF
-                  </button>
-
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Loading Indicator -->
-      <div *ngIf="loading" class="loading-state">
-        <i class="fas fa-spinner fa-spin"></i>
-        <span>Loading employees...</span>
-      </div>
-
-      <!-- Empty State -->
-      <div *ngIf="!loading && filteredEmployees.length === 0" class="empty-state">
-        <i class="fas fa-users"></i>
-        <h4>No Employees Found</h4>
-        <p>Try adjusting your search or filter criteria</p>
-        <button class="btn btn-primary" (click)="openEmployeeModal()">
-          <i class="fas fa-plus"></i> Add First Employee
+      <div class="footer-actions">
+        <button class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+        <button class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-print"></i> Print
         </button>
       </div>
-
-      <!-- Table Footer -->
-      <div class="table-footer">
-        <div class="footer-info">
-          Showing {{ filteredEmployees.length }} of {{ employees.length }} employees
-        </div>
-        <div class="footer-actions">
-          <button class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-download"></i> Export CSV
-          </button>
-          <button class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-print"></i> Print
-          </button>
-        </div>
-      </div>
+    </div>
 
       <!-- ================= Upload Invoice Modal ================= -->
       <div *ngIf="showUploadModal" class="modal-overlay">
@@ -384,32 +402,32 @@
             </button>
           </div>
 
-          <div class="modal-body">
-            <p class="employee-label">
-              <span class="employee-title">Employee:</span>
-              <span class="employee-name">{{ selectedEmployee?.name }}</span>
-            </p>
+        <div class="modal-body">
+          <p class="employee-label">
+            <span class="employee-title">Employee:</span>
+            <span class="employee-name">{{ selectedEmployee?.name }}</span>
+          </p>
 
-            <div class="file-upload-wrapper">
-              <label class="file-upload-btn">
-                <i class="fas fa-upload"></i>
-                Choose PDF
-                <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
-              </label>
+          <div class="file-upload-wrapper">
+            <label class="file-upload-btn">
+              <i class="fas fa-upload"></i>
+              Choose PDF
+              <input type="file" accept="application/pdf" hidden (change)="onFileSelected($event)" />
+            </label>
 
-              <span class="file-name">
-                {{ selectedFileName || 'No file chosen' }}
-              </span>
-            </div>
+            <span class="file-name">
+              {{ selectedFileName || 'No file chosen' }}
+            </span>
+          </div>
 
-            <div class="upload-btn-center">
-              <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
-                Upload PDF
-              </button>
-            </div>
+          <div class="upload-btn-center">
+            <button class="btn btn-primary mt-3" (click)="uploadInvoice()">
+              Upload PDF
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
 
 
@@ -419,166 +437,164 @@
       <div *ngIf="showModal" class="modal-overlay">
         <div class="modal-backdrop" (click)="closeEmployeeModal()"></div>
 
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h3>
-              <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
-              {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
-            </h3>
-            <button class="modal-close" (click)="closeEmployeeModal()">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>
+            <i class="fas" [class.fa-user-edit]="isEdit" [class.fa-user-plus]="!isEdit"></i>
+            {{ isEdit ? 'Edit Employee' : 'Add Employee' }}
+          </h3>
+          <button class="modal-close" (click)="closeEmployeeModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
 
-          <div class="modal-body">
-            <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-user"></i>
-                    Full Name
-                  </label>
-                  <input type="text" class="form-control" formControlName="name" placeholder="Enter employee name" />
-                  <div *ngIf="employeeForm.get('name')?.touched && employeeForm.get('name')?.invalid"
-                    class="text-danger">
-                    Name is required
-                  </div>
+        <div class="modal-body">
+          <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-user"></i>
+                  Full Name
+                </label>
+                <input type="text" class="form-control" formControlName="name" placeholder="Enter employee name" />
+                <div *ngIf="employeeForm.get('name')?.touched && employeeForm.get('name')?.invalid" class="text-danger">
+                  Name is required
                 </div>
+              </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-envelope"></i>
-                    Email Address
-                  </label>
-                  <input type="email" class="form-control" formControlName="email" placeholder="Enter email address"
-                    (blur)="checkEmployeeEmailExists()" />
-                  <div class="text-danger" *ngIf="employeeForm.get('email')?.touched">
-                    <div *ngIf="employeeForm.get('email')?.errors?.['required']">
-                      Email is required
-                    </div>
-                    <div *ngIf="employeeForm.get('email')?.errors?.['email']">
-                      Enter a valid email address
-                    </div>
-                    <div class="text-danger" *ngIf="employeeForm.get('email')?.errors?.['exists']">
-                      This email already exists
-                    </div>
-
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-envelope"></i>
+                  Email Address
+                </label>
+                <input type="email" class="form-control" formControlName="email" placeholder="Enter email address"
+                  (blur)="checkEmployeeEmailExists()" />
+                <div class="text-danger" *ngIf="employeeForm.get('email')?.touched">
+                  <div *ngIf="employeeForm.get('email')?.errors?.['required']">
+                    Email is required
                   </div>
-
-
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-phone"></i> Phone Number
-                  </label>
-
-                  <!-- Phone Input -->
-                  <div class="phone-group"
-                    [class.phone-error]="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
-
-                    <span class="phone-prefix">+91</span>
-
-                    <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
-                      inputmode="numeric" autocomplete="off" placeholder="Enter phone number"
-                      [readonly]="phoneVerifiedUI" (input)="restrictPhoneInput($event)" />
+                  <div *ngIf="employeeForm.get('email')?.errors?.['email']">
+                    Enter a valid email address
                   </div>
-
-                  <!-- ❗ Error message OUTSIDE input -->
-                  <div class="text-danger mt-1" *ngIf="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
-                    Enter a valid 10-digit Mobile Number
-                  </div>
-
-                  <!-- Verified -->
-                  <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
-                    <i class="fas fa-check-circle"></i> Verified
-                  </div>
-
-
-                  <!-- Send OTP button -->
-                  <div class="mt-2" *ngIf="!phoneVerifiedUI">
-                    <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
-                      Send OTP
-                    </button>
-                  </div>
-
-                  <!-- OTP input -->
-                  <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
-                    <label>Enter OTP</label>
-
-                    <input type="text" class="form-control" maxlength="6" [(ngModel)]="otpCode"
-                      [ngModelOptions]="{ standalone: true }" />
-
-                    <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
-                      Verify OTP
-                    </button>
-
-                    <div *ngIf="otpFailed" class="text-danger mt-2">
-                      ✖ Invalid or expired OTP
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-briefcase"></i>
-                    Designation
-                  </label>
-
-                  <select class="form-select" formControlName="designation">
-                    <option value="">Select Designation</option>
-                    <option value="Administrator">Administrator</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Sales Representative">Sales Representative</option>
-                    <option value="Delivery Boy">Delivery Boy</option>
-                    <option value="Cash Collector">Cash Collector</option>
-                  </select>
-                  <div *ngIf="employeeForm.get('designation')?.touched && employeeForm.get('designation')?.invalid"
-                    class="text-danger">
-                    Designation is required
+                  <div class="text-danger" *ngIf="employeeForm.get('email')?.errors?.['exists']">
+                    This email already exists
                   </div>
 
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-user-tag"></i>
-                    Role
-                  </label>
-                  <input type="text" class="form-control" formControlName="role" />
-                  <div *ngIf="employeeForm.get('role')?.touched && employeeForm.get('role')?.invalid"
-                    class="text-danger">
-                    Role is required
-                  </div>
 
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-phone"></i> Phone Number
+                </label>
+
+                <!-- Phone Input -->
+                <div class="phone-group"
+                  [class.phone-error]="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+
+                  <span class="phone-prefix">+91</span>
+
+                  <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
+                    inputmode="numeric" autocomplete="off" placeholder="Enter phone number"
+                    (input)="restrictPhoneInput($event)" />
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-toggle-on"></i>
-                    Status
-                  </label>
-                  <div class="status-toggle">
-                    <label class="toggle-switch">
-                      <input type="checkbox" class="toggle-input" formControlName="isActive" />
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">
-                      {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
-                    </span>
+                <!-- ❗ Error message OUTSIDE input -->
+                <div class="text-danger mt-1" *ngIf="phoneSubmitted && employeeForm.get('phoneNumber')?.invalid">
+                  Enter a valid 10-digit Mobile Number
+                </div>
+
+                <!-- Verified -->
+                <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
+                  <i class="fas fa-check-circle"></i> Verified
+                </div>
+
+
+                <!-- Send OTP button -->
+                <div class="mt-2" *ngIf="!phoneVerifiedUI">
+                  <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                    Send OTP
+                  </button>
+                </div>
+
+                <!-- OTP input -->
+                <div *ngIf="otpSent && !phoneVerifiedUI" class="mt-3">
+                  <label>Enter OTP</label>
+
+                  <input type="text" class="form-control" maxlength="6" [(ngModel)]="otpCode"
+                    [ngModelOptions]="{ standalone: true }" />
+
+                  <button class="btn btn-success w-100 mt-2" type="button" (click)="verifyOtp()">
+                    Verify OTP
+                  </button>
+
+                  <div *ngIf="otpFailed" class="text-danger mt-2">
+                    ✖ Invalid or expired OTP
                   </div>
                 </div>
               </div>
 
-              <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
-                  <i class="fas fa-times"></i> Cancel
-                </button>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-briefcase"></i>
+                  Designation
+                </label>
 
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
-                  {{ isEdit ? 'Update Employee' : 'Save Employee' }}
-                </button>
+                <select class="form-select" formControlName="designation">
+                  <option value="">Select Designation</option>
+                  <option value="Administrator">Administrator</option>
+                  <option value="Manager">Manager</option>
+                  <option value="Sales Representative">Sales Representative</option>
+                  <option value="Delivery Boy">Delivery Boy</option>
+                  <option value="Cash Collector">Cash Collector</option>
+                </select>
+                <div *ngIf="employeeForm.get('designation')?.touched && employeeForm.get('designation')?.invalid"
+                  class="text-danger">
+                  Designation is required
+                </div>
+
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-user-tag"></i>
+                  Role
+                </label>
+                <input type="text" class="form-control" formControlName="role" />
+                <div *ngIf="employeeForm.get('role')?.touched && employeeForm.get('role')?.invalid" class="text-danger">
+                  Role is required
+                </div>
+
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-toggle-on"></i>
+                  Status
+                </label>
+                <div class="status-toggle">
+                  <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input" formControlName="isActive" />
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">
+                    {{ employeeForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+
+              <button type="submit" class="btn btn-primary">
+                <i class="fas" [class.fa-save]="isEdit" [class.fa-check]="!isEdit"></i>
+                {{ isEdit ? 'Update Employee' : 'Save Employee' }}
+              </button>
 
               </div>
             </form>

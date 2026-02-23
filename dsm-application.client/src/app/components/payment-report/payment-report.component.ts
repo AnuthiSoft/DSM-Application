@@ -8,9 +8,9 @@ import { PaymentService } from '../../services/payment.service';
 })
 export class PaymentReportComponent implements OnInit {
 
-  
- 
-  
+
+
+
 
   distributorId: string = '';
   fromDate: string = '';
@@ -90,9 +90,7 @@ export class PaymentReportComponent implements OnInit {
   clearError() {
     this.errorMessage = '';
   }
-  closeModal() {
-    this.showCustomerModal = false;
-  }
+
   // ---------- Export ----------
   exportToExcel() {
     console.log("EXPORT EXCEL — to be implemented");
@@ -117,7 +115,19 @@ export class PaymentReportComponent implements OnInit {
   viewDetails(customer: any) {
     this.selectedCustomer = customer;
     this.showCustomerModal = true;
+
+    // 🔥 LOCK BACKGROUND
+    document.body.style.overflow = 'hidden';
   }
+
+  closeModal() {
+    this.showCustomerModal = false;
+
+    // 🔥 UNLOCK BACKGROUND
+    document.body.style.overflow = 'auto';
+  }
+
+
   downloadReceipt(r: any) {
     console.log("Download receipt:", r);
   }
@@ -176,5 +186,5 @@ export class PaymentReportComponent implements OnInit {
     this.handoverStatus = val;
     this.closeSheet();
   }
-  
+
 }

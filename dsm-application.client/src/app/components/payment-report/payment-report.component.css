@@ -14,7 +14,7 @@
   overflow: hidden;
 }
 
-.dashboard-card::before {
+/* .dashboard-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -29,7 +29,7 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
+} */
 
 /* Card Header */
 .card-header {
@@ -639,21 +639,16 @@
 
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  inset: 0;
+  background: rgba(0,0,0,0.6);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 2000;
-  animation: fadeIn 0.3s ease;
   padding: 20px;
-  overflow: auto; /* FIX: Added for scrolling */
 }
 
-@keyframes fadeIn {
+/* @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
@@ -667,48 +662,76 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
+} */
 
 .modal-content {
-  background: var(--card-bg);
-  border-radius: 16px;
-  width: 100%;
+  width: 95%;
   max-width: 1200px;
-  max-height: 90vh; /* FIX: Changed from 90vh to auto */
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--border-color);
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 12px;
   display: flex;
-  flex-direction: column; /* FIX: Added for proper layout */
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .modal-content h4 {
-  padding: 20px 24px;
+  padding: 16px 20px;
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-color);
-  border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), transparent);
-  flex-shrink: 0; /* FIX: Prevent header from shrinking */
+  border-bottom: 1px solid #eee;
 }
+
 
 /* Modal Body with Scroll */
 .modal-body {
-  padding: 24px;
-  overflow-y: auto; /* FIX: Enable vertical scrolling */
-  flex: 1; /* FIX: Take available space */
-  max-height: calc(90vh - 130px); /* FIX: Calculate max height */
+  padding: 20px;
+  overflow-y: auto; 
+  flex: 1;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;   /* important */
+}
+
+/* Reduce scrollbar thickness */
+.table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+  transition: 0.2s ease;
+}
+
+.close-btn:hover {
+  color: red;
 }
 
 /* Details Table */
 .details-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--card-bg);
-  margin-bottom: 0;
+  table-layout: auto;
 }
+
 
 .details-table thead {
   background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), transparent);
@@ -792,11 +815,9 @@
 
 /* Modal Footer - FIXED */
 .modal-footer {
-  padding: 16px 24px;
-  background: linear-gradient(135deg, transparent, rgba(52, 152, 219, 0.05));
-  border-top: 1px solid var(--border-color);
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
   text-align: right;
-  flex-shrink: 0; /* FIX: Prevent footer from shrinking */
 }
 
 .btn-secondary {
@@ -1063,7 +1084,7 @@ html[data-theme="dark"] .bottom-sheet {
 .sheet-body,
 .modal-body {
   scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) transparent;
+  /* scrollbar-color: var(--primary-color) transparent; */
 }
 
 .table-container::-webkit-scrollbar,
@@ -1096,15 +1117,6 @@ html[data-theme="dark"] .bottom-sheet {
   background: #2777c7;
 }
 
-/* Sticky header for tables */
-.details-table thead th {
-  position: sticky;
-  top: 0;
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), transparent);
-  backdrop-filter: blur(10px);
-  z-index: 10;
-}
-
 /* Utility Classes */
 .text-danger {
   color: #e74c3c !important;
@@ -1125,7 +1137,8 @@ html[data-theme="dark"] .bottom-sheet {
 .btn,
 .pagination-btn,
 .page-number {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease, color 0.2s ease;
+
 }
 
 /* Focus states for accessibility */
@@ -1201,4 +1214,26 @@ html[data-theme="dark"] .bottom-sheet {
   border-top-color: white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Smooth thin scrollbar */
+.table-responsive::-webkit-scrollbar {
+  height: 5px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+@media (max-width: 992px) {
+  .report-table {
+    min-width: 900px;  
+  }
 }

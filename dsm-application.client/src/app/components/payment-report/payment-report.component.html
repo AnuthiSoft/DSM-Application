@@ -124,6 +124,7 @@
     </div>
 
     <div class="table-container">
+      <div class="table-responsive">
       <table class="report-table">
         <thead>
           <tr>
@@ -140,8 +141,8 @@
         <tbody>
           <tr *ngFor="let c of customerReports">
             <td>{{ c.customerName }}</td>
-            <td>{{ c.totalCollected }}</td>
-            <td>{{ c.cashAmount }}</td>
+            <td>{{ c.totalCollected | number:'1.2-2'}}</td>
+            <td>{{ c.cashAmount | number:'1.2-2'}}</td>
             <td>{{ c.onlineAmount }}</td>
             <td>{{ c.scannerAmount }}</td>
             <!-- In your report table row, replace the last payment date cell -->
@@ -157,6 +158,7 @@
           </tr>
         </tbody>
       </table>
+    </div>
     </div>
 
 
@@ -193,119 +195,124 @@
       </button>
     </div>
   </div>
-  </div>
-  
-  <div class="modal" *ngIf="showCustomerModal">
-    <div class="modal-content">
+</div>
 
+<div class="modal" *ngIf="showCustomerModal">
+  <div class="modal-content">
+    <div class="modal-header">
       <h4>
         {{ selectedCustomer.customerName }} – Order Details
       </h4>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="table-wrapper">
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Order Total</th>
+              <th>Paid</th>
+              <th>Pending</th>
+              <th>Payment Mode</th>
+              <th>Transaction Ref</th>
+              <th>Payment Date</th>
 
-      <table class="details-table">
-        <thead>
-          <tr>
-            <th>Order ID</th>
-            <th>Order Total</th>
-            <th>Paid</th>
-            <th>Pending</th>
-            <th>Payment Mode</th>
-            <th>Transaction Ref</th>
-            <th>Payment Date</th>
+              <th>Cashier Name</th>
+              <th>Handed Over</th>
+              <th>Status</th>
+            </tr>
+          </thead>
 
-            <th>Cashier Name</th>
-            <th>Handed Over</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+          <tbody>
+            <tr *ngFor="let o of selectedCustomer.orders">
+              <td>{{ o.orderId }}</td>
+              <td>₹{{ o.orderTotalAmount | number:'1.2-2'}}</td>
+              <td>₹{{ o.amountPaidToday | number:'1.2-2'}}</td>
+              <td>
+                <span *ngIf="o.pendingAmount === 0" class="badge badge-success">
+                  Paid
+                </span>
+                <span *ngIf="o.pendingAmount > 0" class="badge badge-warning">
+                  ₹{{ o.pendingAmount }}
+                </span>
+              </td>
+              <td>
+                <span class="payment-mode-pill">
+                  {{ o.paymentMode | uppercase }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="o.transactionReference; else noRef">
+                  {{ o.transactionReference }}
+                </span>
 
-        <tbody>
-          <tr *ngFor="let o of selectedCustomer.orders">
-            <td>{{ o.orderId }}</td>
-            <td>₹{{ o.orderTotalAmount }}</td>
-            <td>₹{{ o.amountPaidToday }}</td>
-            <td>
-              <span *ngIf="o.pendingAmount === 0" class="badge badge-success">
-                Paid
-              </span>
-              <span *ngIf="o.pendingAmount > 0" class="badge badge-warning">
-                ₹{{ o.pendingAmount }}
-              </span>
-            </td>
-            <td>
-              <span class="payment-mode-pill">
-                {{ o.paymentMode | uppercase }}
-              </span>
-            </td>
-            <td>
-              <span *ngIf="o.transactionReference; else noRef">
-                {{ o.transactionReference }}
-              </span>
+                <ng-template #noRef>
+                  —
+                </ng-template>
+              </td>
 
-              <ng-template #noRef>
-                —
-              </ng-template>
-            </td>
-
-            <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td> {{ o.cashierName }}</td>
-            <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
-            <td>
-              <span class="badge" [ngClass]="{
+              <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td> {{ o.cashierName }}</td>
+              <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
   'badge-success': o.handoverStatus === 'Accepted',
   'badge-danger': o.handoverStatus === 'Rejected',
   'badge-warning': o.handoverStatus === 'Pending'
 }">
-                {{ o.handoverStatus || 'Pending' }}
-              </span>
+                  {{ o.handoverStatus || 'Pending' }}
+                </span>
 
 
-              <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
-                Reason: {{ o.rejectReason }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeModal()">
-          Close
-        </button>
+                <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
+                  Reason: {{ o.rejectReason }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-
     </div>
+
+    <!-- <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()">
+        Close
+      </button>
+    </div> -->
+
+  </div>
+</div>
+
+<!-- BOTTOM SHEET -->
+<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
+
+<div class="bottom-sheet" *ngIf="sheetOpen">
+  <div class="sheet-handle"></div>
+
+  <div class="sheet-header">
+    <h4>{{ sheetTitle }}</h4>
+    <button (click)="closeSheet()">✕</button>
   </div>
 
-  <!-- BOTTOM SHEET -->
-  <div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
+  <div class="sheet-body">
 
-  <div class="bottom-sheet" *ngIf="sheetOpen">
-    <div class="sheet-handle"></div>
 
-    <div class="sheet-header">
-      <h4>{{ sheetTitle }}</h4>
-      <button (click)="closeSheet()">✕</button>
+    <div *ngIf="sheetType === 'payment'">
+      <div class="sheet-option" (click)="setPayment('')">All Modes</div>
+      <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
+      <div class="sheet-option" (click)="setPayment('online')">Online</div>
+      <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
+      <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
     </div>
 
-    <div class="sheet-body">
 
-
-      <div *ngIf="sheetType === 'payment'">
-        <div class="sheet-option" (click)="setPayment('')">All Modes</div>
-        <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
-        <div class="sheet-option" (click)="setPayment('online')">Online</div>
-        <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
-        <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
-      </div>
-
-
-      <div *ngIf="sheetType === 'handover'">
-        <div class="sheet-option" (click)="setHandover('')">All Status</div>
-        <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
-        <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
-      </div>
-
-
+    <div *ngIf="sheetType === 'handover'">
+      <div class="sheet-option" (click)="setHandover('')">All Status</div>
+      <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
+      <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
     </div>
+
+
   </div>
+</div>

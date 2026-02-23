@@ -8,6 +8,7 @@ import { InvoiceUploadService } from '../../services/invoice-upload.service';
 import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/admin.service';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-employees',
@@ -24,9 +25,14 @@ export class EmployeesComponent {
   isEdit = false;
   loading = false;
   selectedEmployee: any = null;
-selectedFile: File | null = null;
-selectedFileName: string = '';   // ✅ ADD THIS
-showUploadModal = false;
+  selectedFile: File | null = null;
+  selectedFileName: string = '';   // ✅ ADD THIS
+  showUploadModal = false;
+  sheetOpen = false;
+  sheetType: 'designation' | 'status' | '' = '';
+  sheetTitle = '';
+  currentUserRole: string = '';
+  originalPhoneNumber: string = '';
 
   // selectedEmployee: any = null;
   // selectedFile: File | null = null;
@@ -80,6 +86,25 @@ showUploadModal = false;
       isActive: [true] // ensures value exists
     });
 
+    this.employeeForm.get('phoneNumber')?.valueChanges.subscribe(value => {
+
+      if (!this.isEdit) return;
+
+      // If changed from original
+      if (value !== this.originalPhoneNumber) {
+        this.phoneVerifiedUI = false;
+        this.otpVerified = false;
+        this.otpSent = false;
+        this.otpFailed = false;
+      }
+
+      // If user changed back to original
+      if (value === this.originalPhoneNumber) {
+        this.phoneVerifiedUI = true;
+        this.otpVerified = true;
+      }
+
+    });
 
     this.loadEmployees();
   }
@@ -204,6 +229,7 @@ showUploadModal = false;
           this.loadEmployees();
           this.resetForm();
           this.showModal = false;
+          document.body.classList.remove('modal-open');
         },
         error: (err) => {
           console.error(err);
@@ -237,6 +263,7 @@ showUploadModal = false;
           this.loadEmployees();
           this.resetForm();
           this.showModal = false;
+          document.body.classList.remove('modal-open');
         },
         error: (err) => {
           console.error(err);
@@ -259,6 +286,10 @@ showUploadModal = false;
             return;
           }
 
+          if (!this.phoneVerifiedUI) {
+            this.toastr.error("Please verify phone number before saving");
+            return;
+          }
           this.toastr.error('Failed to add employee');
         }
 
@@ -269,37 +300,42 @@ showUploadModal = false;
   restrictPhoneInput(event: any) {
     let value = event.target.value;
 
-    // Allow only digits
     value = value.replace(/[^0-9]/g, '');
-
-    // Max 10 digits
     value = value.slice(0, 10);
 
-    // First digit must be 6–9
     if (value.length === 1 && !/^[6-9]$/.test(value)) {
       value = '';
     }
 
     event.target.value = value;
-    this.employeeForm.get('phoneNumber')?.setValue(value, { emitEvent: false });
+    this.employeeForm.get('phoneNumber')?.setValue(value);
   }
-
 
   // ✅ Edit employee (patch form)
   editEmployee(emp: Employee) {
     this.isEdit = true;
 
+    const phoneWithoutCode = emp.phoneNumber?.startsWith('+91')
+      ? emp.phoneNumber.slice(3)
+      : emp.phoneNumber;
+
     this.employeeForm.patchValue({
       ...emp,
-      phoneNumber: emp.phoneNumber?.startsWith('+91')
-        ? emp.phoneNumber.slice(3) // remove +91
-        : emp.phoneNumber
+      phoneNumber: phoneWithoutCode
     });
+
+    // Store original phone
+    this.originalPhoneNumber = phoneWithoutCode;
+
+    // Since it's existing employee → verified
+    this.phoneVerifiedUI = true;
+    this.otpVerified = true;
+    this.otpSent = false;
+    this.otpFailed = false;
 
     this.selectedEmployee = emp;
     this.showModal = true;
   }
-
 
   // // ✅ Delete employee
   // deleteEmployee(emp: Employee) {
@@ -311,24 +347,40 @@ showUploadModal = false;
 
 
   deleteEmployee(emp: Employee) {
-    if (!confirm(`Delete ${emp.name}?`)) return;
 
-    this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
-      next: () => {
-        this.toastr.success("Employee deleted successfully", "Success");
-        this.loadEmployees();
-      },
-      error: (err) => {
-        // ✔ If backend returned text instead of JSON, treat 200 as success
-        if (err.status === 200) {
-          this.toastr.success("Employee deleted successfully", "Success");
-          this.loadEmployees();
-        } else {
-          this.toastr.error("Failed to delete employee", "Error");
-        }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to delete ${emp.name}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e74c3c',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+
+
+        this.employeeService.deleteEmployee(this.distributorId, emp.employeeId!).subscribe({
+          next: () => {
+            this.toastr.success("Employee deleted successfully", "Success");
+            this.loadEmployees();
+          },
+          error: (err) => {
+            // ✔ If backend returned text instead of JSON, treat 200 as success
+            if (err.status === 200) {
+              this.toastr.success("Employee deleted successfully", "Success");
+              this.loadEmployees();
+            } else {
+              this.toastr.error("Failed to delete employee", "Error");
+            }
+          }
+        });
       }
     });
   }
+
 
 
 
@@ -374,11 +426,9 @@ showUploadModal = false;
     });
   }
   openEmployeeModal(): void {
-    this.phoneSubmitted = false;
+
     this.isEdit = false;
-    this.employeeForm.reset();
-    this.emailExists = false;
-    this.phoneExists = false;
+    this.selectedEmployee = null;
 
     this.employeeForm.reset({
       name: '',
@@ -389,11 +439,31 @@ showUploadModal = false;
       isActive: true
     });
 
+    // 🔥 RESET PHONE + OTP STATE
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpFailed = false;
+    this.phoneVerifiedUI = false;
+    this.otpCode = '';
+    this.phoneSubmitted = false;
+
+    this.emailExists = false;
+    this.phoneExists = false;
+
     this.showModal = true;
   }
 
   closeEmployeeModal(): void {
     this.showModal = false;
+
+    // 🔥 reset state here also
+    this.otpSent = false;
+    this.otpVerified = false;
+    this.otpFailed = false;
+    this.phoneVerifiedUI = false;
+    this.otpCode = '';
+
+    document.body.classList.remove('modal-open');
   }
 
   openUploadModal(emp: any) {
@@ -402,10 +472,10 @@ showUploadModal = false;
   }
 
   closeUploadModal() {
-  this.showUploadModal = false;
-  this.selectedFile = null;
-  this.selectedFileName = '';   // ✅ RESET
-}
+    this.showUploadModal = false;
+    this.selectedFile = null;
+    this.selectedFileName = '';   // ✅ RESET
+  }
 
   // closeUploadModal() {
   //   this.showUploadModal = false;
@@ -413,13 +483,13 @@ showUploadModal = false;
   // }
 
   onFileSelected(event: any) {
-  const file = event.target.files[0];
+    const file = event.target.files[0];
 
-  if (file) {
-    this.selectedFile = file;
-    this.selectedFileName = file.name;   // ✅ ADD THIS
+    if (file) {
+      this.selectedFile = file;
+      this.selectedFileName = file.name;   // ✅ ADD THIS
+    }
   }
-}
 
   // onFileSelected(event: any) {
   //   this.selectedFile = event.target.files[0];
@@ -508,5 +578,17 @@ showUploadModal = false;
     window.open(url, '_blank');
   }
 
+  openSheet(type: string) {
+    console.log('Open sheet for:', type);
+
+    // Example:
+    // this.activeSheet = type;
+    // this.isSheetOpen = true;
+  }
+
+  isDistributor(): boolean {
+    const role = localStorage.getItem('Role');
+    return role === 'Distributor';
+  }
 }
 

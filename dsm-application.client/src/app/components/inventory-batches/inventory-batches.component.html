@@ -18,38 +18,30 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let row of rows; let i = index">
+          <tr *ngFor="let row of paginatedRows; let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ row.productName }}</td>
             <td>{{ row.productCode }}</td>
             <td>{{ row.initialQuantity }}</td>
             <td>
-              <span class="quantity-badge" 
-                [class.danger]="row.quantityAvailable === 0"
+              <span class="quantity-badge" [class.danger]="row.quantityAvailable === 0"
                 [class.warning]="row.availableQuantity <= 5 && row.availableQuantity > 0"
                 [class.success]="row.availableQuantity > 5">
                 {{ row.quantityAvailable }}
               </span>
             </td>
             <td>
-              <input 
-                type="date" 
-                class="form-control form-control-sm date-input" 
+              <input type="date" class="form-control form-control-sm date-input"
                 [ngModel]="row.manufactureDate ? (row.manufactureDate | date:'yyyy-MM-dd') : null"
-                (ngModelChange)="updateBatchDates(row, $event, 'mfg')" 
-              />
+                (ngModelChange)="updateBatchDates(row, $event, 'mfg')" />
             </td>
             <td>
-              <input 
-                type="date" 
-                class="form-control form-control-sm date-input" 
+              <input type="date" class="form-control form-control-sm date-input"
                 [ngModel]="row.expiryDate ? (row.expiryDate | date:'yyyy-MM-dd') : null"
-                (ngModelChange)="updateBatchDates(row, $event, 'exp')" 
-              />
+                (ngModelChange)="updateBatchDates(row, $event, 'exp')" />
             </td>
             <td>
-              <span class="status-badge" 
-                [class.expired]="getStatus(row.expiryDate) === 'Expired'"
+              <span class="status-badge" [class.expired]="getStatus(row.expiryDate) === 'Expired'"
                 [class.near-expiry]="getStatus(row.expiryDate) === 'Near Expiry'"
                 [class.valid]="getStatus(row.expiryDate) === 'Valid'"
                 [class.not-set]="getStatus(row.expiryDate) === 'Not Set'">
@@ -60,5 +52,31 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 🔥 PAGINATION OUTSIDE -->
+    <div class="pagination" *ngIf="totalPages > 1">
+
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+        ‹
+      </button>
+
+      <ng-container *ngFor="let page of getPageNumbers()">
+
+        <span *ngIf="page !== '...'" (click)="goToPage(page)" [class.active]="page === currentPage" class="page-number">
+          {{ page }}
+        </span>
+
+        <span *ngIf="page === '...'" class="dots">
+          ...
+        </span>
+
+      </ng-container>
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        ›
+      </button>
+
+    </div>
+
   </div>
 </div>

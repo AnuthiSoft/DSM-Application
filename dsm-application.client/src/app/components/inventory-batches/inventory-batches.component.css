@@ -20,6 +20,7 @@
   padding: 24px;
   box-shadow: var(--shadow);
   margin-bottom: 20px;
+  overflow-x: hidden;
 }
 
 .page-title {
@@ -114,6 +115,7 @@
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
+
 .status-badge {
   padding: 6px 14px;
   border-radius: 30px;
@@ -167,25 +169,25 @@ html[data-theme="dark"] .date-input:focus {
   .dashboard-card {
     padding: 16px;
   }
-  
+
   .page-title {
     font-size: 1.5rem;
     margin-bottom: 20px;
   }
-  
+
   .table thead th,
   .table tbody td {
     padding: 12px 8px;
     font-size: 0.85rem;
   }
-  
+
   .quantity-badge,
   .status-badge {
     font-size: 0.8rem;
     padding: 4px 8px;
     min-width: auto;
   }
-  
+
   .date-input {
     max-width: 120px;
     font-size: 0.8rem;
@@ -197,17 +199,16 @@ html[data-theme="dark"] .date-input:focus {
   .dashboard-main {
     padding: 20px 15px;
   }
-  
+
   .table-responsive {
-    margin: 0 -15px;
     border: none;
     border-radius: 0;
   }
-  
+
   .date-input {
     max-width: 100px;
   }
-  
+
   .status-badge {
     min-width: 80px;
     font-size: 0.7rem;
@@ -221,13 +222,15 @@ html[data-theme="dark"] .date-input:focus {
 @media (min-width: 769px) and (max-width: 1024px) {
 
   .table {
-    table-layout: fixed;     /* 🔥 KEY FIX */
+    table-layout: fixed;
+    /* 🔥 KEY FIX */
     width: 100%;
   }
 
   .table th,
   .table td {
-    white-space: normal;     /* allow wrapping */
+    white-space: normal;
+    /* allow wrapping */
     word-break: break-word;
   }
 
@@ -253,7 +256,8 @@ html[data-theme="dark"] .date-input:focus {
 @media (max-width: 768px) {
 
   .table {
-    min-width: 900px;     /* 🔥 forces scroll */
+    min-width: 900px;
+    /* 🔥 forces scroll */
   }
 
   .table-responsive {
@@ -267,4 +271,61 @@ html[data-theme="dark"] .date-input:focus {
   }
 }
 
+.pagination {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;   /* ✅ always center */
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;           /* ✅ wrap instead of scroll */
+}
 
+.page-number,
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  transition: 0.2s ease;
+}
+
+.page-number:hover,
+.page-btn:hover {
+  background: rgba(52, 152, 219, 0.08);
+}
+
+.page-number.active {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dots {
+  padding: 0 6px;
+  opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+
+  .page-number,
+  .page-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .dots {
+    padding: 0 4px;
+  }
+
+}

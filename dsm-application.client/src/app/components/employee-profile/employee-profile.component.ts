@@ -122,7 +122,7 @@ export class EmployeeProfileComponent implements OnInit {
       next: () => {
         // ✅ IMPORTANT: update UI immediately
         this.profile.phoneVerified = true;
-
+        this.originalPhoneNumber = this.profile.phoneNumber;
         this.showOtpInput = false;
         this.otp = '';
 
@@ -226,6 +226,7 @@ formData.append('PhoneVerified', this.profile.phoneVerified ? 'true' : 'false');
       }
     });
   }
+
 
 
   loadImage() {

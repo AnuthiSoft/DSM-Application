@@ -29,7 +29,7 @@
 
   <!-- Return Cards -->
   <div *ngIf="!loading && returnRequests.length > 0" class="returns-grid">
-    <div class="return-card dashboard-card" *ngFor="let r of returnRequests; let i = index" [ngClass]="r.status">
+    <div class="return-card dashboard-card" *ngFor="let r of paginatedReturns; let i = index" [ngClass]="r.status">
 
       <!-- Card Header -->
       <div class="card-header">
@@ -129,6 +129,55 @@
       </div>
     </div>
   </div>
+
+  <nav *ngIf="totalPages > 1" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+      <!-- Prev -->
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+          Prev
+        </button>
+      </li>
+
+      <!-- First Page -->
+      <li *ngIf="pageNumbers[0] > 1" class="page-item">
+        <button class="page-link" (click)="goToPage(1)">1</button>
+      </li>
+
+      <!-- Start dots -->
+      <li *ngIf="pageNumbers[0] > 2" class="page-item disabled">
+        <span class="page-link">...</span>
+      </li>
+
+      <!-- Dynamic Pages -->
+      <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="currentPage === page">
+        <button class="page-link" (click)="goToPage(page)">
+          {{ page }}
+        </button>
+      </li>
+
+      <!-- End dots -->
+      <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1" class="page-item disabled">
+        <span class="page-link">...</span>
+      </li>
+
+      <!-- Last Page -->
+      <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages" class="page-item">
+        <button class="page-link" (click)="goToPage(totalPages)">
+          {{ totalPages }}
+        </button>
+      </li>
+
+      <!-- Next -->
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+      </li>
+
+    </ul>
+  </nav>
 
   <!-- IMAGE GALLERY MODAL -->
   <div class="image-modal" *ngIf="isImageModalOpen">

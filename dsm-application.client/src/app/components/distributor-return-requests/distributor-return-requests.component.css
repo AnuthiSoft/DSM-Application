@@ -21,7 +21,7 @@
 }
 
 /* Loading State */
-.return-requests-container > div[ngIf="loading"] {
+.return-requests-container>div[ngIf="loading"] {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,7 +58,7 @@
 
 .return-requests-container .return-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: var(--primary-color);
 }
 
@@ -131,7 +131,7 @@
   margin: 20px 0;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 300px;
   border: 2px solid var(--border-color);
 }
@@ -278,7 +278,7 @@
   justify-content: center;
   font-size: 0.9rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive Design */
@@ -286,39 +286,39 @@
   .return-requests-container {
     padding: 15px;
   }
-  
+
   .return-requests-container h2 {
     font-size: 1.5rem;
   }
-  
+
   .return-requests-container .return-card {
     padding: 20px;
   }
-  
+
   .return-requests-container .return-card .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .return-requests-container .return-card p {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .return-requests-container .return-card p b {
     min-width: auto;
   }
-  
+
   .return-requests-container .actions {
     flex-direction: column;
   }
-  
+
   .return-requests-container .btn {
     width: 100%;
     min-width: auto;
   }
-  
+
   .return-requests-container .product-image {
     max-width: 100%;
   }
@@ -328,7 +328,7 @@
   .return-requests-container .return-card {
     padding: 15px;
   }
-  
+
   .return-requests-container .return-card::after {
     top: 10px;
     right: 10px;
@@ -336,7 +336,7 @@
     height: 28px;
     font-size: 0.8rem;
   }
-  
+
   .return-requests-container .status-badge {
     padding: 5px 12px;
     font-size: 0.8rem;
@@ -467,7 +467,7 @@ html[data-theme="dark"] .product-image {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
   padding: 15px;
   color: white;
 }
@@ -690,7 +690,7 @@ html[data-theme="dark"] .product-image {
 .modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .modal-content {
@@ -717,8 +717,13 @@ html[data-theme="dark"] .product-image {
   user-select: none;
 }
 
-.nav-btn.left { left: 40px; }
-.nav-btn.right { right: 40px; }
+.nav-btn.left {
+  left: 40px;
+}
+
+.nav-btn.right {
+  right: 40px;
+}
 
 .close-btn {
   position: absolute;
@@ -745,20 +750,25 @@ html[data-theme="dark"] .product-image {
   background: rgba(var(--primary-color-rgb), 0.03);
   border-radius: 8px;
   border: 1px solid var(--border-color);
-  flex: 1;                     /* ✅ allow equal width boxes */
-  min-width: 0;                /* ✅ prevents text overflow */
+  flex: 1;
+  /* ✅ allow equal width boxes */
+  min-width: 0;
+  /* ✅ prevents text overflow */
 }
 
 .detail-item div {
-  flex: 1;                     /* make text container flexible */
-  min-width: 0;                /* IMPORTANT: prevents overflow */
+  flex: 1;
+  /* make text container flexible */
+  min-width: 0;
+  /* IMPORTANT: prevents overflow */
 }
 
 .order-id {
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 0.9rem;
   color: var(--secondary-color);
-  word-break: break-all;       /* ✅ ensures long IDs wrap inside the box */
+  word-break: break-all;
+  /* ✅ ensures long IDs wrap inside the box */
 }
 
 
@@ -768,12 +778,12 @@ html[data-theme="dark"] .product-image {
     background: #1b2028 !important;
     border-color: #2a2f38 !important;
   }
-  
+
   .custom-swal-title,
   .custom-swal-content {
     color: #e5e7eb !important;
   }
-  
+
   .custom-swal-cancel-btn {
     border-color: #2a2f38 !important;
     color: #e5e7eb !important;
@@ -786,6 +796,7 @@ html[data-theme="dark"] .product-image {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -816,4 +827,23 @@ html[data-theme="dark"] .product-image {
 
 .header-left h4 span {
   word-break: break-all;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;     /* 🔥 spacing between items */
+  flex-wrap: wrap;
+}
+
+.page-item {
+  margin: 0;
+}
+
+.page-link {
+  min-width: 38px;
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px 12px;
 }

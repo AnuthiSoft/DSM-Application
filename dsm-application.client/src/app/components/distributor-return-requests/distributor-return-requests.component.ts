@@ -6,6 +6,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../../models/order.model';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-distributor-return-requests',
@@ -20,14 +21,20 @@ export class DistributorReturnRequestsComponent implements OnInit {
   returnRequests: any[] = [];
   employees: any[] = [];
   loading = true;
+  currentPage = 1;
+  itemsPerPage = 6;
 
   constructor(
     private http: HttpClient,
     private employeeService: EmployeeService,
     private returnApiService: ReturnApiService,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
+  @HostListener('window:resize')
+  onResize() {
+    this.currentPage = this.currentPage;
+  }
   ngOnInit(): void {
     console.log('Distributor ID:', this.distributorId);
     this.loadReturns();
@@ -40,20 +47,20 @@ export class DistributorReturnRequestsComponent implements OnInit {
     this.returnApiService
       .getReturnHistoryForDistributor(this.distributorId)
       .subscribe({
-       next: res => {
-  console.log('RAW API RESPONSE:', res);
+        next: res => {
+          console.log('RAW API RESPONSE:', res);
 
-this.returnRequests = res.map(r => ({
-  ...r,
-  imageUrls: (r.imageUrls ?? []).map((imageId: string) =>
-    `${environment.apiUrl}/returns/return-image/${imageId}`
-  )
-}));
+          this.returnRequests = res.map(r => ({
+            ...r,
+            imageUrls: (r.imageUrls ?? []).map((imageId: string) =>
+              `${environment.apiUrl}/returns/return-image/${imageId}`
+            )
+          }));
 
 
-  console.log('PROCESSED RETURNS:', this.returnRequests);
-  this.loading = false;
-},
+          console.log('PROCESSED RETURNS:', this.returnRequests);
+          this.loading = false;
+        },
 
         error: err => {
           this.loading = false;
@@ -66,20 +73,20 @@ this.returnRequests = res.map(r => ({
   }
 
   loadEmployees() {
-  this.employeeService.getDeliveryEmployees(this.distributorId)
-    .subscribe({
-      next: (res: any[]) => {
-        console.log("Delivery Employees:", res);
+    this.employeeService.getDeliveryEmployees(this.distributorId)
+      .subscribe({
+        next: (res: any[]) => {
+          console.log("Delivery Employees:", res);
 
-        // Backend already returns only delivery employees
-        this.employees = res;
-      },
-      error: (err) => {
-        console.error("Failed to load delivery employees:", err);
-        this.toastr.error("Unable to load delivery employees");
-      }
-    });
-}
+          // Backend already returns only delivery employees
+          this.employees = res;
+        },
+        error: (err) => {
+          console.error("Failed to load delivery employees:", err);
+          this.toastr.error("Unable to load delivery employees");
+        }
+      });
+  }
 
   approveAndSchedule(r: any) {
     // Prevent action if already scheduled
@@ -128,7 +135,7 @@ this.returnRequests = res.map(r => ({
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const minDate = tomorrow.toISOString().split('T')[0];
     const nextWeek = new Date(today);
     nextWeek.setDate(nextWeek.getDate() + 7);
@@ -137,9 +144,9 @@ this.returnRequests = res.map(r => ({
 
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px;">' +
-             '<i class="fas fa-calendar-check" style="color: #3498db; font-size: 1.5rem;"></i>' +
-             '<span>Schedule Return Pickup</span>' +
-             '</div>',
+        '<i class="fas fa-calendar-check" style="color: #3498db; font-size: 1.5rem;"></i>' +
+        '<span>Schedule Return Pickup</span>' +
+        '</div>',
       html: `
         <div class="return-schedule-modal">
           <div style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white; 
@@ -332,9 +339,9 @@ this.returnRequests = res.map(r => ({
   showSuccessAlert(returnId: string, data: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #27ae60;">' +
-             '<i class="fas fa-check-circle" style="font-size: 2rem;"></i>' +
-             '<span>Pickup Scheduled!</span>' +
-             '</div>',
+        '<i class="fas fa-check-circle" style="font-size: 2rem;"></i>' +
+        '<span>Pickup Scheduled!</span>' +
+        '</div>',
       html: `
         <div style="text-align: center; padding: 10px;">
           <h3 style="color: #2c3e50; margin-bottom: 15px; font-weight: 600;">
@@ -407,24 +414,24 @@ this.returnRequests = res.map(r => ({
   }
 
   markReceived(r: any) {
- 
-  this.returnApiService.completeReturn(r.id).subscribe(() => {
-    this.toastr.success(
-      'Product received and return completed',
-      'Completed'
-    );
 
-    // ✅ FINAL STATUS
-    r.status = 'Completed';
-  });
-}
+    this.returnApiService.completeReturn(r.id).subscribe(() => {
+      this.toastr.success(
+        'Product received and return completed',
+        'Completed'
+      );
+
+      // ✅ FINAL STATUS
+      r.status = 'Completed';
+    });
+  }
 
   showMarkReceivedSuccess(r: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #27ae60;">' +
-             '<i class="fas fa-check-circle" style="font-size: 2rem;"></i>' +
-             '<span>Product Received!</span>' +
-             '</div>',
+        '<i class="fas fa-check-circle" style="font-size: 2rem;"></i>' +
+        '<span>Product Received!</span>' +
+        '</div>',
       html: `
         <div style="text-align: center; padding: 10px;">
           <h3 style="color: #2c3e50; margin-bottom: 10px; font-weight: 600;">
@@ -476,9 +483,9 @@ this.returnRequests = res.map(r => ({
   rejectReturnUI(r: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #e74c3c;">' +
-             '<i class="fas fa-ban" style="font-size: 1.5rem;"></i>' +
-             '<span>Reject Return Request</span>' +
-             '</div>',
+        '<i class="fas fa-ban" style="font-size: 1.5rem;"></i>' +
+        '<span>Reject Return Request</span>' +
+        '</div>',
       html: `
         <div style="text-align: left; padding: 5px;">
           <div style="background: rgba(231, 76, 60, 0.1); padding: 15px; border-radius: 10px; 
@@ -589,34 +596,34 @@ this.returnRequests = res.map(r => ({
   }
 
   rejectReturn(
-  returnId: string,
-  reason: string,
-  comments: string,
-  notifyCustomer: boolean
-) {
-  this.returnApiService.rejectReturn(returnId, reason).subscribe({
-    next: () => {
-      // ✅ Update UI AFTER backend success
-      const r = this.returnRequests.find(x => x.id === returnId);
-      if (r) {
-        r.status = 'Rejected';
-        r.rejectedBy = 'Distributor';
-        r.rejectionReason = reason;
-        r.rejectionComments = comments;
+    returnId: string,
+    reason: string,
+    comments: string,
+    notifyCustomer: boolean
+  ) {
+    this.returnApiService.rejectReturn(returnId, reason).subscribe({
+      next: () => {
+        // ✅ Update UI AFTER backend success
+        const r = this.returnRequests.find(x => x.id === returnId);
+        if (r) {
+          r.status = 'Rejected';
+          r.rejectedBy = 'Distributor';
+          r.rejectionReason = reason;
+          r.rejectionComments = comments;
+        }
+
+        this.toastr.success('Return rejected successfully');
+
+        // ✅ safest option (recommended)
+        // this.loadReturns();
+      },
+      error: err => {
+        this.toastr.error(
+          err.error?.message || 'Failed to reject return'
+        );
       }
-
-      this.toastr.success('Return rejected successfully');
-
-      // ✅ safest option (recommended)
-      // this.loadReturns();
-    },
-    error: err => {
-      this.toastr.error(
-        err.error?.message || 'Failed to reject return'
-      );
-    }
-  });
-}
+    });
+  }
 
 
   getStatusLabel(status: string): string {
@@ -648,9 +655,9 @@ this.returnRequests = res.map(r => ({
   viewDetails(r: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #3498db;">' +
-             '<i class="fas fa-info-circle" style="font-size: 1.5rem;"></i>' +
-             '<span>Return Details</span>' +
-             '</div>',
+        '<i class="fas fa-info-circle" style="font-size: 1.5rem;"></i>' +
+        '<span>Return Details</span>' +
+        '</div>',
       html: `
         <div style="text-align: left; padding: 10px;">
           <div style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white; 
@@ -732,9 +739,9 @@ this.returnRequests = res.map(r => ({
   contactCustomer(r: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #3498db;">' +
-             '<i class="fas fa-phone-alt" style="font-size: 1.5rem;"></i>' +
-             '<span>Contact Customer</span>' +
-             '</div>',
+        '<i class="fas fa-phone-alt" style="font-size: 1.5rem;"></i>' +
+        '<span>Contact Customer</span>' +
+        '</div>',
       html: `
         <div style="text-align: left; padding: 10px;">
           <div style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white; 
@@ -841,29 +848,67 @@ this.returnRequests = res.map(r => ({
 
 
   selectedImages: string[] = [];
-selectedImageIndex = 0;
-isImageModalOpen = false;
+  selectedImageIndex = 0;
+  isImageModalOpen = false;
 
-openImageGallery(images: string[], index: number = 0) {
-  this.selectedImages = images;
-  this.selectedImageIndex = index;
-  this.isImageModalOpen = true;
-}
-
-closeImageGallery() {
-  this.isImageModalOpen = false;
-}
-
-prevImage() {
-  if (this.selectedImageIndex > 0) {
-    this.selectedImageIndex--;
+  openImageGallery(images: string[], index: number = 0) {
+    this.selectedImages = images;
+    this.selectedImageIndex = index;
+    this.isImageModalOpen = true;
   }
-}
 
-nextImage() {
-  if (this.selectedImageIndex < this.selectedImages.length - 1) {
-    this.selectedImageIndex++;
+  closeImageGallery() {
+    this.isImageModalOpen = false;
   }
-}
 
+  prevImage() {
+    if (this.selectedImageIndex > 0) {
+      this.selectedImageIndex--;
+    }
+  }
+
+  nextImage() {
+    if (this.selectedImageIndex < this.selectedImages.length - 1) {
+      this.selectedImageIndex++;
+    }
+  }
+
+  get paginatedReturns() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.returnRequests.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.returnRequests.length / this.itemsPerPage);
+  }
+
+  // 🔥 Smart Page Numbers (IMPORTANT)
+  get pageNumbers(): number[] {
+    const width = window.innerWidth;
+
+    let maxVisible = 7; // desktop
+    if (width <= 992) maxVisible = 5;  // tablet
+    if (width <= 576) maxVisible = 3;  // mobile
+
+    const pages: number[] = [];
+
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+
+    if (end > this.totalPages) {
+      end = this.totalPages;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
 }

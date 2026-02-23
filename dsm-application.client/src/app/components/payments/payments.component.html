@@ -1,4 +1,5 @@
-<div class="tab-content active" *ngIf="isActive('payments')">
+<div class="tab-content active" [hidden]="!isPaymentsActive">
+
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-left">
@@ -92,7 +93,7 @@
       <!-- Component Content -->
       <div *ngIf="!loading" class="component-content">
         <!-- Payment Reports -->
-        <div *ngIf="activeSection === 'reports'" class="component-section">
+        <div [hidden]="activeSection !== 'reports'" class="component-section">
           <div class="section-header">
             <h4><i class="fas fa-chart-line"></i> Payment Analytics & Reports</h4>
           </div>
@@ -100,7 +101,7 @@
         </div>
 
         <!-- Pending Handovers -->
-        <div *ngIf="activeSection === 'handovers'" class="component-section">
+        <div [hidden]="activeSection !== 'handovers'" class="component-section">
           <div class="section-header">
             <h4><i class="fas fa-exchange-alt"></i> Manage Cash Handovers</h4>
             <button class="btn btn-sm btn-primary" (click)="refreshHandovers()">
@@ -111,7 +112,7 @@
         </div>
 
         <!-- Customer Payment Status -->
-        <div *ngIf="activeSection === 'customers'" class="component-section">
+        <div [hidden]="activeSection !== 'customers'" class="component-section">
           <div class="section-header">
             <h4><i class="fas fa-user-check"></i> Customer Payment Status</h4>
             <button class="btn btn-sm btn-primary" (click)="refreshCustomers()">

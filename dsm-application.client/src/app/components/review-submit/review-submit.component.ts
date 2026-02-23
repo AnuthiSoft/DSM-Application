@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
   styleUrl: './review-submit.component.css'
 })
 export class ReviewSubmitComponent {
-   model: AddReviewDto = {
+  model: AddReviewDto = {
     reviewerId: '',
     targetId: '',
     targetType: '',
@@ -25,13 +25,14 @@ export class ReviewSubmitComponent {
   success = '';
   error = '';
 
+
   constructor(
     private reviewService: ReviewService,
     private route: ActivatedRoute,
     private auth: AuthService,
-    private cust :CustomerService,
-      private router: Router 
-  ) {}
+    private cust: CustomerService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.model.reviewerId =
@@ -43,54 +44,55 @@ export class ReviewSubmitComponent {
     this.model.targetId = this.route.snapshot.paramMap.get('targetId') || '';
     this.model.targetType = this.route.snapshot.paramMap.get('targetType') || '';
   }
-setRating(value: number) {
-  this.model.rating = value;
-}
- submit(form: any) {
+
+  submit(form: any) {
     this.success = '';
-  this.error = '';
-   if (form.invalid) {
-      form.control.markAllAsTouched(); 
-    this.error = 'Please fill all required fields';
-    return;
-  }
+    this.error = '';
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      this.error = 'Please fill all required fields';
+      return;
+    }
     this.success = '';
     this.error = '';
     // 🔥 Validation
-if (!this.model.title || this.model.title.trim() === '') {
-  this.error = 'Title is required';
-  return;
-}
+    if (!this.model.title || this.model.title.trim() === '') {
+      this.error = 'Title is required';
+      return;
+    }
 
-if (!this.model.description || this.model.description.trim() === '') {
-  this.error = 'Description is required';
-  return;
-}
+    if (!this.model.description || this.model.description.trim() === '') {
+      this.error = 'Description is required';
+      return;
+    }
 
-if (!this.model.rating || this.model.rating === 0) {
-  this.error = 'Rating is required';
-  return;
-}
+    if (!this.model.rating || this.model.rating === 0) {
+      this.error = 'Rating is required';
+      return;
+    }
 
     this.reviewService.submitReview(this.model).subscribe({
       next: (res) => {
         this.success = res.message;
-         setTimeout(() => {
-        this.router.navigate(['/customer-dashboard'], {
-          queryParams: { tab: 'distributors' }
-        });
-      }, 1500); // wait 1.5 sec so message is visible
-    },
-      
+        setTimeout(() => {
+          this.router.navigate(['/customer-dashboard'], {
+            queryParams: { tab: 'distributors' }
+          });
+        }, 1000); // wait 1.5 sec so message is visible
+      },
+
       error: () => {
         this.error = 'Failed to submit review.';
       }
     });
   }
-close() {
-  this.router.navigate(['/customer-dashboard'], {
-    queryParams: { tab: 'distributors' }
-  });
-}
+  close() {
+    this.router.navigate(['/customer-dashboard'], {
+      queryParams: { tab: 'distributors' }
+    });
+  }
 
+  setRating(value: number) {
+    this.model.rating = value;
+  }
 }

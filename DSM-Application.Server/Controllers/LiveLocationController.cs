@@ -192,60 +192,223 @@ namespace DistributorManagementSystem.Server.Controllers
         //}
 
 
+        //[AllowAnonymous]
+        //[HttpPost]
+        //public async Task<IActionResult> SaveLocation([FromBody] LiveLocation location)
+        //{
+        //    // Check if employee is on duty
+        //    if (!ObjectId.TryParse(location.EmployeeId, out var empObjId))
+        //    {
+        //        return BadRequest("Invalid EmployeeId");
+        //    }
+
+        //    Console.WriteLine("DB = " + _db.Database.DatabaseNamespace.DatabaseName);
+        //    //var emp = await _db.Database
+        //    // .GetCollection<Employee>("Employees")
+        //    // .Find(e => e.EmployeeId == location.EmployeeId) // ✅ use EmployeeId
+        //    // .FirstOrDefaultAsync();
+
+        //    //var emp = await _db.Database
+        //    //    .GetCollection<Employee>("Employees")
+        //    //    .Find(e => e.EmployeeId == location.EmployeeId)
+        //    //    .FirstOrDefaultAsync();
+
+        //    //if (emp == null || !emp.IsOnDuty)
+        //    //{
+        //    //    return Ok(new { ignored = true, reason = "Not on duty" });
+        //    //}
+
+        //    var session = await _db.Database
+        //    .GetCollection<DeliverySession>("DeliverySessions")
+        //    .Find(s => s.EmployeeId == location.EmployeeId && s.IsActive)
+        //    .FirstOrDefaultAsync();
+
+        //    if (session == null)
+        //    {
+        //        return Ok(new { ignored = true, reason = "No active trip" });
+        //    }
+
+        //    try
+        //    {
+        //        location.Time = DateTime.UtcNow;
+
+        //        // ✅ Fetch distributor
+        //        // Convert string → ObjectId
+        //        if (!ObjectId.TryParse(location.DistributorId, out var distObjId))
+        //        {
+        //            return BadRequest("Invalid DistributorId");
+        //        }
+
+        //        var distributor = await _distributors
+        //            .Find(d => d.DistributorId == location.DistributorId) // 👈 _id field
+        //            .FirstOrDefaultAsync();
+
+        //        //var distributor = await _distributors
+        //        //    .Find(d => d.DistributorId == location.DistributorId)
+        //        //    .FirstOrDefaultAsync();
+
+        //        if (distributor == null || distributor.Godowns == null || distributor.Godowns.Count == 0)
+        //        {
+        //            return BadRequest("No godown configured for this distributor");
+        //        }
+
+        //        bool insideGodown = false;
+        //        double minDistance = double.MaxValue;
+
+        //        // ✅ Check all godowns
+        //        foreach (var godown in distributor.Godowns)
+        //        {
+        //            var d = GeoDistanceService.GetDistanceInMeters(
+        //                godown.Lat,
+        //                godown.Lng,
+        //                location.Lat,
+        //                location.Lng
+        //            );
+
+        //            if (d < minDistance)
+        //                minDistance = d;
+
+        //            if (d <= godown.RadiusMeters)
+        //            {
+        //                insideGodown = true;
+        //                break;
+        //            }
+        //        }
+
+        //        // 🟢 Inside → Ignore
+        //        //    if (insideGodown)
+        //        //    {
+        //        //        return Ok(new
+        //        //        {
+        //        //            ignored = true,
+        //        //            isInsideGodown = true,
+        //        //            distance = minDistance
+        //        //        });
+        //        //    }
+
+        //        //    // 🔴 Outside → Save
+        //        //    location.IsInsideGodown = false;
+
+        //        //    await _locations.InsertOneAsync(location);
+
+        //        //    return Ok(new
+        //        //    {
+        //        //        saved = true,
+        //        //        isInsideGodown = false,
+        //        //        distance = minDistance
+        //        //    });
+        //        //}
+
+        //        // ✅ Always set flags
+        //        location.IsInsideGodown = insideGodown;
+        //        location.IsIgnored = insideGodown; // inside = ignored
+        //        location.Time = DateTime.UtcNow;
+
+        //        // ✅ Always save
+        //        //await _locations.InsertOneAsync(location);
+
+        //        await _locations.UpdateOneAsync(
+        //        Builders<LiveLocation>.Filter.Eq(l => l.EmployeeId, location.EmployeeId),
+
+        //        Builders<LiveLocation>.Update
+        //            .Set(l => l.EmployeeId, location.EmployeeId)
+        //            .Set(l => l.DistributorId, location.DistributorId)
+        //            .Set(l => l.Lat, location.Lat)
+        //            .Set(l => l.Lng, location.Lng)
+        //            .Set(l => l.Time, location.Time)
+        //            .Set(l => l.IsInsideGodown, insideGodown)
+        //            .Set(l => l.IsIgnored, insideGodown),
+
+        //        new UpdateOptions { IsUpsert = true }
+        //        );
+
+        //        // ✅ Return response
+        //        return Ok(new
+        //        {
+        //            saved = true,
+        //            isInsideGodown = insideGodown,
+        //            distance = minDistance
+        //        });
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("🔥 LiveLocation ERROR: " + ex.ToString());
+
+        //        return StatusCode(500, new
+        //        {
+        //            saved = false,
+        //            error = ex.Message
+        //        });
+        //    }
+        //    //catch (Exception ex)
+        //    //{
+        //    //    Console.WriteLine("LiveLocation error: " + ex);
+
+        //    //    return Ok(new
+        //    //    {
+        //    //        saved = false,
+        //    //        error = "Exception"
+        //    //    });
+        //    //}
+        //}
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> SaveLocation([FromBody] LiveLocation location)
         {
-            // Check if employee is on duty
-            if (!ObjectId.TryParse(location.EmployeeId, out var empObjId))
-            {
-                return BadRequest("Invalid EmployeeId");
-            }
-
-            Console.WriteLine("DB = " + _db.Database.DatabaseNamespace.DatabaseName);
-            var emp = await _db.Database
-             .GetCollection<Employee>("Employees")
-             .Find(e => e.EmployeeId == location.EmployeeId) // ✅ use EmployeeId
-             .FirstOrDefaultAsync();
-
-            //var emp = await _db.Database
-            //    .GetCollection<Employee>("Employees")
-            //    .Find(e => e.EmployeeId == location.EmployeeId)
-            //    .FirstOrDefaultAsync();
-
-            if (emp == null || !emp.IsOnDuty)
-            {
-                return Ok(new { ignored = true, reason = "Not on duty" });
-            }
+            if (location == null || string.IsNullOrWhiteSpace(location.EmployeeId))
+                return BadRequest("EmployeeId is required");
 
             try
             {
-                location.Time = DateTime.UtcNow;
+                // --------------------------------------------------
+                // 1️⃣ CHECK ACTIVE DELIVERY SESSION
+                // --------------------------------------------------
 
-                // ✅ Fetch distributor
-                // Convert string → ObjectId
-                if (!ObjectId.TryParse(location.DistributorId, out var distObjId))
-                {
-                    return BadRequest("Invalid DistributorId");
-                }
-
-                var distributor = await _distributors
-                    .Find(d => d.DistributorId == location.DistributorId) // 👈 _id field
+                var session = await _db.Database
+                    .GetCollection<DeliverySession>("DeliverySessions")
+                    .Find(s => s.EmployeeId == location.EmployeeId && s.IsActive)
                     .FirstOrDefaultAsync();
 
-                //var distributor = await _distributors
-                //    .Find(d => d.DistributorId == location.DistributorId)
-                //    .FirstOrDefaultAsync();
+                if (session == null)
+                {
+                    return Ok(new
+                    {
+                        ignored = true,
+                        reason = "No active trip"
+                    });
+                }
+
+
+                // --------------------------------------------------
+                // 2️⃣ SET SERVER TIME
+                // --------------------------------------------------
+
+                location.Time = DateTime.UtcNow;
+
+
+                // --------------------------------------------------
+                // 3️⃣ FETCH DISTRIBUTOR + GODOWNS
+                // --------------------------------------------------
+
+                var distributor = await _distributors
+                    .Find(d => d.DistributorId == location.DistributorId)
+                    .FirstOrDefaultAsync();
 
                 if (distributor == null || distributor.Godowns == null || distributor.Godowns.Count == 0)
                 {
                     return BadRequest("No godown configured for this distributor");
                 }
 
+
+                // --------------------------------------------------
+                // 4️⃣ CHECK GODOWN DISTANCE
+                // --------------------------------------------------
+
                 bool insideGodown = false;
                 double minDistance = double.MaxValue;
 
-                // ✅ Check all godowns
                 foreach (var godown in distributor.Godowns)
                 {
                     var d = GeoDistanceService.GetDistanceInMeters(
@@ -265,39 +428,58 @@ namespace DistributorManagementSystem.Server.Controllers
                     }
                 }
 
-                // 🟢 Inside → Ignore
-                //    if (insideGodown)
-                //    {
-                //        return Ok(new
-                //        {
-                //            ignored = true,
-                //            isInsideGodown = true,
-                //            distance = minDistance
-                //        });
-                //    }
 
-                //    // 🔴 Outside → Save
-                //    location.IsInsideGodown = false;
+                // --------------------------------------------------
+                // 5️⃣ SET FLAGS
+                // --------------------------------------------------
 
-                //    await _locations.InsertOneAsync(location);
-
-                //    return Ok(new
-                //    {
-                //        saved = true,
-                //        isInsideGodown = false,
-                //        distance = minDistance
-                //    });
-                //}
-
-                // ✅ Always set flags
                 location.IsInsideGodown = insideGodown;
-                location.IsIgnored = insideGodown; // inside = ignored
-                location.Time = DateTime.UtcNow;
+                location.IsIgnored = insideGodown;
 
-                // ✅ Always save
-                await _locations.InsertOneAsync(location);
 
-                // ✅ Return response
+                // --------------------------------------------------
+                // 6️⃣ UPSERT LIVE LOCATION (ONE ROW PER EMPLOYEE)
+                // --------------------------------------------------
+
+                await _locations.UpdateOneAsync(
+                    Builders<LiveLocation>.Filter.Eq(l => l.EmployeeId, location.EmployeeId),
+
+                    Builders<LiveLocation>.Update
+                        .Set(l => l.EmployeeId, location.EmployeeId)
+                        .Set(l => l.DistributorId, location.DistributorId)
+                        .Set(l => l.Lat, location.Lat)
+                        .Set(l => l.Lng, location.Lng)
+                        .Set(l => l.Time, location.Time)
+                        .Set(l => l.IsInsideGodown, insideGodown)
+                        .Set(l => l.IsIgnored, insideGodown),
+
+                    new UpdateOptions { IsUpsert = true }
+                );
+
+
+                // --------------------------------------------------
+                // 7️⃣ SAVE ROUTE POINT IN SESSION (HISTORY)
+                // --------------------------------------------------
+
+                await _db.Database
+                    .GetCollection<DeliverySession>("DeliverySessions")
+                    .UpdateOneAsync(
+                        s => s.Id == session.Id,
+
+                        Builders<DeliverySession>.Update.Push(s => s.Route,
+                            new LatLongPoint
+                            {
+                                Lat = location.Lat,
+                                Lng = location.Lng,
+                                Time = location.Time
+                            })
+                    );
+
+
+                // --------------------------------------------------
+                // 8️⃣ RETURN SUCCESS
+                // --------------------------------------------------
+
                 return Ok(new
                 {
                     saved = true,
@@ -305,10 +487,9 @@ namespace DistributorManagementSystem.Server.Controllers
                     distance = minDistance
                 });
             }
-
             catch (Exception ex)
             {
-                Console.WriteLine("🔥 LiveLocation ERROR: " + ex.ToString());
+                Console.WriteLine("🔥 LiveLocation ERROR: " + ex);
 
                 return StatusCode(500, new
                 {
@@ -316,51 +497,89 @@ namespace DistributorManagementSystem.Server.Controllers
                     error = ex.Message
                 });
             }
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("LiveLocation error: " + ex);
-
-            //    return Ok(new
-            //    {
-            //        saved = false,
-            //        error = "Exception"
-            //    });
-            //}
         }
 
         // ✅ GET LIVE EMPLOYEE LOCATIONS
+        //[AllowAnonymous]
+        //[HttpGet("active")]
+        //public async Task<IActionResult> GetLiveEmployees()
+        //{
+        //    try
+        //    {
+        //        // Get latest location per employee (today only)
+        //        var today = DateTime.UtcNow.Date;
+
+        //        //var list = await _locations
+        //        //    .Find(l => l.Time >= today)
+        //        //var list = await _locations
+        //        ////.Find(l => l.Time >= today && !l.IsIgnored) // ❗ filter
+        //        //    .Find(l => l.Time >= today)
+        //        //    .SortByDescending(l => l.Time)
+        //        //    .ToListAsync();
+
+        //        // Group by EmployeeId → get latest point
+        //        //var result = list
+        //        //    .GroupBy(l => l.EmployeeId)
+        //        //    .Select(g => g.First())
+        //        //    .ToList();
+
+
+        //        //return Ok(result);
+        //        return new JsonResult(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("GetLiveEmployees error: " + ex);
+        //        return Ok(new List<LiveLocation>());
+        //    }
+        //}
+
         [AllowAnonymous]
         [HttpGet("active")]
         public async Task<IActionResult> GetLiveEmployees()
         {
-            try
-            {
-                // Get latest location per employee (today only)
-                var today = DateTime.UtcNow.Date;
+            var sessions = await _db.Database
+                .GetCollection<DeliverySession>("DeliverySessions")
+                .Find(s => s.IsActive)
+                .Project(s => s.EmployeeId)
+                .ToListAsync();
 
-                //var list = await _locations
-                //    .Find(l => l.Time >= today)
-                var list = await _locations
-                //.Find(l => l.Time >= today && !l.IsIgnored) // ❗ filter
-                    .Find(l => l.Time >= today)
-                    .SortByDescending(l => l.Time)
-                    .ToListAsync();
-
-                // Group by EmployeeId → get latest point
-                var result = list
-                    .GroupBy(l => l.EmployeeId)
-                    .Select(g => g.First())
-                    .ToList();
-
-                //return Ok(result);
-                return new JsonResult(result);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetLiveEmployees error: " + ex);
+            if (!sessions.Any())
                 return Ok(new List<LiveLocation>());
-            }
+
+            var live = await _locations
+                .Find(l => sessions.Contains(l.EmployeeId))
+                .ToListAsync();
+
+            return Ok(live);
         }
+
+
+        //[AllowAnonymous]
+        //[HttpGet("active")]
+        //public async Task<IActionResult> GetLiveEmployees()
+        //{
+        //    // 1️⃣ Get active employees
+        //    var sessions = await _db.Database
+        //        .GetCollection<DeliverySession>("DeliverySessions")
+        //        .Find(s => s.IsActive)
+        //        .Project(s => s.EmployeeId)
+        //        .ToListAsync();
+
+        //    if (!sessions.Any())
+        //        return Ok(new List<LiveLocation>());
+
+        //    // 2️⃣ Get ONLY outside-godown locations
+        //    var live = await _locations
+        //        .Find(l =>
+        //            sessions.Contains(l.EmployeeId) &&
+        //            !l.IsInsideGodown &&
+        //            !l.IsIgnored
+        //        )
+        //        .ToListAsync();
+
+        //    return Ok(live);
+        //}
 
         // ✅ GET FULL ROUTE FOR TODAY
         [AllowAnonymous]

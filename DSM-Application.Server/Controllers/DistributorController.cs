@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace DSM_Application.Server.Controllers
 {
-    [Route("api/distributors")]   // FIXED
+    [Route("api/distributor")]   // FIXED
     [ApiController]
     public class DistributorController : ControllerBase
     {

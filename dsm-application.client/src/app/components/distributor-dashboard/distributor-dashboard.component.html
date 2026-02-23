@@ -497,7 +497,7 @@
     <div *ngIf="isActive('live-tracking')" class="live-tracking-container">
       <h2 class="tracking-title">📍 Live Employee Tracking</h2>
  
-       <div class="tracking-controls">
+       <!-- <div class="tracking-controls"> -->
         <!-- <select [(ngModel)]="selectedEmployeeId" class="employee-select">
           <option value="">Select Employee</option>
           <option *ngFor="let e of employees" [value]="e.employeeId">
@@ -515,9 +515,14 @@
 
       </select> -->
 
-      <select
+      <!-- <select
   [(ngModel)]="selectedEmployeeId"
+  class="form-select" -->
+  <!-- <select
+  [(ngModel)]="selectedEmployeeId"
+  (change)="checkTripStatus()"
   class="form-select"
+>
 >
   <option value="">Select Employee</option>
 
@@ -525,11 +530,47 @@
           [value]="emp.employeeId">
     {{ emp.name }}
   </option>
-</select>
+</select> -->
  
-        <button class="btn-start" (click)="startTrip()" [disabled]="!selectedEmployeeId">▶ Start Trip</button>
-        <button class="btn-stop" (click)="stopTrip()" [disabled]="!selectedEmployeeId">⛔ Stop Trip</button>
-      </div>
+        <!-- <button class="btn-start" (click)="startTrip()" [disabled]="!selectedEmployeeId">▶ Start Trip</button> -->
+         <!-- <button class="btn-start" (click)="startTrip()"[disabled]="!selectedEmployeeId || isTripActive">
+          <button class="btn-stop" (click)="stopTrip()" [disabled]="!selectedEmployeeId || !isTripActive"> -->
+        <!-- <button class="btn-stop" (click)="stopTrip()" [disabled]="!selectedEmployeeId">⛔ Stop Trip</button> -->
+      <!-- </div> -->
+
+      <div class="tracking-controls">
+
+  <!-- Employee Dropdown -->
+  <select
+    [(ngModel)]="selectedEmployeeId"
+    (change)="checkTripStatus()"
+    class="form-select"
+  >
+    <option value="">Select Employee</option>
+
+    <option *ngFor="let emp of employees"
+            [value]="emp.employeeId">
+      {{ emp.name }}
+    </option>
+  </select>
+
+  <!-- Start Button -->
+  <button
+    class="btn-start"
+    (click)="startTrip()"
+    [disabled]="!selectedEmployeeId || isTripActive">
+    ▶ Start Trip
+  </button>
+
+  <!-- Stop Button -->
+  <button
+    class="btn-stop"
+    (click)="stopTrip()"
+    [disabled]="!selectedEmployeeId || !isTripActive">
+    ⛔ Stop Trip
+  </button>
+
+</div>
   
       <div class="tracking-map-card">
         <div class="map-wrapper">

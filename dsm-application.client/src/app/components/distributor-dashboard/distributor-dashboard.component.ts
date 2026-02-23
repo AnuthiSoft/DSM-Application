@@ -34,6 +34,8 @@ orderStatusFromDashboard: string | null = null;
 selectedEmployeeForAvailability: string = '';
 availabilityReasonByDistributor: string = '';
 selectedEmployeeId: string = '';
+ //🔥 Trip Status 
+ isTripActive: boolean = false;
 
   constructor(
 
@@ -424,67 +426,143 @@ markEmployeeNotAvailable() {
   // ==============================
   // ▶ START TRIP
   // ==============================
-  startTrip() {
-    if (!this.selectedEmployeeId) {
-      alert("Select employee first!");
+  // startTrip() {
+  //   if (!this.selectedEmployeeId) {
+  //     alert("Select employee first!");
+  //     return;
+  //   }
+
+  //   // this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
+  //   //   employeeId: this.selectedEmployeeId
+  //   // })
+  //         this.http.post(`${environment.apiUrl}/Delivery/start`, {
+  //       employeeId: this.selectedEmployeeId
+  //     }).subscribe({
+  //     next: () => {
+  //       alert("Trip Started");
+
+  //       // ✅ START MAP POLLING
+  //       if (this.trackingComp) {
+  //        // this.trackingComp.startPolling();
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //       alert(err.error || "Failed to start trip");
+  //     }
+  //   });
+  // }
+
+startTrip() {
+
+  if (!this.selectedEmployeeId) {
+    alert("Select employee first!");
+    return;
+  }
+
+  // ✅ Check first
+  this.http.get<any>(
+    `${environment.apiUrl}/Delivery/tracking-status/${this.selectedEmployeeId}`
+  ).subscribe(res => {
+
+    // 🚫 Already active
+    if (res?.tracking) {
+      alert("Trip already started");
+      this.isTripActive = true;
       return;
     }
 
-    // this.http.post(`http://192.168.1.21:5164/api/Delivery/start`, {
-    //   employeeId: this.selectedEmployeeId
-    // })
-          this.http.post(`${environment.apiUrl}/Delivery/start`, {
-        employeeId: this.selectedEmployeeId
-      }).subscribe({
-      next: () => {
-        alert("Trip Started");
+    // ✅ Start if not active
+    this.http.post<any>(
+      `${environment.apiUrl}/Delivery/start`,
+      { employeeId: this.selectedEmployeeId }
+    ).subscribe({
 
-        // ✅ START MAP POLLING
+      next: (r) => {
+
+        alert(r?.message || "Trip Started");
+
+        this.isTripActive = true;
+
         if (this.trackingComp) {
-         // this.trackingComp.startPolling();
+          // this.trackingComp.startPolling();
         }
+
       },
+
       error: (err) => {
         console.error(err);
-        alert(err.error || "Failed to start trip");
+        alert("Failed to start trip");
       }
+
     });
-  }
 
+  });
 
+}
 
   // ==============================
   // ⏹ STOP TRIP
   // ==============================
-  stopTrip() {
-    if (!this.selectedEmployeeId) {
-      alert("Select employee first!");
-      return;
-    }
+  // stopTrip() {
+  //   if (!this.selectedEmployeeId) {
+  //     alert("Select employee first!");
+  //     return;
+  //   }
 
-    // this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
-    //   employeeId: this.selectedEmployeeId
-    // })
-        this.http.post(`${environment.apiUrl}/Delivery/stop`, {
-      employeeId: this.selectedEmployeeId
-    }).subscribe({
-      next: () => {
-        alert("Trip Ended");
+  //   // this.http.post(`http://192.168.1.21:5164/api/Delivery/stop`, {
+  //   //   employeeId: this.selectedEmployeeId
+  //   // })
+  //       this.http.post(`${environment.apiUrl}/Delivery/stop`, {
+  //     employeeId: this.selectedEmployeeId
+  //   }).subscribe({
+  //     next: () => {
+  //       alert("Trip Ended");
 
-        // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
-        if (this.trackingComp) {
-          //this.trackingComp.removeEmployee(this.selectedEmployeeId);
-        }
-      },
-      error: err => {
-        console.error(err);
-        alert("Failed to stop trip");
-      }
-    });
+  //       // ✅ REMOVE ONLY THIS EMPLOYEE FROM MAP
+  //       if (this.trackingComp) {
+  //         //this.trackingComp.removeEmployee(this.selectedEmployeeId);
+  //       }
+  //     },
+  //     error: err => {
+  //       console.error(err);
+  //       alert("Failed to stop trip");
+  //     }
+  //   });
+  // }
+
+
+stopTrip() {
+
+  if (!this.selectedEmployeeId) {
+    alert("Select employee first!");
+    return;
   }
 
+  this.http.post<any>(
+    `${environment.apiUrl}/Delivery/stop`,
+    { employeeId: this.selectedEmployeeId }
+  ).subscribe({
 
+    next: () => {
 
+      alert("Trip Ended");
+
+      this.isTripActive = false;
+
+      if (this.trackingComp) {
+        // this.trackingComp.removeEmployee(this.selectedEmployeeId);
+      }
+
+    },
+
+    error: () => {
+      alert("Failed to stop trip");
+    }
+
+  });
+
+}
 
   isSubmenuOpen(menu: string): boolean {
     return this.openSubmenus.includes(menu);
@@ -533,20 +611,43 @@ markEmployeeNotAvailable() {
   //   // Don't close submenus here to allow navigation within the same section
   // }
 
+  // setActiveTab(tab: string, invoiceId?: string) {
+  //   this.activeTab = tab;
+
+  //   // ✅ SAVE ACTIVE TAB
+  //   localStorage.setItem('distributorActiveTab', tab);
+
+  //   // Close submenus (your existing logic)
+  //   this.closeAllSubmenus();
+
+  //   if (invoiceId) {
+  //     this.selectedInvoiceId = invoiceId;
+  //   }
+  // }
+
   setActiveTab(tab: string, invoiceId?: string) {
-    this.activeTab = tab;
 
-    // ✅ SAVE ACTIVE TAB
-    localStorage.setItem('distributorActiveTab', tab);
+  this.activeTab = tab;
 
-    // Close submenus (your existing logic)
-    this.closeAllSubmenus();
+  localStorage.setItem('distributorActiveTab', tab);
 
-    if (invoiceId) {
-      this.selectedInvoiceId = invoiceId;
-    }
+  this.closeAllSubmenus();
+
+  if (invoiceId) {
+    this.selectedInvoiceId = invoiceId;
   }
 
+  // 🔥 START / STOP LIVE SYNC
+  if (this.trackingComp) {
+
+    if (tab === 'live-tracking') {
+      this.trackingComp.startLiveSync();
+    } else {
+      this.trackingComp.stopLiveSync();
+    }
+
+  }
+}
 
   // Update the toggleMobileMenu method
 
@@ -835,6 +936,28 @@ markAvailability(isAvailable: boolean) {
   });
 }
 
+// ✅ Check trip status
+checkTripStatus() {
+
+  if (!this.selectedEmployeeId) {
+    this.isTripActive = false;
+    return;
+  }
+
+  this.http.get<any>(
+    `${environment.apiUrl}/Delivery/tracking-status/${this.selectedEmployeeId}`
+  ).subscribe({
+
+    next: (res) => {
+      this.isTripActive = res?.tracking === true;
+    },
+
+    error: () => {
+      this.isTripActive = false;
+    }
+
+  });
+}
   @HostListener('window:resize')
   onResize() {
     if (window.innerWidth <= 768) {

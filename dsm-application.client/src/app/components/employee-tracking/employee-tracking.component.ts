@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment';
 // import { MapInfoWindow } from '@angular/google-maps';
 // import { ViewChild } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
+import { filter } from 'rxjs/operators'; // 👈 add at top of file
 
 
 
@@ -61,7 +62,7 @@ ngOnInit() {
   //this.loadLiveData();
   this.startLiveSync();
 // Load old routes on startup
-this.loadExistingRoutes();
+//this.loadExistingRoutes();
 
   // setInterval(() => {
   //   this.loadLiveData();
@@ -245,22 +246,48 @@ this.loadExistingRoutes();
 //   });
 // }
 
+// loadLiveData() {
+
+//   // this.http.get<any[]>(
+//   //   'http://192.168.1.15:5164/api/Delivery/realtime-active'
+//   // )
+//   this.http.get<any[]>(
+//   // `${environment.apiUrl}/Delivery/realtime-active`
+//   `${environment.apiUrl}/live-location/active`
+// ).subscribe(data => {
+
+//     console.log("📍 Live Data:", data);
+
+//     this.updateMap(data);
+
+//   }, err => {
+//     console.error("❌ API Error", err);
+//   });
+
+// }
+
+
+
+
 loadLiveData() {
 
-  // this.http.get<any[]>(
-  //   'http://192.168.1.15:5164/api/Delivery/realtime-active'
-  // )
   this.http.get<any[]>(
-  // `${environment.apiUrl}/Delivery/realtime-active`
-  `${environment.apiUrl}/live-location/active`
-).subscribe(data => {
+    `${environment.apiUrl}/live-location/active`
+  )
+  .pipe(
+    filter(res => Array.isArray(res))
+  )
+  .subscribe({
+    next: (data) => {
 
-    console.log("📍 Live Data:", data);
+      console.log("📍 Live Data:", data);
 
-    this.updateMap(data);
+      this.updateMap(data);
 
-  }, err => {
-    console.error("❌ API Error", err);
+    },
+    error: (err) => {
+      console.error("❌ API Error", err);
+    }
   });
 
 }
@@ -356,6 +383,19 @@ removeEmployee(employeeId: string) {
 // ==============================
 updateMap(liveEmployees: any[]) {
 
+
+  // Remove employees who stopped tracking
+const activeIds = liveEmployees.map(e => e.employeeId);
+
+this.markers = this.markers.filter(m =>
+  activeIds.includes(m.employeeId)
+);
+
+Object.keys(this.polylines).forEach(id => {
+  if (!activeIds.includes(id)) {
+    delete this.polylines[id];
+  }
+});
   
   // Clear everything first
   // this.markers = [];
@@ -407,8 +447,11 @@ updateMap(liveEmployees: any[]) {
 }
 // Auto-center on first marker
 // 🔥 Always center on latest employee position
-this.center = { lat, lng };
-this.zoom = 15;
+// Auto-center only first time
+if (this.markers.length === 1) {
+  this.center = { lat, lng };
+  this.zoom = 15;
+}
     // ================= POLYLINE =================
 
 // if (!this.polylines[emp.employeeId]) {

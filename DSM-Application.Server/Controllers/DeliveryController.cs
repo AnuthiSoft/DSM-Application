@@ -22,20 +22,62 @@ public class DeliveryController : ControllerBase
     }
 
     // 1) DISTRIBUTOR: start trip for an employee
+    //[HttpPost("start")]
+    //public async Task<IActionResult> StartTrip([FromBody] StartTripDto dto)
+    //{
+    //    if (dto == null || string.IsNullOrWhiteSpace(dto.EmployeeId))
+    //        return BadRequest("EmployeeId is required");
+
+    //    // 🔴 CHECK IF ALREADY ACTIVE
+    //    var activeSession = await _sessions
+    //        .Find(s => s.EmployeeId == dto.EmployeeId && s.IsActive)
+    //        .FirstOrDefaultAsync();
+
+    //    if (activeSession != null)
+    //    {
+    //        return BadRequest("Trip already started for this employee");
+    //    }
+
+    //    var session = new DeliverySession
+    //    {
+    //        Id = ObjectId.GenerateNewId(),
+    //        EmployeeId = dto.EmployeeId,
+    //        StartTime = DateTime.UtcNow,
+    //        IsActive = true,
+    //        Route = new List<LatLongPoint>()
+    //    };
+
+    //    await _sessions.InsertOneAsync(session);
+    //    // ⭐ MARK EMPLOYEE ON DUTY
+    //    await _employees.UpdateOneAsync(
+    //        e => e.EmployeeId == dto.EmployeeId,
+    //        Builders<Employee>.Update
+    //            .Set(e => e.IsOnDuty, true)
+    //            .Set(e => e.UpdatedDate, DateTime.UtcNow)
+    //    );
+
+    //    return Ok(new { started = true });
+    //}
+
+
     [HttpPost("start")]
     public async Task<IActionResult> StartTrip([FromBody] StartTripDto dto)
     {
         if (dto == null || string.IsNullOrWhiteSpace(dto.EmployeeId))
             return BadRequest("EmployeeId is required");
 
-        // 🔴 CHECK IF ALREADY ACTIVE
+        // ✅ STRICT CHECK: Do NOT auto close
         var activeSession = await _sessions
             .Find(s => s.EmployeeId == dto.EmployeeId && s.IsActive)
             .FirstOrDefaultAsync();
 
         if (activeSession != null)
         {
-            return BadRequest("Trip already started for this employee");
+            return Ok(new
+            {
+                started = false,
+                message = "Trip already started"
+            });
         }
 
         var session = new DeliverySession
@@ -48,7 +90,7 @@ public class DeliveryController : ControllerBase
         };
 
         await _sessions.InsertOneAsync(session);
-        // ⭐ MARK EMPLOYEE ON DUTY
+
         await _employees.UpdateOneAsync(
             e => e.EmployeeId == dto.EmployeeId,
             Builders<Employee>.Update
@@ -56,10 +98,12 @@ public class DeliveryController : ControllerBase
                 .Set(e => e.UpdatedDate, DateTime.UtcNow)
         );
 
-        return Ok(new { started = true });
+        return Ok(new
+        {
+            started = true,
+            message = "Trip started"
+        });
     }
-
-
 
 
     // 2) DISTRIBUTOR: stop trip for an employee

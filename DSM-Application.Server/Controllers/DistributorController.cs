@@ -11,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace DSM_Application.Server.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/distributors")]   // FIXED
     [ApiController]
     public class DistributorController : ControllerBase
     {
@@ -536,6 +536,30 @@ namespace DSM_Application.Server.Controllers
 
             if (distributor == null)
                 return NotFound();
+
+            return Ok(distributor);
+        }
+
+        // =======================================
+        //  FIX: GET DISTRIBUTOR PROFILE
+        //  Angular calls /api/distributors/profile
+        // =======================================
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            // DistributorId should come from token
+            var distributorId = User.FindFirst("distributorId")?.Value
+                ?? User.FindFirst("DistributorId")?.Value;
+
+            if (string.IsNullOrEmpty(distributorId))
+                return Unauthorized("Invalid token");
+
+            var distributor = await _db.Distributors
+                .Find(d => d.DistributorId == distributorId)
+                .FirstOrDefaultAsync();
+
+            if (distributor == null)
+                return NotFound("Distributor not found");
 
             return Ok(distributor);
         }

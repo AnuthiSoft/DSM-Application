@@ -80,10 +80,19 @@ public class DeliveryController : ControllerBase
             });
         }
 
+        //var session = new DeliverySession
+        //{
+        //    Id = ObjectId.GenerateNewId(),
+        //    EmployeeId = dto.EmployeeId,
+        //    StartTime = DateTime.UtcNow,
+        //    IsActive = true,
+        //    Route = new List<LatLongPoint>()
+        //};
         var session = new DeliverySession
         {
             Id = ObjectId.GenerateNewId(),
             EmployeeId = dto.EmployeeId,
+            DistributorId = dto.DistributorId,   // ✅ ADD
             StartTime = DateTime.UtcNow,
             IsActive = true,
             Route = new List<LatLongPoint>()
@@ -416,6 +425,7 @@ public class DeliveryController : ControllerBase
 public class StartTripDto
 {
     public string EmployeeId { get; set; } = string.Empty;
+    public string DistributorId { get; set; }   // ✅ ADD
 }
 
 public class StopTripDto

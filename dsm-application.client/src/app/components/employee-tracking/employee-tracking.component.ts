@@ -271,12 +271,17 @@ ngOnInit() {
 
 loadLiveData() {
 
-  this.http.get<any[]>(
-    `${environment.apiUrl}/live-location/active`
-  )
-  .pipe(
-    filter(res => Array.isArray(res))
-  )
+  // this.http.get<any[]>(
+  //   `${environment.apiUrl}/live-location/active`
+  // )
+  // .pipe(
+  //   filter(res => Array.isArray(res))
+  // )
+  const distributorId = localStorage.getItem('distributorId');
+
+this.http.get<any[]>(
+  `${environment.apiUrl}/live-location/active/${distributorId}`
+)
   .subscribe({
     next: (data) => {
 
@@ -559,10 +564,19 @@ ngOnDestroy() {
 
 loadExistingRoutes() {
 
-  this.http.get<any[]>(
+  // this.http.get<any[]>(
     // `${environment.apiUrl}/Delivery/realtime-active`
-    `${environment.apiUrl}/live-location/active`
-  ).subscribe(list => {
+  //   `${environment.apiUrl}/live-location/active`
+  // )
+  
+  const distributorId = localStorage.getItem('distributorId');
+
+    // this.http.get<any[]>(
+    //   `${environment.apiUrl}/live-location/active/${distributorId}`
+    // )
+    this.http.get<any[]>(
+      `${environment.apiUrl}/live-location/active/${distributorId}`
+    ).subscribe(list => {
 
     list.forEach(emp => {
 

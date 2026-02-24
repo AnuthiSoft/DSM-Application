@@ -534,26 +534,59 @@ namespace DistributorManagementSystem.Server.Controllers
         //    }
         //}
 
+        //[AllowAnonymous]
+        //[HttpGet("active")]
+        //public async Task<IActionResult> GetLiveEmployees()
+        //{
+        //    var sessions = await _db.Database
+        //        .GetCollection<DeliverySession>("DeliverySessions")
+        //        .Find(s => s.IsActive)
+        //        .Project(s => s.EmployeeId)
+        //        .ToListAsync();
+
+        //    if (!sessions.Any())
+        //        return Ok(new List<LiveLocation>());
+
+        //    var live = await _locations
+        //        .Find(l => sessions.Contains(l.EmployeeId))
+        //        .ToListAsync();
+
+        //    return Ok(live);
+        //}
+
+//        [Authorize(Roles = "Distributor")]
+//[HttpGet("active")]
+//public async Task<IActionResult> GetLiveEmployees()
         [AllowAnonymous]
-        [HttpGet("active")]
-        public async Task<IActionResult> GetLiveEmployees()
+        [HttpGet("active/{distributorId}")]
+        public async Task<IActionResult> GetLiveEmployees(string distributorId)
         {
+            if (string.IsNullOrWhiteSpace(distributorId))
+                return BadRequest("DistributorId required");
+
+            // 1️⃣ Get active sessions ONLY for this distributor
             var sessions = await _db.Database
                 .GetCollection<DeliverySession>("DeliverySessions")
-                .Find(s => s.IsActive)
+                .Find(s =>
+                    s.IsActive &&
+                    s.DistributorId == distributorId   // ⭐ IMPORTANT
+                )
                 .Project(s => s.EmployeeId)
                 .ToListAsync();
 
             if (!sessions.Any())
                 return Ok(new List<LiveLocation>());
 
+            // 2️⃣ Get live locations ONLY for those employees
             var live = await _locations
-                .Find(l => sessions.Contains(l.EmployeeId))
+                .Find(l =>
+                    sessions.Contains(l.EmployeeId) &&
+                    l.DistributorId == distributorId   // ⭐ EXTRA SAFETY
+                )
                 .ToListAsync();
 
             return Ok(live);
         }
-
 
         //[AllowAnonymous]
         //[HttpGet("active")]

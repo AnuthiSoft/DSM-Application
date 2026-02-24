@@ -473,9 +473,16 @@ startTrip() {
     }
 
     // ✅ Start if not active
-    this.http.post<any>(
+    // this.http.post<any>(
+    //   `${environment.apiUrl}/Delivery/start`,
+    //   { employeeId: this.selectedEmployeeId }
+    // )
+        this.http.post<any>(
       `${environment.apiUrl}/Delivery/start`,
-      { employeeId: this.selectedEmployeeId }
+      {
+        employeeId: this.selectedEmployeeId,
+        distributorId: this.distributorId   // ✅ ADD
+      }
     ).subscribe({
 
       next: (r) => {

@@ -5,7 +5,7 @@ public class DeliverySession
 {
     [BsonId]
     public ObjectId Id { get; set; }
-
+    public string DistributorId { get; set; }   // ⭐ ADD THIS
     public string EmployeeId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }

@@ -454,8 +454,16 @@
             Return Qty for {{ getProductName(pid) }}
           </label>
 
-          <input type="number" class="form-control" min="1" [max]="getMaxReturnQtyForProduct(pid)"
-            [(ngModel)]="returnQuantities[pid]" (input)="updateTotalReturnQty()" name="qty_{{pid}}">
+          <input 
+  type="number" 
+  class="form-control"
+  min="1"
+  [max]="getMaxReturnQtyForProduct(pid)"
+  [(ngModel)]="returnQuantities[pid]"
+  name="qty_{{pid}}"
+  (keydown)="preventExceedingMax($event, pid)"
+  (input)="validateReturnQty(pid)"
+>
         </div>
 
         <!-- Auto-filled Total Return Quantity -->

@@ -9,6 +9,11 @@
 
         public decimal ProductPrice { get; set; }
 
+        public string? CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
+        public string? CustomerEmail { get; set; }
+        public string? CustomerAddress { get; set; }
+
 
         public DateTime PickupDate { get; set; }
         public string PickupSlot { get; set; }

@@ -132,13 +132,13 @@
   <div *ngIf="!loading && filterProducts.length > 0" class="products-grid">
     <div class="grid-header">
       <div class="grid-info">
-        <span><strong>{{ products.length }}</strong> products found</span>
+        <span><strong>{{ filterProducts.length }}</strong> products found</span>
         <span class="text-muted">({{ totalStock }} total units available)</span>
       </div>
     </div>
 
     <div class="products-cards">
-     <div class="product-card" *ngFor="let prod of paginatedProducts">
+      <div class="product-card" *ngFor="let prod of filterProducts">
         <!-- Product Image -->
         <div class="product-image">
           <div class="product-image">
@@ -238,28 +238,6 @@
         </div>
       </div>
     </div>
-    <div class="pagination-container" *ngIf="totalPages > 1">
-  <button class="btn btn-sm btn-secondary"
-          (click)="goToPage(currentPage - 1)"
-          [disabled]="currentPage === 1">
-    Prev
-  </button>
-
-  <button class="btn btn-sm"
-          *ngFor="let p of pages"
-          [class.btn-primary]="p === currentPage"
-          [class.btn-outline-primary]="p !== currentPage"
-          (click)="goToPage(p)">
-    {{ p }}
-  </button>
-
-  <button class="btn btn-sm btn-secondary"
-          (click)="goToPage(currentPage + 1)"
-          [disabled]="currentPage === totalPages">
-    Next
-  </button>
-</div>
-    
   </div>
 
   <!-- Simple Add to Cart Popup -->

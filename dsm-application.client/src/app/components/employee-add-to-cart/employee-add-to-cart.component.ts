@@ -1058,8 +1058,6 @@ this.refreshDiscount(item);
      this.goToProductsClicked.emit();
    }
  
- 
- 
    goToConnections() {
      this.showConnectionPopup = false;
      this.router.navigate(['/customer/distributors']);

@@ -13,11 +13,11 @@ export class DistributorProfileService {
   constructor(private http: HttpClient) { }
 
  getProfile() {
-  return this.http.get<DistributorDto>(`${this.api}/distributors/profile`);
+  return this.http.get<DistributorDto>(`${this.api}/distributor/profile`);
 }
 
  updateProfile(formData: FormData) {
-  return this.http.post(`${environment.apiUrl}/distributors/update-profile`, formData);
+  return this.http.post(`${environment.apiUrl}/distributor/update-profile`, formData);
 }
   verifyOtp(data: any) {
   return this.http.post(`${this.api}/otp/verify`, data);

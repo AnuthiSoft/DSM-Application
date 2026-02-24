@@ -721,6 +721,7 @@ body {
   background: #cfcfcf;
 }
 
+
 /* ===== Animation ===== */
 @keyframes popupFadeIn {
   from {
@@ -940,4 +941,75 @@ body {
 .final-price {
   color: #0d6efd;
   font-size: 16px;
+}
+/* Mobile Responsive Product Dropdown */
+@media (max-width: 600px) {
+  .product-dropdown.enhanced {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .dropdown-image img,
+  .no-img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .dropdown-info {
+    width: 100%;
+    text-align: left;
+  }
+
+  .dropdown-info p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .product-box {
+    flex-wrap: wrap;
+  }
+
+  .product-name {
+    width: 100%;
+    margin-bottom: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .quantity-cell input {
+    width: 60px;
+    padding: 6px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .submit-btn, .reset-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .customer-display {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .customer-modal {
+    width: 90%;
+  }
 }

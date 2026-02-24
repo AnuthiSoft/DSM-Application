@@ -17,6 +17,7 @@ namespace DSM_Application.Server.Models.DTOs
         public string CustomerPhone { get; set; }
         public string CustomerEmail { get; set; }
 
+        public string CustomerAddress { get; set; }
         public string? RejectedBy { get; set; } // "Distributor" | "Customer"
 
 

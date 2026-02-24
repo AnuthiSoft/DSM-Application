@@ -128,7 +128,7 @@ namespace DSM_Application.Server.Models
         public decimal CreditUsed { get; set; }
 
         public decimal PayableAmount { get; set; }
-       
+        public string? CustomerAddress { get;set; }
     }
 
 }

@@ -150,37 +150,21 @@
       <!-- DETAILS -->
       <div class="dropdown-info">
 
-        <p><strong>MRP:</strong> ₹{{ item.product.price }}</p>
+       <!-- TOTAL PRICE (Employee Style) -->
 
-        <p *ngIf="item.product.discount > 0">
-          <strong>Discount:</strong>
-          {{ item.product.discount }} %
-        </p>
+      <!-- MRP -->
+<p><strong>MRP:</strong> ₹{{ item.product.price }}</p>
 
-        <p>
-          <strong>After Discount:</strong>
-          ₹{{ getDiscountedPrice(item.product) }}
-        </p>
-
-        <p *ngIf="item.product.gst > 0">
-          <strong>GST ({{ item.product.gst }}%):</strong>
-          ₹{{ getGstAmount(item.product) }}
-        </p>
-
-     <!-- <p><strong>MRP (per item):</strong> ₹{{ item.product.price }}</p> -->
-
-<p *ngIf="item.product.discount > 0">
-  <strong>Discount:</strong> {{ item.product.discount }} %
+<!-- Discount + GST handled by Backend -->
+<p class="total-line" *ngIf="item.discountData">
+  <strong>Total price for {{ item.quantity }} Qty:</strong>
+  ₹{{ item.discountData.finalPrice | number:'1.2-2' }}
 </p>
 
-<!-- <p>
-  <strong>After Discount (1 qty):</strong>
-  ₹{{ getUnitFinalPrice(item.product) }}
-</p> -->
-
-<p class="final-price">
-  <strong>Total for {{ item.quantity }} Qty:</strong>
-  ₹{{ getRowTotal(item.product, item.quantity) }}
+<!-- Fallback -->
+<p class="total-line" *ngIf="!item.discountData">
+  <strong>Total:</strong>
+  ₹{{ item.quantity * item.product.price }}
 </p>
 
         <hr>

@@ -351,9 +351,24 @@ export class CustomerOrdersComponent {
     this.updateTotalReturnQty();
   }
   updateTotalReturnQty() {
-    this.totalReturnQty = Object.values(this.returnQuantities)
-      .reduce((sum: number, qty: any) => sum + Number(qty), 0);
-  }
+  // Enforce max quantity for each product
+  this.selectedProductIds.forEach(pid => {
+    const maxQty = this.getMaxReturnQtyForProduct(pid);
+
+    if (this.returnQuantities[pid] > maxQty) {
+      this.returnQuantities[pid] = maxQty;  // Auto-correct
+      this.toastr.warning(`Maximum return quantity for this product is ${maxQty}`);
+    }
+
+    if (this.returnQuantities[pid] < 1) {
+      this.returnQuantities[pid] = 1; // Prevent 0 or negative
+    }
+  });
+
+  // Recalculate total
+  this.totalReturnQty = Object.values(this.returnQuantities)
+    .reduce((sum: number, qty: any) => sum + Number(qty), 0);
+}
 
 
 
@@ -714,5 +729,41 @@ Swal.fire({
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+
+ preventExceedingMax(event: KeyboardEvent, pid: string) {
+  const max = this.getMaxReturnQtyForProduct(pid);
+
+  const input = event.target as HTMLInputElement;
+  const currentValue = input.value;
+
+  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+
+  if (allowedKeys.includes(event.key)) return;
+
+  if (!/^[0-9]$/.test(event.key)) {
+    event.preventDefault();
+    return;
+  }
+
+  const newValue = currentValue + event.key;
+
+  if (Number(newValue) > max) {
+    event.preventDefault();
+    this.toastr.warning(`Maximum quantity allowed is ${max}`);
+  }
+}
+
+validateReturnQty(pid: string) {
+  const max = this.getMaxReturnQtyForProduct(pid);
+
+  if (this.returnQuantities[pid] > max) {
+    this.returnQuantities[pid] = max;
+  }
+  if (this.returnQuantities[pid] < 1) {
+    this.returnQuantities[pid] = 1;
+  }
+
+  this.updateTotalReturnQty();
+}
 }
 

@@ -452,9 +452,6 @@ getCartKey(): string {
   }
 
 
- toggleProductDropdown(productId: string) {
-  this.expandedProduct[productId] = !this.expandedProduct[productId];
-}
 
 
 
@@ -751,9 +748,9 @@ increaseQuantity(item: any) {
 }
 
 
-
 onQuantityChange(item: any) {
-  if (!item.quantity || item.quantity < 1) {
+
+  if (item.quantity < 1) {
     item.quantity = 1;
   }
 
@@ -763,6 +760,11 @@ onQuantityChange(item: any) {
   }
 
   this.syncProductTable();
+
+  // 🔥 Refresh discount if dropdown is open
+  if (this.expandedProduct[item.product.productId]) {
+    this.refreshDiscount(item);
+  }
 }
 
 
@@ -1020,6 +1022,38 @@ getRowTotal(product: Product, qty: number): number {
   return +(this.getUnitFinalPrice(product) * qty).toFixed(2);
 }
 
+
+refreshDiscount(item: any) {
+  const payload = {
+    customerId: this.customerId,
+    distributorId: item.product.distributorId,
+    products: [
+      {
+        productId: item.product.productId,
+        quantity: item.quantity
+      }
+    ],
+    specialDiscountPercent: 0
+  };
+
+  this.orderService.previewDiscount(payload).subscribe({
+    next: (res: any) => {
+      item.discountData = res.products[0];
+    },
+    error: () => {
+      this.toastr.error("Failed to load discount");
+    }
+  });
+}
+
+toggleProductDropdown(productId: string) {
+  this.expandedProduct[productId] = !this.expandedProduct[productId];
+
+  if (this.expandedProduct[productId]) {
+    const item = this.orderProducts.find(x => x.product.productId === productId);
+    if (item) this.refreshDiscount(item);
+  }
+}
 
 
 }

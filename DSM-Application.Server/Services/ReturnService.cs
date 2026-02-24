@@ -153,6 +153,10 @@ namespace DSM_Application.Server.Services
                     CustomerEmail =
                         customer?.Email
                         ?? order?.CustomerEmail,
+                    CustomerAddress =
+    customer?.Address
+    ?? order?.CustomerAddress
+    ?? "N/A",
 
                     ImageUrls = images
                         .Where(i => i.ReturnId == r.Id)
@@ -297,13 +301,25 @@ namespace DSM_Application.Server.Services
 
             foreach (var r in returns)
             {
+                // 1️⃣ Fetch order
                 var order = await _orders
                     .Find(o => o.Id == r.OrderId)
                     .FirstOrDefaultAsync();
 
+                // 2️⃣ Fetch product
                 var product = order?.Products
                     .FirstOrDefault(p => p.ProductId == r.ProductId);
 
+                // 3️⃣ Fetch customer
+                Customer? customer = null;
+                if (!string.IsNullOrEmpty(r.CustomerId))
+                {
+                    customer = await _customers
+                        .Find(c => c.CustomerId == r.CustomerId)
+                        .FirstOrDefaultAsync();
+                }
+
+                // 4️⃣ Add to DTO
                 result.Add(new EmployeeReturnPickupDto
                 {
                     ReturnId = r.Id,
@@ -313,7 +329,24 @@ namespace DSM_Application.Server.Services
                     PickupDate = r.PickupDate ?? DateTime.MinValue,
                     PickupSlot = r.PickupSlot,
                     Status = r.Status,
-                    ProductPrice = product?.Price ?? 0
+                    ProductPrice = product?.Price ?? 0,
+
+                    // ⭐ NEW CUSTOMER DETAILS ⭐
+                    CustomerName = customer?.Name
+                                   ?? order?.CustomerName
+                                   ?? "Unknown Customer",
+
+                    CustomerPhone = customer?.PhoneNumber
+                                    ?? order?.CustomerPhone
+                                    ?? "N/A",
+
+                    CustomerEmail = customer?.Email
+                                    ?? order?.CustomerEmail
+                                    ?? "N/A",
+
+                    CustomerAddress = customer?.Address
+                                      ?? order?.CustomerAddress
+                                      ?? "N/A"
                 });
             }
 

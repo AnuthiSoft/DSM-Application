@@ -30,7 +30,8 @@ export class PaymentReportComponent implements OnInit {
   sheetOpen = false;
   sheetType = '';
   sheetTitle = '';
-
+  itemsPerPage: number = 8;
+  paginatedReports: any[] = [];
 
   constructor(private paymentService: PaymentService) { }
 
@@ -57,6 +58,11 @@ export class PaymentReportComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.customerReports = res || [];
+          this.totalItems = this.customerReports.length;
+          this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+
+          this.currentPage = 1;
+          this.updatePaginatedData();
           this.loading = false;
         },
         error: () => {
@@ -140,19 +146,62 @@ export class PaymentReportComponent implements OnInit {
   }
 
   previousPage() {
-    if (this.currentPage > 1) this.currentPage--;
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedData();
+    }
   }
 
   nextPage() {
-    if (this.currentPage < this.totalPages) this.currentPage++;
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedData();
+    }
   }
 
-  getPageNumbers() {
-    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (this.totalPages <= 7) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (this.currentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, '...', this.totalPages);
+      } else if (this.currentPage >= this.totalPages - 3) {
+        pages.push(
+          1,
+          '...',
+          this.totalPages - 4,
+          this.totalPages - 3,
+          this.totalPages - 2,
+          this.totalPages - 1,
+          this.totalPages
+        );
+      } else {
+        pages.push(
+          1,
+          '...',
+          this.currentPage - 1,
+          this.currentPage,
+          this.currentPage + 1,
+          '...',
+          this.totalPages
+        );
+      }
+    }
+
+    return pages;
   }
 
   goToPage(page: number) {
     this.currentPage = page;
+    this.updatePaginatedData();
+  }
+
+  isNumber(value: number | string): value is number {
+    return typeof value === 'number';
   }
 
   // ---------- Default Report ----------
@@ -185,6 +234,12 @@ export class PaymentReportComponent implements OnInit {
   setHandover(val: string) {
     this.handoverStatus = val;
     this.closeSheet();
+  }
+
+  updatePaginatedData() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedReports = this.customerReports.slice(start, end);
   }
 
 }

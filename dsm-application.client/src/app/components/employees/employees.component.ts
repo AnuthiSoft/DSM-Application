@@ -55,6 +55,8 @@ export class EmployeesComponent {
   otpCode = '';
   phoneVerifiedUI = false;
   apiUrl = environment.apiUrl;
+  currentPage = 1;
+  itemsPerPage = 4;
 
   // isEdit = false;
   constructor(
@@ -589,6 +591,52 @@ export class EmployeesComponent {
   isDistributor(): boolean {
     const role = localStorage.getItem('Role');
     return role === 'Distributor';
+  }
+
+  get paginatedEmployees() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredEmployees.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredEmployees.length / this.itemsPerPage);
+  }
+
+  get pageNumbers(): number[] {
+    const width = window.innerWidth;
+
+    let maxVisible = 7; // desktop
+    if (width <= 992) maxVisible = 5;  // tablet
+    if (width <= 576) maxVisible = 3;  // mobile
+
+    const pages: number[] = [];
+
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+
+    if (end > this.totalPages) {
+      end = this.totalPages;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
   }
 }
 

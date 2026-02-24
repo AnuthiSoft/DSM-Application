@@ -127,7 +127,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of acceptedCustomers" class="customer-row">
+          <tr *ngFor="let c of paginatedCustomers" class="customer-row">
             <td class="customer-name">
               <strong>{{ c.name }}</strong>
             </td>
@@ -155,6 +155,38 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="desktop-pagination" *ngIf="totalPages > 1">
+
+      <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+
+      <span *ngFor="let page of pageNumbers" class="page-number" [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </span>
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+
+    </div>
+    <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+      <button class="mobile-nav" (click)="previousPage()" [disabled]="currentPage === 1">
+        ←
+      </button>
+
+      <span class="mobile-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button class="mobile-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        →
+      </button>
+
     </div>
 
     <div *ngIf="!loading && acceptedCustomers.length === 0" class="empty-state">

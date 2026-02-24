@@ -6,7 +6,6 @@ import { EmployeeService } from '../../services/employee.service';
 import { Employee } from '../../models/order.model';
 import { environment } from '../../../environments/environment';
 import { ToastrService } from 'ngx-toastr';
-import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-distributor-return-requests',
@@ -23,6 +22,9 @@ export class DistributorReturnRequestsComponent implements OnInit {
   loading = true;
   currentPage = 1;
   itemsPerPage = 6;
+  totalPages = 1;
+
+  paginatedReturns: any[] = [];
 
   constructor(
     private http: HttpClient,
@@ -31,10 +33,6 @@ export class DistributorReturnRequestsComponent implements OnInit {
     private toastr: ToastrService
   ) { }
 
-  @HostListener('window:resize')
-  onResize() {
-    this.currentPage = this.currentPage;
-  }
   ngOnInit(): void {
     console.log('Distributor ID:', this.distributorId);
     this.loadReturns();
@@ -48,7 +46,6 @@ export class DistributorReturnRequestsComponent implements OnInit {
       .getReturnHistoryForDistributor(this.distributorId)
       .subscribe({
         next: res => {
-          console.log('RAW API RESPONSE:', res);
 
           this.returnRequests = res.map(r => ({
             ...r,
@@ -57,11 +54,11 @@ export class DistributorReturnRequestsComponent implements OnInit {
             )
           }));
 
+          this.totalPages = Math.ceil(this.returnRequests.length / this.itemsPerPage);
+          this.updatePagination();
 
-          console.log('PROCESSED RETURNS:', this.returnRequests);
           this.loading = false;
         },
-
         error: err => {
           this.loading = false;
           this.showErrorAlert(
@@ -873,42 +870,61 @@ export class DistributorReturnRequestsComponent implements OnInit {
     }
   }
 
-  get paginatedReturns() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    return this.returnRequests.slice(startIndex, startIndex + this.itemsPerPage);
+  updatePagination() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+
+    this.paginatedReturns = this.returnRequests.slice(start, end);
   }
 
-  get totalPages(): number {
-    return Math.ceil(this.returnRequests.length / this.itemsPerPage);
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
-  // 🔥 Smart Page Numbers (IMPORTANT)
-  get pageNumbers(): number[] {
-    const width = window.innerWidth;
-
-    let maxVisible = 7; // desktop
-    if (width <= 992) maxVisible = 5;  // tablet
-    if (width <= 576) maxVisible = 3;  // mobile
-
-    const pages: number[] = [];
-
-    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
-    let end = start + maxVisible - 1;
-
-    if (end > this.totalPages) {
-      end = this.totalPages;
-      start = Math.max(1, end - maxVisible + 1);
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
     }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    return pages;
   }
 
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
+    this.updatePagination();
+  }
+
+  handlePageClick(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
+
+  getPageNumbers(): (number | string)[] {
+
+    if (this.totalPages <= 7) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+
+    const pages: (number | string)[] = [];
+    pages.push(1);
+
+    if (this.currentPage > 3) pages.push('...');
+
+    const start = Math.max(2, this.currentPage - 1);
+    const end = Math.min(this.totalPages - 1, this.currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (this.currentPage < this.totalPages - 2) pages.push('...');
+
+    pages.push(this.totalPages);
+
+    return pages;
   }
 }

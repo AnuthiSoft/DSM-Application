@@ -1018,6 +1018,13 @@ textarea.form-control {
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* IMPORTANT — force table width */
+.table-responsive table {
+  min-width: 1000px;
 }
 
 /* Keep desktop layout intact */
@@ -1192,7 +1199,7 @@ body.modal-open {
   padding: 0 14px;
   display: flex;
   align-items: center;
-  line-height: 46px;  
+  line-height: 46px;
   justify-content: space-between;
   background: var(--card-bg);
   font-size: 1rem;
@@ -1215,4 +1222,104 @@ body.modal-open {
 
 [data-theme="dark"] .phone-input {
   color: #f9fafb !important;
+}
+
+/* ===========================
+   PAGINATION RESPONSIVE FIX
+=========================== */
+
+/* ===========================
+   PAGINATION (MATCH PRODUCTS)
+=========================== */
+
+.desktop-pagination {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.page-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.page-btn:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.page-number {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  transition: 0.2s ease;
+}
+
+.page-number:hover {
+  background: rgba(52, 152, 219, 0.08);
+}
+
+.page-number.active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.page-number.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mobile-pagination {
+  display: none;
+}
+
+@media (max-width: 768px) {
+
+  .desktop-pagination {
+    display: none !important;
+  }
+
+  .mobile-pagination {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .mobile-nav {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+  }
+
+  .mobile-nav:disabled {
+    opacity: 0.4;
+  }
+
+  .mobile-info {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-color);
+  }
 }

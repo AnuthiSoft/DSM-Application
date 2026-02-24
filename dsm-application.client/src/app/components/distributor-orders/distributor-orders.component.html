@@ -85,32 +85,24 @@
     </div>
     <div class="filter-controls">
       <label class="filter-label">Status Filter:</label>
-   <select class="form-select"
-        [(ngModel)]="statusFilter"
-        (change)="loadOrders()"
-        (mousedown)="openStatusSheet($event)"
-        (click)="openStatusSheet($event)">
+      <select class="form-select" [(ngModel)]="statusFilter" (change)="loadOrders()"
+        (mousedown)="openStatusSheet($event)" (click)="openStatusSheet($event)">
 
-  <option value="All">All Statuses</option>
-  <option *ngFor="let s of statuses" [value]="s">
-    {{ s }}
-  </option>
-</select>
+        <option value="All">All Statuses</option>
+        <option *ngFor="let s of statuses" [value]="s">
+          {{ s }}
+        </option>
+      </select>
 
 
- <!-- 🔍 Customer Search -->
-  <div class="mt-3">
-    <input
-      class="form-control"
-      type="text"
-      placeholder="Search customer..."
-      [(ngModel)]="customerSearch"
-      (input)="applyFilters()"
-    />
-  </div>
+      <!-- 🔍 Customer Search -->
+      <div class="mt-3">
+        <input class="form-control" type="text" placeholder="Search customer..." [(ngModel)]="customerSearch"
+          (input)="applyFilters()" />
+      </div>
     </div>
 
-    
+
   </div>
 
   <!-- Orders Table Card -->
@@ -147,20 +139,20 @@
           </thead>
 
           <tbody>
-            <tr *ngFor="let o of orders" class="order-row">
+            <tr *ngFor="let o of paginatedOrders" class="order-row">
               <td class="order-id"><strong>#{{ o.id }}</strong></td>
               <td class="customer-name">{{ o.customerName }}</td>
 
               <!-- ✅ Correct total amount column -->
-             <td class="order-total text-success fw-bold">
-  {{
-    (
-      o.payableAmount !== null && o.payableAmount !== undefined
-        ? o.payableAmount
-        : (o.totalAmount - (o.creditUsed || 0))
-    ) | currency:'INR'
-  }}
-</td>
+              <td class="order-total text-success fw-bold">
+                {{
+                (
+                o.payableAmount !== null && o.payableAmount !== undefined
+                ? o.payableAmount
+                : (o.totalAmount - (o.creditUsed || 0))
+                ) | currency:'INR'
+                }}
+              </td>
 
 
               <td class="order-status">
@@ -227,6 +219,43 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- DESKTOP PAGINATION -->
+      <div class="desktop-pagination" *ngIf="totalPages > 1">
+
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+
+        <div class="page-numbers">
+          <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+            [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+            {{ page }}
+          </span>
+        </div>
+
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+      <!-- MOBILE PAGINATION -->
+      <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+        <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+          ←
+        </button>
+
+        <div class="mobile-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </div>
+
+        <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          →
+        </button>
+
       </div>
 
       <!-- Empty State (only show when not loading AND no orders) -->
@@ -310,7 +339,7 @@
       </div>
 
 
-      
+
       <!-- ACTIVE EMPLOYEE -->
       <div class="alert alert-info mt-3">
         <strong>Active Employee for Today:</strong><br>
@@ -471,18 +500,18 @@
 
         <hr>
 
-   <div *ngIf="selectedOrder.creditUsed && selectedOrder.creditUsed !== 0" style="color:#d32f2f;">
+        <div *ngIf="selectedOrder.creditUsed && selectedOrder.creditUsed !== 0" style="color:#d32f2f;">
 
-  Credit Used: -₹{{ selectedOrder.creditUsed | number:'1.2-2' }}
-</div>
+          Credit Used: -₹{{ selectedOrder.creditUsed | number:'1.2-2' }}
+        </div>
 
-<div style="font-weight:600; margin-top:5px;">
-  Amount to Collect: ₹{{ (selectedOrder.payableAmount ?? selectedOrder.totalAmount) | number:'1.2-2' }}
+        <div style="font-weight:600; margin-top:5px;">
+          Amount to Collect: ₹{{ (selectedOrder.payableAmount ?? selectedOrder.totalAmount) | number:'1.2-2' }}
 
-</div>
+        </div>
 
 
-        
+
 
 
 

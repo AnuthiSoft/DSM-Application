@@ -1478,8 +1478,9 @@ body.sidebar-open {
     padding: 8px 16px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    background: var(--bg-color);
-  }
+    background: var(--card-bg);
+    color: var(--text-color);   /* 🔥 ADD */
+}
 
   .mobile-nav:disabled {
     opacity: 0.4;

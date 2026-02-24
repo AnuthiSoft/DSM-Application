@@ -125,194 +125,212 @@
 
     <div class="table-container">
       <div class="table-responsive">
-      <table class="report-table">
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Total Collected</th>
-            <th>Cash</th>
-            <th>Online</th>
-            <th>Scanner</th>
-            <th>Last Payment</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let c of customerReports">
-            <td>{{ c.customerName }}</td>
-            <td>{{ c.totalCollected | number:'1.2-2'}}</td>
-            <td>{{ c.cashAmount | number:'1.2-2'}}</td>
-            <td>{{ c.onlineAmount }}</td>
-            <td>{{ c.scannerAmount }}</td>
-            <!-- In your report table row, replace the last payment date cell -->
-            <td>
-              <div class="date-time-badge">
-                <span class="date">{{ c.lastPaymentDate | date:'dd/MM/yyyy' }}</span>
-                <span class="time">{{ c.lastPaymentDate | date:'HH:mm a' }}</span>
-              </div>
-            </td>
-            <td>
-              <button (click)="viewDetails(c)">View</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    </div>
-
-
-    <!-- Pagination -->
-    <div class="pagination-container" *ngIf="totalPages > 1">
-      <div class="pagination-info">
-        Showing {{ getDisplayRange() }} of {{ totalItems }} payments
-      </div>
-      <div class="pagination-controls">
-        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="previousPage()">
-          <i class="fas fa-chevron-left"></i> Previous
-        </button>
-        <div class="page-numbers">
-          <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
-            (click)="goToPage(page)">
-            {{ page }}
-          </span>
-        </div>
-        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
-          Next <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- No Data -->
-  <div *ngIf="!loading && customerReports.length === 0" class="no-data-message">
-    <div class="message-content">
-      <i class="fas fa-file-invoice-dollar"></i>
-      <h4>No Payment Records Found</h4>
-      <p>Try adjusting your filters or select a different date range.</p>
-      <button class="btn btn-outline-primary" (click)="loadDefaultReport()">
-        <i class="fas fa-calendar-week"></i> Load This Month's Report
-      </button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" *ngIf="showCustomerModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h4>
-        {{ selectedCustomer.customerName }} – Order Details
-      </h4>
-      <button class="close-btn" (click)="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="table-wrapper">
-        <table class="details-table">
+        <table class="report-table">
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Order Total</th>
-              <th>Paid</th>
-              <th>Pending</th>
-              <th>Payment Mode</th>
-              <th>Transaction Ref</th>
-              <th>Payment Date</th>
-
-              <th>Cashier Name</th>
-              <th>Handed Over</th>
-              <th>Status</th>
+              <th>Customer</th>
+              <th>Total Collected</th>
+              <th>Cash</th>
+              <th>Online</th>
+              <th>Scanner</th>
+              <th>Last Payment</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr *ngFor="let o of selectedCustomer.orders">
-              <td>{{ o.orderId }}</td>
-              <td>₹{{ o.orderTotalAmount | number:'1.2-2'}}</td>
-              <td>₹{{ o.amountPaidToday | number:'1.2-2'}}</td>
+            <tr *ngFor="let c of paginatedReports">
+              <td>{{ c.customerName }}</td>
+              <td>{{ c.totalCollected | number:'1.2-2'}}</td>
+              <td>{{ c.cashAmount | number:'1.2-2'}}</td>
+              <td>{{ c.onlineAmount }}</td>
+              <td>{{ c.scannerAmount }}</td>
+              <!-- In your report table row, replace the last payment date cell -->
               <td>
-                <span *ngIf="o.pendingAmount === 0" class="badge badge-success">
-                  Paid
-                </span>
-                <span *ngIf="o.pendingAmount > 0" class="badge badge-warning">
-                  ₹{{ o.pendingAmount }}
-                </span>
-              </td>
-              <td>
-                <span class="payment-mode-pill">
-                  {{ o.paymentMode | uppercase }}
-                </span>
-              </td>
-              <td>
-                <span *ngIf="o.transactionReference; else noRef">
-                  {{ o.transactionReference }}
-                </span>
-
-                <ng-template #noRef>
-                  —
-                </ng-template>
-              </td>
-
-              <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td> {{ o.cashierName }}</td>
-              <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
-              <td>
-                <span class="badge" [ngClass]="{
-  'badge-success': o.handoverStatus === 'Accepted',
-  'badge-danger': o.handoverStatus === 'Rejected',
-  'badge-warning': o.handoverStatus === 'Pending'
-}">
-                  {{ o.handoverStatus || 'Pending' }}
-                </span>
-
-
-                <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
-                  Reason: {{ o.rejectReason }}
+                <div class="date-time-badge">
+                  <span class="date">{{ c.lastPaymentDate | date:'dd/MM/yyyy' }}</span>
+                  <span class="time">{{ c.lastPaymentDate | date:'HH:mm a' }}</span>
                 </div>
+              </td>
+              <td>
+                <button (click)="viewDetails(c)">View</button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- <div class="modal-footer">
+
+      <div class="desktop-pagination" *ngIf="totalPages > 1">
+
+        <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+          Previous
+        </button>
+
+        <ng-container *ngFor="let page of getPageNumbers()">
+
+          <span *ngIf="page !== '...'" class="page-number" [class.active]="page === currentPage"
+            (click)="isNumber(page) ? goToPage(page) : null">
+            {{ page }}
+          </span>
+
+          <span *ngIf="page === '...'" class="dots">...</span>
+
+        </ng-container>
+
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next
+        </button>
+
+      </div>
+
+
+      <!-- ✅ MOBILE PAGINATION -->
+      <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+        <button class="mobile-nav" (click)="previousPage()" [disabled]="currentPage === 1">
+          ←
+        </button>
+
+        <span class="mobile-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+
+        <button class="mobile-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          →
+        </button>
+
+      </div>
+    </div>
+    <!-- No Data -->
+    <div *ngIf="!loading && customerReports.length === 0" class="no-data-message">
+      <div class="message-content">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <h4>No Payment Records Found</h4>
+        <p>Try adjusting your filters or select a different date range.</p>
+        <button class="btn btn-outline-primary" (click)="loadDefaultReport()">
+          <i class="fas fa-calendar-week"></i> Load This Month's Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" *ngIf="showCustomerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>
+          {{ selectedCustomer.customerName }} – Order Details
+        </h4>
+        <button class="close-btn" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-wrapper">
+          <table class="details-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Order Total</th>
+                <th>Paid</th>
+                <th>Pending</th>
+                <th>Payment Mode</th>
+                <th>Transaction Ref</th>
+                <th>Payment Date</th>
+
+                <th>Cashier Name</th>
+                <th>Handed Over</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let o of selectedCustomer.orders">
+                <td>{{ o.orderId }}</td>
+                <td>₹{{ o.orderTotalAmount | number:'1.2-2'}}</td>
+                <td>₹{{ o.amountPaidToday | number:'1.2-2'}}</td>
+                <td>
+                  <span *ngIf="o.pendingAmount === 0" class="badge badge-success">
+                    Paid
+                  </span>
+                  <span *ngIf="o.pendingAmount > 0" class="badge badge-warning">
+                    ₹{{ o.pendingAmount }}
+                  </span>
+                </td>
+                <td>
+                  <span class="payment-mode-pill">
+                    {{ o.paymentMode | uppercase }}
+                  </span>
+                </td>
+                <td>
+                  <span *ngIf="o.transactionReference; else noRef">
+                    {{ o.transactionReference }}
+                  </span>
+
+                  <ng-template #noRef>
+                    —
+                  </ng-template>
+                </td>
+
+                <td>{{ o.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td> {{ o.cashierName }}</td>
+                <td>{{ o.isHandedOver ? 'Yes' : 'No' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="{
+  'badge-success': o.handoverStatus === 'Accepted',
+  'badge-danger': o.handoverStatus === 'Rejected',
+  'badge-warning': o.handoverStatus === 'Pending'
+}">
+                    {{ o.handoverStatus || 'Pending' }}
+                  </span>
+
+
+                  <div *ngIf="o.handoverStatus === 'Rejected'" class="text-danger small mt-1">
+                    Reason: {{ o.rejectReason }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- <div class="modal-footer">
       <button class="btn btn-secondary" (click)="closeModal()">
         Close
       </button>
     </div> -->
 
-  </div>
-</div>
-
-<!-- BOTTOM SHEET -->
-<div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
-
-<div class="bottom-sheet" *ngIf="sheetOpen">
-  <div class="sheet-handle"></div>
-
-  <div class="sheet-header">
-    <h4>{{ sheetTitle }}</h4>
-    <button (click)="closeSheet()">✕</button>
+    </div>
   </div>
 
-  <div class="sheet-body">
+  <!-- BOTTOM SHEET -->
+  <div class="sheet-backdrop" *ngIf="sheetOpen" (click)="closeSheet()"></div>
 
+  <div class="bottom-sheet" *ngIf="sheetOpen">
+    <div class="sheet-handle"></div>
 
-    <div *ngIf="sheetType === 'payment'">
-      <div class="sheet-option" (click)="setPayment('')">All Modes</div>
-      <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
-      <div class="sheet-option" (click)="setPayment('online')">Online</div>
-      <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
-      <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
+    <div class="sheet-header">
+      <h4>{{ sheetTitle }}</h4>
+      <button (click)="closeSheet()">✕</button>
     </div>
 
+    <div class="sheet-body">
 
-    <div *ngIf="sheetType === 'handover'">
-      <div class="sheet-option" (click)="setHandover('')">All Status</div>
-      <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
-      <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
+
+      <div *ngIf="sheetType === 'payment'">
+        <div class="sheet-option" (click)="setPayment('')">All Modes</div>
+        <div class="sheet-option" (click)="setPayment('cash')">Cash</div>
+        <div class="sheet-option" (click)="setPayment('online')">Online</div>
+        <div class="sheet-option" (click)="setPayment('upi')">UPI</div>
+        <div class="sheet-option" (click)="setPayment('scanner')">Scanner</div>
+      </div>
+
+
+      <div *ngIf="sheetType === 'handover'">
+        <div class="sheet-option" (click)="setHandover('')">All Status</div>
+        <div class="sheet-option" (click)="setHandover('handed')">Handed Over</div>
+        <div class="sheet-option" (click)="setHandover('pending')">Pending</div>
+      </div>
+
+
     </div>
-
-
   </div>
-</div>

@@ -30,11 +30,14 @@
   <!-- Return Cards -->
   <div *ngIf="!loading && returnRequests.length > 0" class="returns-grid">
     <div class="return-card dashboard-card" *ngFor="let r of paginatedReturns; let i = index" [ngClass]="r.status">
+      <span class="card-number">
+        #{{ (currentPage - 1) * itemsPerPage + i + 1 }}
+      </span>
 
       <!-- Card Header -->
       <div class="card-header">
         <div class="header-left">
-          <h4><i class="fas fa-exchange-alt"></i> Return #{{ r.id }}</h4>
+          <h4><i class="fas fa-exchange-alt"></i> Return #{{r.id}}</h4>
           <small class="request-date">
             <i class="far fa-clock"></i> Requested: {{ r.createdAt | date:'medium' }}
           </small>
@@ -129,55 +132,42 @@
       </div>
     </div>
   </div>
+  <!-- DESKTOP PAGINATION -->
+  <div class="desktop-pagination" *ngIf="totalPages > 1">
 
-  <nav *ngIf="totalPages > 1" class="mt-4">
-    <ul class="pagination justify-content-center">
+    <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
 
-      <!-- Prev -->
-      <li class="page-item" [class.disabled]="currentPage === 1">
-        <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-          Prev
-        </button>
-      </li>
+    <div class="page-numbers">
+      <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+        [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+        {{ page }}
+      </span>
+    </div>
 
-      <!-- First Page -->
-      <li *ngIf="pageNumbers[0] > 1" class="page-item">
-        <button class="page-link" (click)="goToPage(1)">1</button>
-      </li>
+    <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
 
-      <!-- Start dots -->
-      <li *ngIf="pageNumbers[0] > 2" class="page-item disabled">
-        <span class="page-link">...</span>
-      </li>
+  </div>
 
-      <!-- Dynamic Pages -->
-      <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="currentPage === page">
-        <button class="page-link" (click)="goToPage(page)">
-          {{ page }}
-        </button>
-      </li>
+  <!-- MOBILE PAGINATION -->
+  <div class="mobile-pagination" *ngIf="totalPages > 1">
 
-      <!-- End dots -->
-      <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1" class="page-item disabled">
-        <span class="page-link">...</span>
-      </li>
+    <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+      ←
+    </button>
 
-      <!-- Last Page -->
-      <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages" class="page-item">
-        <button class="page-link" (click)="goToPage(totalPages)">
-          {{ totalPages }}
-        </button>
-      </li>
+    <div class="mobile-info">
+      Page {{ currentPage }} of {{ totalPages }}
+    </div>
 
-      <!-- Next -->
-      <li class="page-item" [class.disabled]="currentPage === totalPages">
-        <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
-          Next
-        </button>
-      </li>
+    <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+      →
+    </button>
 
-    </ul>
-  </nav>
+  </div>
 
   <!-- IMAGE GALLERY MODAL -->
   <div class="image-modal" *ngIf="isImageModalOpen">

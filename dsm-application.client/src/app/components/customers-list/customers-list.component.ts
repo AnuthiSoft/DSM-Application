@@ -45,6 +45,11 @@ export class CustomersListComponent implements OnInit {
   formSubmitted = false;
   showStatusSheet = false;
   isSidebarOpen = false;
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  paginatedCustomers: Customer[] = [];
 
   constructor(
     private customerService: CustomerService,
@@ -153,6 +158,8 @@ export class CustomersListComponent implements OnInit {
 
       return matchesSearch && matchesStatus;
     });
+    this.currentPage = 1;
+    this.setupPagination();
   }
 
 
@@ -206,11 +213,6 @@ export class CustomersListComponent implements OnInit {
 
     this.isEdit ? this.updateCustomer() : this.createCustomer();
   }
-
-
-
-  /* ----------------------------- CREATE ------------------------------ */
-
 
 
   /* ----------------------------- UPDATE ------------------------------ */
@@ -278,6 +280,7 @@ export class CustomersListComponent implements OnInit {
         next: (res) => {
           this.allCustomers = res;
           this.filteredCustomers = res;
+          this.setupPagination();
         },
         error: (err) => console.error(err)
       });
@@ -363,4 +366,72 @@ export class CustomersListComponent implements OnInit {
     document.body.classList.remove('sidebar-open');
   }
 
+  setupPagination() {
+    this.totalPages = Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
+    this.updatePaginatedData();
+  }
+
+  updatePaginatedData() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.paginatedCustomers = this.filteredCustomers.slice(start, end);
+  }
+
+  goToPage(page: any) {
+    if (typeof page !== 'number') return;
+
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page;
+    this.updatePaginatedData();
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedData();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedData();
+    }
+  }
+
+  handlePageClick(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (this.totalPages <= 7) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+
+    pages.push(1);
+
+    if (this.currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, this.currentPage - 1);
+    const end = Math.min(this.totalPages - 1, this.currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (this.currentPage < this.totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(this.totalPages);
+
+    return pages;
+  }
 }

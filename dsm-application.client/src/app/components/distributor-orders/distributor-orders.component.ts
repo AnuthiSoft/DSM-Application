@@ -12,7 +12,7 @@ import { Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'app-distributor-orders',
- templateUrl: './distributor-orders.component.html',
+  templateUrl: './distributor-orders.component.html',
   styleUrl: './distributor-orders.component.css'
 })
 export class DistributorOrdersComponent implements OnInit, OnChanges {
@@ -20,8 +20,8 @@ export class DistributorOrdersComponent implements OnInit, OnChanges {
   distributorId = localStorage.getItem('distributorId') || '';
   empId = localStorage.getItem('employeeId') || '';
   apiBaseUrl = environment.apiUrl.replace('/api', '');
-customerSearch: string = '';
-allOrders: DistributorOrder[] = [];  // keep original list
+  customerSearch: string = '';
+  allOrders: DistributorOrder[] = [];  // keep original list
   orders: DistributorOrder[] = [];
   employees: Employee[] = [];
   loading = false;
@@ -37,12 +37,16 @@ allOrders: DistributorOrder[] = [];  // keep original list
   showTempDropdown = false; showProductPopup = false;
   selectedOrder: any = null;
   availableEmployees: any[] = [];
-  
-selectedEmployeeId: string = '';
-@Input() presetStatus: string | null = null;
+  currentPage = 1;
+  pageSize = 10;
+  totalPages = 1;
+  paginatedOrders: DistributorOrder[] = [];
+  selectedEmployeeId: string = '';
 
- 
- confirmingOrder = false;
+  @Input() presetStatus: string | null = null;
+
+
+  confirmingOrder = false;
   // For assignment modal
   // selectedOrder: DistributorOrder | null = null;
   employeeId = '';
@@ -77,68 +81,78 @@ selectedEmployeeId: string = '';
 
 
   ngOnChanges(changes: SimpleChanges): void {
-  if (changes['presetStatus'] && this.presetStatus) {
-    this.statusFilter = this.presetStatus;
-    this.loadOrders();
-  }
-}
-
-
-loadOrders(): void {
-  if (!this.distributorId) return;
-
-  this.loading = true;
-
-  const status = !this.statusFilter || this.statusFilter === 'All'
-    ? undefined
-    : this.statusFilter;
-
-  this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
-    next: (data) => {
-      // Store ORIGINAL list
-      this.allOrders = data.map((o: any) => ({
-        ...o,
-        creditUsed: o.creditUsed ?? 0,
-        payableAmount: o.payableAmount ?? o.totalAmount ?? 0
-      }));
-
-      // Apply search + status filters
-      this.applyFilters();
-
-      this.loading = false;
-
-      // Load employee availability for each customer
-      this.orders.forEach(o => {
-        this.loadAvailabilityForCustomer(o.customerId);
-      });
-    },
-    error: (err) => {
-      console.error(err);
-      this.loading = false;
-      alert('Failed to load orders');
+    if (changes['presetStatus'] && this.presetStatus) {
+      this.statusFilter = this.presetStatus;
+      this.loadOrders();
     }
-  });
-}
+  }
+
+
+  loadOrders(): void {
+    if (!this.distributorId) return;
+
+    this.loading = true;
+
+    const status = !this.statusFilter || this.statusFilter === 'All'
+      ? undefined
+      : this.statusFilter;
+
+    this.orderService.getOrdersByDistributor(this.distributorId, status).subscribe({
+      next: (data) => {
+        // Store ORIGINAL list
+        this.allOrders = data.map((o: any) => ({
+          ...o,
+          creditUsed: o.creditUsed ?? 0,
+          payableAmount: o.payableAmount ?? o.totalAmount ?? 0
+        }));
+
+        // Apply search + status filters
+        this.applyFilters();
+
+        this.loading = false;
+
+        // Load employee availability for each customer
+        this.orders.forEach(o => {
+          this.loadAvailabilityForCustomer(o.customerId);
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading = false;
+        alert('Failed to load orders');
+      }
+    });
+  }
 
 
   applyFilters() {
-  let list = [...this.allOrders];
+    let list = [...this.allOrders];
 
-  // 🔍 Customer name search
-  if (this.customerSearch.trim()) {
-    const term = this.customerSearch.toLowerCase();
-    list = list.filter(o =>
-      o.customerName?.toLowerCase().includes(term)
-    );
+    // 🔍 Customer search
+    if (this.customerSearch.trim()) {
+      const term = this.customerSearch.toLowerCase();
+      list = list.filter(o =>
+        o.customerName?.toLowerCase().includes(term)
+      );
+    }
+
+    // 🟦 Status filter
+    if (this.statusFilter && this.statusFilter !== 'All') {
+      list = list.filter(o => o.status === this.statusFilter);
+    }
+
+    this.totalPages = Math.ceil(list.length / this.pageSize);
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
+    }
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedOrders = list.slice(start, end);
+    this.orders = list; // keep full for count
   }
 
-  // 🟦 Status filter
-  if (this.statusFilter && this.statusFilter !== 'All') {
-    list = list.filter(o => o.status === this.statusFilter);
-  }
-
-  this.orders = list;
-}
   loadAvailabilityForCustomer(customerId: string) {
     this.distService.getCustomerEmployeeStatus(this.distributorId, customerId)
       .subscribe(status => {
@@ -259,13 +273,13 @@ loadOrders(): void {
     setTimeout(() => {
       this.selectedOrder = order;
       // ADD ↓↓↓
-this.selectedOrder.creditUsed = order.creditUsed ?? 0;
+      this.selectedOrder.creditUsed = order.creditUsed ?? 0;
 
-this.selectedOrder.payableAmount =
-  order.payableAmount ??
-  order.remainingAmount ??
-  order.totalAmount ?? 0;
-// ADD ↑↑↑
+      this.selectedOrder.payableAmount =
+        order.payableAmount ??
+        order.remainingAmount ??
+        order.totalAmount ?? 0;
+      // ADD ↑↑↑
 
       this.nextAction = action;
 
@@ -309,12 +323,12 @@ this.selectedOrder.payableAmount =
   // ✅ Fixed: accepts full order object
   openAssignModal(order: DistributorOrder) {
     this.selectedOrder = order;
-      this.showAssignModal = true;
+    this.showAssignModal = true;
 
-      // reset state ✅ (from THEIRS)
-      this.availableEmployees = [];
-      this.selectedEmployeeId = '';
-      this.showTempDropdown = false;
+    // reset state ✅ (from THEIRS)
+    this.availableEmployees = [];
+    this.selectedEmployeeId = '';
+    this.showTempDropdown = false;
 
     // LOAD employees for dropdown
     this.filteredEmployees = this.employees;
@@ -329,48 +343,48 @@ this.selectedOrder.payableAmount =
       this.employeeAvailability[order.customerId] = status;
 
       // 2️⃣ Show active employee (ONLY if assigned)
-    if (status.temporaryEmployeeId) {
-  const tempEmp = this.employees.find(
-    e => e.employeeId === status.temporaryEmployeeId
-  );
-  this.activeEmployeeName = tempEmp?.name || 'Temporary employee assigned';
+      if (status.temporaryEmployeeId) {
+        const tempEmp = this.employees.find(
+          e => e.employeeId === status.temporaryEmployeeId
+        );
+        this.activeEmployeeName = tempEmp?.name || 'Temporary employee assigned';
 
-  // ✅ ADD THIS
-  this.selectedEmployeeId = status.temporaryEmployeeId;
-}
-else if (status.permanentEmployeeId) {
-  const permEmp = this.employees.find(
-    e => e.employeeId === status.permanentEmployeeId
-  );
-  this.activeEmployeeName = permEmp?.name || 'Permanent employee assigned';
+        // ✅ ADD THIS
+        this.selectedEmployeeId = status.temporaryEmployeeId;
+      }
+      else if (status.permanentEmployeeId) {
+        const permEmp = this.employees.find(
+          e => e.employeeId === status.permanentEmployeeId
+        );
+        this.activeEmployeeName = permEmp?.name || 'Permanent employee assigned';
 
-  // ✅ ADD THIS
-  this.selectedEmployeeId = status.permanentEmployeeId;
-}
+        // ✅ ADD THIS
+        this.selectedEmployeeId = status.permanentEmployeeId;
+      }
 
 
       // 3️⃣ Load AVAILABLE employees for today
-     this.employeeService
-  .getAvailableEmployeesToday(this.distributorId)
-  .subscribe(list => {
+      this.employeeService
+        .getAvailableEmployeesToday(this.distributorId)
+        .subscribe(list => {
 
-    this.availableEmployees = list;
+          this.availableEmployees = list;
 
-    // ✅ ADD THIS BLOCK
-    if (
-      this.selectedEmployeeId &&
-      !this.availableEmployees.some(e => e.employeeId === this.selectedEmployeeId)
-    ) {
-      const assignedEmp = this.employees.find(
-        e => e.employeeId === this.selectedEmployeeId
-      );
-      if (assignedEmp) {
-        this.availableEmployees.unshift(assignedEmp);
-      }
-    }
+          // ✅ ADD THIS BLOCK
+          if (
+            this.selectedEmployeeId &&
+            !this.availableEmployees.some(e => e.employeeId === this.selectedEmployeeId)
+          ) {
+            const assignedEmp = this.employees.find(
+              e => e.employeeId === this.selectedEmployeeId
+            );
+            if (assignedEmp) {
+              this.availableEmployees.unshift(assignedEmp);
+            }
+          }
 
-    this.cd.detectChanges();
-  });
+          this.cd.detectChanges();
+        });
 
       // 4️⃣ Show temp dropdown ONLY when permanent exists but NOT available
       this.showTempDropdown =
@@ -379,9 +393,9 @@ else if (status.permanentEmployeeId) {
 
       this.cd.detectChanges();
     });
-}
+  }
 
- 
+
   closeAssignModal() {
     this.showAssignModal = false;
     this.selectedOrder = null;
@@ -413,7 +427,7 @@ else if (status.permanentEmployeeId) {
   //   }
 
   assignAndShip() {
-    
+
 
     if (!this.selectedOrder) return;
 
@@ -462,16 +476,16 @@ else if (status.permanentEmployeeId) {
 
       return;
     }
-    
+
 
     // ⭐ CASE 3: Manual assignment from Available Employees dropdown
-if (this.selectedEmployeeId) {
-  this.finalOrderAssign(this.selectedEmployeeId);
-  return;
-}
+    if (this.selectedEmployeeId) {
+      this.finalOrderAssign(this.selectedEmployeeId);
+      return;
+    }
 
-    
- 
+
+
     alert("Temporary employee not selected");
   }
 
@@ -573,7 +587,7 @@ if (this.selectedEmployeeId) {
         }
       });
   }
- 
+
   savePermanentEmployee() {
     if (!this.selectedOrder || !this.selectedEmployeeId) {
       alert("Select an employee");
@@ -671,6 +685,61 @@ if (this.selectedEmployeeId) {
     this.statusFilter = status || 'All';
     this.showStatusSheet = false;
     this.loadOrders();
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.applyFilters();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.applyFilters();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
+  handlePageClick(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (this.totalPages <= 7) {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+
+    pages.push(1);
+
+    if (this.currentPage > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, this.currentPage - 1);
+    const end = Math.min(this.totalPages - 1, this.currentPage + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (this.currentPage < this.totalPages - 2) {
+      pages.push('...');
+    }
+
+    pages.push(this.totalPages);
+
+    return pages;
   }
 }
 

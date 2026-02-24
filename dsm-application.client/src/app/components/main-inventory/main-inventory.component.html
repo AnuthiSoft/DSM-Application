@@ -59,48 +59,35 @@
   </tbody>
 </table>
 
-<nav *ngIf="totalPages > 1">
-  <ul class="pagination justify-content-center flex-wrap mt-3">
+<!-- Desktop Pagination -->
+<div class="desktop-pagination" *ngIf="totalPages > 1">
+  <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+    <i class="fas fa-chevron-left"></i> Previous
+  </button>
 
-    <!-- Previous -->
-    <li class="page-item" [class.disabled]="currentPage === 1">
-      <button class="page-link" (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">
-        Prev
-      </button>
-    </li>
+  <div class="page-numbers">
+    <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+      [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+      {{ page }}
+    </span>
+  </div>
 
-    <!-- First Page Shortcut -->
-    <li *ngIf="pageNumbers[0] > 1" class="page-item">
-      <button class="page-link" (click)="currentPage = 1">1</button>
-    </li>
+  <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+    Next <i class="fas fa-chevron-right"></i>
+  </button>
+</div>
 
-    <li *ngIf="pageNumbers[0] > 2" class="page-item disabled">
-      <span class="page-link">...</span>
-    </li>
+<!-- Mobile Pagination -->
+<div class="mobile-pagination" *ngIf="totalPages > 1">
+  <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+    ←
+  </button>
 
-    <!-- Dynamic Pages -->
-    <li class="page-item" *ngFor="let page of pageNumbers" [class.active]="currentPage === page">
-      <button class="page-link" (click)="currentPage = page">
-        {{ page }}
-      </button>
-    </li>
+  <div class="mobile-info">
+    Page {{ currentPage }} of {{ totalPages }}
+  </div>
 
-    <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages - 1" class="page-item disabled">
-      <span class="page-link">...</span>
-    </li>
-
-    <li *ngIf="pageNumbers[pageNumbers.length - 1] < totalPages" class="page-item">
-      <button class="page-link" (click)="currentPage = totalPages">
-        {{ totalPages }}
-      </button>
-    </li>
-
-    <!-- Next -->
-    <li class="page-item" [class.disabled]="currentPage === totalPages">
-      <button class="page-link" (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">
-        Next
-      </button>
-    </li>
-
-  </ul>
-</nav>
+  <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+    →
+  </button>
+</div>

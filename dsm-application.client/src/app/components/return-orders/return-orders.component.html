@@ -19,7 +19,7 @@
 
   <!-- Return Orders List -->
   <div *ngIf="!loading && returnOrders.length > 0" class="return-orders-list">
-    <div class="return-card dashboard-card" *ngFor="let r of returnOrders">
+    <div class="return-card dashboard-card" *ngFor="let r of paginatedReturns">
 
       <!-- Header -->
       <div class="return-header">
@@ -155,4 +155,26 @@
       </div>
     </div>
   </div>
+<div class="pagination-container" *ngIf="totalPages > 1">
+
+  <button class="page-btn"
+          (click)="prevGroup()"
+          [disabled]="currentGroup === 0">
+    Prev
+  </button>
+
+  <button class="page-number"
+          *ngFor="let p of pages"
+          (click)="goToPage(p)"
+          [class.active]="currentPage === p">
+    {{ p }}
+  </button>
+
+  <button class="page-btn"
+          (click)="nextGroup()"
+          [disabled]="(currentGroup + 1) * pagesPerGroup >= totalPages">
+    Next
+  </button>
+
+</div>
 </div>

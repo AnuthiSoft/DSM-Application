@@ -106,13 +106,19 @@ public class OrderService
     private readonly InventoryService _inventoryService;
     private readonly IMongoCollection<Product> _products;
 
+    private readonly IMongoCollection<CreditTransaction> _creditTransactions;
+    private readonly IMongoClient _client;
+
+    private readonly IMongoDatabase _database;
+
+
     public OrderService(IMongoDatabase db, TemporaryAssignmentService tempService, MongoDbService mongo, InventoryService inventoryService)
 
     {
 
         _orders = db.GetCollection<Order>("orders");
 
-        _customers = db.GetCollection<Customer>("customers");
+        _customers = mongo.Customers;
 
         _tempService = tempService;
 
@@ -122,6 +128,9 @@ public class OrderService
         _inventoryService = inventoryService;
 
         _products = db.GetCollection<Product>("products");
+        _client = db.Client;
+        _creditTransactions = db.GetCollection<CreditTransaction>("CreditTransactions");
+        _database = db;
     }
 
     public async Task CreateOrderAsync(Order order)
@@ -174,28 +183,26 @@ public class OrderService
         order.TotalAmount = totalAmount;
 
 
-        // APPLY CUSTOMER CREDIT
-        decimal usableCredit = 0;
+        // REQUEST CREDIT (DO NOT DEDUCT)
+        decimal requestedCredit = 0;
 
         if (customer.CreditBalance > 0 && order.TotalAmount > 0)
         {
-            usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
-
-            order.CreditUsed = usableCredit;
-            order.PayableAmount = order.TotalAmount - usableCredit;
-            order.RemainingAmount = order.PayableAmount;
-
-            await _customers.UpdateOneAsync(
-                c => c.CustomerId == order.CustomerId,
-                Builders<Customer>.Update.Inc(c => c.CreditBalance, -usableCredit)
-            );
+            requestedCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
         }
+
+        order.RequestedCredit = requestedCredit;
+        order.ApprovedCredit = 0;
+        order.RefundedCredit = 0;
+        if (requestedCredit > 0)
+            order.CreditStatus = "Pending";
         else
-        {
-            order.CreditUsed = 0;
-            order.PayableAmount = order.TotalAmount;
-            order.RemainingAmount = order.TotalAmount;
-        }
+            order.CreditStatus = "NotRequested";
+
+        // Full amount payable until distributor approves
+        order.CreditUsed = 0;
+        order.PayableAmount = order.TotalAmount;
+        order.RemainingAmount = order.TotalAmount;
 
 
 
@@ -236,11 +243,239 @@ public class OrderService
         // Assign to order
 
         order.AssignedEmployeeId = assignedEmployeeId;
+        order.Status = "Pending";
+        order.OrderedDate = DateTime.UtcNow;
 
         order.CreatedAt = DateTime.UtcNow;
         
         await _orders.InsertOneAsync(order);
 
+    }
+
+    public async Task ApproveCreditAsync(string orderId, decimal approveAmount)
+    {
+        using var session = await _client.StartSessionAsync();
+        session.StartTransaction();
+
+        try
+        {
+            // Collections (define at method level so usable everywhere)
+            var ordersCollection = _database.GetCollection<Order>("Orders");
+            var cashOrdersCollection = _database.GetCollection<Order>("orders");
+
+            bool isCashOrder = false;
+
+            // 1️⃣ Find order in Orders
+            var order = await ordersCollection
+                .Find(session, o => o.Id == orderId)
+                .FirstOrDefaultAsync();
+
+            // 2️⃣ If not found, check cash collector collection
+            if (order == null)
+            {
+                order = await cashOrdersCollection
+                    .Find(session, o => o.Id == orderId)
+                    .FirstOrDefaultAsync();
+
+                if (order != null)
+                    isCashOrder = true;
+            }
+
+            if (order == null)
+                throw new Exception($"Order not found: {orderId}");
+
+            // ===== SAFE CREDIT STATUS CHECK =====
+            // ===== HARD LOCK: Allow approval only once and only in Pending state =====
+
+            // Order must be Pending
+            if (!string.Equals(order.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // Credit must not be already applied
+            if (order.ApprovedCredit > 0 || order.CreditUsed > 0)
+                return;
+
+            // Credit must be requested
+            if (order.RequestedCredit <= 0)
+                return;
+
+            // CreditStatus must be Pending (or empty/null treated as Pending)
+            var status = string.IsNullOrWhiteSpace(order.CreditStatus)
+                ? "Pending"
+                : order.CreditStatus;
+
+            if (!status.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            // 3️⃣ Find customer (existing logic)
+            var customerFilter = Builders<Customer>.Filter.Eq("_id", new ObjectId(order.CustomerId));
+
+            // 2️⃣ FIND CUSTOMER (handles ObjectId + string)
+
+            Customer? customer = null;
+
+            // Try match with Mongo _id (ObjectId)
+            if (ObjectId.TryParse(order.CustomerId, out var customerObjectId))
+            {
+                var objectFilter = Builders<Customer>.Filter.Eq("_id", customerObjectId);
+                customer = await _customers
+                    .Find(session, objectFilter)
+                    .FirstOrDefaultAsync();
+            }
+
+            // If not found, try string field match
+            if (customer == null)
+            {
+                customer = await _customers
+                    .Find(session, c => c.CustomerId == order.CustomerId)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (customer == null)
+                throw new Exception($"Customer not found: {order.CustomerId}");
+
+            // 4️⃣ Calculate usable credit
+            // If credit was never requested, do nothing (idempotent)
+            if (order.RequestedCredit <= 0)
+                return;
+
+            var usableCredit = Math.Min(customer.CreditBalance, approveAmount);
+            usableCredit = Math.Min(usableCredit, order.RequestedCredit);
+            usableCredit = Math.Min(usableCredit, order.TotalAmount);
+
+            if (usableCredit <= 0)
+                return;
+
+            // 5️⃣ Deduct credit atomically
+            var result = await _customers.UpdateOneAsync(
+       session,
+       Builders<Customer>.Filter.And(
+           Builders<Customer>.Filter.Eq("_id", new ObjectId(order.CustomerId)),
+           Builders<Customer>.Filter.Gte(c => c.CreditBalance, usableCredit)
+       ),
+       Builders<Customer>.Update.Inc(c => c.CreditBalance, -usableCredit)
+   );
+
+            if (result.ModifiedCount == 0)
+                throw new Exception("Insufficient credit");
+
+            // 6️⃣ Update order
+            order.ApprovedCredit = usableCredit;
+            order.CreditUsed = usableCredit;
+            order.PayableAmount = order.TotalAmount - usableCredit;
+            order.RemainingAmount = order.PayableAmount;
+            order.CreditStatus = "Approved";
+            order.UpdatedAt = DateTime.UtcNow;
+
+            // Save to correct collection
+            if (isCashOrder)
+            {
+                await cashOrdersCollection.ReplaceOneAsync(
+                    session,
+                    o => o.Id == order.Id,
+                    order
+                );
+            }
+            else
+            {
+                await ordersCollection.ReplaceOneAsync(
+                    session,
+                    o => o.Id == order.Id,
+                    order
+                );
+            }
+
+            // 7️⃣ Ledger entry
+            await _creditTransactions.InsertOneAsync(session, new CreditTransaction
+            {
+                CustomerId = order.CustomerId,
+                Amount = -usableCredit,
+                Type = "OrderApproved",
+                OrderId = order.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await session.CommitTransactionAsync();
+        }
+        catch
+        {
+            await session.AbortTransactionAsync();
+            throw;
+        }
+    }
+
+
+    public async Task CancelOrderAsync(string orderId)
+    {
+        using var session = await _client.StartSessionAsync();
+        session.StartTransaction();
+
+        try
+        {
+            var order = await _orders
+     .Find(session, Builders<Order>.Filter.Eq("_id", new ObjectId(orderId)))
+     .FirstOrDefaultAsync();
+            if (order == null) throw new Exception("Order not found");
+          
+            // 🔒 Prevent double cancel
+            if (order.CreditStatus == "Cancelled")
+                throw new Exception("Order already cancelled");
+
+            // 🔒 Allow cancel only if credit was approved
+            if (order.CreditStatus == "Approved" && order.ApprovedCredit > 0)
+            {
+                await _customers.UpdateOneAsync(
+    session,
+    Builders<Customer>.Filter.Eq("_id", new ObjectId(order.CustomerId)),
+                    Builders<Customer>.Update.Inc(c => c.CreditBalance, order.ApprovedCredit)
+                );
+
+                await _creditTransactions.InsertOneAsync(session, new CreditTransaction
+                {
+                    CustomerId = order.CustomerId,
+                    Amount = order.ApprovedCredit,
+                    Type = "Cancel",
+                    OrderId = order.Id,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            order.CreditStatus = "Cancelled";
+            order.Status = "Cancelled";
+
+
+
+            if (order.ApprovedCredit > 0)
+            {
+                await _customers.UpdateOneAsync(
+                    session,
+                    c => c.CustomerId == order.CustomerId,
+                    Builders<Customer>.Update.Inc(c => c.CreditBalance, order.ApprovedCredit)
+                );
+
+                await _creditTransactions.InsertOneAsync(session, new CreditTransaction
+                {
+                    CustomerId = order.CustomerId,
+                    Amount = order.ApprovedCredit,
+                    Type = "Cancel",
+                    OrderId = order.Id,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            order.CreditStatus = "Cancelled";
+            order.Status = "Cancelled";
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _orders.ReplaceOneAsync(session, o => o.Id == order.Id, order);
+
+            await session.CommitTransactionAsync();
+        }
+        catch
+        {
+            await session.AbortTransactionAsync();
+            throw;
+        }
     }
 
 

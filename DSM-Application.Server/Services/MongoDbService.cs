@@ -79,6 +79,8 @@ namespace DistributorManagementSystem.Server.Services
 
         public IMongoCollection<Cart> Carts =>
     _db.GetCollection<Cart>("Carts");
+        public IMongoCollection<CreditTransaction> CreditTransactions =>
+    _db.GetCollection<CreditTransaction>("CreditTransactions");
 
     }
 

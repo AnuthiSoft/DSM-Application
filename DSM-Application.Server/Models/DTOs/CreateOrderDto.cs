@@ -71,6 +71,11 @@ namespace DSM_Application.Server.Models.DTOs
         public decimal CreditUsed { get; set; }
         public decimal PayableAmount { get; set; }
 
+        public string CreditStatus { get; set; }
+
+        public decimal RequestedCredit { get; set; }
+            
+        public decimal ApprovedCredit { get; set; }
 
         public decimal SpecialDiscountPercent { get; set; }
         public decimal QuantityDiscountPercent { get; set; }

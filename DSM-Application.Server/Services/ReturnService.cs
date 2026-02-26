@@ -20,7 +20,9 @@ namespace DSM_Application.Server.Services
         private readonly IMongoCollection<Customer> _customers;
         private readonly BlobService _blobService;
 
+        private readonly IMongoCollection<CreditTransaction> _creditTransactions;
 
+        private readonly IMongoClient _client;
         public ReturnService(
             MongoDbService db,
             InventoryService inventoryService,
@@ -40,6 +42,8 @@ namespace DSM_Application.Server.Services
 
             _env = env; // ✅ ASSIGN IT (THIS WAS MISSING)
             _blobService = blobService;
+            _creditTransactions = db.CreditTransactions;
+            _client = db.Database.Client;
         }
 
 
@@ -408,10 +412,14 @@ namespace DSM_Application.Server.Services
         // 4️⃣ COMPLETE RETURN (INVENTORY + ORDER)
         public async Task CompleteReturnAsync(string returnId)
         {
-            
+            using var session = await _client.StartSessionAsync();
+            session.StartTransaction();
 
-            // Get distributor from Return itself (NOT from token)
-            var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
+            try
+            {
+
+                // Get distributor from Return itself (NOT from token)
+                var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
             if (ret == null)
                 throw new Exception("Return not found");
 
@@ -471,18 +479,33 @@ namespace DSM_Application.Server.Services
                         order.RemainingAmount = 0;
 
                     order.HasReturn = true;
-                   
-
-                    //  Add credit to customer
-                    var filter = Builders<Customer>.Filter.Eq(
-       "_id",
-       new ObjectId(order.CustomerId)
-   );
 
 
+                    // Refund only approved credit balance
+                    var remainingEligible = order.ApprovedCredit - order.RefundedCredit;
+                    var creditRefund = Math.Min(returnValue, remainingEligible);
 
-                    var update = Builders<Customer>.Update.Inc("CreditBalance", returnValue);
-                    await _customers.UpdateOneAsync(filter, update);
+                    if (creditRefund > 0)
+                    {
+                            // Add credit back to customer
+                            await _customers.UpdateOneAsync(
+         session,
+         c => c.CustomerId == order.CustomerId,
+         Builders<Customer>.Update.Inc(c => c.CreditBalance, creditRefund)
+     );
+                            // Ledger entry
+                            await _creditTransactions.InsertOneAsync(session, new CreditTransaction
+                            {
+                            CustomerId = order.CustomerId,
+                            Amount = creditRefund,
+                            Type = "Return",
+                            OrderId = order.Id,
+                            ReturnId = ret.Id,
+                            CreatedAt = DateTime.UtcNow
+                        });
+
+                        order.RefundedCredit += creditRefund;
+                    }
 
                 }
 
@@ -491,14 +514,21 @@ namespace DSM_Application.Server.Services
             
 
                 // 🔥 SAVE ORDER
-                await _orders.ReplaceOneAsync(o => o.Id == order.Id, order);
+                await _orders.ReplaceOneAsync(session,o => o.Id == order.Id, order);
             }
 
             // 3️⃣ UPDATE RETURN STATUS
             ret.Status = "Completed";
             ret.CompletedAt = DateTime.UtcNow;
 
-            await _returns.ReplaceOneAsync(r => r.Id == ret.Id, ret);
+            await _returns.ReplaceOneAsync(session,r => r.Id == ret.Id, ret);
+                await session.CommitTransactionAsync();
+            }
+            catch
+            {
+                await session.AbortTransactionAsync();
+                throw;
+            }
         }
 
 

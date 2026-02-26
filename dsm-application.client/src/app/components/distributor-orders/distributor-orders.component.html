@@ -170,6 +170,15 @@
 
               <td class="order-actions">
                 <div class="action-buttons">
+<button
+  *ngIf="o.creditStatus === 'Pending' && (o.requestedCredit ?? 0) > 0"
+  class="btn btn-warning btn-sm"
+  (click)="approveCredit(o)">
+  Approve Credit
+</button>
+
+
+
                   <!-- Pending -->
                   <button *ngIf="o.status === 'Pending'" class="btn btn-success btn-sm"
                     (click)="confirmOrderWithCheck(o)">
@@ -537,6 +546,8 @@
     Continue
   </button>
 </div>
+
+
 
 <!-- 📱 Status Bottom Sheet -->
 <div class="bottom-sheet-overlay" *ngIf="showStatusSheet" (click)="closeStatusSheet()">

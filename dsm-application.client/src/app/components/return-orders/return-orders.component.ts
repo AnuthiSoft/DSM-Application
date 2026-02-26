@@ -9,6 +9,12 @@ import { ReturnApiService } from '../../services/return-api.service'
   styleUrl: './return-orders.component.css'
 })
 export class ReturnOrdersComponent implements OnInit {
+  pageSize = 4;          // 4 returns per page
+currentPage = 1;
+totalPages = 1;
+
+pagesPerGroup = 5;     // show 1–5, 6–10
+currentGroup = 0;
 
   @Output() returnUpdated = new EventEmitter<void>();
  
@@ -31,15 +37,53 @@ export class ReturnOrdersComponent implements OnInit {
 
     this.returnApiService.getReturnHistory().subscribe({
       next: (res) => {
-        this.returnOrders = res;
-        this.loading = false;
-      },
+  this.returnOrders = res;
+
+  this.currentPage = 1;
+  this.currentGroup = 0;
+  this.totalPages = Math.ceil(this.returnOrders.length / this.pageSize) || 1;
+
+  this.loading = false;
+},
       error: () => {
         this.loading = false;
         Swal.fire('Error', 'Failed to load return orders', 'error');
       }
     });
   }
+
+  get paginatedReturns() {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.returnOrders.slice(start, start + this.pageSize);
+}
+
+get pages(): number[] {
+  const start = this.currentGroup * this.pagesPerGroup + 1;
+  const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+goToPage(page: number) {
+  if (page < 1 || page > this.totalPages) return;
+
+  this.currentPage = page;
+  this.currentGroup = Math.floor((page - 1) / this.pagesPerGroup);
+}
+
+prevGroup() {
+  if (this.currentGroup > 0) {
+    this.currentGroup--;
+    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+  }
+}
+
+nextGroup() {
+  if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
+    this.currentGroup++;
+    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+  }
+}
 
   // Helpers
   isPending(r: any) {

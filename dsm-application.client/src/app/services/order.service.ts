@@ -144,7 +144,12 @@ collectPayment(orderId: string, payload: { collectedAmount: number; paymentMetho
   );
 }
 
-
+approveCredit(orderId: string, amount: number) {
+  return this.http.post(
+    `${environment.apiUrl}/orders/${orderId}/approve-credit?amount=${amount}`,
+    {}
+  );
+}
 
 }
  

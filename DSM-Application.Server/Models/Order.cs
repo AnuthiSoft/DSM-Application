@@ -128,7 +128,12 @@ namespace DSM_Application.Server.Models
         public decimal CreditUsed { get; set; }
 
         public decimal PayableAmount { get; set; }
-        public string? CustomerAddress { get;set; }
+
+        public decimal RequestedCredit { get; set; }
+        public decimal ApprovedCredit { get; set; }
+        public decimal RefundedCredit { get; set; }
+        public string CreditStatus { get; set; } // Pending / Approved / Rejected / Cancelled
+
     }
 
 }

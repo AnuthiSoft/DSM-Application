@@ -26,6 +26,12 @@ interface ReturnData {
 })
 export class CustomerOrdersComponent {
 
+  // ===== Pagination =====
+pageSize = 6;
+currentPage = 1;
+totalPages = 1;
+pagesPerGroup = 5;
+currentGroup = 0;
   returnData: ReturnData = {
     returnType: 'Return',
     reason: 'Received damaged product',
@@ -113,6 +119,8 @@ export class CustomerOrdersComponent {
         }));
 
         this.applyStatusFilter(); // ✅ IMPORTANT
+        this.currentPage = 1;
+this.updatePagination();
         this.loading = false;
       },
       error: () => {
@@ -120,15 +128,18 @@ export class CustomerOrdersComponent {
       }
     });
   }
-  applyStatusFilter(): void {
-    if (this.statusFilter === 'All') {
-      this.filteredOrders = [...this.orders];
-    } else {
-      this.filteredOrders = this.orders.filter(
-        o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
-      );
-    }
+ applyStatusFilter(): void {
+  if (this.statusFilter === 'All') {
+    this.filteredOrders = [...this.orders];
+  } else {
+    this.filteredOrders = this.orders.filter(
+      o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
+    );
   }
+
+  this.currentPage = 1;
+  this.updatePagination();
+}
 
 
 
@@ -729,41 +740,50 @@ Swal.fire({
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+  updatePagination() {
+  this.totalPages = Math.ceil(this.filteredOrders.length / this.pageSize) || 1;
 
- preventExceedingMax(event: KeyboardEvent, pid: string) {
-  const max = this.getMaxReturnQtyForProduct(pid);
-
-  const input = event.target as HTMLInputElement;
-  const currentValue = input.value;
-
-  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-
-  if (allowedKeys.includes(event.key)) return;
-
-  if (!/^[0-9]$/.test(event.key)) {
-    event.preventDefault();
-    return;
+  if (this.currentPage > this.totalPages) {
+    this.currentPage = this.totalPages;
   }
 
-  const newValue = currentValue + event.key;
-
-  if (Number(newValue) > max) {
-    event.preventDefault();
-    this.toastr.warning(`Maximum quantity allowed is ${max}`);
+  if (this.currentPage < 1) {
+    this.currentPage = 1;
   }
 }
 
-validateReturnQty(pid: string) {
-  const max = this.getMaxReturnQtyForProduct(pid);
+get paginatedOrders(): Order[] {
+  const start = (this.currentPage - 1) * this.pageSize;
+  return this.filteredOrders.slice(start, start + this.pageSize);
+}
 
-  if (this.returnQuantities[pid] > max) {
-    this.returnQuantities[pid] = max;
-  }
-  if (this.returnQuantities[pid] < 1) {
-    this.returnQuantities[pid] = 1;
-  }
+get pages(): number[] {
+  const start = this.currentGroup * this.pagesPerGroup + 1;
+  const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
 
-  this.updateTotalReturnQty();
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+goToPage(page: number) {
+  if (page < 1 || page > this.totalPages) return;
+
+  this.currentPage = page;
+
+  // move group automatically
+  this.currentGroup = Math.floor((page - 1) / this.pagesPerGroup);
+}
+prevGroup() {
+  if (this.currentGroup > 0) {
+    this.currentGroup--;
+    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+  }
+}
+
+nextGroup() {
+  if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
+    this.currentGroup++;
+    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+  }
 }
 }
 

@@ -96,7 +96,7 @@
 
 
     <div class="orders-grid">
-      <div class="order-card" *ngFor="let order of filteredOrders">
+      <div class="order-card" *ngFor="let order of paginatedOrders">
         <div class="order-header">
           <div class="order-title">
             <h4>Order #{{ order.id }}</h4>
@@ -325,9 +325,27 @@
 
 
       </div>
+      
     </div>
 
+<div class="pagination-container" *ngIf="totalPages > 1">
 
+  <button (click)="prevGroup()" [disabled]="currentGroup === 0">
+    Prev
+  </button>
+
+  <span *ngFor="let p of pages"
+        (click)="goToPage(p)"
+        [class.active]="currentPage === p">
+    {{ p }}
+  </span>
+
+  <button (click)="nextGroup()"
+          [disabled]="(currentGroup + 1) * pagesPerGroup >= totalPages">
+    Next
+  </button>
+
+</div>
 
 
     <!-- ✅ Order Summary (after clicking View Details) -->

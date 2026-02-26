@@ -1280,3 +1280,28 @@ html[data-theme="dark"] .modal-close {
   }
 }
 
+/* FIX: Make pagination clickable and properly positioned */
+.pagination-container {
+  position: relative;
+  z-index: 10;          /* bring above cards */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.pagination-container button,
+.pagination-container span {
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.pagination-container span.active {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}

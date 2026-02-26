@@ -741,5 +741,20 @@ export class DistributorOrdersComponent implements OnInit, OnChanges {
 
     return pages;
   }
+  approveCredit(order: any) {
+  const amount = order.requestedCredit ?? order.totalAmount;
+
+  this.orderService.approveCredit(order.id, amount).subscribe({
+    next: () => {
+      // Update UI state immediately
+      order.creditStatus = 'Approved';
+      order.approvedCredit = amount;
+    },
+    error: (err) => {
+      console.error('Approve credit failed', err);
+      alert('Approval failed');
+    }
+  });
+}
 }
 

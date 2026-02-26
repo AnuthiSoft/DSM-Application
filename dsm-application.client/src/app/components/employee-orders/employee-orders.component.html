@@ -104,9 +104,9 @@
         </div>
 
         <div class="fs-5 text-success">
-          <strong>Amount to Collect:</strong>
-          {{ (o?.payableAmount || o?.totalAmount) | currency:'INR' }}
-        </div>
+  <strong>Amount to Collect:</strong>
+  {{ (o?.payableAmount != null ? o.payableAmount : o.totalAmount) | currency:'INR' }}
+</div>
 
 
       </div>
@@ -163,15 +163,15 @@
       </div>
       <div class="modal-body" *ngIf="selectedOrder as so">
 
-        <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p> -->
+              <!-- <p><strong>Subtotal:</strong> ₹{{ selectedOrder ? subtotal(selectedOrder) : 0 }}</p> -->
         <p *ngIf="so.creditUsed && so.creditUsed > 0" class="text-danger">
           Credit Used: -{{ so.creditUsed | currency:'INR' }}
         </p>
 
         <p>
-          <strong>Amount to Collect:</strong>
-          {{ (so.payableAmount || so.totalAmount) | currency:'INR' }}
-        </p>
+  <strong>Amount to Collect:</strong>
+  {{ (so.payableAmount != null ? so.payableAmount : so.totalAmount) | currency:'INR' }}
+</p>
 
 
 

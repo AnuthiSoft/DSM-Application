@@ -45,6 +45,10 @@ export interface DistributorOrder {
 creditUsed: number;
 payableAmount: number;
 
+creditStatus?: string;
+requestedCredit?: number;
+approvedCredit?: number;
+
   paymentCollectedByEmployee?: boolean;
   collectedAmount?: number;
   paymentMethod?: string;
@@ -84,6 +88,7 @@ export interface Order {
 
 creditUsed: number;
 payableAmount: number;
+
 
   status: string;
   subtotal: number;

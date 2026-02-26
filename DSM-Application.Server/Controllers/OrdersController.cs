@@ -244,34 +244,29 @@ namespace DSM_Application.Server.Controllers
                     TotalGst = totalGst
                 };
 
-            // APPLY CUSTOMER CREDIT
+            // CREDIT REQUEST (DO NOT DEDUCT)
             var customer = await _mongo.Customers
                 .Find(c => c.CustomerId == dto.CustomerId)
                 .FirstOrDefaultAsync();
 
+            decimal requestedCredit = 0;
+
             if (customer != null && customer.CreditBalance > 0)
             {
-                var usableCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
-
-                order.CreditUsed = usableCredit;
-                order.PayableAmount = order.TotalAmount - usableCredit;
-                order.RemainingAmount = order.PayableAmount;
-
-
-                if (usableCredit > 0)
-                {
-                    await _mongo.Customers.UpdateOneAsync(
-                        c => c.CustomerId == dto.CustomerId,
-                        Builders<Customer>.Update.Inc(c => c.CreditBalance, -usableCredit)
-                    );
-                }
+                requestedCredit = Math.Min(customer.CreditBalance, order.TotalAmount);
             }
-            else
-            {
-                order.CreditUsed = 0;
-                order.PayableAmount = order.TotalAmount;   // ⭐ ADD
-                order.RemainingAmount = order.TotalAmount;
-            }
+
+            order.RequestedCredit = requestedCredit;
+            order.ApprovedCredit = 0;
+            order.CreditUsed = 0;
+
+            order.CreditStatus = requestedCredit > 0
+                ? "Pending"
+                : "NotRequested";
+
+            order.PayableAmount = order.TotalAmount;
+            order.RemainingAmount = order.TotalAmount;
+
             // ⭐ FINAL SAFETY CALCULATION (ADD THIS)
             order.PayableAmount = order.TotalAmount - order.CreditUsed;
             order.RemainingAmount = order.PayableAmount;
@@ -366,6 +361,9 @@ namespace DSM_Application.Server.Controllers
                     DistributorName = distributor?.Name ?? "Unknown Distributor",
                     CreditUsed = o.CreditUsed,
                     PayableAmount = o.RemainingAmount,
+                    CreditStatus = o.CreditStatus,
+                    RequestedCredit = o.RequestedCredit,
+                    ApprovedCredit = o.ApprovedCredit,
 
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
@@ -473,6 +471,9 @@ namespace DSM_Application.Server.Controllers
                         CreditUsed = o.CreditUsed,
                         PayableAmount = o.TotalAmount - o.CreditUsed,
 
+                        CreditStatus = o.CreditStatus,
+                        RequestedCredit = o.RequestedCredit,
+                        ApprovedCredit = o.ApprovedCredit,
 
 
                         SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
@@ -638,6 +639,9 @@ namespace DSM_Application.Server.Controllers
                 CreditUsed = order.CreditUsed,
                 PayableAmount = order.RemainingAmount,
 
+                CreditStatus = order.CreditStatus,
+                RequestedCredit = order.RequestedCredit,
+                ApprovedCredit = order.ApprovedCredit,
 
                 Status = order.Status,
                 EmployeeId = order.EmployeeId,
@@ -1555,8 +1559,15 @@ namespace DSM_Application.Server.Controllers
 
             return Ok(result); // { productId : lastQuantity }
         }
-
+        [HttpPut("{orderId}/approve-credit")]
+        [HttpPost("{orderId}/approve-credit")]   // <-- ADD THIS LINE
+        public async Task<IActionResult> ApproveCredit(string orderId, [FromQuery] decimal amount)
+        {
+            await _orderService.ApproveCreditAsync(orderId, amount);
+            return Ok(new { message = "Credit approved" });
+        }
     }
+
 }
 
 

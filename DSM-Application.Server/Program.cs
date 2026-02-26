@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.WebHost.UseUrls("http://0.0.0.0:5164", "http://localhost:5164");
 builder.WebHost.UseUrls(
     "http://0.0.0.0:5164",
-    "http://192.168.1.15:5164",
+ 
     "http://localhost:5164"
 );
 
@@ -192,11 +192,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DSM API V1");
+    c.RoutePrefix = "swagger"; // open at /swagger
+});
 
 
 var dbService = app.Services.GetRequiredService<MongoDbService>();
@@ -253,7 +255,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-//app.MapFallbackToFile("index.html");
+app.MapFallbackToFile("index.html");
 
 
 app.Run();

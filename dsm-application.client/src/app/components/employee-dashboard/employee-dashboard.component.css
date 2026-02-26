@@ -1,3 +1,4 @@
+ 
 :root {
   --primary-color: #3498db;
   --secondary-color: #2c3e50;
@@ -12,7 +13,7 @@
   --hover-color: #f1f5f9;
   --shadow: 0 4px 6px rgba(0,0,0,0.12);
 }
-
+ 
 html[data-theme="dark"] {
   --primary-color: #5faee3;
   --bg-color: #0f1218;
@@ -24,26 +25,26 @@ html[data-theme="dark"] {
   --hover-color: #1f2530;
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
-
+ 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   transition: background-color .3s, color .3s, border-color .3s;
 }
-
+ 
 html, body {
   width: 100%;
   height: 100%;
   background-color: var(--bg-color);
 }
-
+ 
 body {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   background-color: var(--bg-color);
   display: flex;
 }
-
+ 
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
   display: none;
@@ -57,7 +58,7 @@ body {
   border-radius: 8px;
   padding: 10px 12px;
 }
-
+ 
 /* Sidebar Navigation */
 .dashboard-sidebar {
   width: 250px;
@@ -76,36 +77,36 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.15);
   overflow: hidden;
 }
-
+ 
 /* Collapsed state */
 .dashboard-sidebar.collapsed {
   width: 70px;
 }
-
+ 
 .dashboard-sidebar.collapsed .sidebar-header h3 span,
 .dashboard-sidebar.collapsed .nav-item span {
   display: none;
 }
-
+ 
 .dashboard-sidebar.collapsed .sidebar-header {
   padding: 0 15px 20px;
   justify-content: center;
 }
-
+ 
 .dashboard-sidebar.collapsed .sidebar-header h3 {
   justify-content: center;
 }
-
+ 
 .dashboard-sidebar.collapsed .nav-item {
   padding: 12px 15px;
   justify-content: center;
 }
-
+ 
 .dashboard-sidebar.collapsed .nav-item i {
   margin-right: 0;
   font-size: 1.2rem;
 }
-
+ 
 /* Sidebar Header */
 .sidebar-header {
   display: flex;
@@ -114,19 +115,19 @@ body {
   padding: 0 20px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.15);
 }
-
+ 
 .sidebar-header h3 {
   margin: 0;
   font-size: 1.25rem;
   display: flex;
   align-items: center;
 }
-
+ 
 .sidebar-header h3 i {
   margin-right: 10px;
   color: var(--primary-color);
 }
-
+ 
 /* Collapse Toggle */
 .collapse-toggle {
   background: rgba(255, 255, 255, 0.1);
@@ -142,19 +143,19 @@ body {
   justify-content: center;
   transition: all 0.3s ease;
 }
-
+ 
 .collapse-toggle:hover {
   background: rgba(255, 255, 255, 0.15);
   transform: rotate(15deg);
 }
-
+ 
 /* Nav Items */
 .nav-items {
   padding: 0 10px;
   flex: 1;
   overflow-y: auto;
 }
-
+ 
 .nav-item {
   padding: 12px 20px;
   display: flex;
@@ -165,29 +166,33 @@ body {
   border-radius: 6px;
   margin-bottom: 5px;
 }
-
+ 
 .nav-item:hover {
   background-color: var(--hover-color);
   color: var(--text-color);
 }
-
+ 
 .nav-item.active {
-  background-color: rgba(52, 152, 219, 0.15);
-  border-left-color: var(--primary-color);
-  color: var(--primary-color);
+  background: linear-gradient(
+    90deg,
+    rgba(52, 152, 219, 0.35),
+    rgba(52, 152, 219, 0.15)
+  );
+  border-left: 4px solid var(--primary-color);
+  color: #ffffff !important;
+  font-weight: 600;
 }
-
 .nav-item i {
   margin-right: 12px;
   width: 20px;
   text-align: center;
 }
-
+ 
 /* Tooltip for collapsed sidebar */
 .dashboard-sidebar.collapsed .nav-item {
   position: relative;
 }
-
+ 
 .dashboard-sidebar.collapsed .nav-item:hover::after {
   content: attr(data-title);
   position: absolute;
@@ -206,7 +211,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   pointer-events: none;
 }
-
+ 
 /* Main Content */
 .dashboard-main {
   margin-left: 250px;
@@ -217,12 +222,12 @@ body {
   transition: all 0.3s ease;
   position: relative;
 }
-
+ 
 .dashboard-sidebar.collapsed + .dashboard-main {
   margin-left: 70px;
   width: calc(100% - 70px);
 }
-
+ 
 /* Dashboard Grid */
 .dashboard-grid {
   display: grid;
@@ -230,7 +235,7 @@ body {
   gap: 20px;
   margin-top: 20px;
 }
-
+ 
 /* Dashboard Cards */
 .dashboard-card {
   background: var(--card-bg);
@@ -240,20 +245,20 @@ body {
   box-shadow: var(--shadow);
   margin-bottom: 20px;
 }
-
+ 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
 }
-
+ 
 .card-header h3 {
   margin: 0;
   color: var(--text-color);
   font-size: 1.2rem;
 }
-
+ 
 /* Stats Grid */
 .stats-grid {
   display: grid;
@@ -265,26 +270,26 @@ body {
   font-size: 16px;
   margin-bottom: 10px;
 }
-
+ 
 .status.available {
   color: rgb(7, 235, 102);
 }
-
+ 
 .status.not-available {
   color: red;
 }
-
+ 
 .status.unknown {
   color: gray;
 }
-
+ 
 /* Availability card safety */
 .dashboard-card {
   overflow: hidden;
   min-width: 400px;
   min-height: 200px;
 }
-
+ 
 /* Buttons container */
 .availability-actions {
   display: flex;
@@ -293,7 +298,7 @@ body {
   width: 100%;
   box-sizing: border-box;
 }
-
+ 
 /* Buttons – PROPER SIZE */
 .availability-actions .btn {
   flex: 1;                     /* equal width */
@@ -309,9 +314,9 @@ body {
   gap: 10px;
   white-space: nowrap;
 }
-
-
-
+ 
+ 
+ 
 .stat-card {
   background: var(--card-bg);
   border-radius: 12px;
@@ -321,27 +326,27 @@ body {
   flex-direction: column;
   border: 1px solid var(--border-color);
 }
-
+ 
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-color);
   margin: 10px 0;
 }
-
+ 
 .stat-label {
   font-size: 0.9rem;
   color: var(--text-color);
   opacity: 0.7;
   font-weight: 500;
 }
-
+ 
 .stat-icon {
   font-size: 1.5rem;
   color: var(--primary-color);
   margin-bottom: 10px;
 }
-
+ 
 /* Welcome Header */
 .welcome-header {
   display: flex;
@@ -349,18 +354,18 @@ body {
   align-items: center;
   margin-bottom: 24px;
 }
-
+ 
 .welcome-header h2 {
   color: var(--text-color);
   margin: 0;
 }
-
+ 
 .user-welcome {
   color: var(--text-color);
   opacity: 0.8;
   font-size: 1.1rem;
 }
-
+ 
 /* Order Items */
 .order-item {
   padding: 15px;
@@ -369,45 +374,45 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
+ 
 .order-item:last-child {
   border-bottom: none;
 }
-
+ 
 .order-info {
   display: flex;
   flex-direction: column;
 }
-
+ 
 .order-date {
   font-size: 0.9rem;
   color: var(--text-color);
   opacity: 0.7;
   margin-top: 5px;
 }
-
+ 
 .order-status {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
 }
-
+ 
 .order-status.assigned {
   background: #d1ecf1;
   color: #0c5460;
 }
-
+ 
 .order-status.delivered {
   background: #d4edda;
   color: #155724;
 }
-
+ 
 .order-status.pending {
   background: #fff3cd;
   color: #856404;
 }
-
+ 
 /* Task Items */
 .task-item {
   padding: 12px;
@@ -416,41 +421,41 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
+ 
 .task-info {
   display: flex;
   flex-direction: column;
 }
-
+ 
 .task-time {
   font-size: 0.9rem;
   color: var(--text-color);
   opacity: 0.7;
   margin-top: 3px;
 }
-
+ 
 .task-priority {
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 500;
 }
-
+ 
 .task-priority.high {
   background: #f8d7da;
   color: #721c24;
 }
-
+ 
 .task-priority.medium {
   background: #fff3cd;
   color: #856404;
 }
-
+ 
 .task-priority.low {
   background: #d1ecf1;
   color: #0c5460;
 }
-
+ 
 /* Quick Actions */
 .quick-actions {
   display: grid;
@@ -458,7 +463,7 @@ body {
   gap: 15px;
   margin-top: 15px;
 }
-
+ 
 .action-btn {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
@@ -470,23 +475,23 @@ body {
   cursor: pointer;
   transition: all 0.3s;
 }
-
+ 
 .action-btn:hover {
   background: var(--hover-color);
   transform: translateY(-2px);
 }
-
+ 
 .action-btn i {
   font-size: 1.5rem;
   color: var(--primary-color);
   margin-bottom: 8px;
 }
-
+ 
 .action-btn span {
   font-size: 0.9rem;
   color: var(--text-color);
 }
-
+ 
 /* Metrics Grid */
 .metrics-grid {
   display: grid;
@@ -494,14 +499,14 @@ body {
   gap: 15px;
   margin-top: 15px;
 }
-
+ 
 .metric-item {
   background: var(--hover-color);
   border-radius: 8px;
   padding: 15px;
   text-align: center;
 }
-
+ 
 .metric-label {
   font-size: 0.9rem;
   color: var(--text-color);
@@ -509,13 +514,13 @@ body {
   display: block;
   margin-bottom: 5px;
 }
-
+ 
 .metric-value {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-color);
 }
-
+ 
 /* Availability Status */
 .availability-status {
   margin: 15px 0;
@@ -523,34 +528,34 @@ body {
   border-radius: 8px;
   background: var(--hover-color);
 }
-
+ 
 .status.available {
   color: #155724;
   background: #d4edda;
   padding: 10px;
   border-radius: 6px;
 }
-
+ 
 .status.not-available {
   color: #721c24;
   background: #f8d7da;
   padding: 10px;
   border-radius: 6px;
 }
-
+ 
 .status.unknown {
   color: #856404;
   background: #fff3cd;
   padding: 10px;
   border-radius: 6px;
 }
-
+ 
 .availability-actions {
   display: flex;
   gap: 10px;
   margin-top: 15px;
 }
-
+ 
 /* Buttons */
 .btn {
   padding: 8px 16px;
@@ -560,45 +565,45 @@ body {
   font-weight: 500;
   transition: all 0.3s;
 }
-
+ 
 .btn-success {
   background: #28a745;
   color: white;
 }
-
+ 
 .btn-success:hover {
   background: #218838;
 }
-
+ 
 .btn-danger {
   background: #dc3545;
   color: white;
 }
-
+ 
 .btn-danger:hover {
   background: #c82333;
 }
-
+ 
 .btn-primary {
   background: var(--primary-color);
   color: white;
 }
-
+ 
 .btn-primary:hover {
   background: #2980b9;
 }
-
+ 
 .btn-outline-primary {
   background: transparent;
   border: 1px solid var(--primary-color);
   color: var(--primary-color);
 }
-
+ 
 .btn-outline-primary:hover {
   background: var(--primary-color);
   color: white;
 }
-
+ 
 /* No Data States */
 .no-data {
   text-align: center;
@@ -611,7 +616,7 @@ body {
   margin-top: auto;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
-
+ 
 .logout-fixed {
   width: 100%;
   padding: 14px 18px;
@@ -621,17 +626,17 @@ body {
   cursor: pointer;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
-
+ 
 .logout-fixed:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-
+ 
 /* Collapsed sidebar logout */
 .dashboard-sidebar.collapsed .logout-fixed {
   justify-content: center;
   padding: 12px 15px;
 }
-
+ 
 .dashboard-sidebar.collapsed .logout-fixed span {
   display: none;
 }
@@ -639,86 +644,86 @@ body {
 html[data-theme="dark"] .order-info strong {
   color: #ffffff !important;
 }
-
+ 
 html[data-theme="dark"] .order-date {
   color: #d1d5db !important;
 }
-
+ 
 /* Responsive Design */
 @media (max-width: 992px) {
   .dashboard-sidebar:not(.collapsed) {
     width: 250px;
   }
-  
+ 
   .dashboard-sidebar.collapsed {
     width: 70px;
   }
-  
+ 
   .dashboard-main {
     margin-left: 70px;
     width: calc(100% - 70px);
   }
-  
+ 
   .dashboard-sidebar:not(.collapsed) + .dashboard-main {
     margin-left: 250px;
     width: calc(100% - 250px);
   }
 }
-
+ 
 @media (max-width: 768px) {
   .mobile-menu-toggle {
     display: block;
   }
-  
+ 
   .dashboard-sidebar {
     width: 250px;
     transform: translateX(-100%);
   }
-  
+ 
   .dashboard-sidebar.mobile-open {
     transform: translateX(0);
   }
-  
+ 
   .dashboard-sidebar.collapsed {
     transform: translateX(-100%);
   }
-  
+ 
   .dashboard-main {
     margin-left: 0 !important;
     width: 100% !important;
     padding: 60px 20px 20px;
   }
-  
+ 
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
-  
+ 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+ 
   .quick-actions {
     grid-template-columns: 1fr;
   }
 }
-
+ 
 @media (max-width: 480px) {
   .dashboard-main {
     padding: 60px 15px 15px;
   }
-  
+ 
   .welcome-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 }
-
-
+ 
+ 
 /* ===============================
    EMPLOYEE DASHBOARD CARD FIX
    =============================== */
-
+ 
 /* Dashboard cards container */
 .dashboard-cards,
 .cards-row {
@@ -726,7 +731,7 @@ html[data-theme="dark"] .order-date {
   flex-wrap: wrap;
   gap: 16px;
 }
-
+ 
 /* Individual cards */
 .dashboard-card,
 .stat-card,
@@ -736,24 +741,24 @@ html[data-theme="dark"] .order-date {
   min-width: 0;        /* 🔥 IMPORTANT: prevents overflow */
   box-sizing: border-box;
 }
-
+ 
 /* Availability card specific */
 .availability-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
-
+ 
+ 
 /* ===============================
    AVAILABILITY CARD BUTTON FIX
    =============================== */
-
+ 
 .availability-card {
   display: flex;
   flex-direction: column;
 }
-
+ 
 /* Button container */
 .availability-card .actions,
 .availability-card .availability-actions {
@@ -761,29 +766,29 @@ html[data-theme="dark"] .order-date {
   flex-wrap: wrap;          /* 🔥 allows wrapping */
   gap: 10px;
 }
-
+ 
 /* Individual buttons */
 .availability-card button {
   flex: 1 1 auto;           /* responsive */
   white-space: nowrap;
 }
-
-
+ 
+ 
 /* ===== Availability card overflow FIX ===== */
-
+ 
 .availability-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
-
+ 
 /* buttons must shrink properly */
 .availability-actions button {
   width: 100%;
   white-space: nowrap;
 }
-
+ 
 /* 🔴 THIS IS THE MISSING PART */
 .availability-card,
 .dashboard-card,
@@ -792,85 +797,87 @@ html[data-theme="dark"] .order-date {
   height: auto !important;
   min-height: unset !important;
 }
-
-
-
-
-
+ 
+ 
+ 
+ 
+ 
 /* ================================
    Availability text – FORCE WHITE
    Visible in BOTH light & dark
    ================================ */
-
+ 
 .availability-card p,
 .availability-card span,
 .availability-card .status-text {
   color: #eee9e9f6 !important;
   font-weight: 500;
 }
-
+ 
 /* If text is inside an alert */
 .availability-card .alert,
 .availability-card .alert-success {
   color: #ffffff !important;
 }
-
+ 
 /* FORCE availability message to white (override Bootstrap) */
 .availability-actions,
 .availability-actions *,
 .text-success {
   color: #ffffff !important;
 }
-
+ 
 /* FINAL – FORCE availability text readable everywhere */
 .availability-card .text-success,
 .availability-card p,
 .availability-card span {
   color: #ffffff !important;
 }
-
-
-
-
+ 
+ 
+ 
+ 
 * FORCE sidebar icon visibility */
 .dashboard-sidebar .nav-item {
   color: #ffffff !important;
 }
-
+ 
 .dashboard-sidebar .nav-item i {
   color: #ffffff !important;
 }
-
+ 
 /* FORCE native calendar icon visible */
 input[type="date"] {
   color-scheme: dark;
 }
-
+ 
 /* Chrome / Edge */
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.6) contrast(1.2);
   opacity: 1;
   cursor: pointer;
 }
-
+ 
 /* Firefox */
 input[type="date"]::-moz-calendar-picker-indicator {
   filter: invert(1) brightness(1.6);
 }
-
+ 
 .stat-card.clickable {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
+ 
 .stat-card.clickable:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
-
+ 
 @media (max-width: 768px) {
   .dashboard-sidebar.mobile-open,
   .dashboard-sidebar.mobile-open.collapsed {
     transform: translateX(0) !important;
   }
 }
+ 
+ 

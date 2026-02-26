@@ -301,19 +301,24 @@
 
 
           <!-- Reorder -->
-          <button class="btn btn-outline-success btn-sm" *ngIf="order.status === 'Delivered'"
-            (click)="reorder(order.id)">
-            <i class="fas fa-redo"></i> Reorder
-          </button>
+ <button class="btn btn-outline-success action-btn"
+        *ngIf="order.status === 'Delivered'"
+        (click)="reorder(order.id)">
+  <i class="fas fa-redo"></i>
+  <span>Reorder</span>
+</button>
+    <button class="btn btn-warning action-btn"
+        *ngIf="canReturn(order)"
+        (click)="openReturnPopup(order)">
+  <i class="fas fa-undo"></i>
+  <span>Return</span>
+</button>
 
 
         </div>
 
         <!-- Return (only for delivered orders) -->
         <!-- Return (only when order is delivered AND no previous returns exist) -->
-        <button class="btn btn-warning btn-sm" *ngIf="canReturn(order)" (click)="openReturnPopup(order)">
-          <i class="fas fa-undo"></i> Return
-        </button>
 
 
 

@@ -15,7 +15,7 @@ export class LiveLocationService {
     isInsideGodown: boolean
   ) {
     return this.http.post(
-      `${environment.apiUrl}/live-location`,
+      `${environment.apiUrl}/livelocation`,
       {
         employeeId,
         distributorId,

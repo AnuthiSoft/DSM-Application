@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { ThemeService } from '../../shared/theme.service';
 
 @Component({
   selector: 'app-main-page',
@@ -9,9 +10,10 @@ import { Router } from '@angular/router';
 })
 export class MainPageComponent implements OnInit {
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router,  public themeService: ThemeService) {}
 
   ngOnInit(): void {
+   
 
     if (this.auth.isLoggedIn()) {
 
@@ -31,5 +33,9 @@ export class MainPageComponent implements OnInit {
       }
 
     }
+    
+  }
+   changeTheme(event: any) {
+    this.themeService.setTheme(event.target.value);
   }
 }

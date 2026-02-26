@@ -28,7 +28,7 @@ namespace DSM_Application.Server.Models
 
         [BsonElement("IsRegistered")]
         public bool IsRegistered { get; set; } = false;
-
+  
         [BsonRepresentation(BsonType.ObjectId)]
         public string AddedByDistributorId { get; set; }
         [BsonElement("ConnectedDistributors")]

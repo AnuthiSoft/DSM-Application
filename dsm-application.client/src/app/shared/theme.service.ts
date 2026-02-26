@@ -4,30 +4,36 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ThemeService {
-  private readonly darkClass = 'dark-theme';
-  private readonly storageKey = 'app-theme';
+
+  private themes = [
+    'theme-lavender',
+    'theme-ocean',
+    'theme-emerald',
+    'theme-dark-purple'
+  ];
+
+  private storageKey = 'selected-theme';
 
   constructor() {
-    this.loadTheme();
+    this.loadSavedTheme();
   }
 
-  toggleTheme(): boolean {
+  setTheme(themeName: string) {
     const html = document.documentElement;
-    const isDark = html.classList.toggle(this.darkClass);
 
-    localStorage.setItem(this.storageKey, isDark ? 'dark' : 'light');
-    return isDark;
+    this.themes.forEach(theme => html.classList.remove(theme));
+    html.classList.add(themeName);
+
+    localStorage.setItem(this.storageKey, themeName);
   }
 
-  private loadTheme(): void {
+  private loadSavedTheme() {
     const savedTheme = localStorage.getItem(this.storageKey);
 
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add(this.darkClass);
+    if (savedTheme && this.themes.includes(savedTheme)) {
+      this.setTheme(savedTheme);
+    } else {
+      this.setTheme('theme-lavender'); // default
     }
-  }
-
-  isDarkMode(): boolean {
-    return document.documentElement.classList.contains(this.darkClass);
   }
 }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
 
 namespace DSM_Application.Server.Models.DTOs
 {
@@ -26,6 +28,7 @@ namespace DSM_Application.Server.Models.DTOs
         // Other metadata (read-only)
         public string Role { get; set; }
         public bool IsRegistered { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
         public string AddedByDistributorId { get; set; }
 
         public bool PhoneVerified { get; set; } = false;

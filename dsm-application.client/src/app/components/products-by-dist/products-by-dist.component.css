@@ -315,10 +315,9 @@
 .products-cards {
   padding: 20px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
-
 
 /* Product Card */
 .product-card {
@@ -1343,11 +1342,3 @@ html, body {
 }
 
 
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  margin: 20px 0;
-  flex-wrap: wrap;
-}

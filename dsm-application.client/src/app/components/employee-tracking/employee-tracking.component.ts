@@ -280,7 +280,7 @@ loadLiveData() {
   const distributorId = localStorage.getItem('distributorId');
 
 this.http.get<any[]>(
-  `${environment.apiUrl}/live-location/active/${distributorId}`
+  `${environment.apiUrl}/livelocation/active/${distributorId}`
 )
   .subscribe({
     next: (data) => {
@@ -301,7 +301,7 @@ this.http.get<any[]>(
   this.http
     .get<any[]>(
       // `${environment.apiUrl}/Delivery/session-route/${employeeId}`
-      `${environment.apiUrl}/live-location/route/${employeeId}`
+      `${environment.apiUrl}/livelocation/route/${employeeId}`
       // `http://192.168.1.21:5164/api/Delivery/session-route/${employeeId}`
     )
     .subscribe(route => {
@@ -575,7 +575,7 @@ loadExistingRoutes() {
     //   `${environment.apiUrl}/live-location/active/${distributorId}`
     // )
     this.http.get<any[]>(
-      `${environment.apiUrl}/live-location/active/${distributorId}`
+      `${environment.apiUrl}/livelocation/active/${distributorId}`
     ).subscribe(list => {
 
     list.forEach(emp => {

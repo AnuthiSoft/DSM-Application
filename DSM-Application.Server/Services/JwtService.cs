@@ -73,7 +73,7 @@ namespace DistributorManagementSystem.Server.Services
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(5),
+           expires: DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
 

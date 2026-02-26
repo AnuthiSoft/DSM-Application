@@ -21,7 +21,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { EmployeesComponent } from './components/employees/employees.component';
 import { SetPasswordComponent } from './components/set-password/set-password.component';
 import { ProfileComponent } from './components/profile/profile.component';
-import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.component';
+// import { ThemeToggleComponent } from './shared/theme-toggle/theme-toggle.component';
 import { ProductsByDistComponent } from './components/products-by-dist/products-by-dist.component';
 import { OrderHistoryComponent } from './components/order-history/order-history.component';
 import { DistributorOrdersComponent } from './components/distributor-orders/distributor-orders.component';
@@ -109,7 +109,7 @@ import { DistributorProfileComponent } from './components/distributor-profile/di
     EmployeesComponent,
     SetPasswordComponent,
     ProfileComponent,
-    ThemeToggleComponent,
+    // ThemeToggleComponent,
     ProductsByDistComponent,
  
    

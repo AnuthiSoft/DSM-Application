@@ -56,9 +56,7 @@ if (token) {
     };
   }
 
-  toggleTheme() {
-    this.themeService.toggleTheme();
-  }
+
 
   private handleGps(lat: number, lng: number) {
 

@@ -9,7 +9,7 @@ using MongoDB.Driver;
 namespace DistributorManagementSystem.Server.Controllers
 {
     [ApiController]
-    [Route("api/live-location")]
+    [Route("api/[controller]")]
     public class LiveLocationController : ControllerBase
     {
         private readonly MongoDbService _db;

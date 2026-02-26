@@ -1,99 +1,238 @@
-/* 🌞 Light Theme */
-:root {
+:root.theme-lavender {
+
+  /* PRIMARY COLORS */
+  --primary-color: #7E7FA8;
+  --hover-primary: #6C6F93;
+  --secondary-color: #9FA2C8;
+  --accent-color: #FF6F91;
+  --success-color: #6fcf97;
+  --warning-color: #f2c94c;
+  --info-color: #56ccf2;
+
+  /* BACKGROUND COLORS */
+  --bg-color: #F4F4F6;
+  --card-bg: #ffffff;
+  --white-bg: #ffffff;
+  --nav-bg: #7E7FA8;
+  --sidebar-bg: #7E7FA8;
+  --header-bg: #ffffff;
+
+  /* TEXT */
+  --text-color: #2E2E3A;
+  --light-color: #8A8AA8;
+  --sidebar-text: #ffffff;
+
+  /* BORDERS */
+  --border-color: #E8E8EE;
+  --dashboard-border-color: #E8E8EE;
+
+  /* TABLE */
+  --table-header-bg: #7E7FA8;
+  --table-stripe: #F9F9FB;
+  --table-hover: #ECECF3;
+  --table-border: #E8E8EE;
+
+  /* INPUT */
+  --input-bg: #ffffff;
+  --input-text: #2E2E3A;
+
+  /* MODAL */
+  --modal-bg: #ffffff;
+
+  /* STEPS */
+  --step-bg: #ffffff;
+  --step-active: #7E7FA8;
+  --step-completed: #9FA2C8;
+  --step-inactive: #E8E8EE;
+
+  /* FOOTER */
+  --footer-bg: #7E7FA8;
+  --footer-text: #ffffff;
+
+  /* SHADOW */
+  --shadow: 0 15px 30px rgba(126, 127, 168, 0.15);
+  
+
+}
+
+:root.theme-ocean {
+
   --primary-color: #3498db;
   --hover-primary: #2980b9;
- 
+
   --secondary-color: #2c3e50;
   --accent-color: #e74c3c;
   --success-color: #16a34a;
   --warning-color: #d97706;
   --info-color: #0891b2;
- 
+
   --light-color: #ecf0f1;
   --bg-color: #f8f9fa;
   --border-color: #e2e8f0;
   --text-color: #333;
- 
+
   --white-bg: #ffffff;
   --card-bg: #ffffff;
   --nav-bg: #343a40;
   --hero-bg: linear-gradient(rgba(44, 62, 80, 0.8), rgba(44, 62, 80, 0.8));
+
   --section-bg-light: #f8f9fa;
   --section-bg-dark: #343a40;
+
   --input-bg: #ffffff;
   --input-text: #333333;
   --password-toogle: #6c757d;
+
   --table-bg: #dee2e6;
   --sec-bg-dark: #343a40;
   --whit-bg: #ffffff;
   --modal-bg: #ffffff;
- 
+
   --sidebar-bg: #2c3e50;
   --sidebar-text: #ffffff;
   --header-bg: #ffffff;
   --hover-color: #f1f5f9;
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --dashboard-border-color: #e2e8f0;
- 
-   --table-header-bg: #1e293b;
+
+  --table-header-bg: #1e293b;
   --table-stripe: #f9fafb;
   --table-hover: #f1f5f9;
   --table-border: #e5e7eb;
- 
-   --step-bg: #ffffff;
+
+  --step-bg: #ffffff;
   --step-active: #3498db;
   --step-completed: #2c3e50;
   --step-inactive: #ddd;
- 
+
   --footer-bg: #2c3e50;
   --footer-text: #ffffff;
- 
+  
 }
- 
-:root.dark-theme {
-  --primary-color: #3498db;
-  --hover-primary: #60a5fa;
- 
-  --secondary-color: #8ca0b3;
-  --accent-color: #e74c3c;
-  --success-color: #16a34a;
-  --warning-color: #d97706;
-  --info-color: #0891b2;
- 
-  --bg-color: #121212;
-  --text-color: #e0e0e0;
-  --light-color: #cccccc;
- 
-  --white-bg: #1c1c1c;
-  --card-bg: #1e1e1e;
-  --nav-bg: #1a1a1a;
-  --header-bg: #1e1e1e;
-  --sidebar-bg: #1e1e2d;
-  --sidebar-text: #e0e0e0;
- 
-  --border-color: #333333;
-  --hover-color: #2d2d2d;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
- 
-  --table-header-bg: #2d3748;
-  --table-stripe: #252525;
-  --table-hover: #2d2d2d;
-  --table-border: #444444;
- 
-  --input-bg: #2a2a2a;
-  --input-text: #f0f0f0;
-  --modal-bg: #1e1e1e;
- 
-  /* --footer-bg: #1a1a1a; */
-  --footer-text: #e0e0e0;
- 
-  --step-bg: #1e1e1e;
-  --step-active: #5faee3;
-  --step-completed: #3c4e60;
-  --step-inactive: #444;
+
+:root.theme-emerald {
+
+  /* PRIMARY COLORS */
+  --primary-color: #0C3B2E;
+  --hover-primary: #145c47;
+  --secondary-color: #6D9773;
+  --accent-color: #B46617;
+  --success-color: #2e7d32;
+  --warning-color: #FFBA00;
+  --info-color: #4f8f74;
+
+  /* BACKGROUND COLORS */
+  --bg-color: #f2f6f3;
+  --card-bg: #ffffff;
+  --white-bg: #ffffff;
+  --nav-bg: #0C3B2E;
+  --sidebar-bg: #0C3B2E;
+  --header-bg: #ffffff;
+
+  /* TEXT */
+  --text-color: #1b2b25;
+  --light-color: #6D9773;
+  --sidebar-text: #ffffff;
+
+  /* BORDERS */
+  --border-color: #dbe5df;
+  --dashboard-border-color: #d1ddd6;
+
+  /* TABLE */
+  --table-header-bg: #0C3B2E;
+  --table-stripe: #f5faf7;
+  --table-hover: #e8f3ee;
+  --table-border: #dbe5df;
+
+  /* INPUT */
+  --input-bg: #ffffff;
+  --input-text: #1b2b25;
+
+  /* MODAL */
+  --modal-bg: #ffffff;
+
+  /* STEPS */
+  --step-bg: #ffffff;
+  --step-active: #0C3B2E;
+  --step-completed: #6D9773;
+  --step-inactive: #dbe5df;
+
+  /* FOOTER */
+  --footer-bg: #0C3B2E;
+  --footer-text: #ffffff;
+
+  /* SHADOW */
+  --shadow: 0 10px 25px rgba(12, 59, 46, 0.15);
+  
 }
- 
- 
+
+:root.theme-dark-purple {
+  /* ================================
+     🎨 PRIMARY COLORS
+  ================================= */
+  --primary-color: #0F6E8C;       /* Main teal */
+  --hover-primary: #0B5C73;
+  --secondary-color: #0A4F63;
+  --accent-color: #14B8A6;
+
+  --success-color: #22C55E;
+  --warning-color: #F59E0B;
+  --info-color: #3B82F6;
+
+  /* ================================
+     🌈 BACKGROUND
+  ================================= */
+  --bg-color: #F3F5F7;           /* Soft app background */
+
+  --card-bg: #FFFFFF;
+  --white-bg: #FFFFFF;
+  --nav-bg: #0F6E8C;
+  --sidebar-bg: #0F6E8C;
+  --header-bg: #0F6E8C;
+
+  /* ================================
+     📝 TEXT
+  ================================= */
+  --text-color: #263238;
+  --light-color: #6B7280;
+  --sidebar-text: #FFFFFF;
+
+  /* ================================
+     🧱 BORDERS
+  ================================= */
+  --border-color: #E5E7EB;
+  --dashboard-border-color: #E5E7EB;
+
+  /* ================================
+     📊 TABLE
+  ================================= */
+  --table-header-bg: #F8FAFC;
+  --table-stripe: #FAFBFC;
+  --table-hover: #EEF2F7;
+  --table-border: #E5E7EB;
+
+  /* ================================
+     🧾 INPUT
+  ================================= */
+  --input-bg: #FFFFFF;
+  --input-text: #263238;
+
+  /* ================================
+     🪟 MODAL
+  ================================= */
+  --modal-bg: #FFFFFF;
+
+  /* ================================
+     🔻 FOOTER
+  ================================= */
+  --footer-bg: #0F6E8C;
+  --footer-text: #FFFFFF;
+
+  /* ================================
+     🌫 SHADOW
+  ================================= */
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
  
  
 .big-alert-box {
@@ -169,10 +308,37 @@ body {
 .dashboard-card,
 .profile-card,
 .info-card {
-  background-color: var(--card-bg);
-  color: var(--text-color);
+  border-radius: 25px;
+  box-shadow: var(--shadow);
 }
- 
+.btn-primary {
+  background-color: #7E7FA8;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 30px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: #6C6F93;
+}
+.bottom-nav {
+  background: #7E7FA8;
+  border-radius: 30px;
+  padding: 12px 20px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+ .icon-circle {
+  width: 50px;
+  height: 50px;
+  background: #ECECF3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dashboard-header {
   background-color: var(--header-bg);
   color: var(--text-color);
@@ -440,6 +606,52 @@ html.dark-theme .form-select option {
 body.modal-open {
   overflow: hidden;
 }
- 
 
- 
+
+/* Dark overlay */
+.hero-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.65)
+  );
+}
+.hero-content h1,
+.hero-content .lead {
+  color: #ffffff;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+}
+.hero-wrapper > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Services positioned at bottom */
+
+/* Service Cards */
+/* .service-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  transition: 0.3s ease;
+} */
+
+.service-card:hover {
+  transform: translateY(-8px);
+}
+
+
+.hero-content h1 {
+  color: #ffffff !important;
+  font-weight: 800;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.hero-content .lead {
+  color: #ffffff !important;
+  font-weight: 500;
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.7);
+  opacity: 1 !important;   /* remove fading */
+}

@@ -13,6 +13,7 @@ export class InventoryBatchesComponent implements OnInit {
   pageSize = 10;
   totalPages = 1;
   paginatedRows: any[] = [];
+    searchText: string = '';   // ✅ ADD THIS LINE
 
   constructor(private inventoryService: InventoryService) { }
 
@@ -49,6 +50,24 @@ export class InventoryBatchesComponent implements OnInit {
       error: err => console.error('Batch load error:', err)
     });
   }
+filterByProduct(): void {
+
+  const search = this.searchText.toLowerCase().trim();
+
+  if (!search) {
+    this.updatePagination();
+    return;
+  }
+
+  const filtered = this.rows.filter(r =>
+    r.productName.toLowerCase().includes(search)
+  );
+
+  this.totalPages = Math.ceil(filtered.length / this.pageSize);
+  this.currentPage = 1;
+
+  this.paginatedRows = filtered.slice(0, this.pageSize);
+}
 
   getStatus(expiryDate: string | null):
     'Expired' | 'Near Expiry' | 'Valid' | 'Not Set' {

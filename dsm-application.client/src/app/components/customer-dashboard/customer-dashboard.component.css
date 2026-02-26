@@ -181,9 +181,9 @@ body {
 }
  
 .nav-item.active {
-  background-color: rgba(52, 152, 219, 0.15);
-  border-left-color: var(--primary-color);
-  color: var(--primary-color);
+  background-color: rgba(52, 152, 219, 0.25); /* stronger */
+  border-left: 4px solid var(--primary-color);
+  color: #ffffff;  /* make text white */
 }
  
 .nav-item i {

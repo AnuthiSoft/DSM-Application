@@ -110,6 +110,18 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#about">About</a>
                     </li>
+                   <li class="nav-item dropdown ms-3">
+  <a class="nav-link theme-icon" href="#" role="button" data-bs-toggle="dropdown">
+    <i class="fas fa-palette"></i>
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-end theme-dropdown">
+    <li><a class="dropdown-item" (click)="themeService.setTheme('theme-lavender')">Lavender</a></li>
+    <li><a class="dropdown-item" (click)="themeService.setTheme('theme-ocean')">Ocean Blue</a></li>
+    <li><a class="dropdown-item" (click)="themeService.setTheme('theme-emerald')">Emerald</a></li>
+    <li><a class="dropdown-item" (click)="themeService.setTheme('theme-dark-purple')">Dark Purple</a></li>
+  </ul>
+</li>
  
  
  
@@ -119,59 +131,61 @@
         </div>
     </nav>
     <!-- <section class="bg-light"> -->
-    <!-- Hero Section -->
-    <section class=" hero-section text-center">
-        <div class="container">
-            <h1 class="display-4 fw-bold mb-4">Your Business Solutions Partner</h1>
-            <p class="lead mb-4">We provide comprehensive solutions for distributors and customers to streamline
-                operations and enhance experiences.</p>
-            <!-- <button class="btn btn-primary btn-lg me-2">Get Started</button>
-            <button class="btn btn-outline-light btn-lg">Learn More</button> -->
+  <!-- HERO + SERVICES BACKGROUND SECTION -->
+<section class="hero-wrapper">
+
+  <!-- HERO TEXT -->
+  <div class="hero-content text-center">
+    <div class="container">
+      <h1 class="display-4 fw-bold mb-4">
+        Your Business Solutions Partner
+      </h1>
+      <p class="lead mb-4">
+        We provide comprehensive solutions for distributors and customers
+        to streamline operations and enhance experiences.
+      </p>
+    </div>
+  </div>
+
+  <!-- SERVICES AT BOTTOM EDGE -->
+  <div class="services-edge">
+    <div class="container">
+     <h2 class="section-title text-white mb-4 text-center">
+  Our Services
+</h2>
+
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+          <div class="card service-card text-center p-4">
+            <i class="fas fa-tachometer-alt fa-2x mb-3"></i>
+            <h4>Dashboard Analytics</h4>
+            <p>Track your performance in real-time.</p>
+          </div>
         </div>
-    </section>
- 
-    <!-- Services Section -->
-    <section class="container mb-5">
-        <div class="text-center">
-            <h2 class="section-title">Our Services</h2>
+
+        <div class="col-md-4">
+          <div class="card service-card text-center p-4">
+            <i class="fas fa-cogs fa-2x mb-3"></i>
+            <h4>Inventory Management</h4>
+            <p>Advanced tracking & forecasting systems.</p>
+          </div>
         </div>
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-4">
-                <div class="card service-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                        </div>
-                        <h3 class="h4">Dashboard Analytics</h3>
-                        <p>Comprehensive analytics and reporting tools to track your business performance in real-time.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="card service-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-cogs"></i>
-                        </div>
-                        <h3 class="h4">Inventory Management</h3>
-                        <p>Efficiently manage your inventory with our advanced tracking and forecasting systems.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="card service-card">
-                    <div class="card-body text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <h3 class="h4">Customer Relations</h3>
-                        <p>Build stronger relationships with your customers through our integrated CRM solutions.</p>
-                    </div>
-                </div>
-            </div>
+
+        <div class="col-md-4">
+          <div class="card service-card text-center p-4">
+            <i class="fas fa-handshake fa-2x mb-3"></i>
+            <h4>Customer Relations</h4>
+            <p>Integrated CRM solutions.</p>
+          </div>
         </div>
-    </section>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+
  
     <!-- Distributor Section -->
     <section class="py-5">
@@ -194,7 +208,7 @@
                     <!-- <a href="#" class="btn btn-primary mt-3">Distributor Login</a> -->
                 </div>
                 <div class="col-lg-6">
-                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80%22"
+                    <img src="/Distributor.png"
                         alt="Distributor Services" class="img-fluid rounded">
                 </div>
             </div>
@@ -225,7 +239,7 @@
  
                 </div>
                 <div class="col-lg-6 order-lg-1">
-                    <img src="https://images.unsplash.com/photo-1526947425960-945c6e72858f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80%22"
+                    <img src="/Customer.png"
                         alt="Customer Services" class="img-fluid rounded">
                 </div>
             </div>
@@ -256,7 +270,7 @@
  
                 <!-- Image Section -->
                 <div class="col-lg-6">
-                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80%22"
+                    <img src="/Employee.png"
                         alt="Employee Portal" class="img-fluid rounded">
                 </div>
             </div>

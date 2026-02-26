@@ -93,13 +93,16 @@
                 {{ c.isRegistered ? 'Registered' : 'Pending' }}
               </span>
             </td>
-            <td class="md">
-              {{ c.permanentEmployeeName || 'Not Assigned' }}
+    <td class="md employee-cell">
+  <span class="employee-name">
+    {{ c.permanentEmployeeName || 'Not Assigned' }}
+  </span>
 
-              <button class="btn btn-outline-success btn-sm ms-2" (click)="openAssignModal(c.customerId!)">
-                <i class="fas fa-user-check"></i> Assign
-              </button>
-            </td>
+  <button class="btn btn-outline-success btn-sm assign-btn"
+          (click)="openAssignModal(c.customerId!)">
+    <i class="fas fa-user-check"></i> Assign
+  </button>
+</td>
 
             <td class="md">
               <!-- ONLY distributor-created customers -->

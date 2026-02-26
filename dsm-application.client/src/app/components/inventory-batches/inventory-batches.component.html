@@ -1,6 +1,15 @@
 <div class="dashboard-main">
   <div class="dashboard-card">
     <h2 class="page-title">Inventory Batches</h2>
+    <div class="mb-3">
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search by product name..."
+    [(ngModel)]="searchText"
+    (input)="filterByProduct()"
+  />
+</div>
 
     <div class="table-responsive">
       <table class="table table-hover">

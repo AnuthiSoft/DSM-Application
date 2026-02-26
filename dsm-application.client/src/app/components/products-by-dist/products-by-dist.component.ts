@@ -12,6 +12,7 @@ import * as bootstrap from 'bootstrap';
 import { CustomerApiService } from '../../services/customer-api.service';
 import { environment } from '../../../environments/environment';
 import { CartService } from '../../services/cart.service';
+import { ToastrService } from 'ngx-toastr';
 
 // import { environment } from '../../../environments/environment';
 // import { Product } from '../../services/customer-api.service';
@@ -75,7 +76,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
     private fb: FormBuilder,
     private orderService: OrderService,
     private router: Router,
-    private customerApiService: CustomerApiService, private cartService: CartService
+    private customerApiService: CustomerApiService, private cartService: CartService, private toastr: ToastrService
   ) {
     // Build product form
     this.productForm = this.fb.group({
@@ -328,12 +329,7 @@ export class ProductsByDistComponent implements OnInit, OnChanges, AfterViewInit
 
 this.cartService.updateCartCount();
 
-this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-  this.router.navigate(
-    ['/customer-dashboard'],
-    { queryParams: { tab: 'cart' } }
-  );
-});
+
 
 }
 
@@ -592,46 +588,40 @@ this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
 
 
 
-  confirmAddToCart() {
+ confirmAddToCart() {
 
-    if (!this.selectedProduct) return;
+  if (!this.selectedProduct) return;
 
-    const customerId = localStorage.getItem('customerId');
-    if (!customerId) return;
+  const customerId = localStorage.getItem('customerId');
+  if (!customerId) return;
 
-    const key = `cart_customer_${customerId}`;
+  const key = `cart_customer_${customerId}`;
+  let cart = JSON.parse(localStorage.getItem(key) || '[]');
 
-    let cart = JSON.parse(localStorage.getItem(key) || '[]');
-
-    const existing = cart.find(
-      (c: any) => c.product.productId === this.selectedProduct?.productId
-    );
-
-    if (existing) {
-      existing.quantity += this.selectedQuantity;
-    } else {
-      cart.push({
-        product: this.selectedProduct,
-        quantity: this.selectedQuantity
-      });
-    }
-
-    localStorage.setItem(key, JSON.stringify(cart));
-    this.cartService.updateCartCount();
-
-    // Close popup
-    this.showPopup = false;
-    this.selectedProduct = null;
-
-this.cartService.updateCartCount();
-
-this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-  this.router.navigate(
-    ['/customer-dashboard'],
-    { queryParams: { tab: 'cart' } }
+  const existing = cart.find(
+    (c: any) => c.product.productId === this.selectedProduct?.productId
   );
-});
 
+  if (existing) {
+    existing.quantity += this.selectedQuantity;
+  } else {
+    cart.push({
+      product: this.selectedProduct,
+      quantity: this.selectedQuantity
+    });
+  }
+
+  localStorage.setItem(key, JSON.stringify(cart));
+  this.cartService.updateCartCount();
+
+  this.showPopup = false;
+  this.selectedProduct = null;
+
+  this.toastr.success(
+    'Item added to cart successfully',
+    'Success',
+    { timeOut: 2000 }
+  );
 }
 
 

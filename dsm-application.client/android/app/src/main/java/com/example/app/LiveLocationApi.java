@@ -21,8 +21,8 @@ public class LiveLocationApi {
         new Thread(() -> {
             try {
                 // ✅ REAL BACKEND URL
-                 //URL url = new URL("https://dms-abaydbbff8hmagec.southindia-01.azurewebsites.net/api/live-location");
-                URL url = new URL("http://192.168.1.15:5164/api/live-location");
+                 URL url = new URL("https://dms-abaydbbff8hmagec.southindia-01.azurewebsites.net/api/livelocation");
+                // URL url = new URL("http://192.168.1.15:5164/api/livelocation");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setInstanceFollowRedirects(true);
                 conn.setRequestMethod("POST");
@@ -34,7 +34,7 @@ public class LiveLocationApi {
                     .getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE)
                     .getString("token", "");
 
-                //conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setDoOutput(true);
 
                 

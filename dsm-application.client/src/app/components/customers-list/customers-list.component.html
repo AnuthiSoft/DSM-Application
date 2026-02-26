@@ -277,12 +277,21 @@
 
     <div class="modal-body">
       <label>Select Employee</label>
-      <select class="form-control" [(ngModel)]="selectedEmployeeId">
+
+      <!-- 🖥 DESKTOP (≥ 992px) -->
+      <select class="form-control d-none d-lg-block" [(ngModel)]="selectedEmployeeId">
         <option value="">-- Select Employee --</option>
         <option *ngFor="let emp of employees" [value]="emp.employeeId">
           {{ emp.name }}
         </option>
       </select>
+
+      <!-- 📱 MOBILE + TABLET (< 992px) -->
+      <div class="mobile-select d-block d-lg-none" (click)="openEmployeeSheet()">
+        {{ selectedEmployeeName || 'Select Employee' }}
+        <i class="fas fa-chevron-down"></i>
+      </div>
+
     </div>
 
     <div class="modal-footer">
@@ -307,6 +316,25 @@
       <button (click)="selectStatus('')">All Status</button>
       <button (click)="selectStatus('registered')">Registered</button>
       <button (click)="selectStatus('unregistered')">Not Registered</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- 📱 EMPLOYEE BOTTOM SHEET -->
+<div class="bottom-sheet-backdrop" *ngIf="showEmployeeSheet" (click)="closeEmployeeSheet()">
+
+  <div class="bottom-sheet" (click)="$event.stopPropagation()">
+
+    <div class="sheet-header">
+      <span>Select Employee</span>
+      <i class="fas fa-times" (click)="closeEmployeeSheet()"></i>
+    </div>
+
+    <div class="sheet-options">
+      <button *ngFor="let emp of employees" (click)="selectEmployee(emp)">
+        {{ emp.name }}
+      </button>
     </div>
 
   </div>

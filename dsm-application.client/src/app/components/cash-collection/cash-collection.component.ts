@@ -31,6 +31,8 @@ export class CashCollectionComponent implements OnInit {
   orderFullDetails: any = null;
   showOrderModal = false;
   showInlinePaymentOptions = false;
+  currentPage = 1;
+  itemsPerPage = 3;
 
   form = {
     customerId: '',
@@ -86,10 +88,10 @@ export class CashCollectionComponent implements OnInit {
     } else {
       this.scannerQrUrl = null;
     }
-      // 🔥 If cash selected, clear reference
-  if (this.form.paymentMode === 'cash') {
-    this.form.transactionReference = '';
-  }
+    // 🔥 If cash selected, clear reference
+    if (this.form.paymentMode === 'cash') {
+      this.form.transactionReference = '';
+    }
   }
 
   // 🔥 GROUP ORDERS BY CUSTOMER
@@ -115,6 +117,7 @@ export class CashCollectionComponent implements OnInit {
       // Initialize filteredCustomers with all customers
       this.filteredCustomers = [...this.customers];
     });
+    this.currentPage = 1;
   }
 
   openModal(customer: any) {
@@ -140,17 +143,17 @@ export class CashCollectionComponent implements OnInit {
     }
   }
 
-canSubmit() {
-  const isReferenceRequired =
-    this.form.paymentMode === 'upi' ||
-    this.form.paymentMode === 'scanner';
+  canSubmit() {
+    const isReferenceRequired =
+      this.form.paymentMode === 'upi' ||
+      this.form.paymentMode === 'scanner';
 
-  if (isReferenceRequired && !this.form.transactionReference?.trim()) {
-    return false;
+    if (isReferenceRequired && !this.form.transactionReference?.trim()) {
+      return false;
+    }
+
+    return this.form.amountPaid > 0 && !this.amountError;
   }
-
-  return this.form.amountPaid > 0 && !this.amountError;
-}
 
   submit() {
     this.paymentService.collectCustomerPayment(this.form).subscribe({
@@ -198,6 +201,7 @@ canSubmit() {
   selectCustomerFilter(customerName: string) {
     this.selectedCustomerFilter = customerName;
     this.showCustomerDropdown = false;
+    this.currentPage = 1;
 
     if (!customerName) {
       // Show all customers
@@ -223,6 +227,7 @@ canSubmit() {
     this.selectedCustomerName = '';
     this.selectedCustomerPhone = '';
     this.selectedCustomerPending = 0;
+    this.currentPage = 1;
   }
 
   getTotalPending(): number {
@@ -276,5 +281,49 @@ canSubmit() {
     this.onPaymentModeChange();
   }
 
-  
+  get paginatedCustomers() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredCustomers.slice(start, start + this.itemsPerPage);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
+  }
+
+  get pageNumbers(): number[] {
+    const width = window.innerWidth;
+
+    let maxVisible = 7;
+    if (width <= 992) maxVisible = 5;
+    if (width <= 576) maxVisible = 3;
+
+    const pages: number[] = [];
+
+    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+
+    if (end > this.totalPages) {
+      end = this.totalPages;
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
 }

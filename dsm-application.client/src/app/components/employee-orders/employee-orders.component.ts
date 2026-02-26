@@ -30,6 +30,8 @@ export class EmployeeOrdersComponent implements OnInit {
   selectedStatus: string = 'All';
   showSheet = false;
   availabilityStatus: 'available' | 'not-available' | 'unknown' = 'unknown';
+  currentPage = 1;
+  itemsPerPage = 5;
 
 
   constructor(
@@ -71,6 +73,7 @@ export class EmployeeOrdersComponent implements OnInit {
         o => o.status === this.selectedStatus
       );
     }
+    this.currentPage = 1;
   }
 
 
@@ -252,4 +255,60 @@ export class EmployeeOrdersComponent implements OnInit {
     return false;
   }
 
+  get paginatedOrders() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredOrders.slice(start, start + this.itemsPerPage);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredOrders.length / this.itemsPerPage);
+  }
+
+  get pageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const total = this.totalPages;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+
+      if (this.currentPage > 4) {
+        pages.push('...');
+      }
+
+      const start = Math.max(2, this.currentPage - 1);
+      const end = Math.min(total - 1, this.currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (this.currentPage < total - 3) {
+        pages.push('...');
+      }
+
+      pages.push(total);
+    }
+
+    return pages;
+  }
+
+  goToPage(page: number | string) {
+    if (page === '...') return;
+
+    const pageNumber = Number(page);
+
+    if (pageNumber < 1 || pageNumber > this.totalPages) return;
+
+    this.currentPage = pageNumber;
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
 }

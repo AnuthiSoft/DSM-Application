@@ -46,7 +46,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let r of reviews" class="review-history-row">
+            <tr *ngFor="let r of paginatedReviews" class="review-history-row">
               <td>
                 <span class="reviewer-id">{{ r.reviewerId }}</span>
               </td>
@@ -85,6 +85,39 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Desktop Pagination -->
+      <div class="desktop-pagination" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+
+        <div class="page-numbers">
+          <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+            [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+            {{ page }}
+          </span>
+        </div>
+
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Pagination -->
+      <div class="mobile-pagination" *ngIf="totalPages > 1">
+        <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+          ←
+        </button>
+
+        <div class="mobile-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </div>
+
+        <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          →
+        </button>
       </div>
     </div>
 

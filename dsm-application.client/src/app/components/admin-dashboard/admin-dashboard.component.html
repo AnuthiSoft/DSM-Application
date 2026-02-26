@@ -150,7 +150,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let d of searchText ? filteredDistributors : distributors">
+              <tr *ngFor="let d of paginatedDistributors">
                 <td class="fw-semibold">{{ d.distributorId }}</td>
                 <td class="fw-semibold">{{ d.companyName }}</td>
                 <td class="fw-semibold">{{ d.name }}</td>
@@ -199,6 +199,36 @@
             </tbody>
           </table>
         </div>
+
+        <div class="desktop-pagination" *ngIf="totalPages > 1">
+          <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <div class="page-numbers">
+            <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+              [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+              {{ page }}
+            </span>
+          </div>
+          <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="mobile-pagination">
+
+          <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+            ←
+          </button>
+
+          <div class="mobile-info">
+            Page {{ currentPage }} of {{ totalPages }}
+          </div>
+
+          <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+            →
+          </button>
+
+        </div>
       </div>
     </div>
 
@@ -245,9 +275,9 @@
     </div>
 
     <!-- Review History Tab -->
-<div class="tab-content" *ngIf="activeTab === 'review-history'">
-  <app-admin-review-history></app-admin-review-history>
-</div>
+    <div class="tab-content" *ngIf="activeTab === 'review-history'">
+      <app-admin-review-history></app-admin-review-history>
+    </div>
 
 
     <!-- Fraud Reports Tab -->
@@ -256,9 +286,9 @@
     </div>
 
     <!-- Fraud History Tab -->
-<div class="tab-content" *ngIf="activeTab === 'fraud-history'">
-  <app-fraud-history></app-fraud-history>
-</div>
+    <div class="tab-content" *ngIf="activeTab === 'fraud-history'">
+      <app-fraud-history></app-fraud-history>
+    </div>
 
 
     <!-- Other Tabs (Placeholders) -->

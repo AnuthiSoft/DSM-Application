@@ -81,7 +81,7 @@
   <!-- PRODUCTS GRID -->
   <div *ngIf="!loading && filterProducts.length" class="products-grid">
 
-    <div class="product-card" *ngFor="let prod of filterProducts">
+    <div class="product-card" *ngFor="let prod of paginatedProducts">
 
       <div class="product-image">
 
@@ -135,6 +135,45 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- ================= PAGINATION ================= -->
+
+  <!-- DESKTOP -->
+  <div class="desktop-pagination" *ngIf="totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+      ‹ Previous
+    </button>
+
+    <ng-container *ngFor="let page of pages">
+      <button *ngIf="page !== '...'; else dots" class="page-number" [class.active]="page === currentPage"
+        (click)="goToPageSafe(page)">
+        {{ page }}
+      </button>
+
+      <ng-template #dots>
+        <span class="page-dots">...</span>
+      </ng-template>
+    </ng-container>
+
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next ›
+    </button>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="mobile-pagination" *ngIf="totalPages > 1">
+    <button class="mobile-nav" (click)="prevPage()" [disabled]="currentPage === 1">
+      ←
+    </button>
+
+    <span class="mobile-info">
+      Page {{ currentPage }} of {{ totalPages }}
+    </span>
+
+    <button class="mobile-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      →
+    </button>
   </div>
 
   <!-- CART SUMMARY -->

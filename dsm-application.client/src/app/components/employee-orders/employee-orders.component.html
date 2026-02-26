@@ -26,7 +26,7 @@
     No orders found for selected status.
   </div>
 
-  <div *ngFor="let o of filteredOrders" class="card mb-3 shadow-sm">
+  <div *ngFor="let o of paginatedOrders" class="card mb-3 shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
       <div>
         <strong>Order #{{ o.id }}</strong> —
@@ -115,6 +115,42 @@
 
     </div>
   </div>
+
+  <!-- ================= Pagination ================= -->
+
+  <div class="desktop-pagination" *ngIf="totalPages > 1">
+
+    <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+      ‹ Previous
+    </button>
+
+    <span *ngFor="let page of pageNumbers" class="page-number" [class.active]="page === currentPage"
+      (click)="goToPage(page)">
+      {{ page }}
+    </span>
+
+    <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next ›
+    </button>
+
+  </div>
+
+  <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+    <button class="mobile-nav" (click)="previousPage()" [disabled]="currentPage === 1">
+      ←
+    </button>
+
+    <span class="mobile-info">
+      Page {{ currentPage }} of {{ totalPages }}
+    </span>
+
+    <button class="mobile-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      →
+    </button>
+
+  </div>
+
 </div>
 
 <!-- Payment Modal -->

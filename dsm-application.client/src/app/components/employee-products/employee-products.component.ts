@@ -46,6 +46,11 @@ export class EmployeeProductsComponent {
 
   distributorId = '';
   customerId = '';
+  // Pagination
+  currentPage = 1;
+  pageSize = 8; // products per page
+  totalPages = 0;
+  paginatedProducts: Product[] = [];
 
   @Input() product!: Product;
   @Input() mode: 'customer' | 'employee' = 'customer';
@@ -144,18 +149,6 @@ export class EmployeeProductsComponent {
     this.addToCart.emit();
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
   loadProducts(): void {
     if (!this.distributorId) {
       this.toastr.error('Distributor not found');
@@ -174,6 +167,7 @@ export class EmployeeProductsComponent {
         }));
 
         this.filterProducts = [...this.products];
+        this.setupPagination();
         this.extractConnectedDistributors();
         this.loading = false;
       },
@@ -412,6 +406,66 @@ export class EmployeeProductsComponent {
     document.body.style.overflow = '';
   }
 
+  setupPagination() {
+    this.totalPages = Math.ceil(this.filterProducts.length / this.pageSize);
+    this.goToPage(1);
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page;
+
+    const start = (page - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedProducts = this.filterProducts.slice(start, end);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.goToPage(this.currentPage + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  get pages(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const total = this.totalPages;
+    const current = this.currentPage;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+
+      if (current > 4) pages.push('...');
+
+      const start = Math.max(2, current - 1);
+      const end = Math.min(total - 1, current + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < total - 3) pages.push('...');
+
+      pages.push(total);
+    }
+
+    return pages;
+  }
+
+  goToPageSafe(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
+  }
 }
 
 

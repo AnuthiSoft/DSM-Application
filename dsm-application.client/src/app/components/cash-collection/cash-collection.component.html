@@ -86,7 +86,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of filteredCustomers">
+        <tr *ngFor="let c of paginatedCustomers">
           <td>
             <div class="action-buttons">
               <button class="btn btn-sm btn-primary" title="Collect Payment" (click)="openModal(c)">
@@ -109,6 +109,38 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="desktop-pagination" *ngIf="totalPages > 1">
+
+      <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+
+      <span *ngFor="let page of pageNumbers" class="page-number" [class.active]="page === currentPage"
+        (click)="goToPage(page)">
+        {{ page }}
+      </span>
+
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+
+    </div>
+    <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+      <button class="mobile-nav" (click)="previousPage()" [disabled]="currentPage === 1">
+        ←
+      </button>
+
+      <span class="mobile-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button class="mobile-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        →
+      </button>
+
+    </div>
   </div>
 
   <!-- No Customers -->
@@ -230,27 +262,20 @@
           </ng-template>
         </div>
 
-       <div *ngIf="form.paymentMode !== 'cash'" class="form-group">
-  <label>
-    Transaction Reference
-    <span class="text-danger">*</span>
-  </label>
+        <div *ngIf="form.paymentMode !== 'cash'" class="form-group">
+          <label>
+            Transaction Reference
+            <span class="text-danger">*</span>
+          </label>
 
-  <input 
-    type="text" 
-    class="form-input" 
-    [(ngModel)]="form.transactionReference"
-    #transactionRef="ngModel"
-    name="transactionReference"
-    required
-    placeholder="Enter reference number">
+          <input type="text" class="form-input" [(ngModel)]="form.transactionReference" #transactionRef="ngModel"
+            name="transactionReference" required placeholder="Enter reference number">
 
-  <!-- Validation Message -->
-  <div class="error-message" 
-       *ngIf="transactionRef.invalid && transactionRef.touched">
-    Transaction Reference is required
-  </div>
-</div>
+          <!-- Validation Message -->
+          <div class="error-message" *ngIf="transactionRef.invalid && transactionRef.touched">
+            Transaction Reference is required
+          </div>
+        </div>
 
       </div>
     </div>

@@ -50,6 +50,8 @@ export class CustomersListComponent implements OnInit {
   itemsPerPage = 10;
   totalPages = 1;
   paginatedCustomers: Customer[] = [];
+  showEmployeeSheet = false;
+  selectedEmployeeName = '';
 
   constructor(
     private customerService: CustomerService,
@@ -433,5 +435,21 @@ export class CustomersListComponent implements OnInit {
     pages.push(this.totalPages);
 
     return pages;
+  }
+
+  openEmployeeSheet() {
+    this.showEmployeeSheet = true;
+    document.body.classList.add('modal-open');
+  }
+
+  closeEmployeeSheet() {
+    this.showEmployeeSheet = false;
+    document.body.classList.remove('modal-open');
+  }
+
+  selectEmployee(emp: any) {
+    this.selectedEmployeeId = emp.employeeId;
+    this.selectedEmployeeName = emp.name;
+    this.closeEmployeeSheet();
   }
 }

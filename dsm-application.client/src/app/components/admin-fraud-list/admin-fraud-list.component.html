@@ -1,25 +1,25 @@
 <div class="fraud-reports-container">
   <!-- Header Card -->
   <div class="dashboard-card header-card">
-  <div class="d-flex justify-content-between align-items-center">
-    <h2 class="mb-0">
-      <i class="fas fa-exclamation-triangle me-2"></i>Fraud Reports Management
-    </h2>
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">
+        <i class="fas fa-exclamation-triangle me-2"></i>Fraud Reports Management
+      </h2>
 
-    <div class="header-actions d-flex flex-wrap gap-2">
-      <!-- Refresh Button -->
-      <button class="btn btn-refresh" (click)="loadPendingReports()">
-        <i class="fas fa-sync-alt me-1"></i> Refresh
-      </button>
+      <div class="header-actions d-flex flex-wrap gap-2">
+        <!-- Refresh Button -->
+        <button class="btn btn-refresh" (click)="loadPendingReports()">
+          <i class="fas fa-sync-alt me-1"></i> Refresh
+        </button>
 
-      <!-- NEW: View History Button -->
-      <button class="btn btn-primary" (click)="viewHistory()">
+        <!-- NEW: View History Button -->
+        <button class="btn btn-primary" (click)="viewHistory()">
 
-        <i class="fas fa-history me-1"></i> View History
-      </button>
+          <i class="fas fa-history me-1"></i> View History
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
 
   <!-- Loading State -->
@@ -39,7 +39,7 @@
         <span class="badge bg-warning ms-2">{{ pendingFrauds.length }}</span>
       </h3>
     </div>
-    
+
     <div class="table-container">
       <div class="table-responsive">
         <table class="table table-striped align-middle fraud-table">
@@ -54,7 +54,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let report of pendingFrauds" class="report-row">
+            <tr *ngFor="let report of paginatedFrauds" class="report-row">
               <td class="fw-semibold text-primary">#{{ report.id }}</td>
               <td class="fw-semibold">{{ report.targetId }}</td>
               <td>
@@ -68,25 +68,18 @@
                 </div>
               </td>
               <td>
-                <a *ngIf="report.evidenceUrl" 
-                   [href]="report.evidenceUrl" 
-                   target="_blank"
-                   class="evidence-link">
+                <a *ngIf="report.evidenceUrl" [href]="report.evidenceUrl" target="_blank" class="evidence-link">
                   <i class="fas fa-external-link-alt me-1"></i>
                   View Evidence
                 </a>
                 <span *ngIf="!report.evidenceUrl" class="text-muted">No evidence</span>
               </td>
               <td class="text-center action-buttons">
-                <button class="btn-action btn-approve me-2" 
-                        (click)="approve(report.id)"
-                        title="Approve Report">
+                <button class="btn-action btn-approve me-2" (click)="approve(report.id)" title="Approve Report">
                   <i class="fas fa-check-circle me-1"></i>
                   Approve
                 </button>
-                <button class="btn-action btn-reject" 
-                        (click)="reject(report.id)"
-                        title="Reject Report">
+                <button class="btn-action btn-reject" (click)="reject(report.id)" title="Reject Report">
                   <i class="fas fa-times-circle me-1"></i>
                   Reject
                 </button>
@@ -94,6 +87,41 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Desktop Pagination -->
+      <div class="desktop-pagination" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 1" (click)="prevPage()">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+
+        <div class="page-numbers">
+          <span *ngFor="let page of getPageNumbers()" class="page-number" [class.active]="page === currentPage"
+            [class.disabled]="page === '...'" (click)="handlePageClick(page)">
+            {{ page }}
+          </span>
+        </div>
+
+        <button class="page-btn" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Pagination -->
+      <div class="mobile-pagination" *ngIf="totalPages > 1">
+
+        <button class="mobile-nav" [disabled]="currentPage === 1" (click)="prevPage()">
+          ←
+        </button>
+
+        <div class="mobile-info">
+          Page {{ currentPage }} of {{ totalPages }}
+        </div>
+
+        <button class="mobile-nav" [disabled]="currentPage === totalPages" (click)="nextPage()">
+          →
+        </button>
+
       </div>
     </div>
   </div>
@@ -116,7 +144,7 @@
         <span class="badge bg-secondary ms-2">{{ historyFrauds.length }}</span>
       </h3>
     </div> -->
-<!-- 
+  <!-- 
     <div class="table-container" *ngIf="historyFrauds.length > 0">
       <div class="table-responsive">
         <table class="table table-striped align-middle history-table">
@@ -174,8 +202,8 @@
       </div>
     </div> -->
 
-    <!-- Empty State for History -->
-    <!-- <div class="empty-state" *ngIf="historyFrauds.length === 0">
+  <!-- Empty State for History -->
+  <!-- <div class="empty-state" *ngIf="historyFrauds.length === 0">
       <div class="empty-content">
         <i class="fas fa-file-alt text-muted"></i>
         <h4>No Report History</h4>
@@ -183,4 +211,4 @@
       </div>
     </div>
   </div> -->
-<!-- </div> -->
+  <!-- </div> -->

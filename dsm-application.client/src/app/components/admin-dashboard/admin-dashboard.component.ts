@@ -60,7 +60,11 @@ export class AdminDashboardComponent implements OnInit {
   pendingCategories: any[] = [];
   isModalOpen = false;
   isMobileView = false;
-
+  // PAGINATION
+  currentPage: number = 1;
+  pageSize: number = 10;
+  totalPages: number = 0;
+  paginatedDistributors: Distributor[] = [];
 
 
   setActiveTab(tab: string) {
@@ -324,6 +328,7 @@ export class AdminDashboardComponent implements OnInit {
         this.activeDistributors = res.filter(d => d.isActive).length;
         this.inactiveDistributors = res.filter(d => !d.isActive).length;
         this.premiumDistributors = res.filter(d => d.isPremium).length;
+        this.setupPagination();
       },
       error: err => console.error(err)
     });
@@ -448,10 +453,10 @@ export class AdminDashboardComponent implements OnInit {
       this.adminService.addDistributor(dist).subscribe({
         next: () => {
           if (this.isMobileView) {
-  alert('Distributor added successfully');
-} else {
-  this.toastr.success('Distributor added successfully');
-}
+            alert('Distributor added successfully');
+          } else {
+            this.toastr.success('Distributor added successfully');
+          }
 
           this.loadDistributors();
           this.distributorModal?.hide();
@@ -559,6 +564,8 @@ export class AdminDashboardComponent implements OnInit {
       d.name.toLowerCase().includes(this.searchText.toLowerCase()) ||
       d.email.toLowerCase().includes(this.searchText.toLowerCase())
     );
+    this.currentPage = 1;
+    this.setupPagination();
   }
 
   onPhoneInput(event: Event) {
@@ -607,5 +614,69 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  setupPagination() {
+    const data = this.searchText ? this.filteredDistributors : this.distributors;
+    this.totalPages = Math.ceil(data.length / this.pageSize) || 1;
+    this.updatePaginatedData();
+  }
 
+  updatePaginatedData() {
+    const data = this.searchText ? this.filteredDistributors : this.distributors;
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+
+    this.paginatedDistributors = data.slice(start, end);
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePaginatedData();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePaginatedData();
+    }
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+
+    if (this.totalPages <= 5) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (this.currentPage > 3) {
+        pages.push('...');
+      }
+
+      for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
+        if (i > 1 && i < this.totalPages) {
+          pages.push(i);
+        }
+      }
+
+      if (this.currentPage < this.totalPages - 2) {
+        pages.push('...');
+      }
+
+      pages.push(this.totalPages);
+    }
+
+    return pages;
+  }
+
+  handlePageClick(page: number | string) {
+    if (typeof page === 'number') {
+      this.currentPage = page;
+      this.updatePaginatedData();
+    }
+  }
 }

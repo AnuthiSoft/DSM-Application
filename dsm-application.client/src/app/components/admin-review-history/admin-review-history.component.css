@@ -8,6 +8,19 @@
   color: white;
   border: none;
   margin-bottom: 20px;
+  padding: 12px 20px !important;   /* Reduce vertical padding */
+  min-height: auto !important;
+}
+
+.header-card .d-flex {
+  align-items: center;
+  gap: 10px;
+}
+
+/* Remove extra padding from dashboard-card if inherited */
+.admin-review-history-container .dashboard-card.header-card {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
 }
 
 .header-card h2 {
@@ -354,4 +367,107 @@
 
 .review-history-row:nth-child(odd) {
   animation-delay: 0.2s;
+}
+
+/* ===============================
+   DESKTOP PAGINATION
+================================ */
+
+.desktop-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+}
+
+.page-number {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  transition: 0.3s;
+}
+
+.page-number:hover:not(.disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.page-number.active {
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.page-number.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ===============================
+   MOBILE PAGINATION
+================================ */
+
+.mobile-pagination {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.mobile-nav {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.mobile-info {
+  font-weight: 600;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 768px) {
+  .desktop-pagination {
+    display: none;
+  }
+
+  .mobile-pagination {
+    display: flex;
+  }
 }

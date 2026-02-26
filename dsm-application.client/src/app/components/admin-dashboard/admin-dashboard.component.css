@@ -1257,5 +1257,122 @@ body.modal-open .mobile-menu-toggle {
   display: none !important;
 }
 
+/* ===============================
+   DESKTOP PAGINATION
+================================ */
 
+.desktop-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-number {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  transition: all 0.3s ease;
+}
+
+.page-number:hover:not(.disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.page-number.active {
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.page-number.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* ===============================
+   MOBILE PAGINATION
+================================ */
+
+.mobile-pagination {
+  display: none;
+  margin-top: 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-nav {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.mobile-nav:disabled {
+  opacity: 0.5;
+}
+
+.mobile-info {
+  font-weight: 600;
+}
+
+/* ===============================
+   RESPONSIVE BREAKPOINTS
+================================ */
+
+@media (max-width: 1024px) {
+  .desktop-pagination {
+    gap: 10px;
+  }
+
+  .page-number {
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-pagination {
+    display: none;
+  }
+
+  .mobile-pagination {
+    display: flex;
+  }
+}
 

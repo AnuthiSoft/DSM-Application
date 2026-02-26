@@ -53,10 +53,7 @@ export class EmployeeReturnOrdersComponent {
       alert("Please upload product photo");
       return;
     }
-    if (!this.selected.tagPresent || !this.selected.packagingIntact) {
-      alert("Please check all conditions");
-      return;
-    }
+  
 
     this.confirmPickup(this.selected);
     this.showModal = false;
@@ -96,20 +93,47 @@ export class EmployeeReturnOrdersComponent {
   }
 
   viewDetails(r: any) {
+
+  // ⭐ Fetch order to include DeliveredOn date
+  this.returnApiService.getOrderById(r.orderId).subscribe(order => {
+
+    const deliveredOnHtml = order?.deliveredOn ? `
+      <p>
+        <b style="color:#2e7d32;">🟢 Delivered On:</b>
+        ${new Date(order.deliveredOn).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        })}
+      </p>
+    ` : '';
+
+   
+
     Swal.fire({
       title: 'Return Details',
       html: `
-      <div style="text-align:left">
-        <p><b>Return ID:</b> ${r.returnId}</p>
-        <p><b>Order ID:</b> ${r.orderId}</p>
-        <p><b>Product:</b> ${r.productName}</p>
-        <p><b>Quantity:</b> ${r.returnQty}</p>
-        <p><b>Status:</b> ${r.status}</p>
-      </div>
-    `,
+        <div style="text-align:left">
+
+          <p><b>Return ID:</b> ${r.returnId}</p>
+          <p><b>Order ID:</b> ${r.orderId}</p>
+          <p><b>Product:</b> ${r.productName}</p>
+          <p><b>Quantity:</b> ${r.returnQty}</p>
+          <p><b>Status:</b> ${r.status}</p>
+
+         
+
+          <!-- ⭐ Delivered On -->
+          ${deliveredOnHtml}
+
+        </div>
+      `,
       width: 400
     });
-  }
+
+  });
+
+}
 
 
   cancelPickup(r: any) {
@@ -188,11 +212,6 @@ export class EmployeeReturnOrdersComponent {
       (r.status || '').toLowerCase() === status.toLowerCase()
     ).length;
   }
-
-
-
-
-
 
 
 }

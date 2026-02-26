@@ -370,8 +370,8 @@ namespace DSM_Application.Server.Controllers
                     Subtotal = o.Subtotal,
                     TotalDiscount = o.TotalDiscount,
                     TotalAmount = o.TotalAmount,
+                    DeliveredOn = o.DeliveredOn,
 
-                   
 
                     SpecialDiscountPercent = o.Products.First().SpecialDiscountPercent,
                     QuantityDiscountPercent = o.Products.First().QuantityDiscountPercent,

@@ -14,6 +14,11 @@
         public string? CustomerEmail { get; set; }
         public string? CustomerAddress { get; set; }
 
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Pincode { get; set; }
+        public string Country { get; set; }
 
         public DateTime PickupDate { get; set; }
         public string PickupSlot { get; set; }

@@ -417,6 +417,22 @@ export class DistributorReturnRequestsComponent implements OnInit {
     });
   }
 
+  formatAddress(address: string): string {
+  if (!address) return 'N/A';
+
+  // split by comma
+  const parts = address.split(',');
+
+  const street = parts[0]?.trim() || '';
+  const city = parts[1]?.trim() || '';
+  const district = parts[2]?.trim() || '';
+  const state = parts[3]?.trim() || '';
+  const pincode = parts[4]?.trim() || '';
+  const country = parts[5]?.trim() || '';
+
+  return `${street}, ${city}, ${state} - ${pincode}, ${country}`;
+}
+
   showMarkReceivedSuccess(r: any) {
     Swal.fire({
       title: '<div style="display: flex; align-items: center; gap: 10px; color: #27ae60;">' +
@@ -530,25 +546,8 @@ export class DistributorReturnRequestsComponent implements OnInit {
             ></textarea>
           </div>
           
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; 
-                padding: 12px; background: rgba(231, 76, 60, 0.05); border-radius: 8px;">
-            <input type="checkbox" id="notifyCustomerReject" checked 
-                  style="width: 18px; height: 18px; accent-color: #e74c3c; cursor: pointer;">
-            <label style="color: #2c3e50; font-weight: 500; cursor: pointer;">
-              <i class="fas fa-bell" style="color: #e74c3c; margin-right: 6px;"></i>
-              Notify customer about rejection
-            </label>
-          </div>
           
-          <div style="background: rgba(243, 156, 18, 0.1); padding: 12px; border-radius: 8px; 
-                border-left: 4px solid #f39c12;">
-            <div style="display: flex; align-items: flex-start; gap: 10px;">
-              <i class="fas fa-exclamation-triangle" style="color: #f39c12;"></i>
-              <div style="font-size: 0.9rem; color: #2c3e50;">
-                <strong>Warning:</strong> This action cannot be undone. The customer will be notified.
-              </div>
-            </div>
-          </div>
+          
         </div>
       `,
       background: '#ffffff',
@@ -643,124 +642,134 @@ export class DistributorReturnRequestsComponent implements OnInit {
     return this.returnRequests.filter(r => r.status === status).length;
   }
 
-  viewDetails(r: any) {
-  Swal.fire({
-    title: '<div style="display: flex; align-items: center; gap: 10px; color: #3498db;">' +
-           '<i class="fas fa-info-circle" style="font-size: 1.5rem;"></i>' +
-           '<span>Return Details</span>' +
-           '</div>',
-    html: `
-      <div style="text-align: left; padding: 10px;">
+ viewDetails(r: any) {
 
-        <!-- HEADER -->
-        <div style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white; 
-              padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-          <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-exchange-alt"></i>
-            Return #${r.id}
-          </h3>
-        </div>
+  // ⭐ Fetch order to get DeliveredOn date
+  this.returnApiService.getOrderById(r.orderId).subscribe(order => {
 
-        <!-- DETAILS GRID -->
-        <div style="display: grid; gap: 12px;">
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Order ID:</span>
-            <span style="color: #2c3e50; font-weight: 600;">${r.orderId}</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Product:</span>
-            <span style="color: #2c3e50; font-weight: 600;">${r.productName}</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Quantity:</span>
-            <span style="color: #e74c3c; font-weight: 600;">${r.returnQty}</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Price:</span>
-            <span style="color: #27ae60; font-weight: 600;">₹${r.price ?? '0'}</span>
-          </div>
-
-          <!-- Customer Name -->
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Customer:</span>
-            <span style="color: #2c3e50; font-weight: 600;">${r.customerName}</span>
-          </div>
-
-          <!-- Customer Phone -->
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Phone:</span>
-            <span style="color: #3498db; font-weight: 600;">${r.customerPhone || 'N/A'}</span>
-          </div>
-
-          <!-- Customer Email -->
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Email:</span>
-            <span style="color: #3498db; font-weight: 600;">${r.customerEmail || 'N/A'}</span>
-          </div>
-
-          <!-- Customer Address -->
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Address:</span>
-            <span style="color: #2c3e50; font-weight: 600; text-align: right; white-space: pre-line;">
-              ${r.customerAddress || 'N/A'}
-            </span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Status:</span>
-            <span style="color: ${this.getStatusColor(r.status)}; font-weight: 600;">
-              ${this.getStatusLabel(r.status)}
-            </span>
-          </div>
-
-          ${r.pickupDate ? `
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-              <span style="color: #7f8c8d; font-weight: 500;">Pickup Date:</span>
-              <span style="color: #2c3e50; font-weight: 500;">${new Date(r.pickupDate).toLocaleDateString()}</span>
-            </div>
-          ` : ''}
-
-          ${r.pickupSlot ? `
-            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
-              <span style="color: #7f8c8d; font-weight: 500;">Time Slot:</span>
-              <span style="color: #2c3e50; font-weight: 500;">${r.pickupSlot}</span>
-            </div>
-          ` : ''}
-
-          <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-            <span style="color: #7f8c8d; font-weight: 500;">Request Date:</span>
-            <span style="color: #2c3e50; font-weight: 500;">${new Date(r.createdAt).toLocaleDateString()}</span>
-          </div>
-        </div>
-
-        <div style="margin-top: 20px; padding: 15px; background: rgba(52, 152, 219, 0.1); 
-              border-radius: 8px; border-left: 4px solid #3498db;">
-          <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 0.95rem; 
-                display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-comment-alt" style="color: #3498db;"></i>
-            Return Reason
-          </h4>
-          <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">${r.reason}</p>
-        </div>
+    const deliveredOnHtml = order?.deliveredOn ? `
+      <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0;">
+        <span style="color:#2e7d32; font-weight:600;">🟢 Delivered On:</span>
+        <span style="font-weight:600;">
+          ${new Date(order.deliveredOn).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}
+        </span>
       </div>
-    `,
-    background: '#ffffff',
-    color: '#2c3e50',
-    showConfirmButton: true,
-    confirmButtonText: '<i class="fas fa-times"></i> Close',
-    confirmButtonColor: '#3498db',
-    width: 450,
-    customClass: {
-      popup: 'custom-swal-popup',
-      title: 'custom-swal-title',
-      htmlContainer: 'custom-swal-content',
-      confirmButton: 'custom-swal-confirm-btn'
-    }
-  });
+    ` : '';
+
+    Swal.fire({
+      title: '<div style="display: flex; align-items: center; gap: 10px; color: #3498db;">' +
+             '<i class="fas fa-info-circle" style="font-size: 1.5rem;"></i>' +
+             '<span>Return Details</span>' +
+             '</div>',
+      html: `
+        <div style="text-align: left; padding: 10px;">
+
+          <!-- HEADER -->
+          <div style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white; 
+                padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;">
+              <i class="fas fa-exchange-alt"></i>
+              Return #${r.id}
+            </h3>
+          </div>
+
+          <!-- DETAILS GRID -->
+          <div style="display: grid; gap: 12px;">
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Order ID:</span>
+              <span style="color: #2c3e50; font-weight: 600;">${r.orderId}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Price:</span>
+              <span style="color: #27ae60; font-weight: 600;">₹${r.price ?? '0'}</span>
+            </div>
+
+            <!-- Customer Name -->
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Customer:</span>
+              <span style="color: #2c3e50; font-weight: 600;">${r.customerName}</span>
+            </div>
+
+            <!-- Customer Phone -->
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Phone:</span>
+              <span style="color: #3498db; font-weight: 600;">${r.customerPhone || 'N/A'}</span>
+            </div>
+
+            <!-- Customer Email -->
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Email:</span>
+              <span style="color: #3498db; font-weight: 600;">${r.customerEmail || 'N/A'}</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+              <span style="color: #7f8c8d; font-weight: 500;">Status:</span>
+              <span style="color: ${this.getStatusColor(r.status)}; font-weight: 600;">
+                ${this.getStatusLabel(r.status)}
+              </span>
+            </div>
+
+            ${r.pickupDate ? `
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                <span style="color: #7f8c8d; font-weight: 500;">Pickup Date:</span>
+                <span style="color: #2c3e50; font-weight: 500;">${new Date(r.pickupDate).toLocaleDateString()}</span>
+              </div>
+            ` : ''}
+
+            ${r.pickupSlot ? `
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                <span style="color: #7f8c8d; font-weight: 500;">Time Slot:</span>
+                <span style="color: #2c3e50; font-weight: 500;">${r.pickupSlot}</span>
+              </div>
+            ` : ''}
+
+            <!-- Request Date -->
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+              <span style="color: #7f8c8d; font-weight: 500;">ReturnRequest Date:</span>
+              <span style="color: #2c3e50; font-weight: 500;">
+                ${new Date(r.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+
+            <!-- ⭐ DELIVERED ON (Added here) -->
+            ${deliveredOnHtml}
+
+          </div>
+
+          <!-- REASON -->
+          <div style="margin-top: 20px; padding: 15px; background: rgba(52, 152, 219, 0.1); 
+                border-radius: 8px; border-left: 4px solid #3498db;">
+            <h4 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 0.95rem; 
+                  display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-comment-alt" style="color: #3498db;"></i>
+              Return Reason
+            </h4>
+            <p style="margin: 0; color: #2c3e50; font-size: 0.9rem;">${r.reason}</p>
+          </div>
+
+        </div>
+      `,
+      background: '#ffffff',
+      color: '#2c3e50',
+      showConfirmButton: true,
+      confirmButtonText: '<i class="fas fa-times"></i> Close',
+      confirmButtonColor: '#3498db',
+      width: 450,
+      customClass: {
+        popup: 'custom-swal-popup',
+        title: 'custom-swal-title',
+        htmlContainer: 'custom-swal-content',
+        confirmButton: 'custom-swal-confirm-btn'
+      }
+    });
+
+  }); // END API subscribe
 }
 
   contactCustomer(r: any) {

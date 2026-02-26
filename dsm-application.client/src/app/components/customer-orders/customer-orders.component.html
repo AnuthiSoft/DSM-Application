@@ -163,6 +163,17 @@
   </span>
 </div> -->
 
+<!-- ⭐ Show Delivered On (Only if delivered at least once) -->
+<div class="detail-item" 
+     *ngIf="order.deliveredOn">
+  <span class="detail-label" style="color:#2e7d32; font-weight:600;">
+    🟢 Delivered on:
+  </span>
+  <span class="detail-value" style="font-weight:600;">
+    {{ order.deliveredOn | date:'mediumDate' }}
+  </span>
+</div>
+
             <div class="detail-item">
               <span class="detail-label">Status:</span>
               <span class="detail-value status-text" [class]="order.status.toLowerCase()">

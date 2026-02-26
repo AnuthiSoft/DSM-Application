@@ -188,4 +188,8 @@ rejectReturn(returnId: string, reason: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${returnId}/reached`, {});
   }
 
+getOrderById(orderId: string) {
+  return this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`);
+}
+
 }

@@ -154,7 +154,14 @@ namespace DSM_Application.Server.Services
                         customer?.Email
                         ?? order?.CustomerEmail,
                     CustomerAddress =
-    customer?.Address
+    string.Join(", ", new[]
+    {
+        customer?.Street,
+        customer?.City,
+        customer?.State,
+        customer?.Pincode,
+        customer?.Country
+    }.Where(x => !string.IsNullOrWhiteSpace(x)))
     ?? order?.CustomerAddress
     ?? "N/A",
 
@@ -344,9 +351,14 @@ namespace DSM_Application.Server.Services
                                     ?? order?.CustomerEmail
                                     ?? "N/A",
 
-                    CustomerAddress = customer?.Address
-                                      ?? order?.CustomerAddress
-                                      ?? "N/A"
+                    CustomerAddress = string.Join(", ", new[]
+{
+    customer?.Street,
+    customer?.City,
+    customer?.State,
+    customer?.Pincode,
+    customer?.Country
+}.Where(x => !string.IsNullOrWhiteSpace(x))),
                 });
             }
 

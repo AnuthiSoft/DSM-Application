@@ -993,9 +993,9 @@ html[data-theme="dark"] .bottom-sheet {
     grid-template-columns: 1fr;
   }
 
-  .report-summary-stats {
+  /* .report-summary-stats {
     grid-template-columns: repeat(2, 1fr);
-  }
+  } */
 
   .pagination-container {
     flex-direction: column;
@@ -1004,10 +1004,10 @@ html[data-theme="dark"] .bottom-sheet {
   }
 
   .report-summary-stats {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
+
 
   .summary-stat-card {
     padding: 14px;
@@ -1162,6 +1162,7 @@ html[data-theme="dark"] .bottom-sheet {
 }
 
 /* Table cell text truncation */
+@media (min-width: 769px) {
 .details-table td,
 .report-table td {
   white-space: nowrap;
@@ -1169,14 +1170,16 @@ html[data-theme="dark"] .bottom-sheet {
   text-overflow: ellipsis;
   max-width: 200px;
 }
+}
 
 /* Order ID special handling */
+@media (min-width: 993px) {
 .details-table td:first-child {
   font-family: monospace;
   font-size: 0.85rem;
   max-width: 150px;
 }
-
+}
 /* Close button in modal header */
 .close-modal-btn {
   position: absolute;
@@ -1242,12 +1245,6 @@ html[data-theme="dark"] .bottom-sheet {
   border-radius: 4px;
 }
 
-@media (max-width: 992px) {
-  .report-table {
-    min-width: 900px;
-  }
-}
-
 /* Prevent page horizontal scroll */
 html,
 body {
@@ -1262,9 +1259,11 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Force table width so scroll appears */
-.table-responsive table {
-  min-width: 1000px;
+/* Desktop only */
+@media (min-width: 992px) {
+  .table-responsive table {
+    min-width: 1000px;
+  }
 }
 
 /* ===================================== */
@@ -1327,8 +1326,6 @@ body {
   opacity: 0.6;
 }
 
-/* ================= MOBILE ================= */
-
 /* ================= MOBILE PAGINATION ================= */
 
 .mobile-pagination {
@@ -1381,3 +1378,41 @@ body {
     white-space: nowrap;
   }
 }
+
+/* ================= FULL WIDTH TABLE FOR MOBILE ================= */
+@media (max-width: 768px) {
+
+  /* Remove extra side padding */
+  .dashboard-card {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .report-section {
+    padding: 12px;
+  }
+
+  /* Make table container full width */
+  .table-container {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .report-table {
+    min-width: 650px;  /* enough width so it scrolls nicely */
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+}
+

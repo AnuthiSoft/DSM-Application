@@ -27,11 +27,11 @@ interface ReturnData {
 export class CustomerOrdersComponent {
 
   // ===== Pagination =====
-pageSize = 6;
-currentPage = 1;
-totalPages = 1;
-pagesPerGroup = 5;
-currentGroup = 0;
+  pageSize = 6;
+  currentPage = 1;
+  totalPages = 1;
+  pagesPerGroup = 5;
+  currentGroup = 0;
   returnData: ReturnData = {
     returnType: 'Return',
     reason: 'Received damaged product',
@@ -120,7 +120,7 @@ currentGroup = 0;
 
         this.applyStatusFilter(); // ✅ IMPORTANT
         this.currentPage = 1;
-this.updatePagination();
+        this.updatePagination();
         this.loading = false;
       },
       error: () => {
@@ -128,18 +128,18 @@ this.updatePagination();
       }
     });
   }
- applyStatusFilter(): void {
-  if (this.statusFilter === 'All') {
-    this.filteredOrders = [...this.orders];
-  } else {
-    this.filteredOrders = this.orders.filter(
-      o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
-    );
-  }
+  applyStatusFilter(): void {
+    if (this.statusFilter === 'All') {
+      this.filteredOrders = [...this.orders];
+    } else {
+      this.filteredOrders = this.orders.filter(
+        o => o.status?.toLowerCase() === this.statusFilter.toLowerCase()
+      );
+    }
 
-  this.currentPage = 1;
-  this.updatePagination();
-}
+    this.currentPage = 1;
+    this.updatePagination();
+  }
 
 
 
@@ -362,24 +362,24 @@ this.updatePagination();
     this.updateTotalReturnQty();
   }
   updateTotalReturnQty() {
-  // Enforce max quantity for each product
-  this.selectedProductIds.forEach(pid => {
-    const maxQty = this.getMaxReturnQtyForProduct(pid);
+    // Enforce max quantity for each product
+    this.selectedProductIds.forEach(pid => {
+      const maxQty = this.getMaxReturnQtyForProduct(pid);
 
-    if (this.returnQuantities[pid] > maxQty) {
-      this.returnQuantities[pid] = maxQty;  // Auto-correct
-      this.toastr.warning(`Maximum return quantity for this product is ${maxQty}`);
-    }
+      if (this.returnQuantities[pid] > maxQty) {
+        this.returnQuantities[pid] = maxQty;  // Auto-correct
+        this.toastr.warning(`Maximum return quantity for this product is ${maxQty}`);
+      }
 
-    if (this.returnQuantities[pid] < 1) {
-      this.returnQuantities[pid] = 1; // Prevent 0 or negative
-    }
-  });
+      if (this.returnQuantities[pid] < 1) {
+        this.returnQuantities[pid] = 1; // Prevent 0 or negative
+      }
+    });
 
-  // Recalculate total
-  this.totalReturnQty = Object.values(this.returnQuantities)
-    .reduce((sum: number, qty: any) => sum + Number(qty), 0);
-}
+    // Recalculate total
+    this.totalReturnQty = Object.values(this.returnQuantities)
+      .reduce((sum: number, qty: any) => sum + Number(qty), 0);
+  }
 
 
 
@@ -421,7 +421,7 @@ this.updatePagination();
   }
 
   // Reorder a previous order
-reorder(orderId: string): void {
+  reorder(orderId: string): void {
 
     this.http.get<any>(`${environment.apiUrl}/orders/${orderId}`).subscribe({
       next: (order) => {
@@ -431,48 +431,48 @@ reorder(orderId: string): void {
           return;
         }
 
-      const distributorId = order.distributorId;
-      const customerId = localStorage.getItem('customerId');
+        const distributorId = order.distributorId;
+        const customerId = localStorage.getItem('customerId');
 
-      if (!customerId) {
-        this.toastr.error('Customer not found');
-        return;
-      }
+        if (!customerId) {
+          this.toastr.error('Customer not found');
+          return;
+        }
 
-      // ✅ Set distributor for AddToCart screen
-      localStorage.setItem('distributorId', distributorId);
+        // ✅ Set distributor for AddToCart screen
+        localStorage.setItem('distributorId', distributorId);
 
-      // 🔑 SAME KEY used by AddToCartComponent
-      const CART_KEY = `cart_customer_${customerId}`;
+        // 🔑 SAME KEY used by AddToCartComponent
+        const CART_KEY = `cart_customer_${customerId}`;
 
-     const orderProducts = order.products.map((item: any) => ({
-  product: {
-    productId: item.productId,
-    productName: item.productName,
-    price: item.price,
-    distributorId: distributorId,
+        const orderProducts = order.products.map((item: any) => ({
+          product: {
+            productId: item.productId,
+            productName: item.productName,
+            price: item.price,
+            distributorId: distributorId,
 
-    // 🔥 Required by AddToCartComponent
-    currentStock: item.currentStock || 9999,
-    brand: item.brand || '',
-    category: item.category || '',
-    distributorName: order.distributorName || ''
-  },
-  quantity: item.quantity
-}));
+            // 🔥 Required by AddToCartComponent
+            currentStock: item.currentStock || 9999,
+            brand: item.brand || '',
+            category: item.category || '',
+            distributorName: order.distributorName || ''
+          },
+          quantity: item.quantity
+        }));
 
-      // ✅ Save where AddToCart actually reads
-      localStorage.setItem(CART_KEY, JSON.stringify(orderProducts));
+        // ✅ Save where AddToCart actually reads
+        localStorage.setItem(CART_KEY, JSON.stringify(orderProducts));
 
         this.toastr.success('Order items loaded into cart');
 
-      this.router.navigate(['//customer-dashboard/add-to-cart']);
-    },
-    error: () => {
-      this.toastr.error('Failed to load previous order');
-    }
-  });
-}
+        this.router.navigate(['//customer-dashboard/add-to-cart']);
+      },
+      error: () => {
+        this.toastr.error('Failed to load previous order');
+      }
+    });
+  }
 
 
 
@@ -641,24 +641,24 @@ reorder(orderId: string): void {
           0
         );
 
-      const creditUsed = order.creditUsed ?? 0;
-const payable = order.payableAmount ?? order.remainingAmount ?? order.totalAmount ?? 0;
+        const creditUsed = order.creditUsed ?? 0;
+        const payable = order.payableAmount ?? order.remainingAmount ?? order.totalAmount ?? 0;
 
 
 
 
-const creditHtml = creditUsed > 0
-  ? `
+        const creditHtml = creditUsed > 0
+          ? `
     <div style="display:flex; justify-content:space-between; margin-top:6px;">
       <strong>Credit Used</strong>
       <strong>-₹${creditUsed.toFixed(2)}</strong>
     </div>
   `
-  : '';
+          : '';
 
-Swal.fire({
-  title: 'Order Items',
-  html: `
+        Swal.fire({
+          title: 'Order Items',
+          html: `
   <div style="text-align:left; font-size:15px;">
 
     ${itemsHtml}
@@ -741,49 +741,108 @@ Swal.fire({
     this.activeTab = tab;
   }
   updatePagination() {
-  this.totalPages = Math.ceil(this.filteredOrders.length / this.pageSize) || 1;
+    this.totalPages = Math.ceil(this.filteredOrders.length / this.pageSize) || 1;
 
-  if (this.currentPage > this.totalPages) {
-    this.currentPage = this.totalPages;
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
   }
 
-  if (this.currentPage < 1) {
-    this.currentPage = 1;
+  get paginatedOrders(): Order[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredOrders.slice(start, start + this.pageSize);
   }
-}
 
-get paginatedOrders(): Order[] {
-  const start = (this.currentPage - 1) * this.pageSize;
-  return this.filteredOrders.slice(start, start + this.pageSize);
-}
+  get pages(): number[] {
+    const start = this.currentGroup * this.pagesPerGroup + 1;
+    const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
 
-get pages(): number[] {
-  const start = this.currentGroup * this.pagesPerGroup + 1;
-  const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
-
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-
-goToPage(page: number) {
-  if (page < 1 || page > this.totalPages) return;
-
-  this.currentPage = page;
-
-  // move group automatically
-  this.currentGroup = Math.floor((page - 1) / this.pagesPerGroup);
-}
-prevGroup() {
-  if (this.currentGroup > 0) {
-    this.currentGroup--;
-    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
-}
 
-nextGroup() {
-  if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
-    this.currentGroup++;
-    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+
+    this.currentPage = page;
+
+    // move group automatically
+    this.currentGroup = Math.floor((page - 1) / this.pagesPerGroup);
   }
-}
+  prevGroup() {
+    if (this.currentGroup > 0) {
+      this.currentGroup--;
+      this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+    }
+  }
+
+  nextGroup() {
+    if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
+      this.currentGroup++;
+      this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
+    }
+  }
+
+  preventExceedingMax(event: KeyboardEvent, pid: string) {
+
+    const input = event.target as HTMLInputElement;
+
+    const max = this.getMaxReturnQtyForProduct(pid);
+
+    const currentValue = Number(input.value || 0);
+
+    // Allow control keys
+
+    if (
+
+      event.key === 'Backspace' ||
+
+      event.key === 'Delete' ||
+
+      event.key === 'ArrowLeft' ||
+
+      event.key === 'ArrowRight' ||
+
+      event.key === 'Tab'
+
+    ) {
+
+      return;
+
+    }
+
+    // Prevent typing if already at max
+
+    if (currentValue >= max) {
+
+      event.preventDefault();
+
+    }
+
+  }
+
+  validateReturnQty(pid: string) {
+
+    const max = this.getMaxReturnQtyForProduct(pid);
+
+    let qty = this.returnQuantities[pid] || 0;
+
+    if (qty > max) {
+
+      this.returnQuantities[pid] = max;
+
+    }
+
+    if (qty < 0) {
+
+      this.returnQuantities[pid] = 0;
+
+    }
+
+  }
+
 }
 

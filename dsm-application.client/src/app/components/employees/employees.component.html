@@ -391,7 +391,7 @@
       <div class="desktop-pagination" *ngIf="totalPages > 1">
 
         <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
-        <i class="fas fa-chevron-left"></i> Previous
+          <i class="fas fa-chevron-left"></i> Previous
         </button>
 
         <span *ngFor="let page of pageNumbers" class="page-number" [class.active]="page === currentPage"

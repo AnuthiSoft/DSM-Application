@@ -70,6 +70,7 @@ export class EmployeesComponent {
   ) { }
 
   ngOnInit(): void {
+    this.currentUserRole = (localStorage.getItem('Role') || '').toLowerCase().trim();
     this.distributorId = this.auth.getDistributorId();
     this.employeeId = this.auth.getEmployeeId();
 
@@ -505,16 +506,22 @@ export class EmployeesComponent {
 
     const formData = new FormData();
     formData.append("file", this.selectedFile);
-    formData.append("EmployeeId", this.selectedEmployee.employeeId); // FIXED
+    formData.append("EmployeeId", this.selectedEmployee.employeeId);
 
     this.http.post(`${this.apiUrl}/invoice-upload/upload`, formData)
       .subscribe({
         next: (res: any) => {
+
+          // 🔥 Immediately attach invoice URL
+          this.selectedEmployee.invoicePdfUrl = res?.pdfUrl || true;
+
           this.toastr.success("Invoice uploaded successfully!");
           this.closeUploadModal();
+
+          // Optional refresh
+          this.loadEmployees();
         },
-        error: (err) => {
-          console.error(err);
+        error: () => {
           this.toastr.error("Upload failed!");
         }
       });
@@ -588,11 +595,6 @@ export class EmployeesComponent {
     // this.isSheetOpen = true;
   }
 
-  isDistributor(): boolean {
-    const role = localStorage.getItem('Role');
-    return role === 'Distributor';
-  }
-
   get paginatedEmployees() {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredEmployees.slice(startIndex, startIndex + this.itemsPerPage);
@@ -637,6 +639,34 @@ export class EmployeesComponent {
 
   nextPage() {
     if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+  isDistributor(): boolean {
+    return (this.currentUserRole || '').toLowerCase().trim() === 'distributor';
+  }
+
+  isDeliveryBoy(emp: any): boolean {
+    return (emp?.designation || '').toLowerCase().includes('delivery');
+  }
+
+  isLoggedInDeliveryBoy(): boolean {
+    const role = localStorage.getItem('Role');
+    return role === 'Delivery Boy';
+  }
+
+  canViewInvoice(emp: any): boolean {
+    const role = (this.currentUserRole || '').toLowerCase().trim();
+
+    // Distributor can view all delivery boy invoices
+    if (role === 'distributor' && this.isDeliveryBoy(emp)) {
+      return true;
+    }
+
+    // Delivery boy can view his own invoice
+    if (role === 'delivery boy' && emp.employeeId === this.employeeId) {
+      return true;
+    }
+
+    return false;
   }
 }
 

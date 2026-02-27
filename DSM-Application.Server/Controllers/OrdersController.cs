@@ -1566,6 +1566,46 @@ namespace DSM_Application.Server.Controllers
             await _orderService.ApproveCreditAsync(orderId, amount);
             return Ok(new { message = "Credit approved" });
         }
+        [HttpGet("dashboard/{distributorId}")]
+        public async Task<IActionResult> GetDistributorDashboard(string distributorId)
+        {
+            if (string.IsNullOrEmpty(distributorId))
+                return BadRequest("DistributorId required");
+
+            var currentMonth = DateTime.UtcNow.Month;
+            var currentYear = DateTime.UtcNow.Year;
+
+            var filter = Builders<Order>.Filter.Eq(o => o.DistributorId, distributorId);
+
+            var orders = await _mongo.Orders
+                .Find(filter)
+                .ToListAsync();
+
+            var pendingOrders = orders.Count(o => o.Status == "Pending");
+
+            var shippedOrders = orders.Count(o => o.Status == "Shipped");
+
+            var returnedOrders = orders.Count(o =>
+                o.Products != null &&
+                o.Products.Any(p => p.ReturnedQty > 0)
+            );
+
+            var monthlyRevenue = orders
+                .Where(o =>
+                    o.Status == "Delivered" &&
+                    o.OrderDate.Month == currentMonth &&
+                    o.OrderDate.Year == currentYear
+                )
+                .Sum(o => o.TotalAmount);
+
+            return Ok(new
+            {
+                pendingOrders,
+                ordersToDeliver = shippedOrders,
+                returnedProducts = returnedOrders,
+                monthlyRevenue
+            });
+        }
     }
 
 }

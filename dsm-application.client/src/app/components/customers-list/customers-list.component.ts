@@ -23,11 +23,12 @@ export class CustomersListComponent implements OnInit {
     address: '',
     role: 'Customer',
     isRegistered: false,
-    isActive: true          // ✅ ADD THIS
+    isActive: true  
+            // ✅ ADD THIS
   };
   employees: any[] = [];
   showPassword = false;
-
+phoneTouched = false;
   searchTerm = '';
   statusFilter = '';
   showModal = false;
@@ -192,29 +193,23 @@ export class CustomersListComponent implements OnInit {
   }
 
 
-  saveCustomer() {
-    this.formSubmitted = true;
+ saveCustomer() {
+  this.formSubmitted = true;
 
-    if (
-      !this.customer.name ||
-      !this.customer.email ||
-      !this.customer.phoneNumber ||
-      !this.customer.address ||
-      !this.customer.password
-    ) {
-      this.toastr.error('All fields are required');
-
-      return;
-    }
-
-    if (!this.otpVerified) {
-      this.toastr.warning('Please verify phone number using OTP');
-
-      return;
-    }
-
-    this.isEdit ? this.updateCustomer() : this.createCustomer();
+  // Field-level validation
+  if (!this.validateForm()) {
+    this.toastr.error('Please fix the highlighted fields');
+    return;
   }
+
+  // OTP validation
+  if (!this.otpVerified) {
+    this.toastr.warning('Please verify phone number using OTP');
+    return;
+  }
+
+  this.isEdit ? this.updateCustomer() : this.createCustomer();
+}
 
 
   /* ----------------------------- UPDATE ------------------------------ */
@@ -452,4 +447,123 @@ export class CustomersListComponent implements OnInit {
     this.selectedEmployeeName = emp.name;
     this.closeEmployeeSheet();
   }
+
+validateField(field: string): boolean {
+  const value = (this.customer as any)[field]?.toString().trim() || '';
+  let error = '';
+
+  switch (field) {
+    case 'name':
+      if (!value) error = 'Full name is required';
+      else if (value.length < 2) error = 'Name must be at least 2 characters';
+      break;
+
+    case 'email':
+      if (!value) error = 'Email is required';
+      else if (!this.emailRegex.test(value))
+        error = 'Enter a valid email address';
+      break;
+
+    case 'phoneNumber':
+      if (!value) error = 'Phone number is required';
+      else if (!this.phoneRegex.test(value))
+        error = 'Enter valid 10 digit mobile number';
+      break;
+
+    case 'password':
+      if (!this.isEdit) { // Password required only on create
+        if (!value) error = 'Password is required';
+        else if (value.length < 6)
+          error = 'Password must be at least 6 characters';
+      }
+      break;
+
+    case 'address':
+      if (!value) error = 'Address is required';
+      else if (value.length < 5)
+        error = 'Address is too short';
+      break;
+  }
+
+  this.fieldErrors[field] = error;
+  return !error;
 }
+validateForm(): boolean {
+  let valid = true;
+
+  valid = this.validateField('name') && valid;
+  valid = this.validateField('email') && valid;
+  valid = this.validateField('phoneNumber') && valid;
+  valid = this.validateField('password') && valid;
+  valid = this.validateField('address') && valid;
+
+  return valid;
+}
+
+onFieldBlur(field: string) {
+  this.validateField(field);
+}
+
+
+onPhoneInput(event: any) {
+  let value = event.target.value.replace(/\D/g, '');
+
+  // Limit to 10 digits
+  if (value.length > 10) {
+    value = value.slice(0, 10);
+  }
+
+  this.customer.phoneNumber = value;
+
+  // Reset OTP if number changes
+  this.otpSent = false;
+  this.otpVerified = false;
+
+  // Clear required error while typing
+  this.fieldErrors.phoneNumber = '';
+
+  // Format validation (only if not empty)
+  if (value && !/^[6-9]/.test(value)) {
+    this.phoneError = 'Mobile number must start with 6, 7, 8, or 9';
+  } else {
+    this.phoneError = '';
+  }
+}
+
+onPhoneBlur() {
+  this.phoneTouched = true;
+
+  const value = this.customer.phoneNumber;
+
+  if (!value) {
+    this.fieldErrors.phoneNumber = 'Phone number is required';
+    return;
+  }
+
+  if (!/^[6-9]\d{9}$/.test(value)) {
+    this.fieldErrors.phoneNumber = 'Enter a valid 10 digit mobile number';
+    return;
+  }
+
+  this.fieldErrors.phoneNumber = '';
+}
+  // ================= FIELD VALIDATION =================
+fieldErrors: any = {
+  name: '',
+  email: '',
+  phoneNumber: '',
+  password: '',
+  address: ''
+};
+
+// Email regex (production safe)
+private emailRegex =
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+// Phone regex (India)
+private phoneRegex =
+  /^[6-9]\d{9}$/;
+
+
+}
+

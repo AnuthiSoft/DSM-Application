@@ -185,26 +185,60 @@
       <div class="form-grid">
 
         <div class="form-group">
-          <label><i class="fas fa-user"></i> Full Name</label>
-          <input class="form-control" type="text" [(ngModel)]="customer.name" />
-        </div>
+  <label><i class="fas fa-user"></i> Full Name</label>
+  <input class="form-control"
+         type="text"
+         [(ngModel)]="customer.name"
+         (blur)="onFieldBlur('name')"
+         [ngClass]="{'is-invalid': fieldErrors.name}" />
 
-        <div class="form-group">
-          <label><i class="fas fa-envelope"></i> Email Address</label>
-          <input class="form-control" type="email" [(ngModel)]="customer.email" />
-        </div>
+  <div class="invalid-feedback">
+    {{ fieldErrors.name }}
+  </div>
+</div>
 
-        <!-- PHONE NUMBER -->
-        <div class="form-group">
-          <label><i class="fas fa-phone"></i> Phone Number</label>
+       <div class="form-group">
+  <label><i class="fas fa-envelope"></i> Email Address</label>
+  <input class="form-control"
+         type="email"
+         [(ngModel)]="customer.email"
+         (blur)="onFieldBlur('email')"
+         [ngClass]="{'is-invalid': fieldErrors.email}" />
+
+  <div class="invalid-feedback">
+    {{ fieldErrors.email }}
+  </div>
+</div>
+
 
           <!-- +91 PHONE INPUT -->
-          <div class="phone-group" [class.verified]="otpVerified">
-            <span class="phone-prefix">+91</span>
+        <div class="form-group">
+  <label><i class="fas fa-phone"></i> Phone Number</label>
 
-            <input class="phone-input" type="text" maxlength="10" placeholder="Enter  mobile number"
-              [(ngModel)]="customer.phoneNumber" (input)="validatePhone($event)" [readonly]="otpVerified" />
-          </div>
+  <div class="phone-group"
+       [class.verified]="otpVerified"
+       [ngClass]="{
+         'is-invalid': (formSubmitted || phoneTouched) && (fieldErrors.phoneNumber || phoneError)
+       }">
+
+    <span class="phone-prefix">+91</span>
+
+    <input class="phone-input"
+           type="text"
+           maxlength="10"
+           placeholder="Enter mobile number"
+           [(ngModel)]="customer.phoneNumber"
+           (input)="onPhoneInput($event)"
+           (blur)="onPhoneBlur()"
+           [readonly]="otpVerified" />
+  </div>
+
+  <!-- Single error message only -->
+  <div class="invalid-feedback d-block"
+       *ngIf="(formSubmitted || phoneTouched) && (fieldErrors.phoneNumber || phoneError)">
+    {{ fieldErrors.phoneNumber || phoneError }}
+  </div>
+</div>
 
           <!-- Send / Resend OTP -->
           <button type="button" class="btn btn-warning w-100 mt-2" *ngIf="!otpVerified"
@@ -236,26 +270,38 @@
           <div class="text-danger mt-1" *ngIf="phoneError">
             {{ phoneError }}
           </div>
-        </div>
+        
 
 
-        <div class="form-group">
-          <label><i class="fas fa-lock"></i> Password</label>
+      <div class="form-group">
+  <label><i class="fas fa-lock"></i> Password</label>
 
-          <div class="password-wrapper">
-            <input class="form-control" type="text" [(ngModel)]="customer.password"
-              placeholder="Enter customer password" />
+  <input class="form-control"
+         type="text"
+         [(ngModel)]="customer.password"
+         placeholder="Enter customer password"
+         (blur)="onFieldBlur('password')"
+         [ngClass]="{'is-invalid': fieldErrors.password}" />
+
+  <div class="invalid-feedback">
+    {{ fieldErrors.password }}
+  </div>
+</div>
 
 
+       <div class="form-group full-row">
+  <label><i class="fas fa-map-marker-alt"></i> Address</label>
 
-          </div>
-        </div>
+  <textarea class="form-control"
+            [(ngModel)]="customer.address"
+            (blur)="onFieldBlur('address')"
+            [ngClass]="{'is-invalid': fieldErrors.address}">
+  </textarea>
 
-
-        <div class="form-group full-row">
-          <label><i class="fas fa-map-marker-alt"></i> Address</label>
-          <textarea class="form-control" [(ngModel)]="customer.address"></textarea>
-        </div>
+  <div class="invalid-feedback">
+    {{ fieldErrors.address }}
+  </div>
+</div>
 
       </div>
     </div>

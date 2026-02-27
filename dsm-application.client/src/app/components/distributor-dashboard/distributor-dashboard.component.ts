@@ -36,6 +36,10 @@ availabilityReasonByDistributor: string = '';
 selectedEmployeeId: string = '';
  //🔥 Trip Status 
  isTripActive: boolean = false;
+ pendingOrders: number = 0;
+ordersToDeliver: number = 0;
+returnedProducts: number = 0;
+monthlyRevenue: number = 0;
 
   constructor(
 
@@ -119,6 +123,7 @@ selectedEmployeeId: string = '';
     // Load only ONCE when component is created
     const stored = localStorage.getItem(`leadTime_${this.distributorId}`);
     this.expectedDays = stored ? Number(stored) : 1;
+    this.loadDashboardStats();
     this.loadRetailerCount();
     this.loadEmployees();   // ⬅ added
    
@@ -127,7 +132,30 @@ selectedEmployeeId: string = '';
     // Check screen width on init
     this.checkScreenWidth();
   }
-  
+  loadDashboardStats() {
+
+  if (!this.distributorId) return;
+
+  this.http.get<any>(
+    `${environment.apiUrl}/orders/dashboard/${this.distributorId}`
+  )
+  .subscribe({
+
+    next: (res) => {
+      console.log("Dashboard Stats:", res);
+
+      this.pendingOrders = res.pendingOrders;
+      this.ordersToDeliver = res.ordersToDeliver;
+      this.returnedProducts = res.returnedProducts;
+      this.monthlyRevenue = res.monthlyRevenue;
+    },
+
+    error: (err) => {
+      console.error("Dashboard API Error:", err);
+    }
+
+  });
+}
 
  updateAvailability(employeeId: string, isAvailable: boolean) {
 

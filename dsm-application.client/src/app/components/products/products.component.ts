@@ -34,7 +34,10 @@ export class ProductsComponent {
   subCategories: any[] = [];
   // ===== Sorting =====
   sortBy: string = 'name';
-
+// ===== Image Validation =====
+maxImages = 10;
+maxFileSize = 5 * 1024 * 1024; // 5MB
+allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
   // ===== Pagination =====
   currentPage = 1;
   pageSize = 8;
@@ -102,7 +105,7 @@ export class ProductsComponent {
       price: [null, [Validators.required, Validators.min(0)]],
       costPrice: [null, [Validators.required, Validators.min(0)]],
       discount: [0, [Validators.required, Validators.min(0)]],
-      gst: [{ value: 0, disabled: true }],
+      gst: [0],
       stock: [0, [Validators.required, Validators.min(0)]],
 
       brand: ['', Validators.required],
@@ -366,6 +369,7 @@ this.updatePagination();
     formData.append('costPrice', data.costPrice.toString());
     formData.append('discount', data.discount.toString());
     formData.append('brand', data.brand);
+    formData.append('gst', data.gst.toString());
 
     // ✅ REQUIRED BY BACKEND
     formData.append('CategoryId', data.category);
@@ -530,25 +534,48 @@ this.updatePagination();
   }
 
   onFileSelected(event: any) {
-    const files: FileList = event.target.files;
+  const files: FileList = event.target.files;
+  if (!files || files.length === 0) return;
 
-    this.selectedFiles = [];   // RESET
-    this.previewUrls = [];     // RESET
+  // Current total images (existing + new)
+  const currentTotal =
+    this.existingImageUrls.length +
+    this.selectedFiles.length;
 
-    if (files && files.length > 0) {
-      const ordered: File[] = Array.from(files); // <-- keeps order EXACTLY
-
-      ordered.forEach(file => {
-        this.selectedFiles.push(file);
-
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewUrls.push(e.target.result);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
+  // Check max count
+  if (currentTotal + files.length > this.maxImages) {
+    this.toastr.error(`Maximum ${this.maxImages} images allowed`);
+    event.target.value = '';
+    return;
   }
+
+  Array.from(files).forEach(file => {
+
+    // Type validation
+    if (!this.allowedTypes.includes(file.type)) {
+      this.toastr.error(`${file.name} is not a valid image`);
+      return;
+    }
+
+    // Size validation
+    if (file.size > this.maxFileSize) {
+      this.toastr.error(`${file.name} exceeds 5MB limit`);
+      return;
+    }
+
+    // Add file
+    this.selectedFiles.push(file);
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.previewUrls.push(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
+  event.target.value = '';
+}
 
   // ==============================================
   // FILTERS & SEARCH
@@ -968,13 +995,17 @@ this.updatePagination();
     }
   }
 
-  removePreview(img: string) {
-    this.previewUrls = this.previewUrls.filter(i => i !== img);
+removePreview(img: string) {
+  const index = this.previewUrls.indexOf(img);
+  if (index > -1) {
+    this.previewUrls.splice(index, 1);
+    this.selectedFiles.splice(index, 1);
   }
+}
 
-  removeExistingImage(img: string) {
-    this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
-  }
+ removeExistingImage(img: string) {
+  this.existingImageUrls = this.existingImageUrls.filter(i => i !== img);
+}
 
 
   openCategorySheet() {

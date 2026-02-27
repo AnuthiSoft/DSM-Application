@@ -79,5 +79,9 @@ hasNumber(): boolean {
 isFormValid(): boolean {
   return this.identifier !== '' && this.password !== '' && this.hasMinLength() && this.hasUpperCase() && this.hasLowerCase() && this.hasNumber();
 }
+showPassword = false;
 
+togglePassword() {
+  this.showPassword = !this.showPassword;
+}
 }

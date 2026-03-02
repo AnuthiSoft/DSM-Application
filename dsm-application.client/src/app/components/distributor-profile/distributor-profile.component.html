@@ -234,30 +234,37 @@
         <div class="form-actions">
 
           <!-- ================= GODOWN LOCATION ================= -->
-          <div class="godown-section">
+      <div class="godown-card">
 
-            <hr />
+        <h4 class="godown-title">📍 Godown Location</h4>
 
-            <h4>
-              📍 Godown Location
-            </h4>
-
-            <p class="text-muted">
-              Set your godown location using GPS (one-time setup).
-            </p>
-
-            <button type="button" class="btn btn-success" (click)="setGodownLocation()" [disabled]="isSavingLocation">
-
-              <i class="fas fa-map-marker-alt"></i>
-              {{ isSavingLocation ? 'Saving...' : 'Set My Godown Location' }}
-
-            </button>
-
-            <div *ngIf="locationSaved" class="text-success mt-2">
-              ✅ Location saved successfully
-            </div>
-
+        <!-- Use Current Location -->
+        <div class="location-row" (click)="useCurrentLocation()">
+          <div class="location-icon">
+            <i class="fas fa-crosshairs"></i>
           </div>
+          <div class="location-text">
+            <div class="main-text">Use Current Location</div>
+            <div class="sub-text">Detect automatically using GPS</div>
+          </div>
+          <div class="arrow">
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider"></div>
+
+        <!-- Search Address -->
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text"
+                class="search-input"
+                placeholder="Search area, street name..."
+                #searchInput>
+        </div>
+
+      </div>
 
           <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving">
             {{ isSaving ? 'Saving...' : 'Save Changes' }}
@@ -329,6 +336,46 @@
 
     </div>
 
+
+  </div>
+
+</div>
+
+<!-- MAP POPUP OVERLAY -->
+<div class="map-overlay" *ngIf="showMap">
+
+  <div class="map-popup">
+
+    <div class="map-header">
+      <h5>Select Godown Location</h5>
+      <button class="close-btn" (click)="closeMap()">✖</button>
+    </div>
+
+    <google-map
+      height="400px"
+      width="100%"
+      [center]="mapCenter"
+      [zoom]="15"
+      (mapClick)="moveMarker($event)">
+
+      <map-marker
+        [position]="markerPosition"
+        [options]="{ draggable: true }"
+        (mapDragend)="markerDragged($event)">
+      </map-marker>
+
+    </google-map>
+
+    <div class="map-actions">
+      <button class="btn btn-primary"
+              (click)="confirmLocation()">
+        Confirm Location
+      </button>
+      <button class="btn btn-outline-secondary"
+              (click)="closeMap()">
+        Cancel
+      </button>
+    </div>
 
   </div>
 

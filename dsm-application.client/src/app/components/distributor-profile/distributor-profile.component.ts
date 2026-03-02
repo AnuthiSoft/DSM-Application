@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+// import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 
@@ -12,7 +13,11 @@ import { DistributorDto } from '../../models/distributor.model';
   templateUrl: './distributor-profile.component.html',
   styleUrls: ['./distributor-profile.component.css']
 })
-export class DistributorProfileComponent implements OnInit {
+// export class DistributorProfileComponent implements OnInit {
+export class DistributorProfileComponent implements OnInit, AfterViewInit {
+
+  @ViewChild('searchInput', { static: false })
+searchInput!: ElementRef;
 
   distributor: DistributorDto = {} as DistributorDto;
   originalDistributor: DistributorDto = {} as DistributorDto;
@@ -24,8 +29,20 @@ export class DistributorProfileComponent implements OnInit {
 isSavingLocation = false;
 locationSaved = false;
 
- 
+// ===== MAP VARIABLES =====
+showMap = false;
 
+selectedLat!: number;
+selectedLng!: number;
+
+mapCenter!: google.maps.LatLngLiteral;
+markerPosition!: google.maps.LatLngLiteral;
+
+ 
+ // ✅ ADD THESE BACK
+  showOtpInput = false;
+  otp: string = '';
+  
   isSaving = false;
   isLoading = false;
   errorMessage = '';
@@ -43,7 +60,33 @@ locationSaved = false;
   ngOnInit(): void {
     this.loadProfile();
   }
+ngAfterViewInit(): void {
 
+  if (!this.searchInput) return; // safety check
+
+  const autocomplete = new google.maps.places.Autocomplete(
+    this.searchInput.nativeElement
+  );
+
+  autocomplete.addListener('place_changed', () => {
+
+    const place = autocomplete.getPlace();
+
+    if (!place.geometry || !place.geometry.location) return;
+
+    this.selectedLat = place.geometry.location.lat();
+    this.selectedLng = place.geometry.location.lng();
+
+    this.mapCenter = {
+      lat: this.selectedLat,
+      lng: this.selectedLng
+    };
+
+    this.markerPosition = this.mapCenter;
+    this.showMap = true;
+  });
+}
+  
   // ================= LOAD PROFILE =================
   loadProfile(): void {
 
@@ -200,7 +243,136 @@ if (res.profileImageBase64) {
   }
 
 
-  
+  sendOtp() {
+
+    if (!this.distributor.phoneNumber) {
+      alert('Enter phone number');
+      return;
+    }
+
+    this.distributorService
+      .sendOtp('+91' + this.distributor.phoneNumber)
+      .subscribe({
+
+        next: (res: any) => {
+          alert(`OTP: ${res.otp}`);
+          this.showOtpInput = true;
+        },
+
+        error: () => {
+          alert('OTP send failed');
+        }
+      });
+  }
+
+
+ verifyOtp() {
+
+  if (!this.otp) {
+    this.toastr.error('Enter OTP');
+    return;
+  }
+
+  const payload = {
+    phoneNumber: '+91' + this.distributor.phoneNumber,
+    code: this.otp.trim()
+  };
+
+  this.profileService.verifyOtp(payload).subscribe({
+
+    next: (res: any) => {
+
+      if (res.success) {
+        this.distributor.phoneVerified = true;
+        this.showOtpInput = false;
+        this.otp = '';
+
+        this.toastr.success('Phone verified successfully');
+      } else {
+        this.toastr.error(res.message || 'Verification failed');
+      }
+    },
+
+    error: (err) => {
+      this.toastr.error(err?.error?.message || 'Invalid OTP');
+    }
+
+  });
+}
+
+useCurrentLocation() {
+
+  if (!navigator.geolocation) {
+    this.toastr.error('GPS not supported');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+
+      this.selectedLat = position.coords.latitude;
+      this.selectedLng = position.coords.longitude;
+
+      this.mapCenter = {
+        lat: this.selectedLat,
+        lng: this.selectedLng
+      };
+
+      this.markerPosition = this.mapCenter;
+      this.showMap = true;
+    },
+    () => {
+      this.toastr.error('Location permission denied');
+    }
+  );
+}
+
+moveMarker(event: google.maps.MapMouseEvent) {
+  if (event.latLng) {
+    this.selectedLat = event.latLng.lat();
+    this.selectedLng = event.latLng.lng();
+
+    this.markerPosition = {
+      lat: this.selectedLat,
+      lng: this.selectedLng
+    };
+  }
+}
+
+
+markerDragged(event: google.maps.MapMouseEvent) {
+  if (event.latLng) {
+    this.selectedLat = event.latLng.lat();
+    this.selectedLng = event.latLng.lng();
+  }
+}
+
+confirmLocation() {
+
+  const payload = {
+    lat: this.selectedLat,
+    lng: this.selectedLng
+  };
+
+  this.profileService
+    .saveGodownLocation(payload)
+    .subscribe({
+
+      next: () => {
+        this.toastr.success('Godown location saved');
+        this.showMap = false;
+      },
+
+      error: () => {
+        this.toastr.error('Failed to save location');
+      }
+
+    });
+}
+
+closeMap() {
+  this.showMap = false;
+}
 
   // ================= GODOWN GPS =================
 setGodownLocation() {

@@ -575,11 +575,11 @@ this.cartService.updateCartCount();
     }
   }
 
- onPopupQtyChange(value: any): void {
+onPopupQtyChange(value: any): void {
   const qty = Number(value);
 
-  if (!qty || isNaN(qty) || qty < 1) {
-    this.selectedQuantity = 1;
+  if (isNaN(qty) || qty < 0) {
+    this.selectedQuantity = 0;
     return;
   }
 
@@ -591,47 +591,25 @@ this.cartService.updateCartCount();
   this.selectedQuantity = qty;
 }
 
-
 confirmAddToCart() {
 
   if (!this.selectedProduct) return;
 
   const qty = Number(this.selectedQuantity);
 
-  // 🔴 STRICT VALIDATION
-  if (isNaN(qty) || qty < 1) {
-    this.toastr.error('Minimum quantity is 1');
-    this.selectedQuantity = 1;
-    return;
+  // ❌ Do not auto-fix to 1
+  if (!qty || isNaN(qty) || qty <= 0) {
+    this.toastr.error('Please enter quantity greater than 0');
+    return; // 🔴 stop here
   }
 
   if (qty > this.selectedProduct.currentStock) {
     this.toastr.error('Quantity exceeds available stock');
-    this.selectedQuantity = this.selectedProduct.currentStock;
     return;
   }
 
-  const customerId = localStorage.getItem('customerId');
-  if (!customerId) return;
-
-  const key = `cart_customer_${customerId}`;
-  let cart = JSON.parse(localStorage.getItem(key) || '[]');
-
-  const existing = cart.find(
-    (c: any) => c.product.productId === this.selectedProduct?.productId
-  );
-
-  if (existing) {
-    existing.quantity += qty;
-  } else {
-    cart.push({
-      product: this.selectedProduct,
-      quantity: qty
-    });
-  }
-
-  localStorage.setItem(key, JSON.stringify(cart));
-  this.cartService.updateCartCount();
+  // ✅ Add only valid quantity
+  this.cartService.addWithQuantity(this.selectedProduct, qty);
 
   this.showPopup = false;
   this.selectedProduct = null;

@@ -391,10 +391,11 @@ body {
 }
  
 .welcome-header h2 {
+  font-size: 20px;        /* smaller */
+  font-weight: 600;
   color: var(--text-color);
   margin: 0;
 }
- 
 .date-display {
   color: var(--text-color);
   opacity: 0.7;
@@ -502,21 +503,20 @@ body {
   top: 0;
   left: 0;
   right: 0;
- 
-  height: 70px;
- 
-  display: grid;
-  grid-template-columns: 60px 1fr 60px;
+
+  height: 75px;
+
+  display: flex;
   align-items: center;
- 
-  padding: 0 10px;
- 
+  justify-content: space-between;
+
+  padding: 0 25px;
+
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
- 
+
   z-index: 100;
 }
- 
 /* 🔥 Gmail-style blur */
 /* .sidebar-open .top-dashboard-bar {
   filter: blur(2px);
@@ -748,13 +748,19 @@ body {
  
 /* Page title */
 .page-heading {
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+
+  font-size: 28px;      /* 🔥 Bigger */
+  font-weight: 800;     /* 🔥 More bold */
+  letter-spacing: 0.8px;
+
+  color: var(--text-color);
   margin: 0;
+
   white-space: nowrap;
 }
- 
  
 /* Sidebar collapsed */
 .dashboard-sidebar.collapsed + .dashboard-main .top-dashboard-bar {
@@ -915,14 +921,6 @@ body.swal2-shown > *:not(.swal2-container) {
    DESKTOP ONLY (≥1200px)
    Move cart to RIGHT side
 ========================================= */
-@media (min-width: 1200px) {
- 
-  .top-cart {
-    grid-column: 3;        /* force to right column */
-    justify-self: end;     /* align to right */
-    margin-right: 20px;
-  }
- 
+.top-cart {
+  margin-left: auto;   /* 🔥 pushes it to right */
 }
- 
- 

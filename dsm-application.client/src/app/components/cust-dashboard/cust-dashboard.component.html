@@ -1,166 +1,295 @@
-<!-- <div *ngIf="loading">Loading distributors...</div>
-
-<div *ngIf="!loading && distributors.length">
-  <div class="distributors-grid">
-    <div class="distributor-card" *ngFor="let d of distributors">
-      <h4>{{ d.companyName }}</h4>
-      <p><i class="fas fa-user"></i> {{ d.name }}</p>
-      <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
-      <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
-      <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
-
-      
-     <button
-  class="btn btn-primary"
-  *ngIf="dashboardType === 'global'" 
-  [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
-  (click)="connectDistributor(d.distributorId)"
->
-  {{ d.status === 'Pending'
-    ? 'Pending'
-    : d.status === 'Accepted'
-    ? 'Connected'
-    : 'Connect' }}
-</button>
-    </div>
-  </div>
-</div>
-
-<div *ngIf="!loading && !distributors.length">
-  <p>No distributors found.</p>
-</div> -->
 <div class="distributors-section">
+
+  <!-- LOADING -->
   <div *ngIf="loading" class="loading-state">
     <i class="fas fa-spinner fa-spin"></i>
     <span>Loading distributors...</span>
   </div>
+<!-- ================= TAB BUTTONS ================= -->
+<div class="distributor-tabs">
 
-  <div *ngIf="!loading && distributors.length" class="distributors-content">
-    <div class="distributors-grid">
-      <div class="distributor-card" *ngFor="let d of distributors">
-        <div class="distributor-header">
-          <h4>{{ d.companyName }}</h4>
-          <span class="status-badge" [ngClass]="{
-    'pending': d.status === 'Pending',
-    'accepted': d.status === 'Accepted',
-    'available': d.canConnect
-  }">
+  <button 
+    class="tab-btn"
+    [class.active]="activeTab === 'available'"
+    (click)="activeTab = 'available'">
+    Available ({{ availableDistributors.length }})
+  </button>
 
-            {{
-            d.status === 'Pending'
-            ? 'Pending'
-            : d.status === 'Accepted' || d.status === 'Connected'
-            ? 'Connected'
-            : 'Available'
-            }}
+  <button 
+    class="tab-btn"
+    [class.active]="activeTab === 'connected'"
+    (click)="activeTab = 'connected'">
+    Connected ({{ connectedDistributors.length }})
+  </button>
 
-          </span>
+  <button 
+    class="tab-btn"
+    [class.active]="activeTab === 'pending'"
+    (click)="activeTab = 'pending'">
+    Pending ({{ pendingDistributors.length }})
+  </button>
 
+</div>
+  <!-- ======================= CONTENT ======================= -->
+  <div *ngIf="!loading" class="distributors-content">
 
-        </div>
+    <!-- ================= CONNECTED DISTRIBUTORS ================= -->
+<div *ngIf="activeTab === 'connected'">
+      <!-- <h3 class="section-title">
+        Connected Distributors ({{ connectedDistributors.length }})
+      </h3> -->
 
-        <div class="distributor-info">
-          <p><i class="fas fa-user"></i> {{ d.name }}</p>
-          <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
-          <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
-          <p *ngIf="d.address"><i class="fas fa-map-marker-alt"></i> {{ d.address }}</p>
-          <p *ngIf="d.pincodes?.length">
-            <i class="fas fa-map-pin"></i>
-            {{ (d.pincodes || []).join(', ') }}
-          </p>
-          <p><i class="fas fa-tags"></i> {{ d.categories }}</p>
+      <div class="distributors-grid">
+        <div class="distributor-card"
+             *ngFor="let d of connectedDistributors">
 
-          <!-- ⭐ Average Rating Block -->
-          <div class="rating-stars" *ngIf="d.averageRating !== undefined">
-            <span *ngFor="let star of getStars(d.averageRating)">
-              <i class="fas" [class.fa-star]="star <= d.averageRating"
-                [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
-                [class.fa-star-o]="star > d.averageRating"></i>
-            </span>
+          <!-- HEADER -->
+          <div class="distributor-header">
+            <h4>{{ d.companyName }}</h4>
 
-            <span class="rating-value">
-              {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
+            <span class="status-badge accepted">
+              Connected
             </span>
           </div>
+
+          <!-- INFO -->
+          <div class="distributor-info">
+            <p><i class="fas fa-user"></i> {{ d.name }}</p>
+            <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+            <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
+
+            <p *ngIf="d.address">
+              <i class="fas fa-map-marker-alt"></i> {{ d.address }}
+            </p>
+
+            <p *ngIf="d.pincodes?.length">
+              <i class="fas fa-map-pin"></i>
+              {{ (d.pincodes || []).join(', ') }}
+            </p>
+
+            <!-- <p><i class="fas fa-tags"></i> {{ d.categories }}</p> -->
+
+            <!-- ⭐ Rating -->
+            <div class="rating-stars" *ngIf="d.averageRating !== undefined">
+              <span *ngFor="let star of getStars(d.averageRating)">
+                <i class="fas"
+                   [class.fa-star]="star <= d.averageRating"
+                   [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
+                   [class.fa-star-o]="star > d.averageRating"></i>
+              </span>
+
+              <span class="rating-value">
+                {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
+              </span>
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+<div class="distributor-actions center-actions">
+  <button class="btn btn-danger"
+          [routerLink]="['/report-fraud','DISTRIBUTOR', d.distributorId]">
+    <i class="fas fa-flag"></i> Report
+  </button>
+
+  <button class="btn btn-warning"
+          (click)="openReview(d.distributorId)">
+    <i class="fas fa-star"></i> Review
+  </button>
+</div>
         </div>
-
-        <div class="distributor-actions">
-          <!-- View Products Button -->
-          <!-- <button class="btn btn-outline-primary" 
-                  *ngIf="d.status === 'Accepted'"
-                  (click)="viewProducts(d.distributorId)">
-            View Products
-          </button> -->
-
-          <!-- Connect Button -->
-          <!-- <button class="btn btn-primary"
-                  *ngIf="dashboardType === 'global'" 
-                  [disabled]="d.status === 'Pending' || d.status === 'Accepted'"
-                  (click)="connectDistributor(d.distributorId)">
-            {{ d.status === 'Pending'
-              ? 'Pending'
-              : d.status === 'Accepted'
-              ? 'Connected'
-              : 'Connect' }}
-          </button> -->
-
-          <!-- Connect Button -->
-          <button class="btn btn-primary" *ngIf="dashboardType === 'global'"
-            [disabled]="d.status === 'Pending' || d.status === 'Accepted' || d.status === 'Connected'"
-            (click)="connectDistributor(d.distributorId)">
-            {{
-            d.status === 'Pending'
-            ? 'Pending'
-            : d.status === 'Accepted' || d.status === 'Connected'
-            ? 'Connected'
-            : 'Connect'
-            }}
-          </button>
+      </div>
+    </div>
 
 
-          <!-- ⭐ REPORT FRAUD BUTTON (FOR CUSTOMER REPORTING DISTRIBUTOR) -->
-          <!-- <button class="btn btn-danger mt-2" [routerLink]="[
-                    '/report-fraud',
-                    'distributor',
-                    d.distributorId
-                  ]">
-            <i class="fas fa-flag"></i> Report
-          </button> -->
-          <button class="btn btn-danger mt-2"
-        [routerLink]="[
-          '/report-fraud',
-          'DISTRIBUTOR',
-          d.distributorId
-        ]">
-        <i class="fas fa-flag"></i> Report
-      </button>
+    <!-- ================= AVAILABLE DISTRIBUTORS ================= -->
+    <div *ngIf="activeTab === 'available'" class="mt-4">
 
+      <!-- <h3 class="section-title">
+        Available Distributors ({{ availableDistributors.length }})
+      </h3> -->
 
-         <button class="btn btn-warning mt-2"
-        (click)="openReview(d.distributorId)">
-  <i class="fas fa-star"></i> Review
-</button>
+      <div class="distributors-grid">
+        <div class="distributor-card"
+             *ngFor="let d of availableDistributors">
 
+          <!-- HEADER -->
+          <div class="distributor-header">
+            <h4>{{ d.companyName }}</h4>
 
-          <!-- <button class="btn-view-products mt-2"
-        *ngIf="d.status === 'Accepted' || !d.canConnect"
-        (click)="openProducts(d.distributorId)">
-  <i class="fas fa-box"></i> View Products
-</button> -->
+            <span class="status-badge"
+                  [ngClass]="{
+                    'pending': d.status === 'Pending',
+                    'available': d.canConnect
+                  }">
 
+              {{
+                d.status === 'Pending'
+                ? 'Pending'
+                : 'Available'
+              }}
 
+            </span>
+          </div>
 
+          <!-- INFO -->
+          <div class="distributor-info">
+            <p><i class="fas fa-user"></i> {{ d.name }}</p>
+            <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+            <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
 
+            <p *ngIf="d.address">
+              <i class="fas fa-map-marker-alt"></i> {{ d.address }}
+            </p>
+
+            <p *ngIf="d.pincodes?.length">
+              <i class="fas fa-map-pin"></i>
+              {{ (d.pincodes || []).join(', ') }}
+            </p>
+
+            <!-- <p><i class="fas fa-tags"></i> {{ d.categories }}</p> -->
+
+            <!-- ⭐ Rating -->
+            <div class="rating-stars" *ngIf="d.averageRating !== undefined">
+              <span *ngFor="let star of getStars(d.averageRating)">
+                <i class="fas"
+                   [class.fa-star]="star <= d.averageRating"
+                   [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
+                   [class.fa-star-o]="star > d.averageRating"></i>
+              </span>
+
+              <span class="rating-value">
+                {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
+              </span>
+            </div>
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="distributor-actions">
+
+            <!-- Connect Button -->
+            <button class="btn btn-primary"
+                    *ngIf="dashboardType === 'global'"
+                    [disabled]="d.status === 'Pending'"
+                    (click)="connectDistributor(d.distributorId)">
+
+              {{
+                d.status === 'Pending'
+                ? 'Pending'
+                : 'Connect'
+              }}
+
+            </button>
+
+            <button class="btn btn-danger mt-2"
+                    [routerLink]="['/report-fraud','DISTRIBUTOR', d.distributorId]">
+              <i class="fas fa-flag"></i> Report
+            </button>
+
+            <button class="btn btn-warning mt-2"
+                    (click)="openReview(d.distributorId)">
+              <i class="fas fa-star"></i> Review
+            </button>
+
+          </div>
 
         </div>
       </div>
     </div>
+<!-- ================= PENDING DISTRIBUTORS ================= -->
+<div *ngIf="activeTab === 'pending'" class="mt-4">
+
+  <!-- <h3 class="section-title">
+    Pending Distributors ({{ pendingDistributors.length }})
+  </h3> -->
+
+  <div class="distributors-grid">
+    <div class="distributor-card"
+         *ngFor="let d of pendingDistributors">
+
+      <!-- HEADER -->
+      <div class="distributor-header">
+        <h4>{{ d.companyName }}</h4>
+
+        <span class="status-badge pending">
+          Pending
+        </span>
+      </div>
+
+      <!-- INFO -->
+      <div class="distributor-info">
+        <p><i class="fas fa-user"></i> {{ d.name }}</p>
+        <p><i class="fas fa-envelope"></i> {{ d.email }}</p>
+        <p><i class="fas fa-phone"></i> {{ d.phoneNumber }}</p>
+
+        <p *ngIf="d.address">
+          <i class="fas fa-map-marker-alt"></i> {{ d.address }}
+        </p>
+
+        <p *ngIf="d.pincodes?.length">
+          <i class="fas fa-map-pin"></i>
+          {{ (d.pincodes || []).join(', ') }}
+        </p>
+
+        <!-- <p><i class="fas fa-tags"></i> {{ d.categories }}</p> -->
+
+        <!-- ⭐ Rating -->
+        <div class="rating-stars" *ngIf="d.averageRating !== undefined">
+          <span *ngFor="let star of getStars(d.averageRating)">
+            <i class="fas"
+               [class.fa-star]="star <= d.averageRating"
+               [class.fa-star-half-alt]="star - 0.5 === d.averageRating"
+               [class.fa-star-o]="star > d.averageRating"></i>
+          </span>
+
+          <span class="rating-value">
+            {{ d.averageRating }}/5 ({{ d.reviewCount }} reviews)
+          </span>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="distributor-actions">
+
+        <!-- Disabled Pending Button -->
+        <button class="btn btn-primary" disabled>
+          Pending
+        </button>
+
+        <button class="btn btn-danger"
+                [routerLink]="['/report-fraud','DISTRIBUTOR', d.distributorId]">
+          <i class="fas fa-flag"></i> Report
+        </button>
+
+        <button class="btn btn-warning"
+                (click)="openReview(d.distributorId)">
+          <i class="fas fa-star"></i> Review
+        </button>
+
+      </div>
+
+    </div>
   </div>
 
-  <div *ngIf="!loading && !distributors.length" class="no-distributors">
-    <i class="fas fa-truck"></i>
-    <h3>No Distributors Found</h3>
-    <p>There are no distributors available at the moment.</p>
+  <!-- Empty State -->
+  <div *ngIf="pendingDistributors.length === 0" class="no-distributors">
+    <i class="fas fa-clock"></i>
+    <h3>No Pending Requests</h3>
+    <p>You have no pending distributor connection requests.</p>
+  </div>
+
+</div>
+
+    <!-- ================= EMPTY STATE ================= -->
+    <div *ngIf="!connectedDistributors?.length && !availableDistributors?.length"
+         class="no-distributors">
+
+      <i class="fas fa-truck"></i>
+      <h3>No Distributors Found</h3>
+      <p>There are no distributors available at the moment.</p>
+
+    </div>
+
   </div>
 </div>
+
 <router-outlet></router-outlet>

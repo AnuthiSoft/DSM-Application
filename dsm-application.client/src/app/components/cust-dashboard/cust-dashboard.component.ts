@@ -83,7 +83,10 @@ export class CustDashboardComponent {
   distributors: Distributor[] = [];
   loading = true;
   pincodes?: string[];
-
+connectedDistributors: Distributor[] = [];
+availableDistributors: Distributor[] = [];
+pendingDistributors: Distributor[] = [];
+activeTab: 'available' | 'connected' | 'pending' = 'available';
 
   // @Output() viewProductsClicked = new EventEmitter<string>();
   dashboardType: 'global' | 'local' = 'global';
@@ -118,19 +121,28 @@ loadDistributors() {
 
         if (res.isGlobal && res.distributors?.length) {
           this.dashboardType = 'global';
-          this.distributors = res.distributors.map(d => {
+     const allDistributors = res.distributors.map(d => ({
+  ...d.distributor,
+  distributorId: d.distributor.distributorId,
+  canConnect: d.canConnect
+}));
 
-          console.log('REPORTING DISTRIBUTOR ID =>', d.distributor.distributorId);
+// 🔥 Split into 2 sections
+this.connectedDistributors = allDistributors.filter(d =>
+  d.status === 'Accepted' || d.status === 'Connected'
+);
 
-          return {
-            ...d.distributor,
+this.pendingDistributors = allDistributors.filter(d =>
+  d.status === 'Pending'
+);
 
-            // 🔥 IMPORTANT: force correct business ID
-            distributorId: d.distributor.distributorId,
+this.availableDistributors = allDistributors.filter(d =>
+  d.status !== 'Accepted' &&
+  d.status !== 'Connected' &&
+  d.status !== 'Pending'
+);
 
-            canConnect: d.canConnect
-          };
-        });
+this.distributors = allDistributors; // optional if needed
 
         } 
         else if (!res.isGlobal && res.distributor) {

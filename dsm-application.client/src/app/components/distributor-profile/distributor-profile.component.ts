@@ -24,8 +24,7 @@ export class DistributorProfileComponent implements OnInit {
 isSavingLocation = false;
 locationSaved = false;
 
-  showOtpInput = false;
-  otp = '';
+ 
 
   isSaving = false;
   isLoading = false;
@@ -201,62 +200,7 @@ if (res.profileImageBase64) {
   }
 
 
-  sendOtp() {
-
-    if (!this.distributor.phoneNumber) {
-      alert('Enter phone number');
-      return;
-    }
-
-    this.distributorService
-      .sendOtp('+91' + this.distributor.phoneNumber)
-      .subscribe({
-
-        next: (res: any) => {
-          alert(`OTP: ${res.otp}`);
-          this.showOtpInput = true;
-        },
-
-        error: () => {
-          alert('OTP send failed');
-        }
-      });
-  }
-
-
- verifyOtp() {
-
-  if (!this.otp) {
-    this.toastr.error('Enter OTP');
-    return;
-  }
-
-  const payload = {
-    phoneNumber: '+91' + this.distributor.phoneNumber,
-    code: this.otp.trim()
-  };
-
-  this.profileService.verifyOtp(payload).subscribe({
-
-    next: (res: any) => {
-
-      if (res.success) {
-        this.distributor.phoneVerified = true;
-        this.showOtpInput = false;
-        this.otp = '';
-
-        this.toastr.success('Phone verified successfully');
-      } else {
-        this.toastr.error(res.message || 'Verification failed');
-      }
-    },
-
-    error: (err) => {
-      this.toastr.error(err?.error?.message || 'Invalid OTP');
-    }
-
-  });
-}
+  
 
   // ================= GODOWN GPS =================
 setGodownLocation() {

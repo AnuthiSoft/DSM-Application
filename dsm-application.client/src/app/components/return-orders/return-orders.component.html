@@ -1,5 +1,20 @@
 <div class="return-orders-container">
 
+ <!-- ⭐ RETURN ORDER FILTER TABS ⭐ -->
+<div class="return-filter-tabs">
+
+  <button
+    *ngFor="let s of statusOptions"
+    class="filter-pill"
+    [class.active]="statusFilter === s"
+    (click)="setStatusFilter(s)"
+  >
+    {{ s }}
+    <span class="count">{{ getStatusCount(s) }}</span>
+  </button>
+
+</div>
+
   <!-- Loading -->
   <div *ngIf="loading" class="loading dashboard-card">
     <div class="loading-content">
@@ -16,6 +31,14 @@
       <p>Your return requests will appear here.</p>
     </div>
   </div>
+
+  <div *ngIf="!loading && filteredReturnOrders.length === 0" class="empty-state dashboard-card">
+  <div class="empty-content">
+    <i class="fas fa-filter"></i>
+    <h3>No Returns Found</h3>
+    <p>No return orders for "{{ statusFilter }}".</p>
+  </div>
+</div>
 
   <!-- Return Orders List -->
   <div *ngIf="!loading && returnOrders.length > 0" class="return-orders-list">

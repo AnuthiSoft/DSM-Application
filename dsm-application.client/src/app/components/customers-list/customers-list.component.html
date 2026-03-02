@@ -241,10 +241,20 @@
 </div>
 
           <!-- Send / Resend OTP -->
-          <button type="button" class="btn btn-warning w-100 mt-2" *ngIf="!otpVerified"
-            [disabled]="phoneError || customer.phoneNumber.length !== 10" (click)="sendOtp()">
-            {{ otpSent ? 'Resend OTP' : 'Send OTP' }}
-          </button>
+         <button type="button"
+        class="btn btn-warning otp-send-btn"
+        *ngIf="!customerOtpVerified"
+        [disabled]="phoneError || customer.phoneNumber.length !== 10"
+        (click)="sendCustomerOtp(); openCustomerOtpPopup()">
+
+  {{ customerOtpSent ? 'Resend OTP' : 'Send OTP' }}
+</button>
+
+          <!-- ✅ SHOW GREEN VERIFIED STATUS UNDER PHONE -->
+<div *ngIf="customerOtpVerified" class="verified-label">
+  <i class="fas fa-check-circle"></i>
+  Verified
+</div>
 
           <!-- OTP input -->
           <div *ngIf="otpSent && !otpVerified" class="mt-3">
@@ -303,7 +313,74 @@
   </div>
 </div>
 
+
+
       </div>
+
+<!-- OTP POPUP (Customer) — PLACE HERE -->
+<div *ngIf="showCustomerOtpPopup" class="otp-popup-container">
+
+  <button class="otp-close-btn" (click)="closeCustomerOtpPopup()">×</button>
+
+  <div class="otp-header">
+    <h4>Verify Phone</h4>
+    <p>Enter the 6-digit OTP sent to the customer</p>
+  </div>
+
+  <div class="otp-input-row">
+    <input maxlength="1" class="otp-box"
+       #c1
+       (input)="focusNext($event, c2)"
+       (keydown)="handleBackspace($event, null, 0)"
+       [(ngModel)]="custOtp[0]">
+
+<input maxlength="1" class="otp-box"
+       #c2
+       (input)="focusNext($event, c3)"
+       (keydown)="handleBackspace($event, c1, 1)"
+       [(ngModel)]="custOtp[1]">
+
+<input maxlength="1" class="otp-box"
+       #c3
+       (input)="focusNext($event, c4)"
+       (keydown)="handleBackspace($event, c2, 2)"
+       [(ngModel)]="custOtp[2]">
+
+<input maxlength="1" class="otp-box"
+       #c4
+       (input)="focusNext($event, c5)"
+       (keydown)="handleBackspace($event, c3, 3)"
+       [(ngModel)]="custOtp[3]">
+
+<input maxlength="1" class="otp-box"
+       #c5
+       (input)="focusNext($event, c6)"
+       (keydown)="handleBackspace($event, c4, 4)"
+       [(ngModel)]="custOtp[4]">
+
+<input maxlength="1" class="otp-box"
+       #c6
+       (input)="joinOtp()"
+       (keydown)="handleBackspace($event, c5, 5)"
+       [(ngModel)]="custOtp[5]">
+  </div>
+
+  <button class="otp-verify-btn" (click)="verifyCustomerOtp()">Verify OTP</button>
+  <div *ngIf="customerOtpVerified" class="otp-verified-box">
+  <i class="fas fa-check-circle"></i>
+  <span>Phone Verified</span>
+</div>
+
+  <div class="otp-footer">
+  <p class="otp-hint">Didn't receive the code?</p>
+  <span class="otp-resend" (click)="sendCustomerOtp()">Resend OTP</span>
+</div>
+
+  <div *ngIf="customerOtpError" class="otp-error">
+    {{ customerOtpError }}
+  </div>
+
+</div>
     </div>
 
     <div class="modal-footer">

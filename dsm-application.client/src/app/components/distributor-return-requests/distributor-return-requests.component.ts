@@ -26,6 +26,18 @@ export class DistributorReturnRequestsComponent implements OnInit {
 
   paginatedReturns: any[] = [];
 
+  statusOptions: string[] = [
+  'All',
+  'Pending',
+  'PickupConfirmed',
+  'Received',
+  'Completed',
+  'Rejected'
+];
+
+statusFilter: string = 'All';
+filteredReturnRequests: any[] = [];
+
   constructor(
     private http: HttpClient,
     private employeeService: EmployeeService,
@@ -67,8 +79,35 @@ export class DistributorReturnRequestsComponent implements OnInit {
           );
         }
       });
+
+      this.filteredReturnRequests = this.applyStatusFilter();
   }
 
+  applyStatusFilter() {
+  if (this.statusFilter === 'All') {
+    return this.returnRequests;
+  }
+  return this.returnRequests.filter(r =>
+    r.status.toLowerCase() === this.statusFilter.toLowerCase()
+  );
+}
+
+setStatusFilter(status: string) {
+  this.statusFilter = status;
+  this.filteredReturnRequests = this.applyStatusFilter();
+
+  // Refresh pagination using filtered list
+  this.totalPages = Math.ceil(this.filteredReturnRequests.length / this.itemsPerPage);
+  this.currentPage = 1;
+  this.updatePaginationFiltered();
+}
+
+updatePaginationFiltered() {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  const end = start + this.itemsPerPage;
+
+  this.paginatedReturns = this.filteredReturnRequests.slice(start, end);
+}
   loadEmployees() {
     this.employeeService.getDeliveryEmployees(this.distributorId)
       .subscribe({
@@ -966,4 +1005,5 @@ export class DistributorReturnRequestsComponent implements OnInit {
 
     return pages;
   }
+  
 }

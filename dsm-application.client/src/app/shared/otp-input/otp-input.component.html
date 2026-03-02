@@ -1,0 +1,22 @@
+<div class="otp-container">
+  
+  <div class="otp-input-group">
+    <input *ngFor="let box of otpArray; let i = index"
+           maxlength="1"
+           type="text"
+           class="otp-box"
+           [(ngModel)]="otpValues[i]"
+           (keyup)="onKeyUp($event, i)"
+           (keydown)="onKeyDown($event)"
+           autofocus="{{ i === 0 }}" />
+  </div>
+
+  <button class="verify-btn" (click)="verifyOtp()">
+    Verify OTP
+  </button>
+
+  <div class="resend">
+    Didn’t receive OTP? <span (click)="resendOtp()">Resend OTP</span>
+  </div>
+
+</div>

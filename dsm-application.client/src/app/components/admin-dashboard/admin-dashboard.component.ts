@@ -70,45 +70,69 @@ export class AdminDashboardComponent implements OnInit {
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
+otpArray = [1, 2, 3, 4, 5, 6];
+otpValues: string[] = ["", "", "", "", "", ""];
 
-  sendOtp() {
-    const phone = this.distributorForm.get("phoneNumber")!.value;
+onOtpKeyUp(event: any, index: number) {
+  const input = event.target;
 
-    this.adminService.sendOtp(phone).subscribe({
-      next: (res) => {
-        this.otpSent = true;
-        this.otpFailed = false;
-
-        // ⭐ SHOW THE OTP FROM BACKEND
-        alert("OTP sent! Your OTP is: " + res.otp);
-
-        console.log("OTP from backend:", res.otp);
-      },
-      error: () => alert("Failed to send OTP")
-    });
+  if (input.value && index < 5) {
+    const next = input.nextElementSibling;
+    if (next) next.focus();
   }
+}
+
+onOtpKeyDown(event: KeyboardEvent, index: number) {
+  const key = event.key;
+
+  // Block non-numeric input except Backspace
+  if (!/[0-9]/.test(key) && key !== "Backspace") {
+    event.preventDefault();
+    return;
+  }
+
+  // Handle Backspace
+  if (key === "Backspace") {
+
+    // CASE 1: If current box has a number → clear it only
+    if (this.otpValues[index]) {
+      this.otpValues[index] = "";
+      return; 
+    }
+
+    // CASE 2: If empty → move to previous box and delete it
+    if (index > 0) {
+      const prevInput = document.querySelectorAll(".otp-box")[index - 1] as HTMLInputElement;
+      this.otpValues[index - 1] = "";
+      prevInput.focus();
+    }
+  }
+}
+
 
 
   // ------------------- OTP VERIFY -------------------
   verifyOtp() {
-    const phone = this.distributorForm.get("phoneNumber")!.value;
+  const otp = this.otpValues.join("");
 
-    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-      next: () => {
-        this.otpVerified = true;
-        this.otpFailed = false;
-        this.phoneVerifiedUI = true; // ⭐ Show tick mark
-        this.otpSent = false;        // ⭐ Hide OTP inputs
-        alert("Phone verified successfully!");
-      },
-      error: () => {
-        this.otpVerified = false;
-        this.otpFailed = true;
-        alert("Invalid or expired OTP");
-      }
-    });
+  if (otp.length !== 6) {
+    alert("Please enter all 6 digits");
+    return;
   }
 
+  const phone = this.distributorForm.get("phoneNumber")!.value;
+
+  this.adminService.verifyOtp(phone, otp).subscribe({
+    next: () => {
+      this.otpVerified = true;
+      this.phoneVerifiedUI = true;
+      this.otpSent = false;
+    },
+    error: () => {
+      this.otpFailed = true;
+    }
+  });
+}
 
 
 
@@ -175,6 +199,15 @@ export class AdminDashboardComponent implements OnInit {
         this.isModalOpen = true;
       });
     }
+
+
+  // Enable Bootstrap Tooltips
+  setTimeout(() => {
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    );
+    tooltipTriggerList.map((el: any) => new bootstrap.Tooltip(el));
+  }, 500);
   }
   @HostListener('window:resize', ['$event'])
   onResize() {
@@ -334,20 +367,20 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  openAdd(): void {
+ openAdd(): void {
+  this.isEdit = false;
+  this.selectedDistributor = null;
 
-    // this.otpSent = false;
-    // this.otpVerified = false;
-    // this.otpFailed = false;
-    // this.otpCode = "";
-    this.isEdit = false;
-    this.selectedDistributor = null;
-    this.distributorForm.reset({ isActive: true });
-    this.distributorForm.reset({ isPremium: true });
-    this.isMobileMenuOpen = false;
-    this.isModalOpen = true;
-    this.distributorModal?.show();
-  }
+  this.otpSent = false;
+  this.otpVerified = false;
+  this.otpFailed = false;
+  this.phoneVerifiedUI = false;
+  this.otpValues = ["", "", "", "", "", ""]; // reset 6 boxes
+
+  this.distributorForm.reset({ isActive: true, isPremium: true });
+  this.isModalOpen = true;
+  this.distributorModal?.show();
+}
 
   openEdit(d: Distributor): void {
     this.isEdit = true;
@@ -375,6 +408,64 @@ export class AdminDashboardComponent implements OnInit {
     this.selectedDistributor = d;
     this.distributorModal?.show();
   }
+
+  otpModalRef: any;
+
+openOtpPopup() {
+  const modalEl = document.getElementById("otpModal");
+  this.otpModalRef = new bootstrap.Modal(modalEl!);
+  this.otpModalRef.show();
+}
+
+closeOtpPopup() {
+  this.otpModalRef?.hide();
+}
+
+// When clicking Send OTP button
+sendOtp() {
+  const phone = this.distributorForm.get("phoneNumber")!.value;
+
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.otpSent = true;
+      this.otpFailed = false;
+
+      // Open OTP Popup
+      this.openOtpPopup();
+
+      alert("OTP sent! Your OTP is: " + res.otp);
+    },
+    error: () => alert("Failed to send OTP")
+  });
+}
+
+// When verifying OTP from popup
+verifyOtpPopup() {
+  const otp = this.otpValues.join("");
+
+  if (otp.length !== 6) {
+    alert("Please enter all 6 digits");
+    return;
+  }
+
+  const phone = this.distributorForm.get("phoneNumber")!.value;
+
+  this.adminService.verifyOtp(phone, otp).subscribe({
+    next: () => {
+      this.otpVerified = true;
+      this.phoneVerifiedUI = true;
+      this.otpSent = false;
+      this.closeOtpPopup();
+    },
+    error: () => {
+      this.otpFailed = true;
+    }
+  });
+}
+
+resendOtpFromPopup() {
+  this.sendOtp(); // reuse logic
+}
 
   togglePremium(d: Distributor) {
     if (d.isPremium) {

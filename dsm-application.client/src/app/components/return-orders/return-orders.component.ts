@@ -16,10 +16,29 @@ totalPages = 1;
 pagesPerGroup = 5;     // show 1–5, 6–10
 currentGroup = 0;
 
+// Pagination core values
+itemsPerPage: number = 5;
+
+
+// These should already exist—but define if missing:
+filteredReturnOrders: any[] = [];
+returnOrders: any[] = [];
+
   @Output() returnUpdated = new EventEmitter<void>();
  
- returnOrders: any[] = [];
   loading = true;
+
+  statusFilter: string = 'All';
+
+statusOptions: string[] = [
+  'All',
+  'Pending',
+  'PickupConfirmed',
+  'Received',
+  'Completed',
+  'Rejected'
+];
+
 
   // UI-only state (frontend driven)
   selectedResolution: Record<string, string> = {};
@@ -30,60 +49,104 @@ currentGroup = 0;
 
   ngOnInit(): void {
     this.loadReturnOrders();
+     this.loadReturns();
   }
+  loadReturns() {
+  this.returnOrders = this.returnOrders || []; // ensure array exists
+  this.filteredReturnOrders = [...this.returnOrders]; // copy data
+  this.updatePagination();
+}
 
+  applyStatusFilter() {
+  if (this.statusFilter === 'All') {
+    this.filteredReturnOrders = [...this.returnOrders];
+  } else {
+    this.filteredReturnOrders = this.returnOrders.filter(
+      r => r.status?.toLowerCase() === this.statusFilter.toLowerCase()
+    );
+  }
+}
+
+
+
+// --- COMPUTE TOTAL PAGES ---
+updatePagination() {
+  this.totalPages = Math.ceil(this.filteredReturnOrders.length / this.itemsPerPage);
+  if (this.currentPage > this.totalPages) {
+    this.currentPage = 1;
+  }
+}
+
+// --- PAGINATED RETURNS LIST ---
+get paginatedReturns() {
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  return this.filteredReturnOrders.slice(start, start + this.itemsPerPage);
+}
+
+// --- PAGES SHOWN IN CURRENT GROUP ---
+get pages() {
+  const start = this.currentGroup * this.pagesPerGroup + 1;
+  const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
+
+  const arr = [];
+  for (let p = start; p <= end; p++) arr.push(p);
+
+  return arr;
+}
+
+// --- GO TO PAGE ---
+goToPage(page: number) {
+  this.currentPage = page;
+}
+
+// --- NEXT GROUP ---
+nextGroup() {
+  if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
+    this.currentGroup++;
+  }
+}
+
+// --- PREVIOUS GROUP ---
+prevGroup() {
+  if (this.currentGroup > 0) {
+    this.currentGroup--;
+  }
+}
+
+// Call both after filtering or loading data
+applyFilters() {
+  // Your filter logic here...
+  this.updatePagination();
+}
+setStatusFilter(status: string) {
+  this.statusFilter = status;
+  this.applyStatusFilter();
+}
+
+getStatusCount(status: string): number {
+  if (status === 'All') return this.returnOrders.length;
+
+  return this.returnOrders.filter(
+    r => r.status?.toLowerCase() === status.toLowerCase()
+  ).length;
+}
   loadReturnOrders() {
-    this.loading = true;
+  this.loading = true;
 
     this.returnApiService.getReturnHistory().subscribe({
       next: (res) => {
-  this.returnOrders = res;
-
-  this.currentPage = 1;
+        this.returnOrders = res;
+         this.currentPage = 1;
   this.currentGroup = 0;
   this.totalPages = Math.ceil(this.returnOrders.length / this.pageSize) || 1;
-
-  this.loading = false;
-},
+        this.loading = false;
+      },
       error: () => {
         this.loading = false;
         Swal.fire('Error', 'Failed to load return orders', 'error');
       }
     });
   }
-
-  get paginatedReturns() {
-  const start = (this.currentPage - 1) * this.pageSize;
-  return this.returnOrders.slice(start, start + this.pageSize);
-}
-
-get pages(): number[] {
-  const start = this.currentGroup * this.pagesPerGroup + 1;
-  const end = Math.min(start + this.pagesPerGroup - 1, this.totalPages);
-
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-
-goToPage(page: number) {
-  if (page < 1 || page > this.totalPages) return;
-
-  this.currentPage = page;
-  this.currentGroup = Math.floor((page - 1) / this.pagesPerGroup);
-}
-
-prevGroup() {
-  if (this.currentGroup > 0) {
-    this.currentGroup--;
-    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
-  }
-}
-
-nextGroup() {
-  if ((this.currentGroup + 1) * this.pagesPerGroup < this.totalPages) {
-    this.currentGroup++;
-    this.goToPage(this.currentGroup * this.pagesPerGroup + 1);
-  }
-}
 
   // Helpers
   isPending(r: any) {

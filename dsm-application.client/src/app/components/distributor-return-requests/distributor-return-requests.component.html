@@ -10,6 +10,21 @@
     </div> -->
   </div>
 
+  <!-- ⭐ STATUS FILTER BAR ⭐ -->
+<div class="return-filter-tabs">
+
+  <button
+    *ngFor="let s of statusOptions"
+    class="filter-pill"
+    [class.active]="statusFilter === s"
+    (click)="setStatusFilter(s)"
+  >
+    {{ s }}
+    <span class="count">{{ getStatusCount(s) }}</span>
+  </button>
+
+</div>
+
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-state dashboard-card">
     <div class="loader">

@@ -1,0 +1,35 @@
+.otp-container {
+  text-align: center;
+  width: 100%;
+}
+
+.otp-input-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.otp-box {
+  width: 45px;
+  height: 55px;
+  font-size: 22px;
+  text-align: center;
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+}
+
+.verify-btn {
+  background: #2bb64c;
+  padding: 12px 35px;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.resend span {
+  color: #1876f2;
+  cursor: pointer;
+}

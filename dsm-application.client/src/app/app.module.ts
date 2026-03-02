@@ -82,6 +82,7 @@ import { EmployeeProductsComponent } from './components/employee-products/employ
 import { CustomerLedgerComponent } from './components/customer-ledger/customer-ledger.component';
 import { OrderDetailsModalComponent } from './components/order-details-modal/order-details-modal.component';
 import { DistributorProfileComponent } from './components/distributor-profile/distributor-profile.component';
+import { OtpInputComponent } from './shared/otp-input/otp-input.component';
 //import { AuthorsAdressComponent } from './authors-adress/authors-adress.component';
  
 // import { PaymentCollectionForCashcollectorComponent } from './payment-collection-for-cashcollector/payment-collection-for-cashcollector.component';
@@ -185,6 +186,7 @@ import { DistributorProfileComponent } from './components/distributor-profile/di
       CustomerLedgerComponent,
       OrderDetailsModalComponent,
       DistributorProfileComponent,
+      OtpInputComponent,
       //AuthorsAdressComponent,
  
  

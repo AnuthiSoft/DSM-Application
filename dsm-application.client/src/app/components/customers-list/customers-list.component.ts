@@ -3,6 +3,7 @@ import { Customer } from '../../models/customer.model';
 import { CustomerService } from '../../services/customer.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { AdminService } from '../../services/admin.service';
 
 
 @Component({
@@ -54,9 +55,18 @@ phoneTouched = false;
   showEmployeeSheet = false;
   selectedEmployeeName = '';
 
+customerOtpSent = false;
+customerOtpVerified = false;
+customerOtpError = "";
+showCustomerOtpPopup = false;
+
+custOtp: string[] = ["", "", "", "", "", ""];
+fullCustomerOtp = "";
+
   constructor(
     private customerService: CustomerService,
     private router: Router,
+    private adminService: AdminService,
     private toastr: ToastrService
   ) { }
 
@@ -75,6 +85,76 @@ phoneTouched = false;
     });
   }
 
+
+  sendCustomerOtp() {
+ const phone = this.customer?.phoneNumber;
+  if (!phone) return;
+
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.customerOtpSent = true;
+      this.customerOtpError = "";
+      alert("Customer OTP is: " + res.otp); // remove in production
+    },
+    error: () => {
+      this.customerOtpError = "Failed to send OTP";
+    }
+  });
+}
+
+openCustomerOtpPopup() {
+  this.showCustomerOtpPopup = true;
+}
+
+closeCustomerOtpPopup() {
+  this.showCustomerOtpPopup = false;
+}
+
+joinOtp() {
+  this.fullCustomerOtp = this.custOtp.join("");
+}
+
+focusNext(event: any, nextInput: any) {
+  if (event.target.value.length === 1) {
+    nextInput.focus();
+  }
+}
+
+
+verifyCustomerOtp() {
+  this.joinOtp();
+
+  const phone = this.customer.phoneNumber;
+
+  this.adminService.verifyOtp(phone, this.fullCustomerOtp).subscribe({
+    next: () => {
+      this.customerOtpVerified = true;
+      this.customerOtpSent = false;
+      this.showCustomerOtpPopup = false; // close popup
+      this.customerOtpError = "";
+    },
+    error: () => {
+      this.customerOtpError = "Invalid OTP. Try again.";
+    }
+  });
+}
+
+handleBackspace(event: any, prevInput: any, index: number) {
+  if (event.key === "Backspace") {
+
+    // If current box is not empty → clear it
+    if (this.custOtp[index]) {
+      this.custOtp[index] = "";
+      return;
+    }
+
+    // If empty → move to previous box
+    if (prevInput) {
+      prevInput.focus();
+      this.custOtp[index - 1] = "";
+    }
+  }
+}
   reportFraudAgainstDistributor() {
     const distributorId = localStorage.getItem('distributorId');
 

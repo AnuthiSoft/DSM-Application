@@ -128,59 +128,37 @@
 
 
           <!-- Phone -->
-          <div class="form-group">
+         <!-- Phone -->
+<div class="form-group">
 
-            <label class="form-label">
-              <i class="fas fa-phone"></i> Phone
-            </label>
+  <label class="form-label">
+    <i class="fas fa-phone"></i> Phone
+  </label>
 
-            <div class="phone-wrapper">
+  <div class="phone-wrapper">
 
-              <span class="phone-prefix">+91</span>
+    <span class="phone-prefix">+91</span>
 
-              <input type="text" class="form-control phone-input" [(ngModel)]="distributor.phoneNumber" name="phone"
-                required pattern="^[6-9]\d{9}$" maxlength="10" (input)="restrictPhoneInput($event)" #phone="ngModel" />
+    <input 
+      type="text"
+      class="form-control phone-input"
+      [(ngModel)]="distributor.phoneNumber"
+      name="phone"
+      required
+      pattern="^[6-9]\d{9}$"
+      maxlength="10"
+      (input)="restrictPhoneInput($event)"
+      #phone="ngModel"
+    />
 
-            </div>
+  </div>
 
+  <div class="text-danger" *ngIf="phone.touched && phone.errors">
+    <div *ngIf="phone.errors['required']">Phone is required</div>
+    <div *ngIf="phone.errors['pattern']">Invalid phone number</div>
+  </div>
 
-            <div class="text-danger" *ngIf="phone.touched && phone.errors">
-
-              <div *ngIf="phone.errors['required']">
-                Phone is required
-              </div>
-
-              <div *ngIf="phone.errors['pattern']">
-                Invalid phone number
-              </div>
-
-            </div>
-
-
-            <!-- OTP -->
-            <button type="button" class="send-otp-btn" *ngIf="!distributor.phoneVerified" (click)="sendOtp()"
-              [disabled]="!distributor.phoneNumber || distributor.phoneNumber.length !== 10">
-              Send OTP
-            </button>
-
-
-            <div *ngIf="showOtpInput && !distributor.phoneVerified" class="otp-verify">
-
-              <input type="text" class="otp-box" placeholder="Enter OTP" [(ngModel)]="otp" name="otp" />
-
-              <button type="button" class="verify-otp-btn" (click)="verifyOtp()">
-                Verify OTP
-              </button>
-
-            </div>
-
-
-            <div *ngIf="distributor.phoneVerified" class="verified-text">
-              <i class="fas fa-check-circle"></i> Verified
-            </div>
-
-          </div>
-
+</div>
 
 
           <!-- Street -->
@@ -232,7 +210,6 @@
 
             <input type="text" class="form-control" [(ngModel)]="distributor.pincode" name="pincode" required
               pattern="^[0-9]{6}$" maxlength="6" #pincode="ngModel" />
-
           </div>
 
 

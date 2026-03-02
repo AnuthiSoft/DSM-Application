@@ -175,25 +175,39 @@
 
                 <!-- Actions -->
                 <td class="text-center action-buttons">
-                  <button class="btn-action btn-edit me-1" (click)="openEdit(d)">
+
+                  <!-- Edit -->
+                  <button class="btn-action btn-edit me-1" (click)="openEdit(d)" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Edit Distributor">
                     <i class="fas fa-pen fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-deactivate me-1" *ngIf="d.isActive"
-                    (click)="deactivate(d.distributorId)">
+
+                  <!-- Activate / Deactivate -->
+                  <button *ngIf="d.isActive" class="btn-action btn-deactivate me-1"
+                    (click)="deactivate(d.distributorId)" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Deactivate Distributor">
                     <i class="fas fa-toggle-on fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-activate me-1" *ngIf="!d.isActive"
-                    (click)="reactivate(d.distributorId)">
+
+                  <button *ngIf="!d.isActive" class="btn-action btn-activate me-1" (click)="reactivate(d.distributorId)"
+                    data-bs-toggle="tooltip" data-bs-placement="top" title="Activate Distributor">
                     <i class="fas fa-toggle-off fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-delete me-1" (click)="delete(d.distributorId)">
+
+                  <!-- Delete -->
+                  <button class="btn-action btn-delete me-1" (click)="delete(d.distributorId)" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Delete Distributor">
                     <i class="fas fa-trash fa-xs"></i>
                   </button>
-                  <button class="btn-action btn-premium" (click)="togglePremium(d)">
+
+                  <!-- Premium -->
+                  <button class="btn-action btn-premium" (click)="togglePremium(d)" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Toggle Premium Status">
                     <i class="fas fa-crown fa-xs"
                       [ngClass]="{ 'text-warning': d.isPremium, 'text-muted': !d.isPremium }">
                     </i>
                   </button>
+
                 </td>
               </tr>
             </tbody>
@@ -318,234 +332,172 @@
 <div class="modal fade" id="distributorModal" tabindex="-1" aria-labelledby="distributorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
+
       <div class="modal-header">
         <h5 class="modal-title" id="distributorModalLabel">
           {{ isEdit ? 'Edit Distributor' : 'Add New Distributor' }}
         </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
         <form [formGroup]="distributorForm" (ngSubmit)="saveDistributor()">
 
+          <!-- ROW 1 -->
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Company Name *</label>
-                <input type="text" class="form-control" formControlName="companyName" [class.is-invalid]="distributorForm.get('companyName')?.invalid 
-                && (distributorForm.get('companyName')?.touched || formSubmitted)">
-
-                <div class="invalid-feedback" *ngIf="distributorForm.get('companyName')?.errors?.['firstLetterCapital']
-                  && (distributorForm.get('companyName')?.touched || formSubmitted)">
-                  Name must start with a capital letter
-                </div>
+                <input type="text" class="form-control" formControlName="companyName">
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Contact Name *</label>
-                <input type="text" class="form-control" formControlName="name"
-                  [class.is-invalid]="distributorForm.get('name')?.invalid && (distributorForm.get('name')?.touched || formSubmitted)">
-                <div class="invalid-feedback" *ngIf="distributorForm.get('name')?.errors?.['firstLetterCapital'] && 
-                (distributorForm.get('name')?.touched || formSubmitted)">
-                  Name must start with a capital letter
-                </div>
+                <input type="text" class="form-control" formControlName="name">
               </div>
             </div>
           </div>
 
+          <!-- EMAIL -->
           <div class="row">
-            <!-- EMAIL -->
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Email *</label>
-                <input type="email" class="form-control" formControlName="email" maxlength="254" [class.is-invalid]="distributorForm.get('email')?.invalid 
-                && (distributorForm.get('email')?.touched || formSubmitted)" (blur)="checkEmailExists()" />
-
-                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['required']
-                && (distributorForm.get('email')?.touched || formSubmitted)">
-                  Email is required
-                </div>
-
-                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['email']
-                && (distributorForm.get('email')?.touched || formSubmitted)">
-                  Enter a valid email address
-                </div>
-
-                <div class="invalid-feedback" *ngIf="distributorForm.get('email')?.errors?.['exists']
-                && (distributorForm.get('email')?.touched || formSubmitted)">
-                  This email already exists
-                </div>
+                <input type="email" class="form-control" formControlName="email">
               </div>
             </div>
           </div>
 
-          <!-- PHONE & OTP SECTION -->
+          <!-- PHONE + OTP -->
           <div class="row">
-            <!-- Phone Number -->
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Phone Number *</label>
 
                 <div class="phone-group">
                   <span class="phone-prefix">+91</span>
-
-                  <input type="text" class="phone-input" formControlName="phoneNumber" maxlength="10"
-                    placeholder="Enter phone number" [readonly]="phoneVerifiedUI" (input)="onPhoneInput($event)" />
+                  <input type="text" class="phone-input" formControlName="phoneNumber">
                 </div>
 
-                <!-- Verified -->
                 <div *ngIf="phoneVerifiedUI" class="text-success mt-1">
                   <i class="fas fa-check-circle"></i> Verified
                 </div>
 
-                <!-- Error -->
-                <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.errors?.['required']
-                && (distributorForm.get('phoneNumber')?.touched || formSubmitted)">
-                  Phone number is required
-                </div>
-
-                <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.errors?.['pattern']
-                && (distributorForm.get('phoneNumber')?.touched || formSubmitted)">
-                  Enter valid 10-digit mobile number
-                </div>
-
-                <div class="text-danger small mt-1" *ngIf="distributorForm.get('phoneNumber')?.errors?.['exists']
-                && (distributorForm.get('phoneNumber')?.touched || formSubmitted)">
-                  Phone number already exists
-                </div>
-              </div>
-            </div>
-
-            <!-- OTP -->
-            <div class="col-md-6" *ngIf="!phoneVerifiedUI">
-              <div class="mb-3">
-                <label class="form-label">&nbsp;</label>
-
-                <button class="btn btn-warning w-100" type="button" (click)="sendOtp()">
+                <button *ngIf="!otpSent && !phoneVerifiedUI"
+                        type="button"
+                        class="btn btn-warning btn-sm mt-2 otp-send-btn"
+                        (click)="sendOtp()">
                   Send OTP
                 </button>
-
-                <div *ngIf="otpSent" class="mt-3">
-                  <label>Enter OTP</label>
-
-                  <input type="text" maxlength="6" class="form-control" [(ngModel)]="otpCode"
-                    [ngModelOptions]="{ standalone: true }" />
-
-                  <button class="btn btn-success mt-2 w-100" type="button" (click)="verifyOtp()">
-                    Verify OTP
-                  </button>
-
-                  <div *ngIf="otpFailed" class="text-danger mt-2">
-                    ✖ Invalid or Expired OTP
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
+          <!-- OTP Section -->
+          <div *ngIf="otpSent && !phoneVerifiedUI" class="otp-section">
+            <label class="form-label">Enter OTP</label>
+          </div>
+
+          <!-- GST + ADDRESS -->
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">GST Number *</label>
-                <input type="text" class="form-control" formControlName="gst" maxlength="15" [class.is-invalid]="distributorForm.get('gst')?.invalid 
-                  && (distributorForm.get('gst')?.touched || formSubmitted)">
-
-                <div class="invalid-feedback" *ngIf="distributorForm.get('gst')?.errors?.['invalidGST']
-                && (distributorForm.get('gst')?.touched || formSubmitted)">
-                  Enter a valid 15-digit GST number
-                </div>
+                <input type="text" class="form-control" formControlName="gst">
               </div>
             </div>
 
             <div class="col-md-6">
               <div class="mb-3">
                 <label class="form-label">Address *</label>
-                <textarea class="form-control" formControlName="address" rows="2"
-                  [class.is-invalid]="distributorForm.get('address')?.invalid 
-                  && (distributorForm.get('address')?.touched || formSubmitted)"></textarea>
-                <div class="invalid-feedback"
-                  *ngIf="distributorForm.get('address')?.invalid && distributorForm.get('address')?.touched">
-                  Address is required
-                </div>
+                <textarea class="form-control" formControlName="address" rows="2"></textarea>
               </div>
             </div>
           </div>
 
-          <!-- <div class="row">
-                     <div class="row">
-                      <div class="col-md-6">
-                        <div class="mb-3">
-                          <label class="form-label">Categories</label>
-                          <select class="form-select" multiple formControlName="categories">
-                            <option value="Electronics">Electronics</option>
-                            <option value="Clothing">Clothing</option>
-                            <option value="Food & Beverages">Food & Beverages</option>
-                            <option value="Home & Garden">Home & Garden</option>
-                            <option value="Automotive">Automotive</option>
-                            <option value="Health & Beauty">Health & Beauty</option>
-                            <option value="Sports">Sports</option>
-                            <option value="Others">Others</option>
-                          </select>
-                          <small class="form-text text-muted">Hold Ctrl to select multiple categories</small>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="mb-3" *ngIf="distributorForm.get('categories')?.value?.includes('Others')">
-                          <label class="form-label">Custom Category</label>
-                          <input type="text" class="form-control" formControlName="customCategory"
-                            placeholder="Enter custom category">
-                        </div>
-                      </div>
-                    </div> -->
-
+          <!-- SWITCHES -->
           <div class="row">
             <div class="col-12">
-              <div class="mb-3">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive"
-                    [class.is-invalid]="distributorForm.get('isActive')?.invalid 
-        && (distributorForm.get('isActive')?.touched || formSubmitted)" />
-
-                  <label class="form-check-label" for="isActive">
-                    Active Distributor
-                  </label>
-                </div>
-
-                <!-- INLINE ERROR -->
-                <div class="text-danger small mt-1" *ngIf="distributorForm.get('isActive')?.errors?.['requiredTrue']
-              && (distributorForm.get('isActive')?.touched || formSubmitted)">
-                  Active Distributor must be enabled
-                </div>
+              <div class="mb-3 form-check form-switch">
+                <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
+                <label class="form-check-label" for="isActive">Active Distributor</label>
               </div>
             </div>
+
             <div class="col-12">
-              <div class="mb-3">
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" formControlName="isPremium" id="isPremium">
-                  <label class="form-check-label" for="isPremium">
-                    Premium Distributor
-                  </label>
-                </div>
+              <div class="mb-3 form-check form-switch">
+                <input class="form-check-input" type="checkbox" formControlName="isPremium" id="isPremium">
+                <label class="form-check-label" for="isPremium">Premium Distributor</label>
               </div>
             </div>
           </div>
+
+          <!-- FOOTER BUTTONS -->
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" (click)="saveDistributor()">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+
+            <button type="submit" class="btn btn-primary">
               {{ isEdit ? 'Update' : 'Save' }} Distributor
             </button>
           </div>
+
         </form>
       </div>
+
     </div>
   </div>
 </div>
 <!-- END OF MODAL -->
 
-<!-- Footer -->
-<footer>
-  <div class="container">
-    <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+
+<<!-- OTP POPUP MODAL -->
+  <div class="modal fade" id="otpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content otp-popup-container">
+
+        <button class="otp-close-btn" data-bs-dismiss="modal">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <div class="otp-header">
+          <h4>Verify OTP</h4>
+          <p>Enter the 6-digit code sent to your phone</p>
+        </div>
+
+        <div class="otp-body">
+
+          <!-- OTP Boxes -->
+          <div class="otp-input-row">
+            <input *ngFor="let box of otpArray; let i=index" maxlength="1" type="text" class="otp-box"
+              [(ngModel)]="otpValues[i]" [ngModelOptions]="{standalone:true}" (keyup)="onOtpKeyUp($event, i)"
+              (keydown)="onOtpKeyDown($event, i)">
+          </div>
+
+          <!-- Verify Button -->
+          <button class="btn btn-primary otp-verify-btn" (click)="verifyOtpPopup()">
+            <i class="fas fa-check-circle me-1"></i> Verify OTP
+          </button>
+
+          <!-- Helper -->
+          <div class="otp-footer">
+            <p class="small text-muted mb-1">Didn’t receive the code?</p>
+            <a class="otp-resend" (click)="resendOtpFromPopup()">Resend OTP</a>
+
+            <div *ngIf="otpFailed" class="otp-error">Invalid or expired OTP!</div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
   </div>
-</footer>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p class="mb-0">&copy; 2023 BusinessPortal. All rights reserved.</p>
+    </div>
+  </footer>

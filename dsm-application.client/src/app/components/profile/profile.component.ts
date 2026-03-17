@@ -232,7 +232,7 @@ export class ProfileComponent implements OnInit {
   apiBaseUrl = environment.apiUrl.replace('/api', '');
 
 
-  @ViewChild('fileInput') fileInput: any;// removed any and replaced this with !
+  @ViewChild('fileInput') fileInput!: any;// removed any and replaced this with !
 
   constructor(private profileService: ProfileService,
     private toastr: ToastrService,
@@ -249,11 +249,11 @@ export class ProfileComponent implements OnInit {
     this.profileService.getProfile().subscribe({
       next: (res) => {
         this.customer = {
-          ...res,
-          phoneNumber: res.phoneNumber?.startsWith('+91')
-            ? res.phoneNumber.substring(3)
-            : res.phoneNumber
-        };
+  ...res,
+  phoneNumber: res.phoneNumber?.startsWith('+91')
+    ? res.phoneNumber.substring(3)
+    : res.phoneNumber,
+};
 
         this.originalCustomer = { ...res };
 
@@ -297,6 +297,7 @@ export class ProfileComponent implements OnInit {
   saveProfile(): void {
 
     this.isSaving = true;
+  
   if (!this.customer.name ||
   !this.customer.email ||
   !/^[6-9]\d{9}$/.test(this.customer.phoneNumber || '')) {
@@ -368,66 +369,6 @@ export class ProfileComponent implements OnInit {
       this.emailExists = exists;
     });
   }
-
-
-  restrictPhoneInput(event: any) {
-    let value = event.target.value.replace(/\D/g, '');
-    value = value.slice(0, 10);
-
-    if (value.length === 1 && !/^[6-9]$/.test(value)) {
-      value = '';
-    }
-
-    event.target.value = value;
-    this.customer.phoneNumber = value;
-
-    // 🔥 detect phone change
-    this.phoneChanged =
-      ('+91' + value) !== this.originalCustomer.phoneNumber;
-
-    // If phone changed, mark unverified
-    if (this.phoneChanged) {
-      this.customer.phoneVerified = false;
-    }
-  }
-
-  sendOtp() {
-  if (!this.customer.phoneNumber) {
-    alert('Enter phone number first');
-    return;
-  }
-
-  this.customerService
-    .sendOtp('+91' + this.customer.phoneNumber)
-    .subscribe({
-      next: (res: any) => {
-        // 🔥 THIS CREATES THE SAME POPUP YOU SHOWED
-        alert(`OTP sent! Your OTP is: ${res.otp}`);
-
-        this.showOtpInput = true;
-      },
-      error: () => {
-        alert('Failed to send OTP');
-      }
-    });
-}
-
-
-
-  verifyOtp() {
-  if (!this.otp || this.otp.trim() === '') {
-    this.toastr.error('Enter OTP');
-    return;
-  }
-
-  this.profileService.verifyPhone('+91' + this.customer.phoneNumber)
-  .subscribe(() => {
-    this.customer.phoneVerified = true;
-    this.showOtpInput = false;
-    this.otp = '';
-    this.toastr.success('Phone number verified');
-  });
-}
 
 checkPhoneExists() {
     if (!this.customer.phoneNumber) return;

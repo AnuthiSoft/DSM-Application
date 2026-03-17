@@ -120,8 +120,11 @@
           <i class="fas fa-comment-alt"></i>
           <div>
             <label>Return Reason</label>
-            <p class="reason-text">{{ r.reason }}</p>
-          </div>
+        <div class="reason-text">
+  <div *ngFor="let reason of formatReturnReason(r.reason)" style="color:black;">
+    {{ reason }}
+  </div>
+</div>    </div>
         </div>
       </div>
 

@@ -62,7 +62,10 @@ namespace DSM_Application.Server.Controllers
                 PhoneNumber = request.PhoneNumber,
                 PasswordHash = ComputeHash(request.Password),
                 IsRegistered = true,
-                MustChangePassword = false
+                MustChangePassword = false,
+
+                CreatedDate = DateTime.UtcNow,   // ✅ MEMBER SINCE
+                UpdatedDate = DateTime.UtcNow
             };
 
             await _db.Customers.InsertOneAsync(customer);
@@ -167,8 +170,10 @@ namespace DSM_Application.Server.Controllers
                 PasswordHash = ComputeHash(dto.Password),
 
                 IsRegistered = true,
+                MustChangePassword = true,
 
-                MustChangePassword = true
+                CreatedDate = DateTime.UtcNow,   // ✅ MEMBER SINCE
+                UpdatedDate = DateTime.UtcNow
             };
 
 
@@ -782,14 +787,7 @@ namespace DSM_Application.Server.Controllers
             if (customer == null)
                 return NotFound("Customer not found");
 
-            if (
-             dto.PhoneNumber != null &&
-             dto.PhoneNumber != customer.PhoneNumber &&
-             customer.PhoneVerified == false
-)
-            {
-                return BadRequest("Please verify phone number before saving");
-            }
+            
 
 
 

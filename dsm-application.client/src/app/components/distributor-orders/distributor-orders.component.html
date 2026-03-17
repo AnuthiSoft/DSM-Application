@@ -161,7 +161,9 @@
                 </span>
               </td>
 
-              <td class="employee-name">{{ o.name || 'Not assigned' }}</td>
+              <td class="employee-name">
+  {{ getEmployeeName(o) }}
+</td>
               <td>
                 <button class="view-details-btn" (click)="openProductDetails(o, 'view')">
                   <i class="fas fa-eye"></i>View Details

@@ -132,7 +132,7 @@
       </table>
     </div>
 
-    <!-- Pagination -->
+  
     <!-- Desktop Pagination -->
     <div class="desktop-pagination" *ngIf="totalPages > 1">
 
@@ -212,7 +212,7 @@
 
 
           <!-- +91 PHONE INPUT -->
-        <div class="form-group">
+       <div class="form-group ">
   <label><i class="fas fa-phone"></i> Phone Number</label>
 
   <div class="phone-group"
@@ -233,27 +233,26 @@
            [readonly]="otpVerified" />
   </div>
 
-  <!-- Single error message only -->
   <div class="invalid-feedback d-block"
        *ngIf="(formSubmitted || phoneTouched) && (fieldErrors.phoneNumber || phoneError)">
     {{ fieldErrors.phoneNumber || phoneError }}
   </div>
-</div>
 
-          <!-- Send / Resend OTP -->
-         <button type="button"
-        class="btn btn-warning otp-send-btn"
-        *ngIf="!customerOtpVerified"
-        [disabled]="phoneError || customer.phoneNumber.length !== 10"
-        (click)="sendCustomerOtp(); openCustomerOtpPopup()">
+  <!-- SEND OTP -->
+  <button type="button"
+          class="btn btn-warning otp-send-btn mt-3"
+          *ngIf="!customerOtpVerified"
+          [disabled]="phoneError || customer.phoneNumber.length !== 10"
+          (click)="sendCustomerOtp(); openCustomerOtpPopup()">
+    {{ customerOtpSent ? 'Resend OTP' : 'Send OTP' }}
+  </button>
 
-  {{ customerOtpSent ? 'Resend OTP' : 'Send OTP' }}
-</button>
+  <!-- VERIFIED -->
+  <div *ngIf="customerOtpVerified" class="verified-label mt-2">
+    <i class="fas fa-check-circle"></i>
+    Verified
+  </div>
 
-          <!-- ✅ SHOW GREEN VERIFIED STATUS UNDER PHONE -->
-<div *ngIf="customerOtpVerified" class="verified-label">
-  <i class="fas fa-check-circle"></i>
-  Verified
 </div>
 
           <!-- OTP input -->

@@ -913,7 +913,8 @@ namespace DSM_Application.Server.Controllers
                 return Unauthorized("CustomerId missing from token");
 
             var order = await _mongo.Orders.Find(o => o.Id == orderId).FirstOrDefaultAsync();
-            if (order == null) return NotFound("Order not found");
+            if (order == null)
+                return NotFound("Order not found");
 
             if (order.CustomerId != customerId)
                 return Forbid("Not authorized to cancel this order");
@@ -921,8 +922,23 @@ namespace DSM_Application.Server.Controllers
             if (order.Status != "Pending")
                 return BadRequest($"Order cannot be canceled in status '{order.Status}'");
 
-            var update = Builders<Order>.Update.Set(o => o.Status, "Canceled")
-                                               .Set(o => o.CanceledOn, DateTime.UtcNow);
+            // ✅🔥 ADD THIS BLOCK (VERY IMPORTANT)
+            foreach (var item in order.Products)
+            {
+                await _inventoryService.AddStockAsync(
+                    item.ProductId,
+                    order.DistributorId,
+                    item.Quantity,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow.AddMonths(6), // or original expiry if available
+                    "ORDER_CANCELLED"
+                );
+            }
+
+            // ✅ Update order status
+            var update = Builders<Order>.Update
+                .Set(o => o.Status, "Canceled")
+                .Set(o => o.CanceledOn, DateTime.UtcNow);
 
             await _mongo.Orders.UpdateOneAsync(o => o.Id == orderId, update);
 

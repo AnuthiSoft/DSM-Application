@@ -83,6 +83,18 @@ filteredReturnRequests: any[] = [];
       this.filteredReturnRequests = this.applyStatusFilter();
   }
 
+ formatReturnReason(reason: string): string[] {
+  if (!reason) return [];
+
+  // Extract [Return] [Refund]
+  const tags = reason.match(/\[(.*?)\]/g)?.map(r => r.replace(/\[|\]/g, '')) || [];
+
+  // Remaining text
+  const description = reason.replace(/\[(.*?)\]/g, '').trim();
+
+  return description ? [...tags, description] : tags;
+}
+
   applyStatusFilter() {
   if (this.statusFilter === 'All') {
     return this.returnRequests;

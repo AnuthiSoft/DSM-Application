@@ -18,7 +18,11 @@ export class CustomerRegisterComponent {
   passwordStrengthText = '';
   request: CustomerRegisterRequest = { name: '', email: '', phoneNumber: '', password: '' };
   message = '';
-
+// OTP popup
+showOtpPopup = false;
+custOtp: string[] = ["", "", "", "", "", ""];
+fullOtp = "";
+otpError = "";
   // OTP vars
   otpSent = false;
   otpVerified = false;
@@ -31,49 +35,86 @@ export class CustomerRegisterComponent {
 
 
   sendOtp() {
-    const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
+  const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
 
+  if (!this.isPhoneValid()) {
+    this.error = "Enter a valid 10-digit phone number";
+    return;
+  }
 
-    if (!this.isPhoneValid()) {
-      this.error = "Enter a valid 10-digit phone number";
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.otpSent = true;
+      this.otpFailed = false;
+
+      // open popup
+      this.showOtpPopup = true;
+
+      alert("OTP sent! Your OTP is: " + res.otp);
+    },
+    error: () => {
+      this.error = "Failed to send OTP";
+    }
+  });
+}
+
+ verifyOtp() {
+
+  this.fullOtp = this.custOtp.join("");
+
+  const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
+
+  this.adminService.verifyOtp(phone, this.fullOtp).subscribe({
+    next: (res) => {
+
+      if (res.valid || res.success) {
+        this.otpVerified = true;
+        this.phoneVerifiedUI = true;
+        this.otpFailed = false;
+        this.showOtpPopup = false;
+
+        alert("Phone number verified!");
+      } else {
+        this.otpError = "Invalid OTP";
+      }
+
+    },
+    error: () => {
+      this.otpError = "OTP verification failed";
+    }
+  });
+}
+
+joinOtp() {
+  this.fullOtp = this.custOtp.join("");
+}
+
+focusNext(event: any, nextInput: any) {
+  if (event.target.value.length === 1) {
+    nextInput.focus();
+  }
+}
+
+handleBackspace(event: any, prevInput: any, index: number) {
+
+  if (event.key === "Backspace") {
+
+    if (this.custOtp[index]) {
+      this.custOtp[index] = "";
       return;
     }
 
-    this.adminService.sendOtp(phone).subscribe({
-      next: (res) => {
-        this.otpSent = true;
-        this.otpFailed = false;
-
-        // show OTP for testing
-        alert("OTP sent! Your OTP is: " + res.otp);
-      },
-      error: () => {
-        this.error = "Failed to send OTP";
-      }
-    });
+    if (prevInput) {
+      prevInput.focus();
+      this.custOtp[index - 1] = "";
+    }
   }
 
-  verifyOtp() {
-    const phone: string = (this.request.phoneNumber || '').replace(/\D/g, '');
+}
 
-
-    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-      next: (res) => {
-        if (res.valid || res.success) {
-          this.otpVerified = true;
-          this.phoneVerifiedUI = true;
-          this.otpFailed = false;
-          alert("Phone number verified!");
-        } else {
-          this.otpFailed = true;
-        }
-      },
-      error: () => {
-        this.otpFailed = true;
-        this.error = "OTP verification failed";
-      }
-    });
-  }
+closeOtpPopup() {
+  this.showOtpPopup = false;
+}
   checkPasswordStrength() {
     const pwd = this.request.password || '';
 

@@ -409,9 +409,17 @@ export class CustomerOrdersComponent {
       if (result.isConfirmed) {
         this.orderService.cancelOrder(orderId).subscribe({
           next: () => {
-            this.toastr.success('Order cancelled successfully');
-            this.loadOrders();
-          },
+  this.toastr.success('Order cancelled successfully');
+
+  this.loadOrders();
+
+  // 🔥 IMPORTANT: refresh products page
+  // Option 1 (simple reload)
+  window.location.reload();
+
+  // OR Option 2 (better if using service)
+  // this.productService.triggerRefresh();
+},
           error: () => {
             this.toastr.error('Failed to cancel order');
           }
@@ -611,20 +619,19 @@ export class CustomerOrdersComponent {
 
 
 
-  viewOrderDetailss(id: string | null | undefined): void {
+ viewOrderDetailss(id: string | null | undefined): void {
 
-    console.log('View Items clicked. Order ID =', id);
+  console.log('View Items clicked. Order ID =', id);
 
-    // 🛑 STOP if ID is invalid
-    if (!id) {
-      this.toastr.error('Invalid Order ID');
-      return;
-    }
+  if (!id) {
+    this.toastr.error('Invalid Order ID');
+    return;
+  }
 
-    this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
-      next: order => {
+  this.http.get<any>(`${environment.apiUrl}/orders/${id}`).subscribe({
+    next: order => {
 
-        const itemsHtml = (order.products || []).map((item: any) => `
+      const itemsHtml = (order.products || []).map((item: any) => `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
           <div>
             <strong>${item.productName}</strong><br>
@@ -636,72 +643,65 @@ export class CustomerOrdersComponent {
         </div>
       `).join('');
 
-        const totalPrice = (order.products || []).reduce(
-          (sum: number, item: any) => sum + (item.price * item.quantity),
-          0
-        );
+      const totalPrice = (order.products || []).reduce(
+        (sum: number, item: any) => sum + (item.price * item.quantity),
+        0
+      );
 
-        const creditUsed = order.creditUsed ?? 0;
-        const payable = order.payableAmount ?? order.remainingAmount ?? order.totalAmount ?? 0;
+      const creditUsed = order.creditUsed ?? 0;
 
+      const payable =
+        order.payableAmount ??
+        order.remainingAmount ??
+        order.totalAmount ??
+        0;
 
+      Swal.fire({
+        title: '<i class="fas fa-box" style="margin-right:8px;"></i>Order Items',
 
+        html: `
+        <div style="text-align:left; font-size:15px;">
 
-        const creditHtml = creditUsed > 0
-          ? `
-    <div style="display:flex; justify-content:space-between; margin-top:6px;">
-      <strong>Credit Used</strong>
-      <strong>-₹${creditUsed.toFixed(2)}</strong>
-    </div>
-  `
-          : '';
+          ${itemsHtml}
 
-        Swal.fire({
-          title: 'Order Items',
-          html: `
-  <div style="text-align:left; font-size:15px;">
+          <hr>
 
-    ${itemsHtml}
-
-    <hr>
-
-    <div style="display:flex; justify-content:space-between; font-size:16px;">
-      <strong>Total Price</strong>
-      <strong>₹${totalPrice.toFixed(2)}</strong>
-    </div>
-
-    <div style="display:flex; justify-content:space-between; margin-top:6px;">
-      <strong>Final Price</strong>
-      <strong>₹${(order.totalAmount ?? 0).toFixed(2)}</strong>
-    </div>
-
-    ${creditUsed > 0 ? `
-      <div style="display:flex; justify-content:space-between; margin-top:6px; color:#d32f2f;">
-        <strong>Credit Used</strong>
-        <strong>-₹${creditUsed.toFixed(2)}</strong>
-      </div>
-    ` : ''}
-
-    <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:17px; color:#2e7d32;">
-      <strong>Amount to Pay</strong>
-      <strong>₹${payable.toFixed(2)}</strong>
-    </div>
-
- 
+          <div style="display:flex; justify-content:space-between; font-size:16px;">
+            <strong>Total Price</strong>
+            <strong>₹${totalPrice.toFixed(2)}</strong>
           </div>
-        `,
-          icon: 'info',
-          width: 450,
-          confirmButtonText: 'Close'
-        });
 
-      },
-      error: err => {
-        console.error('Error loading order:', err);
-        Swal.fire('Error', 'Unable to load order details', 'error');
-      }
-    });
-  }
+          <div style="display:flex; justify-content:space-between; margin-top:6px;">
+            <strong>Final Price</strong>
+            <strong>₹${(order.totalAmount ?? 0).toFixed(2)}</strong>
+          </div>
+
+          ${creditUsed > 0 ? `
+            <div style="display:flex; justify-content:space-between; margin-top:6px; color:#d32f2f;">
+              <strong>Credit Used</strong>
+              <strong>-₹${creditUsed.toFixed(2)}</strong>
+            </div>
+          ` : ''}
+
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:17px; color:#2e7d32;">
+            <strong>Amount to Pay</strong>
+            <strong>₹${payable.toFixed(2)}</strong>
+          </div>
+
+        </div>
+        `,
+
+        width: 450,
+        confirmButtonText: 'Close'
+      });
+
+    },
+    error: err => {
+      console.error('Error loading order:', err);
+      Swal.fire('Error', 'Unable to load order details', 'error');
+    }
+  });
+}
 
   setStatusFilter(status: string) {
     this.statusFilter = status;

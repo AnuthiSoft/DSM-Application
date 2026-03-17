@@ -92,8 +92,13 @@
 
           <div class="form-group">
             <label class="form-label"><i class="fas fa-user"></i> Full Name</label>
-            <input type="text" class="form-control" [(ngModel)]="customer.name" name="name" required
-              pattern="^[A-Z][a-zA-Z ]*$" #name="ngModel" />
+            <input type="text"
+       class="form-control"
+       [(ngModel)]="customer.name"
+       name="name"
+       required
+       pattern="^[A-Z][a-zA-Z0-9 ]*$"
+       #name="ngModel" />
 
             <div class="text-danger" *ngIf="name.touched && name.errors">
               <div *ngIf="name.errors['required']">
@@ -126,48 +131,20 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-phone"></i> Phone</label>
-            <div class="phone-wrapper">
-              <span class="phone-prefix">+91</span>
+  <label class="form-label"><i class="fas fa-phone"></i> Phone</label>
 
-              <input type="text" class="form-control phone-input" [(ngModel)]="customer.phoneNumber" name="phone"
-                required pattern="^[6-9]\d{9}$" maxlength="10" (input)="restrictPhoneInput($event) "
-                (blur)="checkPhoneExists()" #phone="ngModel" />
-            </div>
+  <div class="phone-wrapper">
+    <span class="phone-prefix">+91</span>
 
-            <div class="text-danger" *ngIf="phone.touched && phone.errors">
-              <div *ngIf="phone.errors['required']">
-                Phone number is required
-              </div>
-              <div *ngIf="phone.errors['pattern']">
-                Phone must start with 6–9 and be 10 digits
-              </div>
-              <div *ngIf="phone.errors['exists']">
-                This phone number already exists
-              </div>
-            </div>
-
-            <!-- SEND OTP BUTTON -->
-            <button type="button" class="send-otp-ui" *ngIf="!customer.phoneVerified" (click)="sendOtp()"
-              [disabled]="!customer.phoneNumber || customer.phoneNumber.length !== 10">
-              Send OTP
-            </button>
-
-            <!-- OTP INPUT -->
-            <div *ngIf="showOtpInput && !customer.phoneVerified" class="otp-ui-wrapper">
-              <input type="text" class="otp-input-ui" placeholder="Enter OTP" maxlength="6" [(ngModel)]="otp"
-                name="otp" />
-
-              <button type="button" class="verify-otp-ui" (click)="verifyOtp()">
-                Verify OTP
-              </button>
-            </div>
-
-            <!-- VERIFIED STATE -->
-            <div *ngIf="customer.phoneVerified" class="text-success mt-2">
-                ✔ verified
-              </div>
-          </div>
+    <input
+      type="text"
+      class="form-control phone-input"
+      [value]="customer.phoneNumber"
+      readonly
+    />
+  </div>
+</div>
+          
           
           <div class="form-group full-width">
             <label class="form-label">
@@ -237,7 +214,7 @@
         </div>
 
         <div class="form-actions">
-          <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving || !customer.phoneVerified">
+          <button class="btn btn-primary save-btn" type="submit" [disabled]="isSaving">
             <i class="fas" [class.fa-save]="!isSaving" [class.fa-spinner]="isSaving" [class.fa-spin]="isSaving"></i>
             {{ isSaving ? 'Saving...' : 'Save Changes' }}
           </button>

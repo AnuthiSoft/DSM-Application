@@ -47,7 +47,14 @@ export class EmployeesComponent {
   emailExists = false;   // ✅ ADD THIS
   phoneExists = false;   // ✅ ADD THIS
   phoneSubmitted = false; // ✅ ADD THIS
+// OTP POPUP (Employee)
+employeeOtpSent = false;
+employeeOtpVerified = false;
+employeeOtpError = "";
+showEmployeeOtpPopup = false;
 
+empOtp: string[] = ["", "", "", "", "", ""];
+fullEmployeeOtp = "";
 
   otpSent = false;
   otpVerified = false;
@@ -64,6 +71,7 @@ export class EmployeesComponent {
     private auth: AuthService,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    
 
     private http: HttpClient,
     private adminService: AdminService
@@ -111,46 +119,78 @@ export class EmployeesComponent {
 
     this.loadEmployees();
   }
+openEmployeeOtpPopup() {
+  this.showEmployeeOtpPopup = true;
+}
 
+closeEmployeeOtpPopup() {
+  this.showEmployeeOtpPopup = false;
+}
+
+joinEmployeeOtp() {
+  this.fullEmployeeOtp = this.empOtp.join("");
+}
+
+focusNext(event: any, nextInput: any) {
+  if (event.target.value.length === 1) {
+    nextInput.focus();
+  }
+}
+
+handleBackspace(event: any, prevInput: any, index: number) {
+  if (event.key === "Backspace") {
+
+    if (this.empOtp[index]) {
+      this.empOtp[index] = "";
+      return;
+    }
+
+    if (prevInput) {
+      prevInput.focus();
+      this.empOtp[index - 1] = "";
+    }
+  }
+}
 
   sendOtp() {
-    const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
+  const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
 
-    this.adminService.sendOtp(phone).subscribe({
-      next: (res) => {
-        this.otpSent = true;
-        this.otpFailed = false;
+  this.adminService.sendOtp(phone).subscribe({
+    next: (res) => {
+      this.employeeOtpSent = true;
+      this.employeeOtpError = "";
+      this.showEmployeeOtpPopup = true;
 
-        // ⭐ SHOW THE OTP FROM BACKEND
-        alert("OTP sent! Your OTP is: " + res.otp);
-
-        console.log("OTP from backend:", res.otp);
-      },
-      error: () => alert("Failed to send OTP")
-    });
-  }
+      alert("OTP sent! Your OTP is: " + res.otp); // remove later
+    },
+    error: () => {
+      this.employeeOtpError = "Failed to send OTP";
+    }
+  });
+}
 
 
   // ------------------- OTP VERIFY -------------------
-  verifyOtp() {
-    const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
+ verifyOtp() {
+  this.joinEmployeeOtp();
 
-    this.adminService.verifyOtp(phone, this.otpCode).subscribe({
-      next: () => {
-        this.otpVerified = true;
-        this.otpFailed = false;
-        this.phoneVerifiedUI = true; // ⭐ Show tick mark
-        this.otpSent = false;        // ⭐ Hide OTP inputs
-        alert("Phone verified successfully!");
-      },
-      error: () => {
-        this.otpVerified = false;
-        this.otpFailed = true;
-        alert("Invalid or expired OTP");
-      }
-    });
-  }
+  const phone = '+91' + this.employeeForm.get("phoneNumber")!.value;
 
+  this.adminService.verifyOtp(phone, this.fullEmployeeOtp).subscribe({
+    next: () => {
+      this.employeeOtpVerified = true;
+      this.phoneVerifiedUI = true;
+      this.showEmployeeOtpPopup = false;
+      this.employeeOtpError = "";
+      this.otpSent = false;
+
+      this.toastr.success("Phone verified successfully");
+    },
+    error: () => {
+      this.employeeOtpError = "Invalid OTP. Try again.";
+    }
+  });
+}
   // ✅ Load all employees
   loadEmployees() {
     this.loading = true;

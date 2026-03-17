@@ -133,7 +133,7 @@ namespace DSM_Application.Server.Models
         public decimal ApprovedCredit { get; set; }
         public decimal RefundedCredit { get; set; }
         public string CreditStatus { get; set; } // Pending / Approved / Rejected / Cancelled
-
+        public string? CustomerAddress { get; set; }
     }
 
 }

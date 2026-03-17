@@ -618,6 +618,79 @@
                 </div>
               </div>
 
+              <!-- EMPLOYEE OTP POPUP -->
+<div *ngIf="showEmployeeOtpPopup" class="otp-popup-container">
+
+  <button class="otp-close-btn" (click)="closeEmployeeOtpPopup()">×</button>
+
+  <div class="otp-header">
+    <h4>Verify Phone</h4>
+    <p>Enter the 6-digit OTP sent to employee</p>
+  </div>
+
+  <div class="otp-input-row">
+
+<input maxlength="1" class="otp-box"
+       #e1
+       (input)="focusNext($event, e2)"
+       (keydown)="handleBackspace($event, null, 0)"
+       [(ngModel)]="empOtp[0]"
+       [ngModelOptions]="{standalone:true}">
+
+<input maxlength="1" class="otp-box"
+       #e2
+       (input)="focusNext($event, e3)"
+       (keydown)="handleBackspace($event, e1, 1)"
+       [(ngModel)]="empOtp[1]"
+       [ngModelOptions]="{standalone:true}">
+
+<input maxlength="1" class="otp-box"
+       #e3
+       (input)="focusNext($event, e4)"
+       (keydown)="handleBackspace($event, e2, 2)"
+       [(ngModel)]="empOtp[2]"
+       [ngModelOptions]="{standalone:true}">
+
+<input maxlength="1" class="otp-box"
+       #e4
+       (input)="focusNext($event, e5)"
+       (keydown)="handleBackspace($event, e3, 3)"
+       [(ngModel)]="empOtp[3]"
+       [ngModelOptions]="{standalone:true}">
+
+<input maxlength="1" class="otp-box"
+       #e5
+       (input)="focusNext($event, e6)"
+       (keydown)="handleBackspace($event, e4, 4)"
+       [(ngModel)]="empOtp[4]"
+       [ngModelOptions]="{standalone:true}">
+
+<input maxlength="1" class="otp-box"
+       #e6
+       (input)="joinEmployeeOtp()"
+       (keydown)="handleBackspace($event, e5, 5)"
+       [(ngModel)]="empOtp[5]"
+       [ngModelOptions]="{standalone:true}">
+  </div>
+
+  <button class="otp-verify-btn" (click)="verifyOtp()">Verify OTP</button>
+
+  <div *ngIf="employeeOtpVerified" class="otp-verified-box">
+    <i class="fas fa-check-circle"></i>
+    <span>Phone Verified</span>
+  </div>
+
+  <div class="otp-footer">
+    <p class="otp-hint">Didn't receive the code?</p>
+    <span class="otp-resend" (click)="sendOtp()">Resend OTP</span>
+  </div>
+
+  <div *ngIf="employeeOtpError" class="otp-error">
+    {{ employeeOtpError }}
+  </div>
+
+</div>
+
               <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" (click)="closeEmployeeModal()">
                   <i class="fas fa-times"></i> Cancel

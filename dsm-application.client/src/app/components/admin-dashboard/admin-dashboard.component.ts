@@ -636,15 +636,11 @@ resendOtpFromPopup() {
     });
   }
 
-
-
   logout(): void {
     this.auth.logout();
     this.toastr.info('Logged out successfully');
     window.location.href = '/distributor-login';
   }
-
-
   applyFilter(): void {
     if (!this.searchText) {
       this.filteredDistributors = this.distributors;

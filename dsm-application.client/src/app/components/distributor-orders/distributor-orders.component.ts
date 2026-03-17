@@ -588,27 +588,51 @@ export class DistributorOrdersComponent implements OnInit, OnChanges {
       });
   }
 
-  savePermanentEmployee() {
-    if (!this.selectedOrder || !this.selectedEmployeeId) {
-      alert("Select an employee");
-      return;
-    }
+  getEmployeeName(order: DistributorOrder): string {
 
-    this.distService.assignPermanentEmployee(
-      this.distributorId,
-      this.selectedOrder.customerId,
-      this.selectedEmployeeId
-    ).subscribe({
-      next: () => {
-        alert("Permanent employee assigned successfully!");
-        this.loadOrders();
-      },
-      error: (err) => {
-        console.error(err);
-        alert("Failed to assign permanent employee");
-      }
-    });
+  const availability = this.employeeAvailability[order.customerId];
+
+  // If permanent employee exists
+  if (availability?.permanentEmployeeId) {
+    const emp = this.employees.find(
+      e => e.employeeId === availability.permanentEmployeeId
+    );
+    return emp?.name || 'Not assigned';
   }
+
+  // fallback to assigned order employee
+  return order.name || 'Not assigned';
+}
+
+ savePermanentEmployee() {
+  if (!this.selectedOrder || !this.selectedEmployeeId) {
+    alert("Select an employee");
+    return;
+  }
+
+  const customerId = this.selectedOrder.customerId;
+
+  this.distService.assignPermanentEmployee(
+    this.distributorId,
+    customerId,
+    this.selectedEmployeeId
+  ).subscribe({
+    next: () => {
+
+      // 🔥 Reload employee availability
+      this.loadAvailabilityForCustomer(customerId);
+
+      // 🔥 Reload orders so UI updates
+      this.loadOrders();
+
+      this.toastr.success("Permanent employee assigned successfully");
+    },
+    error: (err) => {
+      console.error(err);
+      this.toastr.error("Failed to assign permanent employee");
+    }
+  });
+}
 
 
 

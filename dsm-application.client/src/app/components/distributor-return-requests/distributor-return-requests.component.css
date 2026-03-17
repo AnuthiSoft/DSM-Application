@@ -850,6 +850,7 @@ html[data-theme="dark"] .product-image {
   font-weight: bold;
   z-index: 4;
 }
+
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
   .custom-swal-popup {

@@ -130,23 +130,28 @@ getStatusCount(status: string): number {
     r => r.status?.toLowerCase() === status.toLowerCase()
   ).length;
 }
-  loadReturnOrders() {
+ loadReturnOrders() {
   this.loading = true;
 
-    this.returnApiService.getReturnHistory().subscribe({
-      next: (res) => {
-        this.returnOrders = res;
-         this.currentPage = 1;
-  this.currentGroup = 0;
-  this.totalPages = Math.ceil(this.returnOrders.length / this.pageSize) || 1;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        Swal.fire('Error', 'Failed to load return orders', 'error');
-      }
-    });
-  }
+  this.returnApiService.getReturnHistory().subscribe({
+    next: (res) => {
+      this.returnOrders = res;
+
+      // ✅ VERY IMPORTANT: sync filtered data
+      this.applyStatusFilter();   // <-- add this
+      this.updatePagination();    // <-- add this
+
+      this.currentPage = 1;
+      this.currentGroup = 0;
+
+      this.loading = false;
+    },
+    error: () => {
+      this.loading = false;
+      Swal.fire('Error', 'Failed to load return orders', 'error');
+    }
+  });
+}
 
   // Helpers
   isPending(r: any) {

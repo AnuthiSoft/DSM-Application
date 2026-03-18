@@ -283,7 +283,7 @@ handleBackspace(event: any, prevInput: any, index: number) {
   }
 
   // OTP validation
-  if (!this.otpVerified) {
+  if (!this.customerOtpVerified) {
     this.toastr.warning('Please verify phone number using OTP');
     return;
   }
@@ -534,9 +534,19 @@ validateField(field: string): boolean {
 
   switch (field) {
     case 'name':
-      if (!value) error = 'Full name is required';
-      else if (value.length < 2) error = 'Name must be at least 2 characters';
-      break;
+  if (!value) {
+    error = 'Full name is required';
+  } 
+  else if (!/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(value)) {
+    error = 'Name can contain only letters, numbers, and spaces';
+  } 
+  else if (/^(.)\1+$/.test(value)) {
+    error = 'Name cannot contain repeated characters';
+  }
+  else if (value.length < 2) {
+    error = 'Name must be at least 2 characters';
+  }
+  break;
 
     case 'email':
       if (!value) error = 'Email is required';

@@ -1398,9 +1398,6 @@ html[data-theme="dark"] input.search-box::placeholder {
 body.modal-open .mobile-menu-toggle {
   display: none !important;
 }
-
-
-
 /* ===============================
    DESKTOP PAGINATION
 ================================ */

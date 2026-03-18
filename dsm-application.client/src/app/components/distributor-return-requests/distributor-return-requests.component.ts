@@ -689,9 +689,15 @@ updatePaginationFiltered() {
     }
   }
 
-  getStatusCount(status: string): number {
-    return this.returnRequests.filter(r => r.status === status).length;
+ getStatusCount(status: string): number {
+  if (status === 'All') {
+    return this.returnRequests.length; // ✅ FIX
   }
+
+  return this.returnRequests.filter(
+    r => r.status?.toLowerCase() === status.toLowerCase()
+  ).length;
+}
 
  viewDetails(r: any) {
 

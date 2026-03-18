@@ -216,7 +216,7 @@
   <label><i class="fas fa-phone"></i> Phone Number</label>
 
   <div class="phone-group"
-       [class.verified]="otpVerified"
+       [class.verified]="customerOtpVerified"
        [ngClass]="{
          'is-invalid': (formSubmitted || phoneTouched) && (fieldErrors.phoneNumber || phoneError)
        }">
@@ -270,7 +270,7 @@
           </div>
 
           <!-- ✅ Verified -->
-          <div *ngIf="otpVerified" class="verified-text">
+          <div *ngIf="customerOtpVerified" class="verified-text">
             <i class="fas fa-check-circle"></i>
             Phone verified
           </div>

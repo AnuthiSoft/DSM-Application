@@ -70,22 +70,24 @@ export class MainInventoryComponent implements OnInit {
 
         // 🔥 MERGE stock with product details
         this.stockList = stockRes.map((s: any) => {
-          const product = this.products.find(
-            p => p.productId === s.productId
-          );
+  const product = this.products.find(
+    p => p.productId === s.productId
+  );
 
-          return {
-            productId: s.productId,
-            currentStock: s.currentStock,
+  return {
+    productId: s.productId,
+    currentStock: s.currentStock,
 
-            // ⬇️ from Products API
-            productName: product?.productName ?? 'N/A',
-            productCode: product?.productCode ?? 'N/A',
-            measure: product?.measure ?? '-',
-            reorderLevel: product?.reorderLevel ?? 0,
-            updatedAt: product?.updatedDate ?? null
-          };
-        });
+    // ✅ IMPORTANT
+    damagedStock: s.damagedQty || 0,
+
+    productName: product?.productName ?? 'N/A',
+    productCode: product?.productCode ?? 'N/A',
+    measure: product?.measure ?? '-',
+    reorderLevel: product?.reorderLevel ?? 0,
+    updatedAt: product?.updatedDate ?? null
+  };
+});
 
         this.filteredStock = this.stockList;
 

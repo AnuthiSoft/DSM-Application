@@ -18,5 +18,6 @@
         public List<string> ImageUrls { get; set; } = new();
         public int ReorderLevel { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int DamagedQty { get; set; }
     }
 }

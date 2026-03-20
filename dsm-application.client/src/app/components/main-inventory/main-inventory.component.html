@@ -34,7 +34,7 @@
       <th>Measure</th>
 
       <th>Available Stock</th>
-      <th>Reorder</th>
+      <th>Damaged Stock</th>
       <th>Updated</th>
     </tr>
   </thead>
@@ -53,7 +53,11 @@
   }">
         {{ s.currentStock }}
       </td>
-      <td>{{ s.reorderLevel }}</td>
+      <td [ngClass]="{
+  'text-danger': s.damagedStock > 0
+}">
+  {{ s.damagedStock }}
+</td>
       <td>{{ s.updatedAt | date:'short' }}</td>
     </tr>
   </tbody>

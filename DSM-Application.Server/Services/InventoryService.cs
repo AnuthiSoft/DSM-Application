@@ -71,6 +71,7 @@ namespace DSM_Application.Server.Services
                     ProductCode = product.ProductCode,
                     Brand = product.Brand,
                     Measure = product.Measure,
+                    DamagedQty = inv.DamagedQty,
                     Price = product.Price,
                     CurrentStock = inv.CurrentStock,
                     ReorderLevel = product.ReorderLevel,

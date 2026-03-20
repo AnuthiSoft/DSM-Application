@@ -420,10 +420,13 @@ namespace DSM_Application.Server.Services
 
                 // Get distributor from Return itself (NOT from token)
                 var ret = await _returns.Find(r => r.Id == returnId).FirstOrDefaultAsync();
-            if (ret == null)
-                throw new Exception("Return not found");
 
-            var distributorId = ret.DistributorId;
+                if (ret == null)
+                    throw new Exception("Return not found");
+
+                // 🔥 ADD THESE LOGS HERE
+               
+                var distributorId = ret.DistributorId;
 
 
 
@@ -440,9 +443,24 @@ namespace DSM_Application.Server.Services
             if (inventory == null)
                 throw new Exception("Inventory not found");
 
-            inventory.CurrentStock += ret.ReturnQty;
-            inventory.ReturnedQty += ret.ReturnQty;
-            inventory.UpdatedAt = DateTime.UtcNow;
+                // 🔥 Detect damaged return
+                bool isDamaged =
+    ret.Reason?.ToLower().Contains("damaged") == true;
+
+                if (isDamaged)
+                {
+                    inventory.DamagedQty += ret.ReturnQty;
+                }
+                else
+                {
+                    inventory.CurrentStock += ret.ReturnQty;
+                }
+
+                // ✅ Always track returned qty
+                inventory.ReturnedQty += ret.ReturnQty;
+
+               
+                inventory.UpdatedAt = DateTime.UtcNow;
 
             await _inventory.ReplaceOneAsync(i => i.InventoryId == inventory.InventoryId, inventory);
 
@@ -529,6 +547,8 @@ namespace DSM_Application.Server.Services
                 await session.AbortTransactionAsync();
                 throw;
             }
+
+
         }
 
 

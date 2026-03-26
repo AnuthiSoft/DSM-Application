@@ -91,16 +91,12 @@ ngOnInit() {
   }
 
 
-
-
   login() {
     const identifier = this.request.email?.trim();
     if (!identifier) {
       this.message = "Please enter email or phone number";
       return;
     }
-
-
 
     if (/^\d+$/.test(identifier)) {
       this.request.phoneNumber = identifier;
@@ -113,14 +109,6 @@ ngOnInit() {
     this.customerService.login(this.request).subscribe({
       next: (res: any) => {
         // Clear old data
-
-
-        // Clear old data
-        // Remove only auth-related old data — NOT the cart!
-    
-
-
-
         // Save new data
         localStorage.setItem("token", res.token);
         localStorage.setItem("role", res.role);

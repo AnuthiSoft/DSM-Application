@@ -34,7 +34,7 @@ export class CustomerOrdersComponent {
   currentGroup = 0;
   returnData: ReturnData = {
     returnType: 'Return',
-    reason: 'Received damaged product',
+    reason: '',
     otherReason: '',
     resolution: 'Refund',
     files: null,
@@ -250,7 +250,7 @@ export class CustomerOrdersComponent {
 
     this.returnData = {
       returnType: 'Return',
-      reason: 'Received damaged product',
+      reason: '',
       otherReason: '',
       resolution: 'Refund',
       files: null
@@ -319,18 +319,21 @@ export class CustomerOrdersComponent {
   }
 
   toggleProductSelection(pid: string) {
-    const index = this.selectedProductIds.indexOf(pid);
+  const index = this.selectedProductIds.indexOf(pid);
 
-    if (index === -1) {
-      this.selectedProductIds.push(pid);
-      this.returnQuantities[pid] = 1; // default qty
-    } else {
-      this.selectedProductIds.splice(index, 1);
-      delete this.returnQuantities[pid];
-    }
+  if (index === -1) {
+    this.selectedProductIds.push(pid);
 
-    this.updateTotalReturnQty();
+    // ✅ Set max available qty as default
+    this.returnQuantities[pid] = this.getMaxReturnQtyForProduct(pid);
+
+  } else {
+    this.selectedProductIds.splice(index, 1);
+    delete this.returnQuantities[pid];
   }
+
+  this.updateTotalReturnQty(); // ✅ important
+}
 
 
   getProductName(pid: string) {

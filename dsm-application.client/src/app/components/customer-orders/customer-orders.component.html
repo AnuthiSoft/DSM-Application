@@ -488,13 +488,14 @@
             Return Qty for {{ getProductName(pid) }}
           </label>
 
-          <input 
+         <input 
   type="number" 
   class="form-control"
   min="1"
   [max]="getMaxReturnQtyForProduct(pid)"
   [(ngModel)]="returnQuantities[pid]"
   name="qty_{{pid}}"
+  (ngModelChange)="updateTotalReturnQty()"  
   (keydown)="preventExceedingMax($event, pid)"
   (input)="validateReturnQty(pid)"
 >
@@ -511,17 +512,23 @@
           <label for="returnReason" class="required">
             <i class="fas fa-question-circle"></i> Reason for Return
           </label>
-          <select id="returnReason" [(ngModel)]="returnData.reason" name="reason" required class="form-select">
-            <option value="" disabled>Select a reason</option>
-            <option>Received damaged product</option>
-            <option>Wrong item received</option>
-            <option>Item not as described</option>
-            <option>Size/fit issue</option>
-            <option>Quality issue</option>
-            <option>Changed my mind</option>
-            <option>Ordered by mistake</option>
-            <option>Other</option>
-          </select>
+          <select id="returnReason"
+        [(ngModel)]="returnData.reason"
+        name="reason"
+        required
+        class="form-select">
+
+  <option value="" disabled selected>Select a reason</option> <!-- ✅ add selected -->
+
+  <option>Received damaged product</option>
+  <option>Wrong item received</option>
+  <option>Item not as described</option>
+  <option>Size/fit issue</option>
+  <option>Quality issue</option>
+  <option>Changed my mind</option>
+  <option>Ordered by mistake</option>
+  <option>Other</option>
+</select>
         </div>
 
         <!-- Other Reason Textarea -->
